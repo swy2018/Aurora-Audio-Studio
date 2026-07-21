@@ -120,7 +120,7 @@ dotnet build .\work\audio-studio\AIAudioStudio.csproj -c Release
 Self-contained single-file publish:
 
 ```powershell
-dotnet publish .\work\audio-studio\AIAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true -o .\publish\Aurora
+dotnet publish .\work\audio-studio\AIAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true -o .\publish\Aurora-Audio-Studio
 ```
 
 ## Repository layout
