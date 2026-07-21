@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
+using System.Globalization;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -44,6 +45,7 @@ internal sealed class MainForm : Form
     private const string MusicUrl = "http://127.0.0.1:7860";
     private const string TtsUrl = "http://127.0.0.1:7861";
     private const string SeedVcUrl = "http://127.0.0.1:7862";
+    private const string AppVersion = "0.8.0";
 
     private static readonly Color AppBackground = Color.FromArgb(7, 12, 20);
     private static readonly Color SidebarBackground = Color.FromArgb(9, 15, 25);
@@ -77,8 +79,19 @@ internal sealed class MainForm : Form
     private readonly Button modelSelect = new();
     private readonly ContextMenuStrip modelMenu = new();
     private readonly Dictionary<string, Button> navButtons = new();
+    private readonly Dictionary<string, Label> sectionLabels = new();
+    private Label? windowTitleLabel;
+    private Label? topHeading;
+    private Label? localModeLabel;
+    private Label? startupLabel;
+    private Label? recentTitleLabel;
+    private AccentButton? releaseButton;
+    private AccentButton? outputButton;
+    private AccentButton? openRecentButton;
+    private Button? languageButton;
     private string localAiRoot = @"C:\LocalAI";
     private string outputRoot = DefaultOutputRoot();
+    private bool englishUi = !CultureInfo.CurrentUICulture.Name.StartsWith("zh", StringComparison.OrdinalIgnoreCase);
     private ModelOption? selectedModelOption;
     private bool modelSelectorActive;
     private string selectedFeature = "music";
@@ -97,6 +110,9 @@ internal sealed class MainForm : Form
     private string SeparatorModels => Path.Combine(localAiRoot, "AudioTools", "models");
     private string BasicPitchExe => Path.Combine(localAiRoot, "AudioTools", "pitch-env", "Scripts", "basic-pitch.exe");
     private string FfmpegDir => Path.Combine(localAiRoot, "Faster-Whisper-XXL", "Faster-Whisper-XXL");
+    private string LogsRoot => Path.Combine(localAiRoot, "Logs");
+    private string NumbaCacheRoot => Path.Combine(localAiRoot, "AudioTools", "numba-cache");
+    private string T(string zh, string en) => englishUi ? en : zh;
     private static string DefaultOutputRoot()
     {
         var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
@@ -107,7 +123,7 @@ internal sealed class MainForm : Form
 
     public MainForm()
     {
-        Text = "Aurora Audio Studio V1.0";
+        Text = $"Aurora Audio Studio {AppVersion}";
         MinimumSize = new Size(1180, 760);
         AutoScaleMode = AutoScaleMode.Dpi;
         Font = new Font("Microsoft YaHei UI", 10f);
@@ -134,6 +150,7 @@ internal sealed class MainForm : Form
         Controls.Add(BuildWindowTitleBar());
 
         BuildDashboard();
+        ApplyStaticLanguage();
         SelectFeature("music");
         FormClosing += (_, _) => StopBackends();
     }
@@ -151,9 +168,9 @@ internal sealed class MainForm : Form
                 SizeMode = PictureBoxSizeMode.Zoom,
                 BackColor = Color.Transparent
             });
-        bar.Controls.Add(new Label
+        windowTitleLabel = new Label
         {
-            Text = "Aurora Audio Studio  ·  V1.0",
+            Text = $"Aurora Audio Studio  ·  {AppVersion}",
             Location = new Point(47, 0),
             Width = 280,
             Height = 42,
@@ -161,7 +178,8 @@ internal sealed class MainForm : Form
             Font = new Font("Microsoft YaHei UI", 9.5f),
             TextAlign = ContentAlignment.MiddleLeft,
             BackColor = Color.Transparent
-        });
+        };
+        bar.Controls.Add(windowTitleLabel);
 
         var close = CreateWindowButton("\u00D7", 14.5f);
         close.Click += (_, _) => Close();
@@ -293,37 +311,40 @@ internal sealed class MainForm : Form
         var bottom = new Panel { Dock = DockStyle.Bottom, Height = 166, BackColor = SidebarBackground };
         var release = new AccentButton(false)
         {
-            Text = "释放模型显存",
+            Text = T("释放模型显存", "Unload models"),
             Location = new Point(0, 12),
             Size = new Size(238, 48),
             ForeColor = Color.FromArgb(170, 185, 205),
             Font = new Font("Microsoft YaHei UI", 10.5f)
         };
+        releaseButton = release;
         release.Click += (_, _) =>
         {
             StopBackends();
-            ShowDashboard("已停止全部音频模型，显存正在释放。");
+            ShowDashboard(T("已停止全部音频模型，显存正在释放。", "All audio backends stopped. VRAM is being released."));
         };
         var output = new AccentButton(false)
         {
-            Text = "设置输出位置",
+            Text = T("设置输出位置", "Set output folder"),
             Location = new Point(0, 66),
             Size = new Size(238, 42),
             ForeColor = Color.FromArgb(170, 185, 205),
             Font = new Font("Microsoft YaHei UI", 10f)
         };
+        outputButton = output;
         output.Click += (_, _) => ChooseOutputLocation();
         bottom.Controls.Add(release);
         bottom.Controls.Add(output);
-        bottom.Controls.Add(new Label
+        startupLabel = new Label
         {
-            Text = "不会开机自启动  ·  仅本机运行",
+            Text = T("不会开机自启动  ·  仅本机运行", "No startup item · Local only"),
             Dock = DockStyle.Bottom,
             Height = 34,
             ForeColor = Color.FromArgb(91, 107, 129),
             Font = new Font("Microsoft YaHei UI", 8.5f),
             TextAlign = ContentAlignment.MiddleCenter
-        });
+        };
+        bottom.Controls.Add(startupLabel);
 
         var navigation = new FlowLayoutPanel
         {
@@ -334,14 +355,14 @@ internal sealed class MainForm : Form
             BackColor = SidebarBackground,
             Padding = new Padding(0, 8, 0, 0)
         };
-        AddSectionLabel(navigation, "创作");
-        AddFeatureButton(navigation, "音乐创作", "music");
-        AddFeatureButton(navigation, "AI配音与声音克隆", "tts");
-        AddFeatureButton(navigation, "歌声克隆", "singing");
-        AddSectionLabel(navigation, "制作工具");
-        AddFeatureButton(navigation, "去人声 / AI分轨", "separator");
-        AddFeatureButton(navigation, "AI扒谱（MIDI）", "pitch");
-        AddFeatureButton(navigation, "视频 AI 字幕", "subtitle");
+        AddSectionLabel(navigation, "creation");
+        AddFeatureButton(navigation, "music");
+        AddFeatureButton(navigation, "tts");
+        AddFeatureButton(navigation, "singing");
+        AddSectionLabel(navigation, "tools");
+        AddFeatureButton(navigation, "separator");
+        AddFeatureButton(navigation, "pitch");
+        AddFeatureButton(navigation, "subtitle");
 
         panel.Controls.Add(navigation);
         panel.Controls.Add(bottom);
@@ -349,23 +370,25 @@ internal sealed class MainForm : Form
         return panel;
     }
 
-    private static void AddSectionLabel(FlowLayoutPanel parent, string text)
+    private void AddSectionLabel(FlowLayoutPanel parent, string key)
     {
-        parent.Controls.Add(new Label
+        var label = new Label
         {
-            Text = text,
+            Text = SectionText(key),
             Width = 230,
             Height = 32,
             Margin = new Padding(9, 10, 0, 2),
             ForeColor = Color.FromArgb(91, 107, 129),
             Font = new Font("Microsoft YaHei UI", 8.5f, FontStyle.Bold),
             TextAlign = ContentAlignment.MiddleLeft
-        });
+        };
+        sectionLabels[key] = label;
+        parent.Controls.Add(label);
     }
 
-    private void AddFeatureButton(FlowLayoutPanel parent, string text, string key)
+    private void AddFeatureButton(FlowLayoutPanel parent, string key)
     {
-        var button = CreateNavButton(text, key);
+        var button = CreateNavButton(FeatureNavText(key), key);
         button.Click += (_, _) => SelectFeature(key);
         navButtons[key] = button;
         parent.Controls.Add(button);
@@ -392,6 +415,24 @@ internal sealed class MainForm : Form
         return button;
     }
 
+    private string SectionText(string key) => key switch
+    {
+        "creation" => T("创作", "Create"),
+        "tools" => T("制作工具", "Production tools"),
+        _ => key
+    };
+
+    private string FeatureNavText(string key) => key switch
+    {
+        "music" => T("音乐创作", "Music generation"),
+        "tts" => T("AI配音与声音克隆", "AI voice & cloning"),
+        "singing" => T("歌声克隆", "Singing voice clone"),
+        "separator" => T("去人声 / AI分轨", "Vocal removal / stems"),
+        "pitch" => T("AI扒谱（MIDI）", "AI transcription (MIDI)"),
+        "subtitle" => T("视频 AI 字幕", "Video AI subtitles"),
+        _ => key
+    };
+
     private Control BuildTopBar()
     {
         var top = new TableLayoutPanel
@@ -399,7 +440,7 @@ internal sealed class MainForm : Form
             Dock = DockStyle.Top,
             Height = 68,
             BackColor = Color.FromArgb(8, 14, 23),
-            ColumnCount = 3,
+            ColumnCount = 4,
             RowCount = 1,
             Padding = Padding.Empty,
             Margin = Padding.Empty
@@ -407,27 +448,67 @@ internal sealed class MainForm : Form
         top.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 130));
         top.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         top.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170));
-        var heading = new Label
+        top.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 104));
+        topHeading = new Label
         {
-            Text = "工作台",
+            Text = T("工作台", "Workbench"),
             Dock = DockStyle.Fill,
             Padding = new Padding(24, 0, 0, 0),
             ForeColor = Color.FromArgb(210, 220, 234),
             Font = new Font("Microsoft YaHei UI", 11f, FontStyle.Bold),
             TextAlign = ContentAlignment.MiddleLeft
         };
-        var local = new Label
+        localModeLabel = new Label
         {
-            Text = "●  本地离线模式",
+            Text = T("●  本地离线模式", "●  Local offline"),
             Dock = DockStyle.Fill,
             ForeColor = Color.FromArgb(89, 224, 173),
             Font = new Font("Microsoft YaHei UI", 9.5f),
             TextAlign = ContentAlignment.MiddleCenter
         };
-        top.Controls.Add(heading, 0, 0);
+        languageButton = new Button
+        {
+            Text = englishUi ? "中文" : "English",
+            Dock = DockStyle.Fill,
+            Margin = new Padding(0, 16, 18, 16),
+            FlatStyle = FlatStyle.Flat,
+            BackColor = Color.FromArgb(15, 23, 36),
+            ForeColor = Color.FromArgb(190, 205, 224),
+            Font = new Font("Microsoft YaHei UI", 8.8f, FontStyle.Bold),
+            Cursor = Cursors.Hand
+        };
+        languageButton.FlatAppearance.BorderSize = 1;
+        languageButton.FlatAppearance.BorderColor = Color.FromArgb(45, 65, 91);
+        languageButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(25, 37, 53);
+        languageButton.Click += (_, _) =>
+        {
+            englishUi = !englishUi;
+            SaveUserSettings();
+            ApplyStaticLanguage();
+            SelectFeature(selectedFeature);
+        };
+        top.Controls.Add(topHeading, 0, 0);
         top.Controls.Add(status, 1, 0);
-        top.Controls.Add(local, 2, 0);
+        top.Controls.Add(localModeLabel, 2, 0);
+        top.Controls.Add(languageButton, 3, 0);
         return top;
+    }
+
+    private void ApplyStaticLanguage()
+    {
+        if (windowTitleLabel is not null) windowTitleLabel.Text = $"Aurora Audio Studio  ·  {AppVersion}";
+        if (topHeading is not null) topHeading.Text = T("工作台", "Workbench");
+        if (localModeLabel is not null) localModeLabel.Text = T("●  本地离线模式", "●  Local offline");
+        if (languageButton is not null) languageButton.Text = englishUi ? "中文" : "English";
+        if (releaseButton is not null) releaseButton.Text = T("释放模型显存", "Unload models");
+        if (outputButton is not null) outputButton.Text = T("设置输出位置", "Set output folder");
+        if (startupLabel is not null) startupLabel.Text = T("不会开机自启动  ·  仅本机运行", "No startup item · Local only");
+        if (recentTitleLabel is not null) recentTitleLabel.Text = T("最近成品", "Recent outputs");
+        if (openRecentButton is not null) openRecentButton.Text = T("打开成品目录", "Open output folder");
+        foreach (var pair in sectionLabels)
+            pair.Value.Text = SectionText(pair.Key);
+        foreach (var pair in navButtons)
+            pair.Value.Text = "     " + FeatureNavText(pair.Key);
     }
 
     private void BuildDashboard()
@@ -491,14 +572,15 @@ internal sealed class MainForm : Form
             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
             BackColor = Surface
         };
-        recentCard.Controls.Add(new Label
+        recentTitleLabel = new Label
         {
-            Text = "最近成品",
+            Text = T("最近成品", "Recent outputs"),
             Location = new Point(26, 20),
             AutoSize = true,
             ForeColor = Color.White,
             Font = new Font("Microsoft YaHei UI", 11f, FontStyle.Bold)
-        });
+        };
+        recentCard.Controls.Add(recentTitleLabel);
         recentName.SetBounds(27, 53, 720, 28);
         recentName.ForeColor = Color.FromArgb(216, 225, 238);
         recentName.Font = new Font("Microsoft YaHei UI", 10f);
@@ -507,11 +589,12 @@ internal sealed class MainForm : Form
         recentMeta.Font = new Font("Microsoft YaHei UI", 8.8f);
         var openRecent = new AccentButton(false)
         {
-            Text = "打开成品目录",
+            Text = T("打开成品目录", "Open output folder"),
             Size = new Size(160, 42),
             Location = new Point(890, 42),
             Anchor = AnchorStyles.Top | AnchorStyles.Right
         };
+        openRecentButton = openRecent;
         openRecent.Click += (_, _) => OpenFolder(CurrentOutputFolder());
         recentCard.Controls.Add(recentName);
         recentCard.Controls.Add(recentMeta);
@@ -581,15 +664,15 @@ internal sealed class MainForm : Form
 
         var spec = key switch
         {
-            "tts" => new FeatureSpec("AI配音与声音克隆", "克隆自然说话音色，生成中文旁白、角色对白，\r\n以及可直接使用的配音成品。", "IndexTTS2 · 本地 FP16", "启动配音模型", "打开配音成品", OpenTtsAsync, "AI配音"),
-            "singing" => new FeatureSpec("歌声克隆", "保留原歌曲的旋律与唱法，\r\n将演唱音色替换成你的参考人声。", "Seed-VC · 44.1 kHz", "启动歌声克隆", "打开歌声成品", OpenSingingVoiceAsync, "AI歌声克隆"),
-            "separator" => new FeatureSpec("去人声 / AI分轨", "自动分离成两个结果：纯人声 Vocal + 纯伴奏 Instrumental，\r\n为翻唱、混音和扒谱准备干净素材。", "BS-RoFormer · 本地 GPU", "选择音频开始分离", "打开分离成品", SeparateAudioAsync, "AI分轨"),
-            "pitch" => new FeatureSpec("AI扒谱", "分析独唱或单乐器音高，\r\n自动生成可编辑 MIDI 与音符事件表。", "Basic Pitch · MIDI", "选择音频开始扒谱", "打开扒谱成品", TranscribeMusicAsync, "AI扒谱"),
-            "subtitle" => new FeatureSpec("视频 AI 字幕", "本地识别视频语音并生成时间轴字幕，\r\n随后在原生字幕工作台中快速校对。", "Subtitle Edit · Faster-Whisper", "打开字幕工作台", "打开字幕成品", () => { OpenSubtitles(); return Task.CompletedTask; }, "AI字幕"),
-            _ => new FeatureSpec("音乐创作", "从中文灵感开始，生成完整歌曲、纯音乐与旋律，\r\n支持多种人声风格和音乐类型。", "ACE-Step 1.5 · 本地模型", "启动音乐模型", "打开音乐成品", OpenMusicAsync, "AI音乐")
+            "tts" => new FeatureSpec(T("AI配音与声音克隆", "AI Voice & Voice Cloning"), T("克隆自然说话音色，生成中文旁白、角色对白，\r\n以及可直接使用的配音成品。", "Clone natural speaking voices for narration, character lines,\r\nand production-ready voice assets."), "IndexTTS2 · FP16", T("启动配音模型", "Start voice model"), T("打开配音成品", "Open voice outputs"), OpenTtsAsync, "AI配音"),
+            "singing" => new FeatureSpec(T("歌声克隆", "Singing Voice Clone"), T("保留原歌曲的旋律与唱法，\r\n将演唱音色替换成你的参考人声。", "Keep the source melody and phrasing,\r\nthen replace the singer timbre with a reference voice."), "Seed-VC · 44.1 kHz", T("启动歌声克隆", "Start singing clone"), T("打开歌声成品", "Open singing outputs"), OpenSingingVoiceAsync, "AI歌声克隆"),
+            "separator" => new FeatureSpec(T("去人声 / AI分轨", "Vocal Removal / AI Stems"), T("自动分离成两个结果：纯人声 Vocal + 纯伴奏 Instrumental，\r\n为翻唱、混音和扒谱准备干净素材。", "Automatically creates two files: clean Vocal and Instrumental,\r\nready for covers, remixing, and transcription."), "BS-RoFormer · GPU", T("选择音频开始分离", "Select audio to separate"), T("打开分离成品", "Open stem outputs"), SeparateAudioAsync, "AI分轨"),
+            "pitch" => new FeatureSpec(T("AI扒谱", "AI Transcription"), T("分析独唱或单乐器音高，\r\n自动生成可编辑 MIDI 与音符事件表。", "Analyze solo vocal or single-instrument pitch,\r\nthen export editable MIDI and note-event tables."), "Basic Pitch · MIDI", T("选择音频开始扒谱", "Select audio to transcribe"), T("打开扒谱成品", "Open MIDI outputs"), TranscribeMusicAsync, "AI扒谱"),
+            "subtitle" => new FeatureSpec(T("视频 AI 字幕", "Video AI Subtitles"), T("本地识别视频语音并生成时间轴字幕，\r\n随后在原生字幕工作台中快速校对。", "Recognize video speech locally and generate timed subtitles,\r\nthen polish them in the native subtitle editor."), "Subtitle Edit · Faster-Whisper", T("打开字幕工作台", "Open subtitle studio"), T("打开字幕成品", "Open subtitle outputs"), () => { OpenSubtitles(); return Task.CompletedTask; }, "AI字幕"),
+            _ => new FeatureSpec(T("音乐创作", "Music Generation"), T("从中文灵感开始，生成完整歌曲、纯音乐与旋律，\r\n支持多种人声风格和音乐类型。", "Start from a Chinese or English idea and generate full songs,\r\ninstrumentals, melodies, and varied vocal/music styles."), "ACE-Step 1.5 · Local", T("启动音乐模型", "Start music model"), T("打开音乐成品", "Open music outputs"), OpenMusicAsync, "AI音乐")
         };
         pageTitle.Text = spec.Title;
-        pageSubtitle.Text = "本地创作工作台  ·  文件自动整理到 AI工作流";
+        pageSubtitle.Text = T("本地创作工作台  ·  文件自动整理到 AI工作流", "Local production studio · Files are organized into AI Workflow");
         heroTitle.Text = spec.Title;
         heroDescription.Text = spec.Description;
         primaryButton.Text = spec.PrimaryText;
@@ -600,7 +683,7 @@ internal sealed class MainForm : Form
         secondaryButton.SetClick(() => OpenFolder(OutputFolder(spec.OutputName)));
         ConfigureModelSelector(key, spec.Model);
         RefreshRecent(spec.OutputName);
-        ShowDashboard("就绪 · " + spec.Title);
+        ShowDashboard(T("就绪 · ", "Ready · ") + spec.Title);
     }
 
     private void ConfigureModelSelector(string key, string fallbackModel)
@@ -609,7 +692,7 @@ internal sealed class MainForm : Form
         var options = ModelOptions(key).ToList();
         foreach (var option in options)
         {
-            var item = new ToolStripMenuItem(option.ToString()) { Tag = option };
+            var item = new ToolStripMenuItem(option.Name + (option.IsInstalled ? "" : T("（未安装）", " (not installed)"))) { Tag = option };
             item.BackColor = Color.FromArgb(20, 31, 47);
             item.ForeColor = option.IsInstalled ? Color.FromArgb(219, 229, 242) : Color.FromArgb(135, 150, 170);
             item.Click += (_, _) =>
@@ -622,21 +705,21 @@ internal sealed class MainForm : Form
         if (key is "music" or "tts" or "singing" or "separator" or "pitch" or "subtitle")
         {
             modelMenu.Items.Add(new ToolStripSeparator());
-            var install = new ToolStripMenuItem("安装当前选择模型...")
+            var install = new ToolStripMenuItem(T("安装当前选择模型...", "Install selected model..."))
             {
                 BackColor = Color.FromArgb(20, 31, 47),
                 ForeColor = Color.FromArgb(105, 214, 255)
             };
             install.Click += (_, _) => ChooseInstallLocationAndRunInstaller(key, selectedModelOption);
             modelMenu.Items.Add(install);
-            var installDefault = new ToolStripMenuItem("选择位置并安装默认模型...")
+            var installDefault = new ToolStripMenuItem(T("选择位置并安装默认模型...", "Choose location and install default model..."))
             {
                 BackColor = Color.FromArgb(20, 31, 47),
                 ForeColor = Color.FromArgb(105, 214, 255)
             };
             installDefault.Click += (_, _) => ChooseInstallLocationAndRunInstaller(key, ModelOptions(key).FirstOrDefault());
             modelMenu.Items.Add(installDefault);
-            var open = new ToolStripMenuItem("打开当前 LocalAI 目录")
+            var open = new ToolStripMenuItem(T("打开当前 LocalAI 目录", "Open current LocalAI folder"))
             {
                 BackColor = Color.FromArgb(20, 31, 47),
                 ForeColor = Color.FromArgb(219, 229, 242)
@@ -662,7 +745,7 @@ internal sealed class MainForm : Form
     private void UpdateSelectedModelLabel()
     {
         if (selectedModelOption is not { } option) return;
-        modelTag.Text = "●  " + option.Tag + (option.IsInstalled ? "" : " · 未安装");
+        modelTag.Text = "●  " + option.Tag + (option.IsInstalled ? "" : T(" · 未安装", " · Not installed"));
         modelSelect.Text = option.Name + "    ▼";
         if (option.IsInstalled)
         {
@@ -672,7 +755,7 @@ internal sealed class MainForm : Form
         }
         else
         {
-            primaryButton.Text = "安装此模型";
+            primaryButton.Text = T("安装此模型", "Install this model");
             primaryButton.SetClick(() => ChooseInstallLocationAndRunInstaller(selectedFeature, option));
         }
     }
@@ -684,25 +767,25 @@ internal sealed class MainForm : Form
     {
         "music" =>
         [
-            new("ACE-Step 1.5", "ACE-Step 1.5 · 本地模型", IsMusicInstalled()),
-            new("YuE 音乐模型", "YuE · 预留入口", Directory.Exists(Path.Combine(localAiRoot, "YuE"))),
-            new("Stable Audio Open", "Stable Audio Open · 预留入口", Directory.Exists(Path.Combine(localAiRoot, "StableAudioOpen")))
+            new("ACE-Step 1.5", T("ACE-Step 1.5 · 本地模型", "ACE-Step 1.5 · Local model"), IsMusicInstalled()),
+            new("YuE 音乐模型", T("YuE · 预留入口", "YuE · installable entry"), Directory.Exists(Path.Combine(localAiRoot, "YuE"))),
+            new("Stable Audio Open", T("Stable Audio Open · 预留入口", "Stable Audio Open · installable entry"), Directory.Exists(Path.Combine(localAiRoot, "StableAudioOpen")))
         ],
         "tts" =>
         [
-            new("IndexTTS2", "IndexTTS2 · 本地 FP16", IsTtsInstalled()),
-            new("GPT-SoVITS", "GPT-SoVITS · 预留入口", Directory.Exists(Path.Combine(localAiRoot, "GPT-SoVITS"))),
-            new("CosyVoice", "CosyVoice · 预留入口", Directory.Exists(Path.Combine(localAiRoot, "CosyVoice")))
+            new("IndexTTS2", T("IndexTTS2 · 本地 FP16", "IndexTTS2 · Local FP16"), IsTtsInstalled()),
+            new("GPT-SoVITS", T("GPT-SoVITS · 预留入口", "GPT-SoVITS · installable entry"), Directory.Exists(Path.Combine(localAiRoot, "GPT-SoVITS"))),
+            new("CosyVoice", T("CosyVoice · 预留入口", "CosyVoice · installable entry"), Directory.Exists(Path.Combine(localAiRoot, "CosyVoice")))
         ],
         "singing" =>
         [
             new("Seed-VC 44.1k", "Seed-VC · 44.1 kHz", IsSingingInstalled()),
-            new("RVC WebUI", "RVC WebUI · 预留入口", Directory.Exists(Path.Combine(localAiRoot, "RVC-WebUI"))),
-            new("DiffSinger", "DiffSinger · 预留入口", Directory.Exists(Path.Combine(localAiRoot, "DiffSinger")))
+            new("RVC WebUI", T("RVC WebUI · 预留入口", "RVC WebUI · installable entry"), Directory.Exists(Path.Combine(localAiRoot, "RVC-WebUI"))),
+            new("DiffSinger", T("DiffSinger · 预留入口", "DiffSinger · installable entry"), Directory.Exists(Path.Combine(localAiRoot, "DiffSinger")))
         ],
         "separator" =>
         [
-            new("BS-RoFormer 分轨", "BS-RoFormer · 本地 GPU", IsSeparatorInstalled())
+            new("BS-RoFormer 分轨", T("BS-RoFormer · 本地 GPU", "BS-RoFormer · Local GPU"), IsSeparatorInstalled())
         ],
         "pitch" =>
         [
@@ -722,9 +805,9 @@ internal sealed class MainForm : Form
             ? Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories)
                 .Select(path => new FileInfo(path)).OrderByDescending(file => file.LastWriteTime).FirstOrDefault()
             : null;
-        recentName.Text = latest?.Name ?? "这里还没有成品";
+        recentName.Text = latest?.Name ?? T("这里还没有成品", "No outputs yet");
         recentMeta.Text = latest is null
-            ? "完成第一次任务后，最新文件会显示在这里。"
+            ? T("完成第一次任务后，最新文件会显示在这里。", "After the first task finishes, the newest file will appear here.")
             : $"{latest.LastWriteTime:yyyy-MM-dd  HH:mm}  ·  {FormatSize(latest.Length)}";
     }
 
@@ -758,7 +841,8 @@ internal sealed class MainForm : Form
     {
         using var dialog = new FolderBrowserDialog
         {
-            Description = "选择 AI 成品输出目录。软件会在这里创建 AI音乐、AI配音、AI字幕等文件夹。",
+            Description = T("选择 AI 成品输出目录。软件会在这里创建 AI音乐、AI配音、AI字幕等文件夹。",
+                "Choose the AI output folder. Aurora will create AI music, voice, subtitles, and tool folders here."),
             UseDescriptionForTitle = true,
             SelectedPath = Directory.Exists(outputRoot) ? outputRoot : Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)
         };
@@ -767,7 +851,7 @@ internal sealed class MainForm : Form
         Directory.CreateDirectory(outputRoot);
         SaveUserSettings();
         RefreshRecent(CurrentOutputName());
-        ShowDashboard("输出位置已设置：" + outputRoot);
+        ShowDashboard(T("输出位置已设置：", "Output folder set: ") + outputRoot);
     }
 
     private string CurrentOutputName() => selectedFeature switch
@@ -784,7 +868,8 @@ internal sealed class MainForm : Form
     {
         using var dialog = new FolderBrowserDialog
         {
-            Description = "选择安装位置。软件会在你选的位置下面创建 LocalAI 文件夹。",
+            Description = T("选择安装位置。软件会在你选的位置下面创建 LocalAI 文件夹。",
+                "Choose an install location. Aurora will create a LocalAI folder inside it."),
             UseDescriptionForTitle = true,
             SelectedPath = Directory.Exists(localAiRoot) ? Directory.GetParent(localAiRoot)?.FullName ?? localAiRoot : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
         };
@@ -800,7 +885,7 @@ internal sealed class MainForm : Form
             WorkingDirectory = localAiRoot
         });
         ConfigureModelSelector(selectedFeature, modelTag.Text.TrimStart('●', ' '));
-        ShowDashboard("已打开安装窗口。安装位置：" + localAiRoot);
+        ShowDashboard(T("已打开安装窗口。安装位置：", "Installer window opened. Install folder: ") + localAiRoot);
     }
 
     private string SettingsPath()
@@ -823,6 +908,8 @@ internal sealed class MainForm : Form
                 localAiRoot = local.GetString()!;
             if (doc.RootElement.TryGetProperty("outputRoot", out var output) && !string.IsNullOrWhiteSpace(output.GetString()))
                 outputRoot = output.GetString()!;
+            if (doc.RootElement.TryGetProperty("language", out var language) && !string.IsNullOrWhiteSpace(language.GetString()))
+                englishUi = language.GetString()!.Equals("en", StringComparison.OrdinalIgnoreCase);
         }
         catch { }
     }
@@ -831,7 +918,7 @@ internal sealed class MainForm : Form
     {
         var path = SettingsPath();
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        var json = JsonSerializer.Serialize(new { localAiRoot, outputRoot }, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(new { localAiRoot, outputRoot, language = englishUi ? "en" : "zh" }, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(path, json);
     }
 
@@ -1035,17 +1122,15 @@ Pause
 
     private sealed record FeatureSpec(string Title, string Description, string Model, string PrimaryText,
         string SecondaryText, Func<Task> PrimaryAction, string OutputName);
-    private sealed record ModelOption(string Name, string Tag, bool IsInstalled)
-    {
-        public override string ToString() => Name + (IsInstalled ? "" : "（未安装）");
-    }
+    private sealed record ModelOption(string Name, string Tag, bool IsInstalled);
 
     private async Task OpenMusicAsync()
     {
         var option = SelectedModel();
         if (option.Name != "ACE-Step 1.5")
         {
-            ShowDashboard($"{option.Name} 尚未安装或暂未接入启动器。当前可用：ACE-Step 1.5。");
+            ShowDashboard(T($"{option.Name} 尚未安装或暂未接入启动器。当前可用：ACE-Step 1.5。",
+                $"{option.Name} is not installed or not wired to the launcher yet. Available now: ACE-Step 1.5."));
             return;
         }
         StopProcess(ref seedVcProcess);
@@ -1054,7 +1139,8 @@ Pause
             : Path.Combine(MusicRoot, ".venv", "Scripts", "python.exe");
         if (!File.Exists(python))
         {
-            ShowDashboard("音乐环境尚未安装完成。请在模型下拉菜单里点“安装/选择模型位置...”。");
+            ShowDashboard(T("音乐环境尚未安装完成。请在模型下拉菜单里点“安装/选择模型位置...”。",
+                "Music environment is not ready. Use the model menu to install or choose a model location."));
             return;
         }
 
@@ -1065,7 +1151,7 @@ Pause
                 $"\"{script}\" --port 7860 --server-name 127.0.0.1 --language zh --config_path acestep-v15-turbo --lm_model_path acestep-5Hz-lm-1.7B --download-source modelscope --init_service true",
                 MusicRoot, "music.log");
         }
-        await NavigateWhenReadyAsync(MusicUrl, "正在启动音乐模型，首次加载会较慢……");
+        await NavigateWhenReadyAsync(MusicUrl, T("正在启动音乐模型，首次加载会较慢……", "Starting the music model. First load can be slow..."));
     }
 
     private async Task OpenTtsAsync()
@@ -1073,14 +1159,16 @@ Pause
         var option = SelectedModel();
         if (option.Name != "IndexTTS2")
         {
-            ShowDashboard($"{option.Name} 尚未安装或暂未接入启动器。当前可用：IndexTTS2。");
+            ShowDashboard(T($"{option.Name} 尚未安装或暂未接入启动器。当前可用：IndexTTS2。",
+                $"{option.Name} is not installed or not wired to the launcher yet. Available now: IndexTTS2."));
             return;
         }
         StopProcess(ref seedVcProcess);
         var python = Path.Combine(TtsRoot, ".venv", "Scripts", "python.exe");
         if (!File.Exists(python))
         {
-            ShowDashboard("配音环境尚未安装完成。请在模型下拉菜单里点“安装/选择模型位置...”。");
+            ShowDashboard(T("配音环境尚未安装完成。请在模型下拉菜单里点“安装/选择模型位置...”。",
+                "Voice environment is not ready. Use the model menu to install or choose a model location."));
             return;
         }
 
@@ -1091,7 +1179,7 @@ Pause
                 $"\"{script}\" --host 127.0.0.1 --port 7861 --model_dir checkpoints --fp16",
                 TtsRoot, "tts.log", useModelScope: true);
         }
-        await NavigateWhenReadyAsync(TtsUrl, "正在启动配音模型，首次加载会较慢……");
+        await NavigateWhenReadyAsync(TtsUrl, T("正在启动配音模型，首次加载会较慢……", "Starting the voice model. First load can be slow..."));
     }
 
     private async Task OpenSingingVoiceAsync()
@@ -1099,7 +1187,8 @@ Pause
         var option = SelectedModel();
         if (option.Name != "Seed-VC 44.1k")
         {
-            ShowDashboard($"{option.Name} 尚未安装或暂未接入启动器。当前可用：Seed-VC 44.1k。");
+            ShowDashboard(T($"{option.Name} 尚未安装或暂未接入启动器。当前可用：Seed-VC 44.1k。",
+                $"{option.Name} is not installed or not wired to the launcher yet. Available now: Seed-VC 44.1k."));
             return;
         }
         var python = Path.Combine(SeedVcRoot, ".venv", "Scripts", "python.exe");
@@ -1109,7 +1198,8 @@ Pause
             "config_dit_mel_seed_uvit_whisper_base_f0_44k.yml");
         if (!File.Exists(python) || !File.Exists(checkpoint) || !File.Exists(config))
         {
-            ShowDashboard("歌声克隆环境尚未安装完成。请在模型下拉菜单里点“安装/选择模型位置...”。");
+            ShowDashboard(T("歌声克隆环境尚未安装完成。请在模型下拉菜单里点“安装/选择模型位置...”。",
+                "Singing voice clone environment is not ready. Use the model menu to install or choose a model location."));
             return;
         }
 
@@ -1119,7 +1209,7 @@ Pause
         {
             var output = OutputFolder("AI歌声克隆");
             Directory.CreateDirectory(output);
-            Directory.CreateDirectory(@"C:\LocalAI\AudioTools\numba-cache");
+            Directory.CreateDirectory(NumbaCacheRoot);
             var script = Path.Combine(SeedVcRoot, "app_svc_local.py");
             var environment = new Dictionary<string, string>
             {
@@ -1131,21 +1221,22 @@ Pause
                 ["HF_HUB_DISABLE_XET"] = "1",
                 ["HF_HUB_ENABLE_HF_TRANSFER"] = "0",
                 ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1",
-                ["NUMBA_CACHE_DIR"] = @"C:\LocalAI\AudioTools\numba-cache",
+                ["NUMBA_CACHE_DIR"] = NumbaCacheRoot,
                 ["PYTHONUTF8"] = "1"
             };
             seedVcProcess = StartHidden(python,
                 $"\"{script}\" --checkpoint \"{checkpoint}\" --config \"{config}\" --fp16 True",
                 SeedVcRoot, "seed-vc.log", environment: environment);
         }
-        await NavigateWhenReadyAsync(SeedVcUrl, "正在启动 44.1kHz 歌声克隆模型，请稍候……");
+        await NavigateWhenReadyAsync(SeedVcUrl, T("正在启动 44.1kHz 歌声克隆模型，请稍候……", "Starting the 44.1 kHz singing voice clone model..."));
     }
 
     private void OpenSubtitles()
     {
         if (!File.Exists(SubtitleExe))
         {
-            ShowDashboard("字幕工具尚未安装完成。请先在模型下拉菜单或安装脚本里安装字幕工具。");
+            ShowDashboard(T("字幕工具尚未安装完成。请先在模型下拉菜单或安装脚本里安装字幕工具。",
+                "Subtitle tools are not installed yet. Use the model menu or installer first."));
             return;
         }
         EnsureSubtitleEditChinese();
@@ -1154,7 +1245,8 @@ Pause
             WorkingDirectory = OutputFolder("AI字幕"),
             UseShellExecute = true
         });
-        status.Text = "已打开原生字幕工具。请打开视频后选择：视频 → 音频转文字。";
+        status.Text = T("已打开原生字幕工具。请打开视频后选择：视频 → 音频转文字。",
+            "Native subtitle editor opened. Open a video, then choose Video → Audio to text.");
     }
 
     private void EnsureSubtitleEditChinese()
@@ -1178,16 +1270,17 @@ Pause
     {
         if (!File.Exists(SeparatorExe) || !Directory.Exists(SeparatorModels))
         {
-            ShowDashboard("AI 分轨环境尚未安装完成。请安装分轨工具和 BS-RoFormer 模型。");
+            ShowDashboard(T("AI 分轨环境尚未安装完成。请安装分轨工具和 BS-RoFormer 模型。",
+                "AI stem separation is not ready. Install the separation tool and BS-RoFormer model."));
             return;
         }
         if (utilityProcess is { HasExited: false })
         {
-            status.Text = "当前已有音频任务在运行，请等待完成。";
+            status.Text = T("当前已有音频任务在运行，请等待完成。", "An audio task is already running. Please wait.");
             return;
         }
 
-        using var picker = CreateAudioPicker("选择要去人声或分轨的音频");
+        using var picker = CreateAudioPicker(T("选择要去人声或分轨的音频", "Choose audio for vocal removal / stem separation"));
         if (picker.ShowDialog(this) != DialogResult.OK) return;
 
         var output = OutputFolder("AI分轨");
@@ -1213,28 +1306,33 @@ Pause
         startInfo.ArgumentList.Add("WAV");
         startInfo.ArgumentList.Add("--use_autocast");
         startInfo.Environment["PATH"] = FfmpegDir + ";" + Environment.GetEnvironmentVariable("PATH");
-        var numbaCache = @"C:\LocalAI\AudioTools\numba-cache";
+        var numbaCache = NumbaCacheRoot;
         Directory.CreateDirectory(numbaCache);
         startInfo.Environment["NUMBA_CACHE_DIR"] = numbaCache;
 
-        await RunUtilityAsync(startInfo, "separator", "正在使用 BS-RoFormer 分离人声和伴奏，请稍候……",
-            "分轨完成：已生成人声和伴奏 WAV。可点“打开分轨成品”查看。", output);
+        await RunUtilityAsync(startInfo, "separator",
+            T("正在使用 BS-RoFormer 分离人声和伴奏，请稍候……", "Separating vocal and instrumental with BS-RoFormer..."),
+            T("分轨完成：已生成人声和伴奏 WAV。可点“打开分离成品”查看。",
+                "Stem separation complete: vocal and instrumental WAV files were created. Use Open stem outputs to view them."),
+            output);
     }
 
     private async Task TranscribeMusicAsync()
     {
         if (!File.Exists(BasicPitchExe))
         {
-            ShowDashboard("AI 扒谱环境尚未安装完成。请安装扒谱工具。");
+            ShowDashboard(T("AI 扒谱环境尚未安装完成。请安装扒谱工具。",
+                "AI transcription is not ready. Install the transcription tool first."));
             return;
         }
         if (utilityProcess is { HasExited: false })
         {
-            status.Text = "当前已有音频任务在运行，请等待完成。";
+            status.Text = T("当前已有音频任务在运行，请等待完成。", "An audio task is already running. Please wait.");
             return;
         }
 
-        using var picker = CreateAudioPicker("选择要扒谱的音频（单独人声或单乐器效果最好）");
+        using var picker = CreateAudioPicker(T("选择要扒谱的音频（单独人声或单乐器效果最好）",
+            "Choose audio to transcribe (solo voice or one instrument works best)"));
         if (picker.ShowDialog(this) != DialogResult.OK) return;
 
         var output = OutputFolder("AI扒谱");
@@ -1256,18 +1354,22 @@ Pause
         startInfo.ArgumentList.Add("--save-midi");
         startInfo.ArgumentList.Add("--save-note-events");
         startInfo.Environment["PYTHONUTF8"] = "1";
-        var numbaCache = @"C:\LocalAI\AudioTools\numba-cache";
+        var numbaCache = NumbaCacheRoot;
         Directory.CreateDirectory(numbaCache);
         startInfo.Environment["NUMBA_CACHE_DIR"] = numbaCache;
 
-        await RunUtilityAsync(startInfo, "basic-pitch", "正在分析音高并生成 MIDI，请稍候……",
-            "扒谱完成：已生成 MIDI 和音符事件 CSV。可点“打开扒谱成品”查看。", output);
+        await RunUtilityAsync(startInfo, "basic-pitch",
+            T("正在分析音高并生成 MIDI，请稍候……", "Analyzing pitch and generating MIDI..."),
+            T("扒谱完成：已生成 MIDI 和音符事件 CSV。可点“打开扒谱成品”查看。",
+                "Transcription complete: MIDI and note-event CSV files were created. Use Open MIDI outputs to view them."),
+            output);
     }
 
-    private static OpenFileDialog CreateAudioPicker(string title) => new()
+    private OpenFileDialog CreateAudioPicker(string title) => new()
     {
         Title = title,
-        Filter = "音频文件|*.wav;*.mp3;*.flac;*.m4a;*.aac;*.ogg;*.wma;*.opus|所有文件|*.*",
+        Filter = T("音频文件|*.wav;*.mp3;*.flac;*.m4a;*.aac;*.ogg;*.wma;*.opus|所有文件|*.*",
+            "Audio files|*.wav;*.mp3;*.flac;*.m4a;*.aac;*.ogg;*.wma;*.opus|All files|*.*"),
         CheckFileExists = true,
         Multiselect = false
     };
@@ -1280,7 +1382,7 @@ Pause
         status.BringToFront();
         status.Text = runningText;
         Cursor = Cursors.WaitCursor;
-        var logDir = @"C:\LocalAI\Logs";
+        var logDir = LogsRoot;
         Directory.CreateDirectory(logDir);
         var logPath = Path.Combine(logDir, $"{logPrefix}-{DateTime.Now:yyyyMMdd-HHmmss}.log");
         Process? running = null;
@@ -1303,13 +1405,14 @@ Pause
             }
             else
             {
-                status.Text = $"任务失败（代码 {running.ExitCode}），日志：{logPath}";
+                status.Text = T($"任务失败（代码 {running.ExitCode}），日志：{logPath}",
+                    $"Task failed (code {running.ExitCode}). Log: {logPath}");
             }
         }
         catch (Exception ex)
         {
             File.WriteAllText(logPath, ex.ToString());
-            status.Text = $"任务启动失败，日志：{logPath}";
+            status.Text = T($"任务启动失败，日志：{logPath}", $"Task failed to start. Log: {logPath}");
         }
         finally
         {
@@ -1345,7 +1448,8 @@ Pause
                     web.Visible = true;
                     web.BringToFront();
                     status.BringToFront();
-                    status.Text = "已连接本地模型。此窗口内运行，不会打开浏览器。";
+                    status.Text = T("已连接本地模型。此窗口内运行，不会打开浏览器。",
+                        "Connected to the local model. It runs inside this window; no browser opens.");
                     return;
                 }
             }
@@ -1356,13 +1460,13 @@ Pause
             await Task.Delay(1000, token).ContinueWith(_ => { }, TaskScheduler.Default);
         }
         if (!token.IsCancellationRequested)
-            ShowDashboard("模型启动超时，请查看 C:\\LocalAI\\Logs 中的日志。");
+            ShowDashboard(T("模型启动超时，请查看日志目录：", "Model startup timed out. Check logs at: ") + LogsRoot);
     }
 
-    private static Process StartHidden(string fileName, string arguments, string workingDirectory, string logName,
+    private Process StartHidden(string fileName, string arguments, string workingDirectory, string logName,
         bool useModelScope = false, IReadOnlyDictionary<string, string>? environment = null)
     {
-        var logDir = @"C:\LocalAI\Logs";
+        var logDir = LogsRoot;
         Directory.CreateDirectory(logDir);
         var logPath = Path.Combine(logDir, logName);
         var process = new Process
