@@ -270,7 +270,7 @@ internal sealed class MainForm : Form
         var panel = new Panel
         {
             Dock = DockStyle.Left,
-            Width = 276,
+            Width = 304,
             BackColor = SidebarBackground,
             Padding = new Padding(18, 16, 18, 16)
         };
@@ -313,7 +313,7 @@ internal sealed class MainForm : Form
         {
             Text = T("释放模型显存", "Unload models"),
             Location = new Point(0, 12),
-            Size = new Size(238, 48),
+            Size = new Size(266, 48),
             ForeColor = Color.FromArgb(170, 185, 205),
             Font = new Font("Microsoft YaHei UI", 10.5f)
         };
@@ -327,7 +327,7 @@ internal sealed class MainForm : Form
         {
             Text = T("设置输出位置", "Set output folder"),
             Location = new Point(0, 66),
-            Size = new Size(238, 42),
+            Size = new Size(266, 42),
             ForeColor = Color.FromArgb(170, 185, 205),
             Font = new Font("Microsoft YaHei UI", 10f)
         };
@@ -375,7 +375,7 @@ internal sealed class MainForm : Form
         var label = new Label
         {
             Text = SectionText(key),
-            Width = 230,
+            Width = 258,
             Height = 32,
             Margin = new Padding(9, 10, 0, 2),
             ForeColor = Color.FromArgb(91, 107, 129),
@@ -400,7 +400,7 @@ internal sealed class MainForm : Form
         {
             Name = key,
             Text = "     " + text,
-            Width = 238,
+            Width = 266,
             Height = 48,
             Margin = new Padding(0, 3, 0, 3),
             FlatStyle = FlatStyle.Flat,
@@ -408,6 +408,7 @@ internal sealed class MainForm : Form
             ForeColor = Color.FromArgb(183, 195, 212),
             Font = new Font("Microsoft YaHei UI", 10.5f),
             TextAlign = ContentAlignment.MiddleLeft,
+            UseMnemonic = false,
             Cursor = Cursors.Hand
         };
         button.FlatAppearance.BorderSize = 0;
@@ -425,10 +426,10 @@ internal sealed class MainForm : Form
     private string FeatureNavText(string key) => key switch
     {
         "music" => T("音乐创作", "Music generation"),
-        "tts" => T("AI配音与声音克隆", "AI voice & cloning"),
-        "singing" => T("歌声克隆", "Singing voice clone"),
-        "separator" => T("去人声 / AI分轨", "Vocal removal / stems"),
-        "pitch" => T("AI扒谱（MIDI）", "AI transcription (MIDI)"),
+        "tts" => T("AI配音与声音克隆", "AI voice clone"),
+        "singing" => T("歌声克隆", "Singing clone"),
+        "separator" => T("去人声 / AI分轨", "Vocal removal"),
+        "pitch" => T("AI扒谱（MIDI）", "MIDI transcription"),
         "subtitle" => T("视频 AI 字幕", "Video AI subtitles"),
         _ => key
     };
@@ -445,17 +446,17 @@ internal sealed class MainForm : Form
             Padding = Padding.Empty,
             Margin = Padding.Empty
         };
-        top.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 130));
+        top.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 178));
         top.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         top.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170));
-        top.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 104));
+        top.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 112));
         topHeading = new Label
         {
             Text = T("工作台", "Workbench"),
             Dock = DockStyle.Fill,
-            Padding = new Padding(24, 0, 0, 0),
+            Padding = new Padding(28, 0, 0, 0),
             ForeColor = Color.FromArgb(210, 220, 234),
-            Font = new Font("Microsoft YaHei UI", 11f, FontStyle.Bold),
+            Font = new Font("Microsoft YaHei UI", 10.5f, FontStyle.Bold),
             TextAlign = ContentAlignment.MiddleLeft
         };
         localModeLabel = new Label
@@ -590,7 +591,7 @@ internal sealed class MainForm : Form
         var openRecent = new AccentButton(false)
         {
             Text = T("打开成品目录", "Open output folder"),
-            Size = new Size(160, 42),
+            Size = new Size(210, 42),
             Location = new Point(890, 42),
             Anchor = AnchorStyles.Top | AnchorStyles.Right
         };
@@ -664,7 +665,7 @@ internal sealed class MainForm : Form
 
         var spec = key switch
         {
-            "tts" => new FeatureSpec(T("AI配音与声音克隆", "AI Voice & Voice Cloning"), T("克隆自然说话音色，生成中文旁白、角色对白，\r\n以及可直接使用的配音成品。", "Clone natural speaking voices for narration, character lines,\r\nand production-ready voice assets."), "IndexTTS2 · FP16", T("启动配音模型", "Start voice model"), T("打开配音成品", "Open voice outputs"), OpenTtsAsync, "AI配音"),
+            "tts" => new FeatureSpec(T("AI配音与声音克隆", "AI Voice and Voice Cloning"), T("克隆自然说话音色，生成中文旁白、角色对白，\r\n以及可直接使用的配音成品。", "Clone natural speaking voices for narration, character lines,\r\nand production-ready voice assets."), "IndexTTS2 · FP16", T("启动配音模型", "Start voice model"), T("打开配音成品", "Open voice outputs"), OpenTtsAsync, "AI配音"),
             "singing" => new FeatureSpec(T("歌声克隆", "Singing Voice Clone"), T("保留原歌曲的旋律与唱法，\r\n将演唱音色替换成你的参考人声。", "Keep the source melody and phrasing,\r\nthen replace the singer timbre with a reference voice."), "Seed-VC · 44.1 kHz", T("启动歌声克隆", "Start singing clone"), T("打开歌声成品", "Open singing outputs"), OpenSingingVoiceAsync, "AI歌声克隆"),
             "separator" => new FeatureSpec(T("去人声 / AI分轨", "Vocal Removal / AI Stems"), T("自动分离成两个结果：纯人声 Vocal + 纯伴奏 Instrumental，\r\n为翻唱、混音和扒谱准备干净素材。", "Automatically creates two files: clean Vocal and Instrumental,\r\nready for covers, remixing, and transcription."), "BS-RoFormer · GPU", T("选择音频开始分离", "Select audio to separate"), T("打开分离成品", "Open stem outputs"), SeparateAudioAsync, "AI分轨"),
             "pitch" => new FeatureSpec(T("AI扒谱", "AI Transcription"), T("分析独唱或单乐器音高，\r\n自动生成可编辑 MIDI 与音符事件表。", "Analyze solo vocal or single-instrument pitch,\r\nthen export editable MIDI and note-event tables."), "Basic Pitch · MIDI", T("选择音频开始扒谱", "Select audio to transcribe"), T("打开扒谱成品", "Open MIDI outputs"), TranscribeMusicAsync, "AI扒谱"),
