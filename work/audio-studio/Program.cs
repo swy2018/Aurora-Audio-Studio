@@ -98,6 +98,8 @@ internal sealed class MainForm : Form
     private Label? recentTitleLabel;
     private AccentButton? releaseButton;
     private AccentButton? outputButton;
+    private AccentButton? updateButton;
+    private AccentButton? websiteButton;
     private AccentButton? openRecentButton;
     private Button? languageButton;
     private string localAiRoot = @"C:\LocalAI";
@@ -320,14 +322,14 @@ internal sealed class MainForm : Form
             TextAlign = ContentAlignment.MiddleLeft
         });
 
-        var bottom = new Panel { Dock = DockStyle.Bottom, Height = 166, BackColor = SidebarBackground };
+        var bottom = new Panel { Dock = DockStyle.Bottom, Height = 220, BackColor = SidebarBackground };
         var release = new AccentButton(false)
         {
             Text = T("释放模型显存", "Unload models"),
             Location = new Point(0, 12),
-            Size = new Size(266, 48),
+            Size = new Size(266, 40),
             ForeColor = Color.FromArgb(170, 185, 205),
-            Font = new Font("Microsoft YaHei UI", 10.5f)
+            Font = new Font("Microsoft YaHei UI", 10f)
         };
         releaseButton = release;
         release.Click += (_, _) =>
@@ -338,15 +340,37 @@ internal sealed class MainForm : Form
         var output = new AccentButton(false)
         {
             Text = T("设置输出位置", "Set output folder"),
-            Location = new Point(0, 66),
-            Size = new Size(266, 42),
+            Location = new Point(0, 58),
+            Size = new Size(266, 38),
             ForeColor = Color.FromArgb(170, 185, 205),
             Font = new Font("Microsoft YaHei UI", 10f)
         };
         outputButton = output;
         output.Click += (_, _) => ChooseOutputLocation();
+        var update = new AccentButton(false)
+        {
+            Text = T("检查更新", "Check updates"),
+            Location = new Point(0, 102),
+            Size = new Size(266, 38),
+            ForeColor = Color.FromArgb(170, 185, 205),
+            Font = new Font("Microsoft YaHei UI", 10f)
+        };
+        updateButton = update;
+        update.Click += async (_, _) => await CheckForUpdatesAsync();
+        var website = new AccentButton(false)
+        {
+            Text = T("访问官网", "Visit website"),
+            Location = new Point(0, 146),
+            Size = new Size(266, 38),
+            ForeColor = Color.FromArgb(170, 185, 205),
+            Font = new Font("Microsoft YaHei UI", 10f)
+        };
+        websiteButton = website;
+        website.Click += (_, _) => OpenWebsite();
         bottom.Controls.Add(release);
         bottom.Controls.Add(output);
+        bottom.Controls.Add(update);
+        bottom.Controls.Add(website);
         startupLabel = new Label
         {
             Text = T("不会开机自启动  ·  仅本机运行", "No startup item · Local only"),
@@ -515,6 +539,8 @@ internal sealed class MainForm : Form
         if (languageButton is not null) languageButton.Text = englishUi ? "中文" : "English";
         if (releaseButton is not null) releaseButton.Text = T("释放模型显存", "Unload models");
         if (outputButton is not null) outputButton.Text = T("设置输出位置", "Set output folder");
+        if (updateButton is not null) updateButton.Text = T("检查更新", "Check updates");
+        if (websiteButton is not null) websiteButton.Text = T("访问官网", "Visit website");
         if (startupLabel is not null) startupLabel.Text = T("不会开机自启动  ·  仅本机运行", "No startup item · Local only");
         if (recentTitleLabel is not null) recentTitleLabel.Text = T("最近成品", "Recent outputs");
         if (openRecentButton is not null) openRecentButton.Text = T("打开成品目录", "Open output folder");
@@ -922,6 +948,35 @@ internal sealed class MainForm : Form
         SaveUserSettings();
         RefreshRecent(CurrentOutputName());
         ShowDashboard(T("输出位置已设置：", "Output folder set: ") + outputRoot);
+    }
+
+    private void OpenWebsite()
+        => OpenUrl("https://swy2018.github.io/Aurora-Audio-Studio/");
+
+    private async Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            using var http = new HttpClient();
+            http.DefaultRequestHeaders.UserAgent.ParseAdd("Aurora-Audio-Studio/" + AppVersion);
+            var json = await http.GetStringAsync("https://api.github.com/repos/swy2018/Aurora-Audio-Studio/releases/latest");
+            using var doc = JsonDocument.Parse(json);
+            var tag = doc.RootElement.TryGetProperty("tag_name", out var tagNode) ? tagNode.GetString() ?? "" : "";
+            var page = doc.RootElement.TryGetProperty("html_url", out var urlNode) ? urlNode.GetString() ?? "" : "";
+            var latest = tag.TrimStart('v', 'V');
+            if (latest.Equals(AppVersion, StringComparison.OrdinalIgnoreCase))
+            {
+                ShowDashboard(T($"当前已经是最新版：{AppVersion}", $"You are already on the latest version: {AppVersion}"));
+                return;
+            }
+            ShowDashboard(T($"发现新版本：{tag}。已打开下载页。", $"New version found: {tag}. The download page has been opened."));
+            if (!string.IsNullOrWhiteSpace(page)) OpenUrl(page);
+        }
+        catch
+        {
+            ShowDashboard(T("检查更新失败。你可以点“访问官网”手动查看最新版。",
+                "Update check failed. Use Visit website to check the latest version manually."));
+        }
     }
 
     private string CurrentOutputName() => selectedFeature switch
@@ -1667,6 +1722,9 @@ Pause
         Directory.CreateDirectory(path);
         Process.Start(new ProcessStartInfo("explorer.exe", $"\"{path}\"") { UseShellExecute = true });
     }
+
+    private static void OpenUrl(string url)
+        => Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
 
     private string OutputFolder(string name) => Path.Combine(outputRoot, name);
 }

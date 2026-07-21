@@ -8,7 +8,7 @@ Current version: `0.8.0`
 
 [下载 Windows 版 / Download for Windows](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest/download/Aurora-Audio-Studio-0.8.0-win-x64.zip)
 
-![Aurora Audio Studio visual](docs/assets/aurora-hero.png)
+![Aurora Audio Studio screenshot](docs/assets/aurora-app-preview.png)
 
 ---
 
