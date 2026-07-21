@@ -1,0 +1,41 @@
+# Ignore everything by default; this repository publishes only the Aurora app source.
+*
+
+# Repository metadata
+!.gitignore
+!README.md
+!LICENSE
+
+# Aurora source
+!work/
+!work/audio-studio/
+!work/audio-studio/Program.cs
+!work/audio-studio/AIAudioStudio.csproj
+!work/audio-studio/app.manifest
+!work/audio-studio/README-给音乐人的使用说明.md
+!work/audio-studio/assets/
+!work/audio-studio/assets/**
+
+# Never commit build outputs, release artifacts, local models, caches, or machine state.
+**/bin/
+**/obj/
+.dotnet/
+发布/
+publish/
+*.exe
+*.dll
+*.pdb
+*.deps.json
+*.runtimeconfig.json
+*.zip
+*.7z
+*.part
+*.safetensors
+*.ckpt
+*.gguf
+*.pth
+*.pt
+*.onnx
+*.log
+*.tmp
+*.user
