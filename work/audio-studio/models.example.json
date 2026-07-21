@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "models": [
+    {
+      "feature": "music",
+      "name": "Example Music Model",
+      "tagZh": "示例音乐模型 · 外部配置",
+      "tagEn": "Example music model · external catalog",
+      "installedPaths": [
+        "ExampleMusicModel\\run.ps1"
+      ],
+      "installScript": "Write-Host 'Install your model here.'\n# Example:\n# git clone https://example.com/model.git (Join-Path $root 'ExampleMusicModel')"
+    }
+  ]
+}

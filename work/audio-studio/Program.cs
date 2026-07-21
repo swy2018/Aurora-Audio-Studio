@@ -18,16 +18,27 @@ internal static class Program
         var previewIndex = Array.IndexOf(args, "--render-preview");
         if (previewIndex >= 0 && previewIndex + 1 < args.Length)
         {
-            var featureIndex = Array.IndexOf(args, "--preview-feature");
-            if (featureIndex >= 0 && featureIndex + 1 < args.Length)
-                form.SelectPreviewFeature(args[featureIndex + 1]);
-            form.ShowInTaskbar = false;
-            form.StartPosition = FormStartPosition.Manual;
-            form.Location = new Point(-32000, -32000);
-            form.Show();
-            Application.DoEvents();
-            form.RenderPreview(args[previewIndex + 1]);
-            Environment.Exit(0);
+            try
+            {
+                var languageIndex = Array.IndexOf(args, "--preview-language");
+                if (languageIndex >= 0 && languageIndex + 1 < args.Length)
+                    form.SetPreviewLanguage(args[languageIndex + 1]);
+                var featureIndex = Array.IndexOf(args, "--preview-feature");
+                if (featureIndex >= 0 && featureIndex + 1 < args.Length)
+                    form.SelectPreviewFeature(args[featureIndex + 1]);
+                form.ShowInTaskbar = false;
+                form.StartPosition = FormStartPosition.Manual;
+                form.Location = new Point(-32000, -32000);
+                form.Show();
+                Application.DoEvents();
+                form.RenderPreview(args[previewIndex + 1]);
+                Environment.Exit(0);
+            }
+            catch (Exception ex)
+            {
+                File.WriteAllText(args[previewIndex + 1] + ".error.txt", ex.ToString());
+                Environment.Exit(2);
+            }
         }
         Application.Run(form);
     }
@@ -102,6 +113,7 @@ internal sealed class MainForm : Form
     private CancellationTokenSource? navigationCancellation;
     private string currentPrimaryText = "";
     private Func<Task>? currentPrimaryAction;
+    private List<ModelCatalogEntry>? modelCatalog;
     private string MusicRoot => Path.Combine(localAiRoot, "ACE-Step-1.5");
     private string TtsRoot => Path.Combine(localAiRoot, "IndexTTS2");
     private string SeedVcRoot => Path.Combine(localAiRoot, "Seed-VC");
@@ -764,7 +776,10 @@ internal sealed class MainForm : Form
     private ModelOption SelectedModel()
         => selectedModelOption ?? ModelOptions(selectedFeature).First();
 
-    private IEnumerable<ModelOption> ModelOptions(string feature) => feature switch
+    private IEnumerable<ModelOption> ModelOptions(string feature)
+        => DefaultModelOptions(feature).Concat(ExternalModelOptions(feature));
+
+    private IEnumerable<ModelOption> DefaultModelOptions(string feature) => feature switch
     {
         "music" =>
         [
@@ -798,6 +813,60 @@ internal sealed class MainForm : Form
         ],
         _ => []
     };
+
+    private IEnumerable<ModelOption> ExternalModelOptions(string feature)
+    {
+        foreach (var entry in LoadModelCatalog())
+        {
+            if (!entry.Feature.Equals(feature, StringComparison.OrdinalIgnoreCase)) continue;
+            if (string.IsNullOrWhiteSpace(entry.Name)) continue;
+            var tag = englishUi
+                ? FirstNonEmpty(entry.TagEn, entry.TagZh, entry.Name)
+                : FirstNonEmpty(entry.TagZh, entry.TagEn, entry.Name);
+            yield return new ModelOption(entry.Name, tag, IsCatalogModelInstalled(entry), entry.InstallScript);
+        }
+    }
+
+    private IEnumerable<ModelCatalogEntry> LoadModelCatalog()
+    {
+        if (modelCatalog is not null) return modelCatalog;
+        modelCatalog = [];
+        var paths = new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "models.json"),
+            UserModelCatalogPath()
+        };
+        foreach (var path in paths)
+        {
+            try
+            {
+                if (!File.Exists(path)) continue;
+                var catalog = JsonSerializer.Deserialize<ModelCatalogFile>(File.ReadAllText(path),
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (catalog?.Models is null) continue;
+                modelCatalog.AddRange(catalog.Models);
+            }
+            catch
+            {
+                // Invalid community model catalogs should not block the app from opening.
+            }
+        }
+        return modelCatalog;
+    }
+
+    private bool IsCatalogModelInstalled(ModelCatalogEntry entry)
+    {
+        if (entry.InstalledPaths is null || entry.InstalledPaths.Length == 0)
+            return Directory.Exists(Path.Combine(localAiRoot, entry.Name));
+        return entry.InstalledPaths.Any(path =>
+        {
+            var fullPath = Path.IsPathRooted(path) ? path : Path.Combine(localAiRoot, path);
+            return File.Exists(fullPath) || Directory.Exists(fullPath);
+        });
+    }
+
+    private static string FirstNonEmpty(params string?[] values)
+        => values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)) ?? "";
 
     private void RefreshRecent(string outputName)
     {
@@ -878,7 +947,8 @@ internal sealed class MainForm : Form
         localAiRoot = Path.Combine(dialog.SelectedPath, "LocalAI");
         Directory.CreateDirectory(localAiRoot);
         SaveUserSettings();
-        WriteInstallerScript(feature, option?.Name ?? ModelOptions(feature).FirstOrDefault()?.Name ?? feature);
+        var installOption = option ?? ModelOptions(feature).FirstOrDefault();
+        WriteInstallerScript(feature, installOption);
         Process.Start(new ProcessStartInfo("powershell.exe",
         $"-NoExit -ExecutionPolicy Bypass -File \"{InstallerScriptPath()}\"")
         {
@@ -891,6 +961,12 @@ internal sealed class MainForm : Form
 
     private string SettingsPath()
         => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aurora Audio Studio", "settings.json");
+
+    private string SettingsDirectory()
+        => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aurora Audio Studio");
+
+    private string UserModelCatalogPath()
+        => Path.Combine(SettingsDirectory(), "models.json");
 
     private string InstallerScriptPath()
         => Path.Combine(localAiRoot, "AuroraInstaller", "install_selected_models.ps1");
@@ -923,11 +999,43 @@ internal sealed class MainForm : Form
         File.WriteAllText(path, json);
     }
 
-    private void WriteInstallerScript(string feature, string modelName)
+    private static string CustomInstallBlock(string modelName, string? installScript)
     {
+        if (BuiltInInstallerModels.Contains(modelName)) return "";
+        if (string.IsNullOrWhiteSpace(installScript))
+        {
+            return """
+Write-Host '这是 models.json 里的扩展模型，但没有提供 installScript。'
+Write-Host '请把模型文件放到 LocalAI 下对应目录，或在 models.json 中补充 installScript。'
+""";
+        }
+
+        return installScript;
+    }
+
+    private static readonly HashSet<string> BuiltInInstallerModels = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "ACE-Step 1.5",
+        "YuE 音乐模型",
+        "Stable Audio Open",
+        "IndexTTS2",
+        "GPT-SoVITS",
+        "CosyVoice",
+        "Seed-VC 44.1k",
+        "RVC WebUI",
+        "DiffSinger",
+        "BS-RoFormer 分轨",
+        "Basic Pitch 扒谱",
+        "Subtitle Edit 字幕"
+    };
+
+    private void WriteInstallerScript(string feature, ModelOption? option)
+    {
+        var modelName = option?.Name ?? feature;
         var scriptPath = InstallerScriptPath();
         Directory.CreateDirectory(Path.GetDirectoryName(scriptPath)!);
         Directory.CreateDirectory(Path.GetDirectoryName(InstallLogPath())!);
+        var customInstallBlock = CustomInstallBlock(modelName, option?.InstallScript);
         var script = $$"""
 $ErrorActionPreference = 'Stop'
 $root = '{{localAiRoot}}'
@@ -1091,6 +1199,8 @@ if ('{{modelName}}' -eq 'Subtitle Edit 字幕') {
   }
 }
 
+{{customInstallBlock}}
+
 Write-Host ''
 Write-Host '安装脚本执行完成。回到 Aurora 重新点击模型即可。'
 Stop-Transcript
@@ -1121,9 +1231,32 @@ Pause
 
     public void SelectPreviewFeature(string key) => SelectFeature(key);
 
+    public void SetPreviewLanguage(string language)
+    {
+        englishUi = language.Equals("en", StringComparison.OrdinalIgnoreCase);
+        ApplyStaticLanguage();
+        SelectFeature(selectedFeature);
+    }
+
     private sealed record FeatureSpec(string Title, string Description, string Model, string PrimaryText,
         string SecondaryText, Func<Task> PrimaryAction, string OutputName);
-    private sealed record ModelOption(string Name, string Tag, bool IsInstalled);
+    private sealed record ModelOption(string Name, string Tag, bool IsInstalled, string? InstallScript = null);
+
+    private sealed class ModelCatalogFile
+    {
+        public int Version { get; set; } = 1;
+        public List<ModelCatalogEntry> Models { get; set; } = [];
+    }
+
+    private sealed class ModelCatalogEntry
+    {
+        public string Feature { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string? TagZh { get; set; }
+        public string? TagEn { get; set; }
+        public string[]? InstalledPaths { get; set; }
+        public string? InstallScript { get; set; }
+    }
 
     private async Task OpenMusicAsync()
     {

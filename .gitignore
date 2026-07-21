@@ -13,8 +13,11 @@
 !work/audio-studio/AIAudioStudio.csproj
 !work/audio-studio/app.manifest
 !work/audio-studio/README-给音乐人的使用说明.md
+!work/audio-studio/models.example.json
 !work/audio-studio/assets/
 !work/audio-studio/assets/**
+!docs/
+!docs/**
 
 # Never commit build outputs, release artifacts, local models, caches, or machine state.
 **/bin/

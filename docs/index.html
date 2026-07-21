@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aurora Audio Studio</title>
+  <meta name="description" content="Windows 本地 AI 音频制作工作室：音乐创作、AI 配音、歌声克隆、去人声分轨、AI 扒谱和视频字幕。">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #060b13;
+      --panel: #0d1725;
+      --panel2: #111f31;
+      --text: #eaf4ff;
+      --muted: #9fb2cb;
+      --cyan: #27c8ff;
+      --green: #47e6b2;
+      --border: #263852;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Microsoft YaHei UI", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 78% 8%, rgba(40, 166, 255, .26), transparent 30%),
+        radial-gradient(circle at 85% 46%, rgba(117, 52, 255, .22), transparent 32%),
+        linear-gradient(180deg, #07101b, var(--bg));
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 22px 64px; }
+    .nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 62px; }
+    .brand { display: flex; align-items: center; gap: 14px; font-weight: 800; letter-spacing: .02em; }
+    .logo { width: 46px; height: 46px; border-radius: 12px; background: #101c34; border: 1px solid #384f7d; display: grid; place-items: center; color: var(--cyan); font-size: 26px; }
+    .lang { color: var(--muted); font-size: 14px; }
+    .hero { display: grid; grid-template-columns: 1fr .95fr; align-items: center; gap: 38px; }
+    h1 { font-size: clamp(42px, 6vw, 72px); line-height: 1.02; margin: 0 0 22px; letter-spacing: -0.05em; }
+    .lead { color: #c5d5ea; font-size: 20px; line-height: 1.72; margin: 0 0 28px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px; }
+    .badge { border: 1px solid var(--border); background: rgba(13, 23, 37, .72); color: #b8cce5; border-radius: 999px; padding: 8px 13px; font-size: 14px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 14px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border-radius: 12px; text-decoration: none; font-weight: 800; border: 1px solid var(--border); background: var(--panel2); }
+    .button.primary { background: var(--cyan); color: #06101a; border: 0; }
+    .shot { border: 1px solid var(--border); border-radius: 22px; overflow: hidden; background: #08111e; box-shadow: 0 30px 120px rgba(0,0,0,.45); }
+    .shot img { width: 100%; display: block; }
+    section { margin-top: 82px; }
+    h2 { font-size: 34px; margin: 0 0 22px; letter-spacing: -0.03em; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .card { background: rgba(13, 23, 37, .78); border: 1px solid var(--border); border-radius: 18px; padding: 22px; min-height: 154px; }
+    .card h3 { margin: 0 0 10px; font-size: 19px; }
+    .card p, li { color: var(--muted); line-height: 1.65; }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; counter-reset: step; }
+    .step { counter-increment: step; padding: 20px; border-radius: 18px; background: rgba(17,31,49,.7); border: 1px solid var(--border); }
+    .step:before { content: counter(step); display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--cyan); color: #06101a; font-weight: 900; margin-bottom: 14px; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 16px; border: 1px solid var(--border); background: rgba(13, 23, 37, .72); }
+    th, td { padding: 15px 16px; border-bottom: 1px solid var(--border); text-align: left; color: #c7d8ee; }
+    th { color: var(--text); background: rgba(39, 200, 255, .09); }
+    tr:last-child td { border-bottom: 0; }
+    .footer { margin-top: 72px; color: #7185a0; font-size: 14px; }
+    @media (max-width: 900px) {
+      .hero, .grid, .steps { grid-template-columns: 1fr; }
+      .nav { margin-bottom: 38px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="nav">
+      <div class="brand"><div class="logo">A</div><div>Aurora Audio Studio</div></div>
+      <div class="lang">中文 / English · Windows 10/11 x64</div>
+    </nav>
+
+    <main class="hero">
+      <div>
+        <h1>给创作者用的本地 AI 音频工作室</h1>
+        <p class="lead">音乐创作、AI 配音、歌声克隆、去人声分轨、AI 扒谱和视频字幕，一个桌面软件里启动和管理。不要求用户会命令行。</p>
+        <div class="badges">
+          <span class="badge">本地优先</span>
+          <span class="badge">中文 / English</span>
+          <span class="badge">自包含 exe</span>
+          <span class="badge">不含模型权重</span>
+        </div>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest/download/Aurora-Audio-Studio-0.8.0-win-x64.zip">下载 Windows 版</a>
+          <a class="button" href="https://github.com/swy2018/Aurora-Audio-Studio">查看 GitHub</a>
+        </div>
+      </div>
+      <div class="shot">
+        <img src="assets/aurora-hero.png" alt="Aurora Audio Studio visual">
+      </div>
+    </main>
+
+    <section>
+      <h2>能做什么</h2>
+      <div class="grid">
+        <div class="card"><h3>音乐创作</h3><p>用 ACE-Step 1.5 等本地模型生成歌曲、纯音乐、旋律和灵感草稿。</p></div>
+        <div class="card"><h3>AI 配音</h3><p>启动 IndexTTS2、GPT-SoVITS、CosyVoice 等配音与声音克隆入口。</p></div>
+        <div class="card"><h3>歌声克隆</h3><p>用 Seed-VC 等工具保留旋律和唱法，替换演唱音色。</p></div>
+        <div class="card"><h3>去人声 / 分轨</h3><p>输出纯人声 Vocal 和纯伴奏 Instrumental，方便翻唱、混音和扒谱。</p></div>
+        <div class="card"><h3>AI 扒谱</h3><p>把清晰旋律音频转换成 MIDI 和音符事件表。</p></div>
+        <div class="card"><h3>视频字幕</h3><p>打开 Subtitle Edit / Faster-Whisper 类工作流，生成并校对时间轴字幕。</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>第一次使用</h2>
+      <div class="steps">
+        <div class="step">下载 zip，解压后双击 exe。</div>
+        <div class="step">选择功能和模型。</div>
+        <div class="step">模型没装时，点击“安装此模型”。</div>
+        <div class="step">选择安装位置，Aurora 会创建 LocalAI 文件夹。</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>默认模型清单</h2>
+      <table>
+        <thead><tr><th>功能</th><th>默认入口</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td>音乐创作</td><td>ACE-Step 1.5</td><td>歌曲、伴奏、旋律草稿</td></tr>
+          <tr><td>AI 配音</td><td>IndexTTS2</td><td>旁白、对白、说话音色克隆</td></tr>
+          <tr><td>歌声克隆</td><td>Seed-VC 44.1k</td><td>歌声音色转换</td></tr>
+          <tr><td>去人声 / 分轨</td><td>BS-RoFormer</td><td>纯人声和纯伴奏</td></tr>
+          <tr><td>AI 扒谱</td><td>Basic Pitch</td><td>MIDI 和音符事件</td></tr>
+          <tr><td>视频字幕</td><td>Subtitle Edit</td><td>SRT 字幕和时间轴校对</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>English</h2>
+      <p class="lead">Aurora Audio Studio is a local-first Windows launcher for AI audio production: music generation, AI voice, singing voice conversion, vocal separation, MIDI transcription, and subtitles. It is made for creators who do not want to use command-line tools.</p>
+      <div class="actions">
+        <a class="button primary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest/download/Aurora-Audio-Studio-0.8.0-win-x64.zip">Download for Windows</a>
+        <a class="button" href="https://github.com/swy2018/Aurora-Audio-Studio#readme">Read documentation</a>
+      </div>
+    </section>
+
+    <div class="footer">
+      MIT Licensed. Aurora does not bundle model weights; third-party models and tools keep their own licenses.
+    </div>
+  </div>
+</body>
+</html>
