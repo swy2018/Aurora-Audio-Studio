@@ -4,6 +4,72 @@
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
 
+## 1.1.0 — 2026-08-09
+
+### 中文
+
+Aurora 1.1 将原本分散的本地音频工具进一步整合为可持续使用的专业工作流，重点完善素材进入、任务执行、模型部署和结果回收。
+
+#### 创作与批处理
+
+- 支持一次选择多个音频或视频，也可把素材直接拖入处理区。
+- 新增内置媒体预览，在提交任务前确认素材内容、格式与文件大小。
+- 新增快速草稿、推荐质量和高质量三档预设，并为分轨、扒谱和字幕匹配对应引擎。
+- 批量任务按顺序使用本地 GPU，每个任务独立保存状态与结果。
+
+#### 任务中心与成品库
+
+- 接入引擎输出的实时百分比和状态信息，替代固定的占位进度。
+- 显示当前阶段、已用时间、最近一条引擎信息和持久任务日志。
+- 支持暂停和继续等待中的队列，当前运行任务不会被强行中断。
+- 新增成品库，按项目与时间集中展示音轨、MIDI、字幕及其他输出。
+
+#### 模型部署
+
+- 安装前同时显示预计下载量、建议空间与目标磁盘当前可用空间。
+- 支持下载进度、传输速度、取消和断点续传。
+- 模型包继续执行 SHA-256 校验；新安装先在临时位置完成完整性检查，再进入正式目录。
+- Hugging Face 与 Python 环境部署过程可以安全取消，未完成下载保留用于下次继续。
+
+#### 官网与产品表达
+
+- 全面重构官方网站的排版、信息层级和响应式布局。
+- 三张真实工作台截图使用 1672 × 941 原始比例展示，不再裁切或透视拉伸。
+- 新增原尺寸灯箱预览、键盘可操作标签页、语言适配和低动态模式。
+- README、软件介绍和中英双语发布说明与 1.1 功能同步更新。
+
+### English
+
+Aurora 1.1 turns the local audio toolkit into a more continuous professional workflow, strengthening media intake, task execution, model deployment, and result management.
+
+#### Creation and batches
+
+- Select multiple audio or video files at once, or drop them directly into the processing workspace.
+- Preview media before submission with format and file-size details.
+- Choose Fast, Recommended, or Quality presets mapped to the appropriate separation, transcription, and subtitle engines.
+- Batch tasks use the local GPU in sequence and preserve each status and result independently.
+
+#### Task Center and Results
+
+- Replaced fixed placeholder percentages with live progress and state reported by local engines.
+- Added current stage, elapsed time, latest engine message, and persistent task logs.
+- Pause and resume pending work without forcing the active process to stop.
+- Added a Results library for stems, MIDI, subtitles, and other output, grouped by project and time.
+
+#### Model deployment
+
+- Review estimated download, recommended capacity, and currently available disk space before installation.
+- Added progress, transfer speed, cancellation, and resumable downloads.
+- Model packages retain SHA-256 verification; new packages complete integrity checks in staging before entering the final directory.
+- Hugging Face and Python environment deployment can stop safely and continue from retained partial downloads.
+
+#### Website and product presentation
+
+- Rebuilt the official site with a new visual hierarchy and responsive system.
+- All three real product screenshots display at their full 1672 × 941 ratio without cropping or perspective distortion.
+- Added full-resolution viewing, keyboard-accessible tabs, language adaptation, and reduced-motion support.
+- Updated the README, product description, and bilingual release material for version 1.1.
+
 ## 1.0.1 — 2026-08-08
 
 ### 中文

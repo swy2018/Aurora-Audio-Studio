@@ -19,7 +19,7 @@ public sealed class UpdateService(SettingsService settings, LocalizationService 
 
     public async Task<AppUpdateInfo> CheckAsync(CancellationToken cancellationToken = default)
     {
-        var current = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.1";
+        var current = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.1.0";
         try
         {
             using var response = await client.GetAsync(LatestReleaseApi, cancellationToken);
@@ -203,7 +203,7 @@ public sealed class UpdateService(SettingsService settings, LocalizationService 
             DefaultRequestVersion = HttpVersion.Version11,
             DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
         };
-        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.1"));
+        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.1.0"));
         value.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
         return value;
     }

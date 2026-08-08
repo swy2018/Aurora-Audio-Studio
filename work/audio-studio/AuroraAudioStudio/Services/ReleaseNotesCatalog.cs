@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 1, 0), "2026-08-09", [
+            "• 新增批量素材工作流，可多选或拖入音频与视频，并在提交前直接预览。\n• 新增快速草稿、推荐质量与高质量三档处理预设。\n• 任务中心接入引擎实时进度、当前阶段、持续时间与持久日志，并可暂停后续队列。\n• 新增成品库，按项目与时间汇总音轨、MIDI、字幕及其他结果。\n• 模型部署新增磁盘空间检查、下载进度与速度、取消、断点续传及安装完整性检查。\n• 全面重构官方网站，以原始比例清晰展示真实工作台并支持全屏查看。",
+            "• 新增批次素材工作流程，可多選或拖入音訊與影片，並在提交前直接預覽。\n• 新增快速草稿、建議品質與高品質三種處理預設。\n• 任務中心接入引擎即時進度、目前階段、持續時間與持久記錄，並可暫停後續佇列。\n• 新增成品庫，依專案與時間彙整音軌、MIDI、字幕及其他結果。\n• 模型部署新增磁碟空間檢查、下載進度與速度、取消、續傳及安裝完整性檢查。\n• 全面重構官方網站，以原始比例清楚展示真實工作台並支援全螢幕查看。",
+            "• Added batch media workflows with multi-select, drag and drop, and built-in preview before submission.\n• Added Fast, Recommended, and Quality processing presets.\n• Task Center now shows live engine progress, stage, duration, and persistent logs, with control over the pending queue.\n• Added a Results library that groups stems, MIDI, subtitles, and other output by project and time.\n• Model deployment now includes disk-space checks, download progress and speed, cancel, resume, and installation integrity checks.\n• Rebuilt the website around clear, full-ratio product imagery with full-screen viewing.",
+            "• 音声・動画の複数選択、ドラッグ＆ドロップ、送信前プレビューに対応したバッチ素材ワークフローを追加。\n• 高速、推奨品質、高品質の3つの処理プリセットを追加。\n• タスクセンターにエンジンのリアルタイム進捗、現在段階、所要時間、永続ログを追加し、待機キューを一時停止可能に。\n• ステム、MIDI、字幕などをプロジェクトと時刻でまとめる成果ライブラリを追加。\n• モデル導入に空き容量確認、速度付き進捗、キャンセル、再開、整合性確認を追加。\n• 実際の画面を元の比率で鮮明に表示し、全画面確認できる公式サイトへ刷新。"]),
         new(new(1, 0, 1), "2026-08-08", [
             "• 未安装的创作模型现在会显示“自动安装模型”，不再禁用入口。\n• 安装前明确显示目标目录、预计下载量与建议预留空间，并可更改 Aurora 模型目录。\n• 模型安装完成并通过完整性检测后，自动继续进入工作台。\n• 自动更新只保留 Windows 标准安装进度界面，移除重复的 Aurora 自制安装窗口。",
             "• 未安裝的創作模型現在會顯示「自動安裝模型」，不再停用入口。\n• 安裝前清楚顯示目標目錄、預計下載量與建議預留空間，並可變更 Aurora 模型目錄。\n• 模型安裝完成並通過完整性檢查後，自動繼續進入工作台。\n• 自動更新只保留 Windows 標準安裝進度介面，移除重複的 Aurora 自製安裝視窗。",

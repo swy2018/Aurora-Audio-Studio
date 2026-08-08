@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Text.RegularExpressions;
 using System.Net;
 using System.Runtime.InteropServices;
 using AuroraAudioStudio.Models;
@@ -131,19 +132,19 @@ public sealed class BackendService(SettingsService settings)
         return await WaitForUrlAsync("http://127.0.0.1:7862", "Starting Seed-VC 44.1k");
     }
 
-    public async Task<OperationResult> RunUtilityAsync(string feature, string inputPath, string modelId, string language, CancellationToken cancellationToken = default)
+    public async Task<OperationResult> RunUtilityAsync(string feature, string inputPath, string modelId, string language, IProgress<TaskExecutionProgress>? progress = null, CancellationToken cancellationToken = default)
     {
         if (IsRunning("utility")) return new OperationResult(false, "Another local task is already running.");
         return feature switch
         {
-            "separation" => await SeparateAsync(inputPath, modelId, cancellationToken),
-            "transcription" => await TranscribeAsync(inputPath, modelId, cancellationToken),
-            "subtitles" => await SubtitleAsync(inputPath, modelId, language, cancellationToken),
+            "separation" => await SeparateAsync(inputPath, modelId, progress, cancellationToken),
+            "transcription" => await TranscribeAsync(inputPath, modelId, progress, cancellationToken),
+            "subtitles" => await SubtitleAsync(inputPath, modelId, language, progress, cancellationToken),
             _ => new OperationResult(false, "Unsupported local task.")
         };
     }
 
-    private async Task<OperationResult> SeparateAsync(string source, string modelId, CancellationToken cancellationToken)
+    private async Task<OperationResult> SeparateAsync(string source, string modelId, IProgress<TaskExecutionProgress>? progress, CancellationToken cancellationToken)
     {
         if (modelId.Equals("demucs", StringComparison.OrdinalIgnoreCase))
         {
@@ -153,7 +154,7 @@ public sealed class BackendService(SettingsService settings)
             var demucsInfo = Hidden(demucs, demucsOutput);
             demucsInfo.ArgumentList.Add("-o"); demucsInfo.ArgumentList.Add(demucsOutput); demucsInfo.ArgumentList.Add(source);
             demucsInfo.Environment["PYTHONUTF8"] = "1";
-            return await RunCapturedAsync("utility", demucsInfo, "demucs", demucsOutput, cancellationToken);
+            return await RunCapturedAsync("utility", demucsInfo, "demucs", demucsOutput, progress, cancellationToken);
         }
         var exe = Path.Combine(Root, "AudioTools", "roformer-env", "Scripts", "bs-roformer-infer.exe");
         var models = Path.Combine(Root, "AudioTools", "roformer-models");
@@ -164,13 +165,14 @@ public sealed class BackendService(SettingsService settings)
         var prepared = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(source) + ".wav");
         try
         {
+            progress?.Report(new(.05, "正在准备音频素材"));
             await PrepareAudioAsync(source, prepared);
             var info = Hidden(exe, output);
             info.ArgumentList.Add("--input_folder"); info.ArgumentList.Add(tempFolder);
             info.ArgumentList.Add("--store_dir"); info.ArgumentList.Add(output);
             info.ArgumentList.Add("--models_dir"); info.ArgumentList.Add(models);
             info.Environment["PATH"] = FfmpegRoot + ";" + Environment.GetEnvironmentVariable("PATH");
-            return await RunCapturedAsync("utility", info, "separator", output, cancellationToken);
+            return await RunCapturedAsync("utility", info, "separator", output, progress, cancellationToken);
         }
         finally
         {
@@ -179,7 +181,7 @@ public sealed class BackendService(SettingsService settings)
         }
     }
 
-    private async Task<OperationResult> TranscribeAsync(string source, string modelId, CancellationToken cancellationToken)
+    private async Task<OperationResult> TranscribeAsync(string source, string modelId, IProgress<TaskExecutionProgress>? progress, CancellationToken cancellationToken)
     {
         if (modelId.Equals("basic-pitch", StringComparison.OrdinalIgnoreCase))
         {
@@ -189,7 +191,7 @@ public sealed class BackendService(SettingsService settings)
             var basicPitchInfo = Hidden(basicPitch, basicPitchOutput);
             basicPitchInfo.ArgumentList.Add(basicPitchOutput); basicPitchInfo.ArgumentList.Add(source);
             basicPitchInfo.Environment["PYTHONUTF8"] = "1";
-            return await RunCapturedAsync("utility", basicPitchInfo, "basic-pitch", basicPitchOutput, cancellationToken);
+            return await RunCapturedAsync("utility", basicPitchInfo, "basic-pitch", basicPitchOutput, progress, cancellationToken);
         }
         var piano = modelId.Equals("piano", StringComparison.OrdinalIgnoreCase);
         var output = OutputFolder("AI扒谱");
@@ -205,6 +207,7 @@ public sealed class BackendService(SettingsService settings)
             tempFolder = Path.Combine(Path.GetTempPath(), "Aurora-Piano-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(tempFolder);
             prepared = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(source) + ".wav");
+            progress?.Report(new(.05, "正在准备钢琴音频"));
             await PrepareAudioAsync(source, prepared);
             info = Hidden(python, output);
             info.ArgumentList.Add("-c");
@@ -224,7 +227,7 @@ public sealed class BackendService(SettingsService settings)
             info.Environment["MT3_CHECKPOINT_DIR"] = Path.Combine(Root, "AudioTools", "mt3-models");
         }
         info.Environment["PYTHONUTF8"] = "1";
-        try { return await RunCapturedAsync("utility", info, piano ? "piano" : "yourmt3", output, cancellationToken); }
+        try { return await RunCapturedAsync("utility", info, piano ? "piano" : "yourmt3", output, progress, cancellationToken); }
         finally
         {
             if (prepared is not null && File.Exists(prepared)) File.Delete(prepared);
@@ -232,7 +235,7 @@ public sealed class BackendService(SettingsService settings)
         }
     }
 
-    private async Task<OperationResult> SubtitleAsync(string source, string modelId, string language, CancellationToken cancellationToken)
+    private async Task<OperationResult> SubtitleAsync(string source, string modelId, string language, IProgress<TaskExecutionProgress>? progress, CancellationToken cancellationToken)
     {
         var exe = Path.Combine(FfmpegRoot, "faster-whisper-xxl.exe");
         if (!File.Exists(exe)) return Missing("Faster-Whisper XXL");
@@ -253,7 +256,7 @@ public sealed class BackendService(SettingsService settings)
         info.ArgumentList.Add("-m"); info.ArgumentList.Add(model);
         if (language.StartsWith("zh")) { info.ArgumentList.Add("-l"); info.ArgumentList.Add("zh"); }
         else if (language.StartsWith("ja")) { info.ArgumentList.Add("-l"); info.ArgumentList.Add("ja"); }
-        return await RunCapturedAsync("utility", info, "subtitles", output, cancellationToken);
+        return await RunCapturedAsync("utility", info, "subtitles", output, progress, cancellationToken);
     }
 
     private async Task PrepareAudioAsync(string source, string destination)
@@ -272,7 +275,7 @@ public sealed class BackendService(SettingsService settings)
         if (result.ExitCode != 0) throw new InvalidOperationException(result.Error);
     }
 
-    private async Task<OperationResult> RunCapturedAsync(string key, ProcessStartInfo info, string logPrefix, string output, CancellationToken cancellationToken = default)
+    private async Task<OperationResult> RunCapturedAsync(string key, ProcessStartInfo info, string logPrefix, string output, IProgress<TaskExecutionProgress>? progress = null, CancellationToken cancellationToken = default)
     {
         StatusChanged?.Invoke(this, "running:" + logPrefix);
         var logPath = Path.Combine(Logs, $"{logPrefix}-{DateTime.Now:yyyyMMdd-HHmmss}.log");
@@ -280,15 +283,24 @@ public sealed class BackendService(SettingsService settings)
         processes[key] = process;
         try
         {
+            progress?.Report(new(.04, "正在启动本地引擎"));
             process.Start();
             using var cancellation = cancellationToken.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
-            var stdout = process.StandardOutput.ReadToEndAsync();
-            var stderr = process.StandardError.ReadToEndAsync();
+            var lines = new List<string>();
+            var sync = new object();
+            void Capture(string? line)
+            {
+                if (string.IsNullOrWhiteSpace(line)) return;
+                lock (sync) lines.Add(line);
+                progress?.Report(ParseProgress(line));
+            }
+            process.OutputDataReceived += (_, args) => Capture(args.Data);
+            process.ErrorDataReceived += (_, args) => Capture(args.Data);
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
             await process.WaitForExitAsync(cancellationToken);
-            var stdoutText = await stdout;
-            var stderrText = await stderr;
-            var content = stdoutText + Environment.NewLine + stderrText;
-            File.WriteAllText(logPath, content);
+            await Task.Delay(80, CancellationToken.None);
+            lock (sync) File.WriteAllLines(logPath, lines);
             var success = process.ExitCode == 0;
             StatusChanged?.Invoke(this, success ? "completed:" + logPrefix : "failed:" + logPrefix);
             return new OperationResult(success, success ? "Task completed." : $"Task failed with code {process.ExitCode}.", success ? output : logPath);
@@ -297,6 +309,16 @@ public sealed class BackendService(SettingsService settings)
         {
             processes.Remove(key);
         }
+    }
+
+    private static TaskExecutionProgress ParseProgress(string line)
+    {
+        var compact = Regex.Replace(line.Trim(), @"\s+", " ");
+        if (compact.Length > 220) compact = compact[..220];
+        var match = Regex.Match(compact, @"(?<!\d)(?<value>\d{1,3}(?:\.\d+)?)\s*%");
+        if (match.Success && double.TryParse(match.Groups["value"].Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var percentage))
+            return new(Math.Clamp(percentage / 100d, .04, .99), "正在本机处理", compact);
+        return new(null, "正在本机处理", compact);
     }
 
     public string OutputFolder(string name)

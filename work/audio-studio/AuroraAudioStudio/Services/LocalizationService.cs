@@ -8,6 +8,8 @@ public sealed class LocalizationService(SettingsService settings)
         ["homeSubtitle"] = ["继续项目，或从一个清晰的创作任务开始。", "繼續專案，或從一個清楚的創作任務開始。", "Continue a project or start with a focused creative task.", "プロジェクトを続けるか、明確な制作タスクから始めます。"],
         ["tasks"] = ["任务中心", "任務中心", "Task Center", "タスクセンター"],
         ["tasksSubtitle"] = ["查看排队、处理中、已完成与可恢复的任务。", "查看排隊、處理中、已完成與可恢復的任務。", "Review queued, running, completed, and recoverable tasks.", "待機中、処理中、完了、復旧可能なタスクを確認します。"],
+        ["results"] = ["成品库", "成品庫", "Results", "成果ライブラリ"],
+        ["resultsSubtitle"] = ["集中查看本地生成的音轨、MIDI、字幕与其他成品。", "集中查看本機產生的音軌、MIDI、字幕與其他成品。", "Browse locally generated stems, MIDI, subtitles, and other results.", "ローカルで生成したステム、MIDI、字幕などをまとめて確認します。"],
         ["music"] = ["音乐创作", "音樂創作", "Music", "音楽制作"],
         ["voice"] = ["AI配音与声音克隆", "AI配音與聲音複製", "AI Voice", "AI音声"],
         ["singing"] = ["歌声克隆", "歌聲複製", "Singing Voice", "歌声変換"],

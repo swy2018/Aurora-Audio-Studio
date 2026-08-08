@@ -46,6 +46,19 @@ public sealed class ProjectService(SettingsService settings)
 
     public AuroraProject? Find(string id) => Recent(200).FirstOrDefault(x => x.Id == id);
 
+    public IReadOnlyList<ArtifactDisplay> Artifacts(int count = 120) => Recent(300)
+        .SelectMany(project => project.Artifacts.Select(artifact => new ArtifactDisplay
+        {
+            ProjectName = project.Name,
+            Kind = artifact.Kind,
+            Path = artifact.Path,
+            CreatedAt = artifact.CreatedAt
+        }))
+        .Where(x => !string.IsNullOrWhiteSpace(x.Path))
+        .OrderByDescending(x => x.CreatedAt)
+        .Take(count)
+        .ToList();
+
     public async Task AddTaskAsync(AuroraProject project, AuroraTaskRecord task)
     {
         if (!project.TaskIds.Contains(task.Id)) project.TaskIds.Add(task.Id);

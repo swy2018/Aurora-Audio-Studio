@@ -39,10 +39,11 @@ Aurora unifies independently installed local audio models behind one bilingual d
 - Six-stem separation with BS-RoFormer-SW, plus optional general-purpose Demucs 4 separation.
 - Multi-instrument MIDI transcription with YourMT3+ and a dedicated piano model, plus optional lightweight Spotify Basic Pitch transcription.
 - Video subtitles with Subtitle Edit and Faster-Whisper, plus optional Small, Large v3 Turbo, and Large v3 CTranslate2 model packs.
-- Model selection, on-demand optional-model deployment, model manager, output-folder selection, verified app updates, per-model update checks, VRAM release, diagnostics export, recent-output access, and four-language switching.
+- Batch media intake with drag and drop, built-in preview, quality presets, live task progress, persistent logs, pending-queue pause, and a unified Results library.
+- Model selection, resumable on-demand deployment with disk checks and cancellation, model manager, output-folder selection, verified app updates, per-model update checks, VRAM release, diagnostics export, and four-language switching.
 - Closing Aurora stops the backends it launched.
 - A redesign must preserve every existing workflow, control, and product behavior unless the user explicitly approves a functional change.
-- The approved A workbench and dark rounded A-wave icon remain the visual baseline for version 1.0.1.
+- The approved A workbench and dark rounded A-wave icon remain the visual baseline for version 1.1.0.
 - The existing model suite remains the default. Optional engines never install automatically and do not create maintenance warnings when absent.
 - The installer defaults to Program Files, performs guarded in-place upgrades under the same AppId, and preserves user-owned data and the selected install location.
 - Interactive uninstall offers an explicit personal-configuration cleanup choice without touching models, projects, source media, or outputs.
