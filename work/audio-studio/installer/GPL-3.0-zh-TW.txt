@@ -1,0 +1,502 @@
+﻿
+This is an unofficial translation of the GNU General Public License into Simplified Chinese. It was not published by the Free Software Foundation, and does not legally state the distribution terms for software that uses the GNU GPL—only the original English text of the GNU GPL does that. However, we hope that this translation will help Simplified Chinese speakers understand the GNU GPL better. You may publish this translation, modified or unmodified, only under the terms at https://www.gnu.org/licenses/translations.html.
+
+這是GNU通用公共許可證（GNU GPL）的非正式簡體中文翻譯。它并未被自由軟件基金會發布，也并非使用GNU GPL軟件的分發條款的法律聲明——只有GNU GPL的原始英文版才有法律意義。不過，我們希望本翻譯能夠幫助簡體中文用戶更好地理解GNU GPL。您可以發布本翻譯的修改版或原版，但您必須基于 http://www.gnu.org/licenses/translations.html 的條款發布。
+
+GNU General Public License
+
+GNU通用公共許可證
+
+Version 3, 29 June 2007
+
+第3版 2007年6月29日
+
+Copyright © 2007 Free Software Foundation, Inc. <https://fsf.org/>
+
+Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
+
+版權所有 © 2007 自由軟件基金會公司 <https://fsf.org/>
+
+任何人皆可復制或分發本許可證的逐字副本，但不得修改。
+
+Begin license text.
+
+許可證文本開始。
+
+Preamble序言
+
+The GNU General Public License is a free, copyleft license for software and other kinds of works.
+
+GNU通用公共許可證是面向軟件及其他形式作品的、自由的著佐權許可證。
+
+The licenses for most software and other practical works are designed to take away your freedom to share and change the works. By contrast, the GNU General Public License is intended to guarantee your freedom to share and change all versions of a program--to make sure it remains free software for all its users. We, the Free Software Foundation, use the GNU General Public License for most of our software; it applies also to any other work released this way by its authors. You can apply it to your programs, too.
+
+大多數軟件及其他實用作品的許可證皆被設計用于剝奪你的分享和修改作品的自由。相反，GNU通用公共許可證則旨在保證你可分享和修改程序的所有版本——以確保它對于所有用戶來說都是自由軟件。我們自由軟件基金會將GNU通用公共許可證用于對我們的大多數軟件；也可將該許可證用于其作者以這種方式發布的其他作品。你也可以將它用于你的程序。
+
+When we speak of free software, we are referring to freedom, not price. Our General Public Licenses are designed to make sure that you have the freedom to distribute copies of free software (and charge for them if you wish), that you receive source code or can get it if you want it, that you can change the software or use pieces of it in new free programs, and that you know you can do these things.
+
+當我們談及自由軟件，強調的是自由，而非免費。我們的通用公共許可證被設計用于確保你可以自由地分發自由軟件副本（如你愿意，可以對此收費），確保你能夠接收到該自由軟件的源代碼或者在你想要的時候能夠得到，確保你可以修改該軟件或在新的自由程序中復用該軟件的片段，并確保你知悉可以這么做。
+
+To protect your rights, we need to prevent others from denying you these rights or asking you to surrender the rights. Therefore, you have certain responsibilities if you distribute copies of the software, or if you modify it: responsibilities to respect the freedom of others.
+
+為了保障你的權利，我們需要謹防他人剝奪你的權利或要求你交出權利。為此，若你分發或修改軟件副本，你應承擔特定的責任：尊重他人自由的責任。
+
+For example, if you distribute copies of such a program, whether gratis or for a fee, you must pass on to the recipients the same freedoms that you received. You must make sure that they, too, receive or can get the source code. And you must show them these terms so they know their rights.
+
+例如，若你分發該程序的副本（無論是免費的還是收費的），你必須把你獲得的自由同樣傳遞給接收者。你必須確保他們也收到或能夠得到源代碼。此外，你必須向他們展示這些條款以讓他們知悉他們的權利。
+
+Developers that use the GNU GPL protect your rights with two steps: (1) assert copyright on the software, and (2) offer you this License giving you legal permission to copy, distribute and/or modify it.
+
+采用GNU GPL的開發者通過兩個步驟保障你的權利：（1）在軟件上申明版權；（2）向你提供本許可證，以授予你復制、分發和/或修改軟件的法律許可。
+
+For the developers’ and authors’ protection, the GPL clearly explains that there is no warranty for this free software. For both users’ and authors’ sake, the GPL requires that modified versions be marked as changed, so that their problems will not be attributed erroneously to authors of previous versions.
+
+為了保障開發者和作者的權益，GPL闡明：該自由軟件沒有任何保證。為了保障用戶和作者的利益，GPL要求修改版應標注其已經過修訂，那么修改版的問題就不會被錯誤地歸咎于以前版本的作者。
+
+Some devices are designed to deny users access to install or run modified versions of the software inside them, although the manufacturer can do so. This is fundamentally incompatible with the aim of protecting users' freedom to change the software. The systematic pattern of such abuse occurs in the area of products for individuals to use, which is precisely where it is most unacceptable. Therefore, we have designed this version of the GPL to prohibit the practice for those products. If such problems arise substantially in other domains, we stand ready to extend this provision to those domains in future versions of the GPL, as needed to protect the freedom of users.
+
+一些設備被設計為拒絕用戶安裝或運行在其內部的軟件的修改版，盡管制造商可以這樣做。這與保障用戶能夠自由修改軟件這一目標從根本上存在沖突。尤其不能接受的是，這種普遍化的濫用行為發生在供個人使用的產品領域。因此，我們設計了本版本的GPL來禁止對于這些產品的這種做法。如果該問題在其他領域大量出現，我們隨時準備在未來的GPL版本中，根據需要將這一條款擴展到那些領域，以保護用戶的自由。
+
+Finally, every program is threatened constantly by software patents. States should not allow patents to restrict development and use of software on general-purpose computers, but in those that do, we wish to avoid the special danger that patents applied to a free program could make it effectively proprietary. To prevent this, the GPL assures that patents cannot be used to render the program non-free.
+
+最后，每個程序都不斷地受到軟件專利的威脅。各國不應允許專利對通用計算機上軟件的開發與使用進行限制。但在允許此類做法的那些國家中，我們希望避免這種特殊的風險：適用于自由程序的專利導致自由程序事實上被專有化。為了防止這種情況發生，GPL確保專利不能被用于使程序變得不自由。
+
+The precise terms and conditions for copying, distribution and modification follow.
+
+復制、分發和修改的確切條款與條件如下。
+
+TERMS AND CONDITIONS 條款與條件
+
+0. Definitions. 定義
+
+“This License” refers to version 3 of the GNU General Public License.
+
+“本許可證”是指GNU通用公共許可證的第3版。
+
+“Copyright” also means copyright-like laws that apply to other kinds of works, such as semiconductor masks.
+
+“版權”也指適用于其他種類作品的類似版權的法律，例如半導體掩模。
+
+“The Program” refers to any copyrightable work licensed under this License. Each licensee is addressed as “you”. “Licensees” and “recipients” may be individuals or organizations.
+
+“本程序”是指在本許可證下許可的任何受版權保護的作品。每個被許可人被稱為“你”。“被許可人”和“接收者”可以是個人或組織。
+
+To “modify” a work means to copy from or adapt all or part of the work in a fashion requiring copyright permission, other than the making of an exact copy. The resulting work is called a “modified version” of the earlier work or a work “based on” the earlier work.
+
+“修改”作品是指以需獲版權許可的方式復制或改編該作品的全部或部分內容，而非制作一個完全相同的副本。由此產生的作品被稱為先前作品的“修改版”或“基于”先前作品的作品。
+
+A “covered work” means either the unmodified Program or a work based on the Program.
+
+“被覆蓋作品”是指未作修改的本程序或基于本程序的作品。
+
+To “propagate” a work means to do anything with it that, without permission, would make you directly or secondarily liable for infringement under applicable copyright law, except executing it on a computer or modifying a private copy. Propagation includes copying, distribution (with or without modification), making available to the public, and in some countries other activities as well.
+
+“傳播”作品是指那些你未經許可對作品所實施的將導致你在適用版權法下承擔直接或間接侵權責任的任何行為，但在計算機上執行作品或修改私有副本的行為除外。傳播行為包括復制、分發（無論修改與否）、向公眾提供，在一些國家還包括其他行為。
+
+To “convey” a work means any kind of propagation that enables other parties to make or receive copies. Mere interaction with a user through a computer network, with no transfer of a copy, is not conveying.
+
+“傳遞”作品是指使其他各方能夠制作或接收副本的任何一種傳播方式。僅僅是通過計算機網絡與用戶交互，而沒有轉移副本，并不構成傳遞行為。
+
+An interactive user interface displays “Appropriate Legal Notices” to the extent that it includes a convenient and prominently visible feature that (1) displays an appropriate copyright notice, and (2) tells the user that there is no warranty for the work (except to the extent that warranties are provided), that licensees may convey the work under this License, and how to view a copy of this License. If the interface presents a list of user commands or options, such as a menu, a prominent item in the list meets this criterion.
+
+交互式用戶界面對于“適當的法律聲明”的展示應有一個方便且醒目的特性以：（1）展示適當的版權聲明，并（2）告知用戶：該作品沒有任何保證（已提供保證的范圍除外）、被許可人可以根據本許可證傳遞該作品，以及如何查閱本許可證的副本。如果該界面呈現的是一個用戶命令或選項的列表，例如菜單，則列表中突出顯示的條目即可滿足此標準。
+
+1. Source Code. 源代碼
+
+The “source code” for a work means the preferred form of the work for making modifications to it. “Object code” means any non-source form of a work.
+
+作品的“源代碼”指對作品進行修改的首選形式。“目標代碼”指作品的任何非源代碼形式。
+
+A “Standard Interface” means an interface that either is an official standard defined by a recognized standards body, or, in the case of interfaces specified for a particular programming language, one that is widely used among developers working in that language.
+
+“標準接口”指由公認的標準機構定義的官方標準的接口，或者對于某一特定編程語言的接口而言，是指在使用該語言的開發者中廣泛使用的接口。
+
+The “System Libraries” of an executable work include anything, other than the work as a whole, that (a) is included in the normal form of packaging a Major Component, but which is not part of that Major Component, and (b) serves only to enable use of the work with that Major Component, or to implement a Standard Interface for which an implementation is available to the public in source code form. A “Major Component”, in this context, means a major essential component (kernel, window system, and so on) of the specific operating system (if any) on which the executable work runs, or a compiler used to produce the work, or an object code interpreter used to run it.
+
+可執行作品中的“系統庫”不是指整個程序，而是涵蓋此等內容：（a）以通常形式和“主組件”打包到一起但并非后者一部分，且（b）僅為使作品與“主組件”可一起使用，或為實現一個標準接口（該接口的實現已以源代碼形式向公眾提供）。“主組件”在這里指該可執行作品運行依賴的特定操作系統（如有）的必要組件（內核、窗口系統等）、生成該作品的編譯器，或運行所需的目標代碼解釋器。
+
+The “Corresponding Source” for a work in object code form means all the source code needed to generate, install, and (for an executable work) run the object code and to modify the work, including scripts to control those activities. However, it does not include the work's System Libraries, or general-purpose tools or generally available free programs which are used unmodified in performing those activities but which are not part of the work. For example, Corresponding Source includes interface definition files associated with source files for the work, and the source code for shared libraries and dynamically linked subprograms that the work is specifically designed to require, such as by intimate data communication or control flow between those subprograms and other parts of the work.
+
+目標代碼形式的作品的“對應源代碼”是指生成、安裝及運行（對于可執行作品）目標代碼以及修改作品所需的所有源代碼，包括控制前述活動的腳本。但它不包括作品的“系統庫”，或在執行前述活動時通常被不經修改地使用、但不屬于該作品組成部分的通用工具或普遍可得的自由程序。例如，“對應源代碼”包括與作品源文件相關的接口定義文件、及專為該作品所需而設計的共享庫和動態鏈接子程序（比如與作品的其他部分之間有著緊密數據通信或控制流的這些子程序）的源代碼。
+
+The Corresponding Source need not include anything that users can regenerate automatically from other parts of the Corresponding Source.
+
+“對應源代碼”不需要包括用戶能從“對應源代碼”其他部分自動重新生成的任何內容。
+
+The Corresponding Source for a work in source code form is that same work.
+
+源代碼形式的作品的“對應源代碼”即為該作品本身。
+
+2. Basic Permissions. 基礎許可
+
+All rights granted under this License are granted for the term of copyright on the Program, and are irrevocable provided the stated conditions are met. This License explicitly affirms your unlimited permission to run the unmodified Program. The output from running a covered work is covered by this License only if the output, given its content, constitutes a covered work. This License acknowledges your rights of fair use or other equivalent, as provided by copyright law.
+
+本許可證授予的所有權利在本程序的版權保護期內授予，且在滿足所述條件的情況下不可撤銷。本許可證明確認可對你運行未經修改的本程序的無限制許可。僅在運行被覆蓋作品所產生的輸出（鑒于其內容）構成被覆蓋作品的情況下，該輸出才被本許可證覆蓋。本許可證認可你享有合理使用的權利或版權法所規定的其他同等權利。
+
+You may make, run and propagate covered works that you do not convey, without conditions so long as your license otherwise remains in force. You may convey covered works to others for the sole purpose of having them make modifications exclusively for you, or provide you with facilities for running those works, provided that you comply with the terms of this License in conveying all material for which you do not control copyright. Those thus making or running the covered works for you must do so exclusively on your behalf, under your direction and control, on terms that prohibit them from making any copies of your copyrighted material outside their relationship with you.
+
+只要你的許可證仍然有效，你就可以無條件地制作、運行和傳播你沒有傳遞的被覆蓋作品。你僅可以以委托他人專門為你修改作品或為你提供運行該作品的設備為目的將被覆蓋作品傳遞給他人，只要你在傳遞所有你不掌控版權的材料時遵守了本許可證條款。在你的指導和控制下，那些因此為你制作或運行被覆蓋作品的人必須完全代表你，且禁止其在與你關系之外制作你的版權材料的任何副本。
+
+Conveying under any other circumstances is permitted solely under the conditions stated below. Sublicensing is not allowed; section 10 makes it unnecessary.
+
+只有在下述條件下，才允許在任何其他情況下傳遞被覆蓋作品。分許可并不被允許；第10條的規定使分許可沒有必要。
+
+3. Protecting Users’ Legal Rights From Anti-Circumvention Law 保護用戶的法律權利免受反規避法限制
+
+No covered work shall be deemed part of an effective technological measure under any applicable law fulfilling obligations under article 11 of the WIPO copyright treaty adopted on 20 December 1996, or similar laws prohibiting or restricting circumvention of such measures.
+
+不論是根據為滿足1996年12月20日通過的《世界知識產權組織版權條約》第11條規定義務而制定的任何法律，還是根據禁止或限制規避這些措施的類似法律，被覆蓋作品均不得被視為有效技術措施的一部分。
+
+When you convey a covered work, you waive any legal power to forbid circumvention of technological measures to the extent such circumvention is effected by exercising rights under this License with respect to the covered work, and you disclaim any intention to limit operation or modification of the work as a means of enforcing, against the work's users, your or third parties' legal rights to forbid circumvention of technological measures.
+
+在你傳遞被覆蓋作品時，即表明你放棄任何禁止規避技術措施的法律權力，只要這種規避是通過對被覆蓋作品行使本許可證下的權利而實現的；且表明你放棄任何限制（用戶）操作或修改作品的意圖，不會以之對該作品的用戶強制執行你或第三方禁止規避技術措施的合法權利。
+
+4. Conveying Verbatim Copies. 傳遞逐字副本
+
+You may convey verbatim copies of the Program's source code as you receive it, in any medium, provided that you conspicuously and appropriately publish on each copy an appropriate copyright notice; keep intact all notices stating that this License and any non-permissive terms added in accord with section 7 apply to the code; keep intact all notices of the absence of any warranty; and give all recipients a copy of this License along with the Program.
+
+你可以通過任何介質傳遞你所收到的本程序源代碼的逐字副本，只要你在每份副本上醒目且適當地發布了合適的版權聲明；應完整保留所有本許可證的聲明及根據第7條添加的適用于代碼的任何非許可條款的聲明；應完整保留所有無保證的聲明；并將本許可證副本和本程序一起交給所有接收者。
+
+You may charge any price or no price for each copy that you convey, and you may offer support or warranty protection for a fee.
+
+你可有償或無償傳遞每一份副本，你也可有償提供支持或保證。
+
+5. Conveying Modified Source Versions. 傳遞源代碼修改版
+
+You may convey a work based on the Program, or the modifications to produce it from the Program, in the form of source code under the terms of section 4, provided that you also meet all of these conditions:
+
+你可根據第4條的規定以源代碼形式傳遞基于本程序的作品、或用于從本程序產生前述作品而做的（對本程序的）修改，只要你同時滿足了以下條件：
+
+a) The work must carry prominent notices stating that you modified it, and giving a relevant date.
+
+該作品中必須有顯著聲明，聲明你修改了它，并給出相關日期。
+
+b) The work must carry prominent notices stating that it is released under this License and any conditions added under section 7. This requirement modifies the requirement in section 4 to “keep intact all notices”.
+
+該作品中必須有顯著聲明，說明它是基于本許可證以及任何根據第7條添加的條件而發布。本條要求構成對第4條中“完整保留所有聲明”要求的變更。
+
+c) You must license the entire work, as a whole, under this License to anyone who comes into possession of a copy. This License will therefore apply, along with any applicable section 7 additional terms, to the whole of the work, and all its parts, regardless of how they are packaged. This License gives no permission to license the work in any other way, but it does not invalidate such permission if you have separately received it.
+
+你必須在本許可證下將整個作品作為一個整體，授權給持有副本的任何人。因此本許可證與根據第7條而附加的任何條款一起，將適用于整個作品，及其所有部分，無論它們是如何打包的。本許可證不允許以任何其他方式許可該作品，但不會使你單獨收到的許可無效。
+
+d) If the work has interactive user interfaces, each must display Appropriate Legal Notices; however, if the Program has interactive interfaces that do not display Appropriate Legal Notices, your work need not make them do so.
+
+如果作品有交互式用戶界面，每個界面都必須展示“適當的法律聲明”；但是，如果本程序的交互式界面并不展示“適當的法律聲明”，你的作品則不需要使其展示。
+
+A compilation of a covered work with other separate and independent works, which are not by their nature extensions of the covered work, and which are not combined with it such as to form a larger program, in or on a volume of a storage or distribution medium, is called an “aggregate” if the compilation and its resulting copyright are not used to limit the access or legal rights of the compilation's users beyond what the individual works permit. Inclusion of a covered work in an aggregate does not cause this License to apply to the other parts of the aggregate.
+
+被覆蓋作品與其他可分離、獨立的作品（其在本質上不屬于被覆蓋作品的擴展，且未與之結合以構成一個更大的程序）在同一存儲或分發介質中的匯編，被稱為“聚合體”——如果/且該匯編內容及其產生的版權對用戶訪問作品或相關權利的限制，并不超出其中每個作品所許可的限度。將被覆蓋作品置于聚合體中并不會導致本許可證適用于聚合體的其他部分。
+
+6. Conveying Non-Source Forms. 傳遞非源代碼形式（的作品）
+
+You may convey a covered work in object code form under the terms of sections 4 and 5, provided that you also convey the machine-readable Corresponding Source under the terms of this License, in one of these ways:
+
+你可以根據第4條和第5條的規定，以目標代碼形式傳遞被覆蓋作品，只要你也根據本許可證的規定以如下方式之一傳遞了機器可讀的“對應源代碼”：
+
+a) Convey the object code in, or embodied in, a physical product (including a physical distribution medium), accompanied by the Corresponding Source fixed on a durable physical medium customarily used for software interchange.
+
+傳遞包含或內嵌目標代碼的實物產品（包括物理分發介質）時，應將“對應源代碼”存儲在通常用于軟件交換的耐用物理介質上隨附提供。
+
+b) Convey the object code in, or embodied in, a physical product (including a physical distribution medium), accompanied by a written offer, valid for at least three years and valid for as long as you offer spare parts or customer support for that product model, to give anyone who possesses the object code either (1) a copy of the Corresponding Source for all the software in the product that is covered by this License, on a durable physical medium customarily used for software interchange, for a price no more than your reasonable cost of physically performing this conveying of source, or (2) access to copy the Corresponding Source from a network server at no charge.
+
+傳遞包含或內嵌目標代碼的實物產品（包括物理分發介質）時應隨附書面要約——該要約有效期至少為三年，且只要你為該型號產品提供備件或客戶支持，該要約就持續有效——以向任何持有目標代碼的人提供：（1）在通常用于軟件交換的耐用物理介質上的，該產品中本許可證覆蓋下的所有軟件的“對應源代碼”副本，可收取不超過源代碼實物傳遞的合理費用，或（2）從網絡服務器上免費復制“對應源代碼”的權限。
+
+c) Convey individual copies of the object code with a copy of the written offer to provide the Corresponding Source. This alternative is allowed only occasionally and noncommercially, and only if you received the object code with such an offer, in accord with subsection 6b.
+
+傳遞目標代碼的單個副本并附上一份提供“對應源代碼”的書面要約副本。該替代方式僅允許偶爾且非商業性地使用，且僅在你依據第6b小節收到附帶此要約的目標代碼的情況下允許。
+
+d) Convey the object code by offering access from a designated place (gratis or for a charge), and offer equivalent access to the Corresponding Source in the same way through the same place at no further charge. You need not require recipients to copy the Corresponding Source along with the object code. If the place to copy the object code is a network server, the Corresponding Source may be on a different server (operated by you or a third party) that supports equivalent copying facilities, provided you maintain clear directions next to the object code saying where to find the Corresponding Source. Regardless of what server hosts the Corresponding Source, you remain obligated to ensure that it is available for as long as needed to satisfy these requirements.
+
+通過提供從指定位置（免費或收費）獲取的途徑來傳遞目標代碼，并以同樣的方式通過同一位置等同提供“對應源代碼”的訪問且不收費。你無需要求接收者在復制目標代碼的同時復制“對應源代碼”。如果在網絡服務器上復制目標代碼，“對應源代碼”可置于支持等同復制設備的另一臺服務器上（由你或第三方運營），但你必須在目標代碼旁持續清晰地指示，說明可以找到“對應源代碼”的位置。無論“對應源代碼”置于哪個服務器上，你皆有義務確保該服務器隨時可用以滿足這些要求。
+
+e) Convey the object code using peer-to-peer transmission, provided you inform other peers where the object code and Corresponding Source of the work are being offered to the general public at no charge under subsection 6d.
+
+使用點對點（P2P）的傳輸方式傳遞目標代碼，但你必須告知對等方，該作品的目標代碼及“對應源代碼”根據第6條d)款被免費提供給公眾的位置。
+
+A separable portion of the object code, whose source code is excluded from the Corresponding Source as a System Library, need not be included in conveying the object code work.
+
+系統庫作為目標代碼可分離的一部分——其源代碼不屬于“對應源代碼”——無需被包含在被傳遞的目標代碼作品中。
+
+A “User Product” is either (1) a “consumer product”, which means any tangible personal property which is normally used for personal, family, or household purposes, or (2) anything designed or sold for incorporation into a dwelling. In determining whether a product is a consumer product, doubtful cases shall be resolved in favor of coverage. For a particular product received by a particular user, “normally used” refers to a typical or common use of that class of product, regardless of the status of the particular user or of the way in which the particular user actually uses, or expects or is expected to use, the product. A product is a consumer product regardless of whether the product has substantial commercial, industrial or non-consumer uses, unless such uses represent the only significant mode of use of the product.
+
+“用戶產品”是（1）“消費品”，即通常被用于個人、家庭或家用目的任何有形個人財產，或（2）被設計或銷售用于居家的任何產品。在確認一個產品是否是“消費品”時，存疑情形應傾向于判定為符合（消費品定義）。對于特定用戶收到的特定產品，“通常使用”指對該類產品的典型或常見用途，不考慮特定用戶的身份或被特定用戶實際、預期或被預期使用該產品的方式。一個產品無論是否有大量的商業、工業或非消費用途都被視為“消費品”，除非這種用途是該產品的唯一重要使用方式。
+
+“Installation Information” for a User Product means any methods, procedures, authorization keys, or other information required to install and execute modified versions of a covered work in that User Product from a modified version of its Corresponding Source. The information must suffice to ensure that the continued functioning of the modified object code is in no case prevented or interfered with solely because modification has been made.
+
+用戶產品的“安裝信息”是指基于“對應源代碼”的修改版本、安裝和執行該用戶產品中的被覆蓋作品的修改版所需的任何方法、程序、授權密鑰或其他信息。這些信息必須足以確保修改后目標代碼的持續運行在任何情況下都不會僅僅因為進行過修改而被阻止或干擾。
+
+If you convey an object code work under this section in, or with, or specifically for use in, a User Product, and the conveying occurs as part of a transaction in which the right of possession and use of the User Product is transferred to the recipient in perpetuity or for a fixed term (regardless of how the transaction is characterized), the Corresponding Source conveyed under this section must be accompanied by the Installation Information. But this requirement does not apply if neither you nor any third party retains the ability to install modified object code on the User Product (for example, the work has been installed in ROM).
+
+如你在“用戶產品”中，或隨“用戶產品”一起，或專門用于“用戶產品”傳遞本條規定下的目標代碼作品，該傳遞作為交易的一部分——在該交易中占有和使用“用戶作品”的權利永久地或在固定期限內轉讓給接收者（無論該交易如何定性）——那么根據本條規定傳遞該“對應源代碼”必須附帶“安裝信息”。但如你或任何第三方皆未保留在“用戶產品”上安裝修改版目標代碼的能力（例如，作品安裝在ROM中），則該要求不適用。
+
+The requirement to provide Installation Information does not include a requirement to continue to provide support service, warranty, or updates for a work that has been modified or installed by the recipient, or for the User Product in which it has been modified or installed. Access to a network may be denied when the modification itself materially and adversely affects the operation of the network or violates the rules and protocols for communication across the network.
+
+要求提供安裝信息并不包括，持續為已被接收者修改或安裝的作品或者已被修改或安裝的“用戶產品”來提供支持服務、保證或更新。當修改本身實質上不利地影響網絡的運行或違反了網絡通信的規則和協議時，訪問網絡可能被拒絕。
+
+Corresponding Source conveyed, and Installation Information provided, in accord with this section must be in a format that is publicly documented (and with an implementation available to the public in source code form), and must require no special password or key for unpacking, reading or copying.
+
+根據本條傳遞的“對應源代碼”和提供的安裝信息必須是公開記錄的格式（并以源代碼形式向公眾提供實現），并且不需要解包、讀取或復制的特殊密碼或密鑰。
+
+7. Additional Terms. 附加條款
+
+“Additional permissions” are terms that supplement the terms of this License by making exceptions from one or more of its conditions. Additional permissions that are applicable to the entire Program shall be treated as though they were included in this License, to the extent that they are valid under applicable law. If additional permissions apply only to part of the Program, that part may be used separately under those permissions, but the entire Program remains governed by this License without regard to the additional permissions.
+
+“附加許可”是對本許可證條款的補充，對其一個或多個條件作出例外規定。如果“附加許可”適用于整個程序，其在適用法律下有效的部分應被視為包含于本許可證內。如果“附加許可”只適用于本程序的一部分，則該部分可以根據“附加許可”單獨使用，但整個程序仍僅受本許可證約束而不考慮“附加許可”。
+
+When you convey a copy of a covered work, you may at your option remove any additional permissions from that copy, or from any part of it. (Additional permissions may be written to require their own removal in certain cases when you modify the work.) You may place additional permissions on material, added by you to a covered work, for which you have or can give appropriate copyright permission.
+
+當你傳遞一份被覆蓋作品的副本時，你可以選擇從該副本或其任何部分刪除任何“附加許可”（在某些情況下，“附加許可”可能被寫成：一旦你修改作品即應刪除“附加許可”）。你可以將“附加許可”放在被你增補到被覆蓋作品中的材料上，如果你已經或可以對該材料給予適當的版權許可。
+
+Notwithstanding any other provision of this License, for material you add to a covered work, you may (if authorized by the copyright holders of that material) supplement the terms of this License with terms:
+
+盡管本許可證有任何其他條款，對于被你添加到被覆蓋作品中的材料，你可以（如你得到該材料的版權持有人的授權）用如下條款來補充本許可證的條款：
+
+a) Disclaiming warranty or limiting liability differently from the terms of sections 15 and 16 of this License; or
+
+以不同于本許可證第15條和第16條的條款去免除保證或限制責任；或
+
+b) Requiring preservation of specified reasonable legal notices or author attributions in that material or in the Appropriate Legal Notices displayed by works containing it; or
+
+要求在該材料中或在包含該材料的作品所展示的“適當的法律聲明”中，保留特定的合理的法律聲明或作者署名；或
+
+c) Prohibiting misrepresentation of the origin of that material, or requiring that modified versions of such material be marked in reasonable ways as different from the original version; or
+
+禁止虛報該材料的來源，或要求以合理方式將該材料的修改版標注為與原始版本不同；或
+
+d) Limiting the use for publicity purposes of names of licensors or authors of the material; or
+
+限制為宣傳目的使用許可人或材料作者的姓名；或
+
+e) Declining to grant rights under trademark law for use of some trade names, trademarks, or service marks; or
+
+拒絕授予商標法下某些商號、商標及服務標識的使用權利；或
+
+f) Requiring indemnification of licensors and authors of that material by anyone who conveys the material (or modified versions of it) with contractual assumptions of liability to the recipient, for any liability that these contractual assumptions directly impose on those licensors and authors.
+
+要求向接收者傳遞材料（或該材料的修改版）并基于合同設定責任的任何人，向許可人和作者賠償基于合同設定直接強加于許可人和作者的任何責任。
+
+All other non-permissive additional terms are considered “further restrictions” within the meaning of section 10. If the Program as you received it, or any part of it, contains a notice stating that it is governed by this License along with a term that is a further restriction, you may remove that term. If a license document contains a further restriction but permits relicensing or conveying under this License, you may add to a covered work material governed by the terms of that license document, provided that the further restriction does not survive such relicensing or conveying.
+
+所有其他非許可性的附加條款均為視為第10條意義上的“進一步限制”。如果你收到的本程序或其任何部分包含一個聲明，說明它受本許可證管轄并同時附上“進一步限制”的條款，你可以自行刪除該條款。如果一個許可文件包含“進一步限制”但允許根據本許可證再許可或傳遞，你則可將該受許可文件管轄的材料添加到被覆蓋作品中，只要在此類再許可或傳遞中并不存在“進一步限制”。
+
+If you add terms to a covered work in accord with this section, you must place, in the relevant source files, a statement of the additional terms that apply to those files, or a notice indicating where to find the applicable terms.
+
+如果你按照本條的規定對被覆蓋作品增加了條款，你必須在相關的源文件中說明適用于這些源文件的附加條款，或給一個說明指明適用條款的位置。
+
+Additional terms, permissive or non-permissive, may be stated in the form of a separately written license, or stated as exceptions; the above requirements apply either way.
+
+附加條款，無論是許可性的還是非許可性的，可以以單獨的書面許可形式說明，或者作為例外情況形式說明；上述要求對這兩種形式均適用。
+
+8. Termination. 權利的終止
+
+You may not propagate or modify a covered work except as expressly provided under this License. Any attempt otherwise to propagate or modify it is void, and will automatically terminate your rights under this License (including any patent licenses granted under the third paragraph of section 11).
+
+除非本許可證明確規定，你不得傳播或修改被覆蓋作品。任何試圖以其他方式傳播或修改被覆蓋作品的行為均為無效，并將自動終止你在本許可證下的權利（包括根據第11條3款授予的任何專利許可）。
+
+However, if you cease all violation of this License, then your license from a particular copyright holder is reinstated (a) provisionally, unless and until the copyright holder explicitly and finally terminates your license, and (b) permanently, if the copyright holder fails to notify you of the violation by some reasonable means prior to 60 days after the cessation.
+
+但是，如你停止所有違反本許可證的行為，那么你從特定版權持有人處獲得的許可將被（1）暫時恢復，除非版權持有人明確地、最終地終止對你的許可；或（2）永久恢復，如在你停止違反行為后60天內版權持有人未能以某種合理方式通知你曾違反本許可證。
+
+Moreover, your license from a particular copyright holder is reinstated permanently if the copyright holder notifies you of the violation by some reasonable means, this is the first time you have received notice of violation of this License (for any work) from that copyright holder, and you cure the violation prior to 30 days after your receipt of the notice.
+
+此外，如你首次收到了版權持有人以某種合理方式關于你違反本許可證的通知，且你在收到通知后30天內糾正了違反行為，則你從特定版權持有人處獲得的許可將被永久恢復。
+
+Termination of your rights under this section does not terminate the licenses of parties who have received copies or rights from you under this License. If your rights have been terminated and not permanently reinstated, you do not qualify to receive new licenses for the same material under section 10.
+
+根據本條終止你的權利，并不終止那些根據本許可證從你處獲得副本或權利的各方的許可。如果你的權利已被終止且沒有永久恢復，你就沒有資格根據第10條獲得相同材料的新許可。
+
+9. Acceptance Not Required for Having Copies. 持有副本并不需要接受本許可證
+
+You are not required to accept this License in order to receive or run a copy of the Program. Ancillary propagation of a covered work occurring solely as a consequence of using peer-to-peer transmission to receive a copy likewise does not require acceptance. However, nothing other than this License grants you permission to propagate or modify any covered work. These actions infringe copyright if you do not accept this License. Therefore, by modifying or propagating a covered work, you indicate your acceptance of this License to do so.
+
+你無需為了接收或運行本程序副本而接受本許可證。僅是因為使用點對點傳輸接收副本而發生的被覆蓋作品的輔助傳播，你也無需接受本許可證。然而，除了本許可證以外，沒有任何其他文件授權你傳播或修改任何被覆蓋作品。如果你不接受本許可證，這些行為（傳播和修改）即構成版權侵權。因此，如果你修改或傳播被覆蓋作品，就表示你接受了本許可證。
+
+10. Automatic Licensing of Downstream Recipients. 對下游接收者的自動許可。
+
+Each time you convey a covered work, the recipient automatically receives a license from the original licensors, to run, modify and propagate that work, subject to this License. You are not responsible for enforcing compliance by third parties with this License.
+
+每當你傳遞一個被覆蓋作品時，接收者都自動從原始許可人處獲得一個許可，以根據本許可證運行、修改和傳播該作品。你沒有義務要求第三方遵守本許可證。
+
+An “entity transaction” is a transaction transferring control of an organization, or substantially all assets of one, or subdividing an organization, or merging organizations. If propagation of a covered work results from an entity transaction, each party to that transaction who receives a copy of the work also receives whatever licenses to the work the party's predecessor in interest had or could give under the previous paragraph, plus a right to possession of the Corresponding Source of the work from the predecessor in interest, if the predecessor has it or can get it with reasonable efforts.
+
+“實體交易”是指轉移一個組織或其實質上所有資產的控制權，或拆分一個組織或合并多個組織的交易。如果一個“實體交易”導致被覆蓋作品的傳播，那么每個收到作品副本的交易方也會收到該方的利益前身根據上一段規定已有的或可以授予的作品許可，以及從利益前身處獲得的占有作品“對應源代碼”的權利，如果利益前身擁有該權利或通過合理努力能夠獲得該權利。
+
+You may not impose any further restrictions on the exercise of the rights granted or affirmed under this License. For example, you may not impose a license fee, royalty, or other charge for exercise of rights granted under this License, and you may not initiate litigation (including a cross-claim or counterclaim in a lawsuit) alleging that any patent claim is infringed by making, using, selling, offering for sale, or importing the Program or any portion of it.
+
+你不得對行使本許可證授予或確認的權利施加“進一步限制”。例如，你不能對行使本許可證所授予的權利而收取許可費、使用費或其他費用，也不得提起訴訟（包括在訴訟中提起交叉訴訟或反訴）去主張對本程序或其任何部分的制造、使用、銷售、許諾銷售或進口侵犯了任何專利權利要求。
+
+11. Patents. 專利權
+
+A “contributor” is a copyright holder who authorizes use under this License of the Program or a work on which the Program is based. The work thus licensed is called the contributor's “contributor version”.
+
+根據本許可證授權使用本程序或本程序所基于的作品的版權持有人是“貢獻者”。如此被授權的作品被稱為貢獻者的“貢獻者版本”。
+
+A contributor's “essential patent claims” are all patent claims owned or controlled by the contributor, whether already acquired or hereafter acquired, that would be infringed by some manner, permitted by this License, of making, using, or selling its contributor version, but do not include claims that would be infringed only as a consequence of further modification of the contributor version. For purposes of this definition, “control” includes the right to grant patent sublicenses in a manner consistent with the requirements of this License.
+
+貢獻者的“必要專利權利要求”是指貢獻者擁有或控制的、無論已取得或后續將取得、以本許可證允許的某種形式制造、使用或銷售其貢獻者版本而將被侵犯的所有專利權利要求，但不包括僅因貢獻者版本的進一步修改而將被侵犯的權利要求。在本定義中，“控制”包括以符合本許可證要求的方式授予專利分許可的權利。
+
+Each contributor grants you a non-exclusive, worldwide, royalty-free patent license under the contributor's essential patent claims, to make, use, sell, offer for sale, import and otherwise run, modify and propagate the contents of its contributor version.
+
+每個貢獻者根據其必要專利權利要求，授予你非排他的、全球范圍的、免許可費的專利許可，以制造、使用、銷售、許諾銷售、進口及以其他方式運行、修改和傳播其貢獻者版本內容。
+
+In the following three paragraphs, a “patent license” is any express agreement or commitment, however denominated, not to enforce a patent (such as an express permission to practice a patent or covenant not to sue for patent infringement). To “grant” such a patent license to a party means to make such an agreement or commitment not to enforce a patent against the party.
+
+在以下三段中，“專利許可”是指不進行專利維權的任何明確同意或承諾（例如，明確允許使用專利或不起訴專利侵權），無論其如何命名。向一方“授予”專利許可，即表示作出不對該方進行專利維權的同意或承諾。
+
+If you convey a covered work, knowingly relying on a patent license, and the Corresponding Source of the work is not available for anyone to copy, free of charge and under the terms of this License, through a publicly available network server or other readily accessible means, then you must either (1) cause the Corresponding Source to be so available, or (2) arrange to deprive yourself of the benefit of the patent license for this particular work, or (3) arrange, in a manner consistent with the requirements of this License, to extend the patent license to downstream recipients. “Knowingly relying” means you have actual knowledge that, but for the patent license, your conveying the covered work in a country, or your recipient's use of the covered work in a country, would infringe one or more identifiable patents in that country that you have reason to believe are valid.
+
+如你傳遞被覆蓋作品時，明知道其依賴某一專利許可，且該作品“對應源代碼”并沒有通過公開的網絡服務器或其他容易獲得的方式以供任何人根據本許可證的條款免費復制，那么你必須：或者（1）以上述方式提供“對應源代碼”，或者（2）安排放棄該特定作品的專利許可權益，或者（3）以符合本許可證要求的方式，將專利許可擴展到所有的下游接收者。“明知依賴”是指你事實上知道如果沒有專利許可，你在某個國家傳遞被覆蓋作品或你的接收者在某個國家使用被覆蓋作品將會侵犯一項或多項可識別專利，且你有理由相信前述專利在該國有效。
+
+If, pursuant to or in connection with a single transaction or arrangement, you convey, or propagate by procuring conveyance of, a covered work, and grant a patent license to some of the parties receiving the covered work authorizing them to use, propagate, modify or convey a specific copy of the covered work, then the patent license you grant is automatically extended to all recipients of the covered work and works based on it.
+
+如果依照或根據某一交易或安排，你傳遞或通過促成傳遞而傳播被覆蓋作品，并向接收被覆蓋作品的某些當事方授予專利許可，以授權他們使用、傳播、修改或傳遞被覆蓋作品的特定副本，那么你授予的專利許可將自動擴展到被覆蓋作品和基于該作品的作品的所有接收者。
+
+A patent license is “discriminatory” if it does not include within the scope of its coverage, prohibits the exercise of, or is conditioned on the non-exercise of one or more of the rights that are specifically granted under this License. You may not convey a covered work if you are a party to an arrangement with a third party that is in the business of distributing software, under which you make payment to the third party based on the extent of your activity of conveying the work, and under which the third party grants, to any of the parties who would receive the covered work from you, a discriminatory patent license (a) in connection with copies of the covered work conveyed by you (or copies made from those copies), or (b) primarily for and in connection with specific products or compilations that contain the covered work, unless you entered into that arrangement, or that patent license was granted, prior to 28 March 2007.
+
+如果某一專利許可在其覆蓋范圍內未包含本許可證具體授予的一項或多項權利、禁止行使前述權利、或以不行使前述權利為條件，則該專利許可是“歧視性的”。如果你與第三方達成有關軟件分發的某一安排，根據該安排，你為你傳遞作品的范圍向第三方付款，且據此安排第三方向任何從你處接收所覆蓋作品的當事方授予(a)與你傳遞的所覆蓋作品的副本（或基于這些副本制作的副本）相關聯的歧視性的專利許可，或者(b)主要是為包含所覆蓋作品的特定產品或匯編而作出且與之相關聯的歧視性的專利許可，則你不能傳遞所覆蓋作品，除非在2007年3月28日之前你已達成了該安排，或已授予該專利許可。
+
+Nothing in this License shall be construed as excluding or limiting any implied license or other defenses to infringement that may otherwise be available to you under applicable patent law.
+
+本許可證中的任何內容都不應被解釋為排除或限制你根據適用的專利法可能得到的任何默示許可或其他侵權辯護理由。
+
+12. No Surrender of Others' Freedom. 不得犧牲他人的自由
+
+If conditions are imposed on you (whether by court order, agreement or otherwise) that contradict the conditions of this License, they do not excuse you from the conditions of this License. If you cannot convey a covered work so as to satisfy simultaneously your obligations under this License and any other pertinent obligations, then as a consequence you may not convey it at all. For example, if you agree to terms that obligate you to collect a royalty for further conveying from those to whom you convey the Program, the only way you could satisfy both those terms and this License would be to refrain entirely from conveying the Program.
+
+如果你被施加的條件（無論是通過法院命令、協議或其他方式）與本許可證的條件存在矛盾，這也不能成為你不履行本許可證條件的借口。如果你在傳遞被覆蓋作品時，不能同時滿足本許可證下的義務和任何其他相關義務，則你不得傳遞它。例如，如果你同意了某些條款，其使你有義務對接收你傳遞的本程序的人的進一步傳遞行為收取許可費，那么你能夠滿足那些條款和本許可證的唯一方法是完全避免傳遞本程序。
+
+13. Use with the GNU Affero General Public License. 和GNU Affero通用公共許可證一起使用
+
+Notwithstanding any other provision of this License, you have permission to link or combine any covered work with a work licensed under version 3 of the GNU Affero General Public License into a single combined work, and to convey the resulting work. The terms of this License will continue to apply to the part which is the covered work, but the special requirements of the GNU Affero General Public License, section 13, concerning interaction through a network will apply to the combination as such.
+
+盡管本許可證有任何其他條款，你有權將任何被覆蓋作品與在GNU Affero通用公共許可證第3版下許可的作品進行鏈接或組合成單一的組合作品，并傳遞由此產生的作品。本許可證的條款將繼續適用于被覆蓋作品，但GNU AGPL第13條中關于通過網絡進行交互的特殊要求將適用于由此組合后的作品。
+
+14. Revised Versions of this License. 本許可證的修訂版
+
+The Free Software Foundation may publish revised and/or new versions of the GNU General Public License from time to time. Such new versions will be similar in spirit to the present version, but may differ in detail to address new problems or concerns.
+
+自由軟件基金會可能會不時發布GNU通用公共許可證的修訂版和/或新版本。這些新版本將體現與當前版本相似的精神，但在細節上可能有所不同，以解決新的問題或關注點。
+
+Each version is given a distinguishing version number. If the Program specifies that a certain numbered version of the GNU General Public License “or any later version” applies to it, you have the option of following the terms and conditions either of that numbered version or of any later version published by the Free Software Foundation. If the Program does not specify a version number of the GNU General Public License, you may choose any version ever published by the Free Software Foundation.
+
+每個版本都有一個可區分的版本號。如果本程序指定其適用GNU通用公共許可證的某個特定版本“或任何后續版本”，你可選擇遵循該編號版本或自由軟件基金會發布的任何后續版本的條款和條件。如果本程序沒有指定GNU通用公共許可證的版本號，你可以選擇自由軟件基金會曾經發布的任何版本。
+
+If the Program specifies that a proxy can decide which future versions of the GNU General Public License can be used, that proxy's public statement of acceptance of a version permanently authorizes you to choose that version for the Program.
+
+如果本程序指定代理方來決定使用GNU通用公共許可證的哪個未來版本，那么該代理方接受某個版本許可證的公開聲明即永久授權你在本程序中選擇該版本。
+
+Later license versions may give you additional or different permissions. However, no additional obligations are imposed on any author or copyright holder as a result of your choosing to follow a later version.
+
+后續許可證版本可能給你額外或不同的許可。但任何作者或版權持有人都不因你選擇遵循后續許可證版本而承擔額外義務。
+
+15. Disclaimer of Warranty. 無保證聲明
+
+THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+在適用法律允許的范圍內，本程序沒有任何保證。除非另有書面說明，否則版權持有人和/或其他各方“按原樣”提供本程序，而不提供任何明示保證或默示保證，包括但不限于對適銷性和特定目的適用性的默示保證。關于本程序的質量和性能的全部風險皆由你承擔。如果本程序確有缺陷，你將承擔所有必要的服務、維修或修正的費用。
+
+16. Limitation of Liability. 責任限制
+
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+在任何情況下，除非適用法律要求或經書面同意，否則任何版權持有人或任何其他按照上述許可修改和/或傳遞本程序的一方皆不對你的損失負責，包括因不再使用或無法使用本程序而引起的任何一般的、特殊的、附帶的或繼發性的損失（包括但不限于數據丟失或數據偏差造成的損失、或本程序無法與任何其他程序一起運行使你或第三方遭受的損失），即便該持有人或其他人曾被告知存在該等損失的可能性。
+
+17. Interpretation of Sections 15 and 16. 對第15條和第16條的解釋
+
+If the disclaimer of warranty and limitation of liability provided above cannot be given local legal effect according to their terms, reviewing courts shall apply local law that most closely approximates an absolute waiver of all civil liability in connection with the Program, unless a warranty or assumption of liability accompanies a copy of the Program in return for a fee.
+
+如果以上規定的無保證聲明和責任限制不能根據其條款在當地產生法律效力，除非本程序副本附帶收費的保證或擔責承諾，否則審理法院應適用與“絕對放棄與本程序有關的一切民事責任”最為接近的當地法律。
+
+END OF TERMS AND CONDITIONS
+
+條款與條件結束
+
+How to Apply These Terms to Your New Programs 如何在你的新程序中應用本條款
+
+If you develop a new program, and you want it to be of the greatest possible use to the public, the best way to achieve this is to make it free software which everyone can redistribute and change under these terms.
+
+如果你開發了一個新程序且你希望其最大限度地為公眾所用，最佳實現方式就是使它成為自由軟件，以使每個人都可以在這些條款下再分發和修改。
+
+To do so, attach the following notices to the program. It is safest to attach them to the start of each source file to most effectively state the exclusion of warranty; and each file should have at least the “copyright” line and a pointer to where the full notice is found.
+
+為此，請在該程序中附上以下聲明。最安全的做法是將它們附在每個源文件的頭部，以便最有效地聲明沒有保證；每個文件至少應有“版權”行和完整聲明位置的指向。
+
+<one line to give the program’s name and a brief idea of what it does.>
+
+Copyright (C) <year> <name of author>
+
+This program is free software: you can redistribute it and/or modify
+
+it under the terms of the GNU General Public License as published by
+
+the Free Software Foundation, either version 3 of the License, or
+
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+<用一行字來說明程序名稱及用途簡介。>
+
+版權所有 (C) <年份> <作者姓名>
+
+本程序是自由軟件：你可以基于自由軟件基金會發布的GNU通用公共許可證的條款下重新分發
+
+和/或修改它，或者本許可證第3版或者（由你選擇）任何后續版本。
+
+分發本程序是希望它能派上用場，但沒有任何保證，甚至也沒有對其適銷性或特定目的適用性的
+
+默示保證。更多細節請參見“GNU通用公共許可證”。
+
+你應該已收到本程序隨附的GNU通用公共許可證的副本。如未收到，請參見：
+
+http://www.gnu.org/licenses/ 。
+
+Also add information on how to contact you by electronic and paper mail.
+
+此外，還應附上如何通過電子郵件和紙質信件聯系你的信息。
+
+If the program does terminal interaction, make it output a short notice like this when it starts in an interactive mode:
+
+如果本程序進行終端交互，讓它在交互模式下啟動時輸出如下簡短聲明：
+
+<program> Copyright (C) <year> <name of author>
+
+This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+
+This is free software, and you are welcome to redistribute it
+
+under certain conditions; type `show c' for details.
+
+<程序名稱> 版權所有 (C) <年份> <作者姓名>
+
+本程序絕對沒有任何保證，請輸入‘show w’了解詳情。
+
+這是自由軟件，歡迎你基于某些條件再分發它；請輸入‘show c’了解詳情。
+
+The hypothetical commands show w' and show c' should show the appropriate parts of the General Public License. Of course, your program’s commands might be different; for a GUI interface, you would use an “about box”.
+
+“show w”和“show c”這兩個假設命令應該展示“通用公共許可證”的適當部分。當然，你的程序命令可能有所不同；對于GUI界面，你可能使用“關于”對話框的形式。
+
+You should also get your employer (if you work as a programmer) or school, if any, to sign a “copyright disclaimer” for the program, if necessary. For more information on this, and how to apply and follow the GNU GPL, see http://www.gnu.org/licenses/.
+
+如有必要，你還應讓你的雇主（如果你是程序員）或學校（如有）就本程序簽署一份“版權不主張聲明”。更多相關信息以及如何適用和遵守GNU GPL，請參見：http://www.gnu.org/licenses/ 。
+
+The GNU General Public License does not permit incorporating your program into proprietary programs. If your program is a subroutine library, you may consider it more useful to permit linking proprietary applications with the library. If this is what you want to do, use the GNU Lesser General Public License instead of this License. But first, please read http://www.gnu.org/philosophy/why-not-lgpl.html.
+
+GNU通用公共許可證不允許將你的程序并入專有程序中。如果你的程序是一個子程序庫，你可能認為允許專有應用程序鏈接至本庫更為有用。若這是你想做的，請使用GNU較寬松通用公共許可證，而非本許可證。但首先請閱讀： http://www.gnu.org/philosophy/why-not-lgpl.html 。
+
+End license text.
+
+許可證文本結束。
+
+譯文聲明：本中譯文系基于吳瑞、王荷舒、趙振華、郭雪雯、Sikkim的譯文投稿，在20230409、0514、0521、0716、0806譯文評審會上經衛劍釩、沈芬律師、徐美玲助理教授、周明輝教授、宋雷教授集體審定而成。本譯文按照CC0授權你使用、復制及傳播等。但也請你注意，本譯文并非官方譯文，僅為便于閱讀、理解、研討而翻譯，開放原子開源基金會不提供與本譯文相關的任何明示或默示保證。GPL第3.0版的原文請見https://www.gnu.org/licenses/gpl-3.0.en.html

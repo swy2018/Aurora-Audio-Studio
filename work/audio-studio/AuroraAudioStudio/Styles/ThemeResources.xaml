@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="AuroraBackgroundBrush" Color="#F7FAF8" />
+            <SolidColorBrush x:Key="AuroraPaneBrush" Color="#F0F6F3" />
+            <SolidColorBrush x:Key="AuroraSurfaceBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="AuroraAccentBrush" Color="#267D63" />
+            <SolidColorBrush x:Key="AuroraTextBrush" Color="#15231F" />
+            <SolidColorBrush x:Key="AuroraMutedBrush" Color="#5C6D67" />
+            <SolidColorBrush x:Key="AuroraStrokeBrush" Color="#D9E6DF" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="AuroraBackgroundBrush" Color="#111A18" />
+            <SolidColorBrush x:Key="AuroraPaneBrush" Color="#16221F" />
+            <SolidColorBrush x:Key="AuroraSurfaceBrush" Color="#1B2824" />
+            <SolidColorBrush x:Key="AuroraAccentBrush" Color="#57C7A4" />
+            <SolidColorBrush x:Key="AuroraTextBrush" Color="#EFF8F4" />
+            <SolidColorBrush x:Key="AuroraMutedBrush" Color="#B0C1BA" />
+            <SolidColorBrush x:Key="AuroraStrokeBrush" Color="#32443E" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <SolidColorBrush x:Key="AuroraBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="AuroraPaneBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="AuroraSurfaceBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="AuroraAccentBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="AuroraTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="AuroraMutedBrush" Color="{ThemeResource SystemColorGrayTextColor}" />
+            <SolidColorBrush x:Key="AuroraStrokeBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+    <Style TargetType="NavigationView">
+        <Setter Property="Background" Value="{ThemeResource AuroraBackgroundBrush}" />
+    </Style>
+    <Style TargetType="Button">
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="MinHeight" Value="36" />
+    </Style>
+    <Style TargetType="TextBox">
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style TargetType="ComboBox">
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+</ResourceDictionary>

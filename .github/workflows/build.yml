@@ -1,0 +1,88 @@
+name: Build Windows installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build unsigned Windows installer
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.302
+
+      - name: Read application version
+        id: version
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content -Raw 'work/audio-studio/AuroraAudioStudio/AuroraAudioStudio.csproj'
+          $versionGroup = $project.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1
+          $version = [string]$versionGroup.Version
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            throw 'Unable to read the application version from AuroraAudioStudio.csproj.'
+          }
+          "AURORA_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Restore
+        run: dotnet restore work/audio-studio/AuroraAudioStudio/AuroraAudioStudio.csproj --runtime win-x64 -p:PublishReadyToRun=true
+
+      - name: Build
+        run: dotnet build work/audio-studio/AuroraAudioStudio/AuroraAudioStudio.csproj --configuration Release --no-restore -p:Platform=x64 -p:ContinuousIntegrationBuild=true
+
+      - name: Publish application
+        run: dotnet publish work/audio-studio/AuroraAudioStudio/AuroraAudioStudio.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore -p:Platform=x64 -p:PublishSingleFile=false -p:ContinuousIntegrationBuild=true --output publish/ci-app
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path -LiteralPath $iscc)) {
+            throw "Inno Setup compiler was not found at $iscc"
+          }
+          & $iscc "/DMyAppVersion=$env:AURORA_VERSION" '/DPublishFolder=ci-app' '/DInstallerFolder=ci-installer' "/DInstallerBaseName=Aurora-Audio-Studio-$env:AURORA_VERSION-Setup-x64" 'work/audio-studio/AuroraAudioStudio.iss'
+          if ($LASTEXITCODE -ne 0) {
+            throw "Inno Setup failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Create SHA-256 checksum
+        shell: pwsh
+        run: |
+          $installer = "publish/ci-installer/Aurora-Audio-Studio-$env:AURORA_VERSION-Setup-x64.exe"
+          if (-not (Test-Path -LiteralPath $installer)) {
+            throw "Installer was not created: $installer"
+          }
+          $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $installer).Hash.ToLowerInvariant()
+          "$hash  $(Split-Path -Leaf $installer)" | Set-Content -Encoding ascii "$installer.sha256"
+
+      - name: Upload unsigned build artifact
+        id: upload-unsigned-artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Aurora-Audio-Studio-${{ steps.version.outputs.version }}-unsigned
+          path: |
+            publish/ci-installer/*.exe
+            publish/ci-installer/*.sha256
+          if-no-files-found: error
+          retention-days: 14
+
+      # After the SignPath Foundation application is approved, the signing
+      # request action will consume upload-unsigned-artifact.outputs.artifact-id.

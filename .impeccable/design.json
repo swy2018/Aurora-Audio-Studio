@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-04T05:37:39.0304917+08:00",
+  "title": "Design System: Aurora Audio Studio",
+  "extensions": {
+    "colorMeta": {
+      "paper": { "role": "neutral", "displayName": "Studio Paper", "canonical": "#f6fbf8", "tonalRamp": ["#163127", "#254d3e", "#3b6958", "#5f8978", "#88aa9b", "#b4cabe", "#dce9e2", "#f6fbf8"] },
+      "surface": { "role": "neutral", "displayName": "Clean Surface", "canonical": "#ffffff", "tonalRamp": ["#242424", "#3f3f3f", "#5d5d5d", "#7d7d7d", "#a0a0a0", "#c4c4c4", "#e6e6e6", "#ffffff"] },
+      "surface-mint": { "role": "neutral", "displayName": "Mint Field", "canonical": "#eaf6f1", "tonalRamp": ["#17332a", "#294e42", "#416b5d", "#638b7c", "#8caca0", "#b7cdc5", "#dce9e4", "#f3faf7"] },
+      "ink": { "role": "neutral", "displayName": "Forest Ink", "canonical": "#17241f", "tonalRamp": ["#17241f", "#31433c", "#4d635a", "#6c847a", "#8fa69c", "#b2c7be", "#d8e7e1", "#f2faf7"] },
+      "muted": { "role": "neutral", "displayName": "Sage Copy", "canonical": "#5f7169", "tonalRamp": ["#1a2822", "#31423b", "#4a5d55", "#657970", "#84988f", "#a8bab2", "#cfddd7", "#edf6f2"] },
+      "line": { "role": "neutral", "displayName": "Soft Divider", "canonical": "#cfe0d8", "tonalRamp": ["#173028", "#2a4b40", "#42675a", "#62877a", "#89a99d", "#b1c9bf", "#d4e3dc", "#f1f8f5"] },
+      "accent": { "role": "primary", "displayName": "Workbench Green", "canonical": "#248368", "tonalRamp": ["#082c22", "#0c4938", "#12654e", "#248368", "#4da087", "#7dbba5", "#b3d7c9", "#e2f3ec"] },
+      "accent-deep": { "role": "primary", "displayName": "Deep Action Green", "canonical": "#165f4d", "tonalRamp": ["#08271f", "#0d3f33", "#165f4d", "#2e7a65", "#579681", "#83b49f", "#b5d2c5", "#e3f1eb"] },
+      "accent-soft": { "role": "primary", "displayName": "Soft Selection Mint", "canonical": "#d9eee6", "tonalRamp": ["#153129", "#284d41", "#406a5b", "#60897a", "#87aa9b", "#afcabf", "#d9eee6", "#f0faf6"] },
+      "accent-hover": { "role": "primary", "displayName": "Pressed Forest", "canonical": "#0f513f", "tonalRamp": ["#07261d", "#0a3b2e", "#0f513f", "#286d59", "#4f8a74", "#7aa994", "#adcbbb", "#e0efe8"] },
+      "focus": { "role": "primary", "displayName": "Focus Green", "canonical": "#0f6a52", "tonalRamp": ["#06281f", "#093f31", "#0f5945", "#0f6a52", "#3a8a72", "#6eaa94", "#a6cbbb", "#dbede5"] },
+      "local-panel": { "role": "neutral", "displayName": "Local Console Forest", "canonical": "#173a30", "tonalRamp": ["#102820", "#173a30", "#295548", "#437166", "#668e82", "#90aea3", "#bfd0c9", "#e8f2ee"] },
+      "local-panel-deep": { "role": "neutral", "displayName": "Path Well", "canonical": "#0d2a22", "tonalRamp": ["#0d2a22", "#1e453a", "#356155", "#507e71", "#729c8f", "#98baad", "#c2d8cf", "#eaf4f0"] },
+      "local-panel-text": { "role": "neutral", "displayName": "Console Text", "canonical": "#edf8f3", "tonalRamp": ["#173129", "#2b4c41", "#44685b", "#65887b", "#8dab9f", "#b7cdc4", "#dce9e4", "#edf8f3"] },
+      "local-panel-muted": { "role": "neutral", "displayName": "Console Muted", "canonical": "#c7ded5", "tonalRamp": ["#163027", "#294b40", "#42675a", "#618579", "#87a69a", "#adc6bc", "#c7ded5", "#eff7f4"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero statements only, with a short line length." },
+      "headline": { "displayName": "Headline", "purpose": "Major section openings." },
+      "title": { "displayName": "Title", "purpose": "Focused panels and local-ownership headings." },
+      "body": { "displayName": "Body", "purpose": "Bilingual explanations and interface-adjacent prose." },
+      "label": { "displayName": "Label", "purpose": "Navigation, metadata, and compact status text." }
+    },
+    "shadows": [
+      { "name": "workbench-float", "value": "0 34px 90px rgba(38, 76, 61, .16), 0 10px 28px rgba(38, 76, 61, .10)", "purpose": "Approved app frames and workbench screenshots." },
+      { "name": "primary-action-lift", "value": "0 12px 26px rgba(22, 95, 77, .22)", "purpose": "Primary call-to-action buttons." },
+      { "name": "quiet-container-lift", "value": "0 18px 50px rgba(38, 76, 61, .08)", "purpose": "Large informational containers." },
+      { "name": "local-panel-lift", "value": "0 26px 70px rgba(20, 58, 48, .22)", "purpose": "Dark local-ownership panel." }
+    ],
+    "motion": [
+      { "name": "control-state", "value": "180ms ease", "purpose": "Button transform, background, and shadow transitions." },
+      { "name": "workbench-settle", "value": "750ms cubic-bezier(.16, 1, .3, 1)", "purpose": "One-time desktop workbench entrance." },
+      { "name": "reduced-motion", "value": ".01ms", "purpose": "Near-instant fallback when reduced motion is requested." }
+    ],
+    "breakpoints": [
+      { "name": "compact-desktop", "value": "1050px" },
+      { "name": "mobile", "value": "760px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The principal download or completion action.",
+      "html": "<button class=\"ds-button-primary\">下载 0.7.0 安装版</button>",
+      "css": ".ds-button-primary { min-height: 48px; padding: 0 22px; border: 1px solid var(--accent-deep); border-radius: var(--radius-sm); color: #fff; background: var(--accent-deep); font: 680 16px/1.65 'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei UI', sans-serif; box-shadow: 0 12px 26px rgba(22, 95, 77, .22); cursor: pointer; transition: transform .18s ease, background .18s ease, box-shadow .18s ease; } .ds-button-primary:hover { background: #0f513f; transform: translateY(-2px); } .ds-button-primary:focus-visible { outline: 3px solid #0f6a52; outline-offset: 3px; } .ds-button-primary:active { transform: translateY(0); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A supporting source, feedback, or alternate action.",
+      "html": "<button class=\"ds-button-secondary\">查看源代码</button>",
+      "css": ".ds-button-secondary { min-height: 48px; padding: 0 22px; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--ink); background: var(--surface); font: 680 16px/1.65 'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei UI', sans-serif; cursor: pointer; transition: transform .18s ease, background .18s ease; } .ds-button-secondary:hover { background: var(--surface-mint); transform: translateY(-2px); } .ds-button-secondary:focus-visible { outline: 3px solid #0f6a52; outline-offset: 3px; } .ds-button-secondary:active { transform: translateY(0); }"
+    },
+    {
+      "name": "Language Switcher",
+      "kind": "button",
+      "refersTo": "language-button",
+      "description": "The compact bilingual switch retained in desktop and mobile navigation.",
+      "html": "<button class=\"ds-language-button\">English</button>",
+      "css": ".ds-language-button { min-height: 38px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); background: var(--surface); font: 650 13px/1.65 'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei UI', sans-serif; cursor: pointer; } .ds-language-button:hover { border-color: #9ebcaf; background: var(--surface-mint); } .ds-language-button:focus-visible { outline: 3px solid #0f6a52; outline-offset: 3px; } .ds-language-button:active { background: var(--accent-soft); }"
+    },
+    {
+      "name": "Navigation Link",
+      "kind": "nav",
+      "description": "Compact muted navigation that defers to the wordmark and workbench.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link\" href=\"#workbench\">工作台</a><a class=\"ds-nav-link\" href=\"#workflows\">创作能力</a><a class=\"ds-nav-link\" href=\"#local\">本地优先</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; gap: 26px; } .ds-nav-link { color: var(--muted); text-decoration: none; font: 600 14px/1.65 'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei UI', sans-serif; } .ds-nav-link:hover { color: var(--accent-deep); } .ds-nav-link:focus-visible { outline: 3px solid #0f6a52; outline-offset: 3px; border-radius: 4px; } .ds-nav-link:active { color: #0f513f; }"
+    },
+    {
+      "name": "Selected Workbench Tab",
+      "kind": "button",
+      "refersTo": "workbench-tab-selected",
+      "description": "An active workflow choice in the workbench preview rail.",
+      "html": "<button class=\"ds-workbench-tab\" aria-selected=\"true\">音乐创作</button>",
+      "css": ".ds-workbench-tab { width: 100%; padding: 19px 18px; border: 0; border-radius: var(--radius-sm); color: var(--accent-deep); background: var(--accent-soft); text-align: left; font: 630 17px/1.65 'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei UI', sans-serif; cursor: pointer; } .ds-workbench-tab:hover { color: var(--ink); background: rgba(234, 246, 241, .72); } .ds-workbench-tab[aria-selected='true']:hover { color: var(--accent-deep); background: var(--accent-soft); } .ds-workbench-tab:focus-visible { outline: 3px solid #0f6a52; outline-offset: 3px; } .ds-workbench-tab:active { background: #cfe6dd; }"
+    },
+    {
+      "name": "Local Ownership Panel",
+      "kind": "card",
+      "description": "The dark proof surface that makes local paths and file ownership tangible.",
+      "html": "<section class=\"ds-local-panel\"><h3>你的电脑，你的目录，你的成品。</h3><p>模型与生成内容留在你的本机目录。</p><code>D:\\Creative Tools\\LocalAI</code></section>",
+      "css": ".ds-local-panel { padding: 38px; border-radius: var(--radius-lg); color: #edf8f3; background: #173a30; box-shadow: 0 26px 70px rgba(20, 58, 48, .22); font-family: 'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei UI', sans-serif; } .ds-local-panel h3 { margin: 0; font: 700 25px/1.65 'Segoe UI Variable Display', 'Segoe UI', 'Microsoft YaHei UI', sans-serif; letter-spacing: -.025em; } .ds-local-panel p { margin: 12px 0 30px; color: #c7ded5; } .ds-local-panel code { display: block; overflow-x: auto; padding: 15px 17px; border-radius: var(--radius-sm); color: #dbf2e9; background: #0d2a22; font: 14px/1.65 Consolas, monospace; white-space: nowrap; } .ds-local-panel:focus-within { outline: 3px solid #0f6a52; outline-offset: 3px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Windows Creator's Desk",
+    "overview": "Aurora feels like a well-kept creative workstation: calm white working space, mint organization fields, deep green actions, and familiar Fluent proportions. The interface gives the workbench and its real output context visual authority; decoration stays quiet so creators can scan, decide, and continue working.\n\nThe system is professional without becoming corporate or sterile. Asymmetry, restrained perspective, and the approved A-wave icon give it a specific human-made identity, while durable Windows typography and measured density keep it practical across Chinese, English, Traditional Chinese, and Japanese layouts. Neon AI blue or purple, generic glass surfaces, and grids of interchangeable cards are explicit anti-references.",
+    "keyCharacteristics": [
+      "Calm white and mint working surfaces with rare deep-green emphasis.",
+      "Fluent typography, control sizing, and rounded proportions.",
+      "Real Aurora workbench imagery as evidence, not abstract AI spectacle.",
+      "Asymmetric editorial layouts that remain task-led and scannable.",
+      "Visible focus, reduced-motion support, and responsive reflow."
+    ],
+    "rules": [
+      { "name": "The Deep-Green Action Rule", "body": "Use deep green for actions and selected states, not as a broad decorative wash.", "section": "colors" },
+      { "name": "The Real Workbench Rule", "body": "Product imagery shows the approved Aurora workbench; abstract AI gradients never substitute for working evidence.", "section": "colors" },
+      { "name": "The Fluent Voice Rule", "body": "Use Segoe Variable roles first and retain the CJK fallbacks; do not introduce a fashionable display face that breaks the Windows studio character.", "section": "typography" },
+      { "name": "The Workbench Leads Rule", "body": "When copy and product UI share a view, copy establishes meaning and the larger workbench image proves it.", "section": "layout" },
+      { "name": "The Tonal-First Rule", "body": "Separate ordinary regions with paper, white, mint, and dividers; reserve shadows for actions, substantial containers, and real workbench imagery.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do let white, mint, and dividers carry most of the page structure.",
+      "Do keep deep green scarce enough that actions and selected states remain obvious.",
+      "Do use the approved A-wave icon and real Aurora workbench imagery at their native proportions.",
+      "Do preserve visible keyboard focus and the reduced-motion path.",
+      "Do collapse layouts cleanly for narrow screens and long localized strings."
+    ],
+    "donts": [
+      "Don't introduce neon AI blue, purple gradients, or glowing synthetic-network imagery.",
+      "Don't use generic glass panels as the default material language.",
+      "Don't turn workflows into a repetitive card-heavy template.",
+      "Don't add decorative claims, metrics, endorsements, or UI components without product evidence.",
+      "Don't let perspective or animation reduce the readability of the actual workbench."
+    ]
+  }
+}

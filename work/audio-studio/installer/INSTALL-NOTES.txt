@@ -1,0 +1,43 @@
+Aurora Audio Studio 安装说明
+
+Aurora Audio Studio 是一套在 Windows 本机运行的 AI 音频制作工作台。
+
+安装程序将：
+1. 默认把 Aurora Audio Studio 安装到 C:\Program Files\Aurora Audio Studio，也可安装到你选择的位置。
+2. 创建开始菜单快捷方式。
+3. 根据你的选择创建桌面快捷方式。
+4. 注册标准卸载信息，方便从 Windows“已安装的应用”中卸载。
+5. 升级时先安全移除旧版应用文件，并保留个人设置、模型、项目和成品。
+
+安装程序不会：
+1. 自动下载任何 AI 模型。
+2. 创建开机启动项。
+3. 修改浏览器主页或文件关联。
+4. 删除或移动现有的模型、音频和成品文件。
+
+模型只会在你于 Aurora 中明确选择安装时下载。应用运行期间产生的模型和成品位于你指定的目录，不属于程序安装目录。
+
+继续安装前，请阅读并同意 GNU General Public License version 3。
+
+------------------------------------------------------------
+
+Aurora Audio Studio Installation Notes
+
+Aurora Audio Studio is a local AI audio production workspace for Windows.
+
+Setup will:
+1. Install Aurora Audio Studio in C:\Program Files\Aurora Audio Studio by default, or another location you select.
+2. Create Start menu shortcuts.
+3. Create a desktop shortcut only if you select that option.
+4. Register a standard uninstaller in Windows Installed Apps.
+5. Safely remove previous application files during upgrades while preserving settings, models, projects, and outputs.
+
+Setup will not:
+1. Download AI models automatically.
+2. Add Aurora to Windows startup.
+3. Change browser settings or file associations.
+4. Delete or move existing models, audio, or output files.
+
+Models are downloaded only after an explicit install action in Aurora. Models and generated outputs are stored in locations selected by the user and are not part of the application installation directory.
+
+Before continuing, read and accept the GNU General Public License version 3.

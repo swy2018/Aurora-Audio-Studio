@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="assets/aurora-icon.png">
+  <meta name="theme-color" content="#f6fbf8">
+  <title>Aurora Audio Studio | Windows 本地 AI 音频工作台</title>
+  <meta name="description" content="Aurora Audio Studio 把音乐生成、声音克隆、歌声转换、AI 分轨、MIDI 扒谱与视频字幕带进同一套本地 Windows 工作台。">
+  <meta property="og:title" content="Aurora Audio Studio">
+  <meta property="og:description" content="创作留在本机，工具收进一个工作台。">
+  <meta property="og:image" content="https://swy2018.github.io/Aurora-Audio-Studio/assets/aurora-workbench-music.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://swy2018.github.io/Aurora-Audio-Studio/">
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f6fbf8;
+      --surface: #ffffff;
+      --surface-mint: #eaf6f1;
+      --ink: #17241f;
+      --muted: #5f7169;
+      --line: #cfe0d8;
+      --accent: #248368;
+      --accent-deep: #165f4d;
+      --accent-soft: #d9eee6;
+      --shadow: 0 34px 90px rgba(38, 76, 61, .16), 0 10px 28px rgba(38, 76, 61, .10);
+      --radius-sm: 12px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --content: 1240px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", "Yu Gothic UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body[data-lang="zh"] .en,
+    body[data-lang="en"] .zh { display: none !important; }
+
+    img { max-width: 100%; }
+    a { color: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    .shell {
+      width: min(calc(100% - 44px), var(--content));
+      margin: 0 auto;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(246, 251, 248, .9);
+      border-bottom: 1px solid rgba(207, 224, 216, .78);
+      backdrop-filter: blur(18px) saturate(140%);
+    }
+
+    .nav {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      margin-right: auto;
+      text-decoration: none;
+      font-weight: 680;
+      letter-spacing: -.02em;
+    }
+
+    .brand img { width: 38px; height: 38px; border-radius: var(--radius-sm); box-shadow: 0 8px 20px rgba(23, 36, 31, .16); }
+    .nav-links { display: flex; align-items: center; gap: 26px; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 600; }
+    .nav-links a:hover { color: var(--accent-deep); }
+
+    .language-button {
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink);
+      background: var(--surface);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .language-button:hover { border-color: #9ebcaf; background: var(--surface-mint); }
+    :focus-visible { outline: 3px solid #0f6a52; outline-offset: 3px; }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-weight: 680;
+      white-space: nowrap;
+      transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+
+    .button:hover { transform: translateY(-2px); }
+    .button.primary { color: #fff; border-color: var(--accent-deep); background: var(--accent-deep); box-shadow: 0 12px 26px rgba(21, 31, 27, .18); }
+    .button.primary:hover { background: #0f513f; }
+    .button.secondary { background: var(--surface); }
+    .button.secondary:hover { background: var(--surface-mint); }
+
+    .hero {
+      min-height: calc(100dvh - 72px);
+      display: grid;
+      grid-template-columns: minmax(0, .82fr) minmax(560px, 1.18fr);
+      align-items: center;
+      gap: clamp(38px, 6vw, 90px);
+      padding: 74px 0 92px;
+      overflow: hidden;
+    }
+
+    .hero-copy { position: relative; z-index: 2; }
+    .release-line { margin: 0 0 22px; color: var(--accent-deep); font-size: 14px; font-weight: 700; }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: "Segoe UI Variable Display", "Segoe UI", "Microsoft YaHei UI", sans-serif;
+      text-wrap: balance;
+    }
+
+    h1 {
+      max-width: 10.5em;
+      font-size: clamp(48px, 5vw, 68px);
+      line-height: 1.03;
+      letter-spacing: -.045em;
+      font-weight: 690;
+    }
+
+    .hero-lead {
+      max-width: 34em;
+      margin: 26px 0 32px;
+      color: var(--muted);
+      font-size: clamp(18px, 1.5vw, 21px);
+      line-height: 1.75;
+    }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .hero-note { margin: 18px 0 0; color: var(--muted); font-size: 13px; }
+
+    .hero-stage { position: relative; min-width: 0; }
+    .hero-stage::before {
+      content: "";
+      position: absolute;
+      width: 78%;
+      aspect-ratio: 1;
+      right: -12%;
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: 50%;
+      background: #dcefe7;
+      filter: blur(2px);
+    }
+
+    .app-frame {
+      position: relative;
+      width: 96%;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      transform: perspective(1400px) rotateY(-4deg) rotateX(1.5deg);
+      transform-origin: left center;
+      animation: settle .75s cubic-bezier(.16, 1, .3, 1) both;
+    }
+
+    .app-frame img { display: block; width: 100%; height: auto; margin-top: -3.1%; }
+
+    @keyframes settle {
+      from { opacity: .35; transform: perspective(1400px) rotateY(-8deg) rotateX(3deg) translateY(24px); }
+      to { opacity: 1; transform: perspective(1400px) rotateY(-4deg) rotateX(1.5deg) translateY(0); }
+    }
+
+    .proof-strip { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); }
+    .proof-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+    .proof-item { padding: 30px 36px 32px 0; }
+    .proof-item + .proof-item { padding-left: 36px; border-left: 1px solid var(--line); }
+    .proof-item strong { display: block; margin-bottom: 5px; font-size: 19px; font-weight: 680; }
+    .proof-item span { color: var(--muted); }
+
+    .section { padding: 124px 0; }
+    .section-title { max-width: 720px; font-size: clamp(36px, 4vw, 58px); line-height: 1.1; letter-spacing: -.04em; font-weight: 680; }
+    .section-intro { max-width: 670px; margin: 22px 0 0; color: var(--muted); font-size: 18px; }
+
+    .workbench-layout { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 56px; align-items: start; margin-top: 54px; }
+    .workbench-tabs { display: flex; flex-direction: column; gap: 4px; }
+    .workbench-tab {
+      width: 100%;
+      padding: 19px 18px;
+      border: 0;
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      background: transparent;
+      text-align: left;
+      font: inherit;
+      font-size: 17px;
+      font-weight: 630;
+      cursor: pointer;
+    }
+
+    .workbench-tab:hover { color: var(--ink); background: rgba(234, 246, 241, .72); }
+    .workbench-tab[aria-selected="true"] { color: var(--accent-deep); background: var(--accent-soft); }
+    .workbench-description { margin: 24px 18px 0; color: var(--muted); }
+    .workbench-shot { overflow: hidden; border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); }
+    .workbench-shot img { display: block; width: 100%; height: auto; margin-top: -3.1%; }
+
+    .flow-section { background: var(--surface-mint); }
+    .flow-layout { display: grid; grid-template-columns: .75fr 1.25fr; gap: 90px; align-items: start; }
+    .flow-list { margin: 2px 0 0; }
+    .flow-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; padding: 22px 0; border-bottom: 1px solid #bfd6cc; }
+    .flow-row strong { font-size: 17px; font-weight: 650; }
+    .flow-row span { color: var(--muted); font-size: 14px; text-align: right; }
+
+    .local-layout { display: grid; grid-template-columns: 1.08fr .92fr; gap: 84px; align-items: center; }
+    .local-panel { padding: 38px; border-radius: var(--radius-lg); color: #edf8f3; background: #173a30; box-shadow: 0 26px 70px rgba(20, 58, 48, .22); }
+    .local-panel h3 { font-size: 25px; letter-spacing: -.025em; }
+    .local-panel p { margin: 12px 0 30px; color: #c7ded5; }
+    .path-line { overflow-x: auto; padding: 15px 17px; border-radius: var(--radius-sm); color: #dbf2e9; background: #0d2a22; font-size: 14px; white-space: nowrap; }
+    .local-points { display: grid; gap: 28px; }
+    .local-point { padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    .local-point:last-child { padding-bottom: 0; border-bottom: 0; }
+    .local-point strong { display: block; margin-bottom: 6px; font-size: 18px; }
+    .local-point p { margin: 0; color: var(--muted); }
+
+    .requirements { padding-top: 0; }
+    .requirement-box { display: grid; grid-template-columns: .75fr 1.25fr; gap: 90px; padding: 52px; border-radius: var(--radius-lg); background: var(--surface); box-shadow: 0 18px 50px rgba(38, 76, 61, .08); }
+    .requirement-box h2 { font-size: 34px; letter-spacing: -.03em; }
+    .requirement-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 40px; margin: 0; padding: 0; list-style: none; }
+    .requirement-list li { padding: 12px 0; color: var(--muted); border-bottom: 1px solid var(--line); }
+
+    .closing { padding: 110px 0 120px; text-align: center; }
+    .closing h2 { max-width: 860px; margin: 0 auto; font-size: clamp(40px, 5vw, 70px); line-height: 1.08; letter-spacing: -.045em; }
+    .closing p { max-width: 570px; margin: 22px auto 30px; color: var(--muted); font-size: 18px; }
+    .closing .hero-actions { justify-content: center; }
+
+    footer { border-top: 1px solid var(--line); background: var(--surface); }
+    .footer-inner { display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: center; padding: 30px 0; color: var(--muted); font-size: 13px; }
+    .footer-links { display: flex; gap: 22px; }
+    .footer-links a:hover { color: var(--accent-deep); }
+
+    @media (max-width: 1050px) {
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero-copy { max-width: 760px; }
+      .app-frame { width: 96%; }
+      .workbench-layout { grid-template-columns: 270px minmax(0, 1fr); gap: 34px; }
+      .flow-layout, .local-layout, .requirement-box { gap: 50px; }
+    }
+
+    @media (max-width: 760px) {
+      .shell { width: min(calc(100% - 32px), var(--content)); }
+      .nav { min-height: 64px; gap: 14px; }
+      .brand span { display: none; }
+      .brand img { width: 36px; height: 36px; }
+      .nav-links { display: none; }
+      .hero { padding: 54px 0 70px; gap: 48px; }
+      h1 { font-size: clamp(44px, 13vw, 62px); }
+      .app-frame { width: 100%; border-radius: var(--radius-md); transform: none; }
+      .proof-grid { grid-template-columns: 1fr; }
+      .proof-item { padding: 24px 0; }
+      .proof-item + .proof-item { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
+      .section { padding: 86px 0; }
+      .workbench-layout, .flow-layout, .local-layout, .requirement-box { grid-template-columns: minmax(0, 1fr); gap: 38px; min-width: 0; }
+      .workbench-layout > div { min-width: 0; }
+      .workbench-tabs { display: flex; flex-direction: row; width: 100%; max-width: 100%; overflow-x: auto; }
+      .workbench-tab { flex: 0 0 150px; min-width: 0; padding: 14px; }
+      .workbench-description { margin: 18px 0 0; }
+      .flow-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+      .flow-row span { text-align: left; }
+      .requirement-box { padding: 30px 24px; }
+      .requirement-list { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; }
+      .footer-links { flex-wrap: wrap; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body data-lang="zh"><!--
+    THESIS: Aurora turns scattered local audio tools into one calm Windows studio; it refuses the neon AI launch-page template.
+    OWN-WORLD: warm white, mint fields, deep green actions, Fluent proportions, real workbench imagery, restrained perspective.
+    STORY: understand the local studio, inspect real workflows, trust file ownership, download the installer.
+    FIRST VIEWPORT: copy leads on the left, the approved workbench fills the right, and download remains visible without scrolling.
+    FORM: asymmetric studio dossier, position 1, seed key established-aurora-a.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+  -->
+  <header class="site-header">
+    <nav class="nav shell" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="Aurora Audio Studio home">
+        <img src="assets/aurora-icon.png" alt="">
+        <span>Aurora Audio Studio</span>
+      </a>
+      <div class="nav-links">
+        <a href="#workbench"><span class="zh">工作台</span><span class="en">Workbench</span></a>
+        <a href="#workflows"><span class="zh">创作能力</span><span class="en">Workflows</span></a>
+        <a href="#local"><span class="zh">本地优先</span><span class="en">Local first</span></a>
+        <a href="https://github.com/swy2018/Aurora-Audio-Studio">GitHub</a>
+      </div>
+      <button class="language-button" id="languageButton" type="button" aria-label="Switch language">English</button>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero shell">
+      <div class="hero-copy">
+        <p class="release-line"><span class="zh">Aurora 1.0.0 正式版 · Windows 10 / 11 x64</span><span class="en">Aurora 1.0.0 stable · Windows 10 / 11 x64</span></p>
+        <h1><span class="zh">让声音创作，<br>回到创作本身。</span><span class="en">Keep audio creation about creating.</span></h1>
+        <p class="hero-lead"><span class="zh">一套默认工作流，更多可选引擎。项目、任务、模型与成品，都在同一个本地工作台里。</span><span class="en">One dependable default suite, with more engines when you need them. Projects, tasks, models, and output stay in one local workspace.</span></p>
+        <div class="hero-actions">
+          <a class="button primary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><span class="zh">下载 1.0.0 正式版</span><span class="en">Download 1.0.0</span></a>
+          <a class="button secondary" href="https://github.com/swy2018/Aurora-Audio-Studio"><span class="zh">查看源代码</span><span class="en">View source</span></a>
+        </div>
+        <p class="hero-note"><span class="zh">GPL v3.0 开源。模型按需安装，仅提供标准安装版。</span><span class="en">GPL v3.0. Models install on demand. Standard installer only.</span></p>
+      </div>
+      <div class="hero-stage" aria-label="Aurora Audio Studio interface preview">
+        <div class="app-frame">
+          <img src="assets/aurora-workbench-music.png" alt="Aurora Audio Studio 音乐创作工作台" width="1672" height="941">
+        </div>
+      </div>
+    </section>
+
+    <div class="proof-strip">
+      <div class="proof-grid shell">
+        <div class="proof-item"><strong><span class="zh">项目不再失联</span><span class="en">Projects keep their context</span></strong><span class="zh">素材、模型、任务与成品保存在同一份项目记录中。</span><span class="en">Sources, models, tasks, and outputs remain connected.</span></div>
+        <div class="proof-item"><strong><span class="zh">任务可以恢复</span><span class="en">Tasks survive restarts</span></strong><span class="zh">队列持久保存，意外退出后可以查看并重试。</span><span class="en">The queue persists so interrupted work can be reviewed and retried.</span></div>
+        <div class="proof-item"><strong><span class="zh">模型完整管理</span><span class="en">Complete model lifecycle</span></strong><span class="zh">安装、修复、更新、回退与安全卸载都在 Aurora 内完成。</span><span class="en">Install, repair, update, roll back, and safely uninstall in Aurora.</span></div>
+      </div>
+    </div>
+
+    <section class="section shell" id="workbench">
+      <h2 class="section-title"><span class="zh">不是启动器，是你真正工作的地方。</span><span class="en">More than a launcher. This is where the work happens.</span></h2>
+      <p class="section-intro"><span class="zh">选择创作引擎后，模型工作台直接显示在 Aurora 中。运行状态、保存位置和更新管理始终留在同一套界面里。</span><span class="en">Choose an engine and its workbench opens inside Aurora. Runtime status, output paths, and updates remain in the same interface.</span></p>
+      <div class="workbench-layout">
+        <div>
+          <div class="workbench-tabs" role="tablist" aria-label="Workbench previews">
+            <button class="workbench-tab" id="workbenchTabMusic" type="button" role="tab" aria-selected="true" aria-controls="workbenchPanel" tabindex="0" data-image="assets/aurora-workbench-music.png" data-alt-zh="Aurora 音乐创作工作台" data-alt-en="Aurora music workbench" data-description-zh="从文字灵感开始，在嵌入式工作台里生成完整歌曲、纯音乐与旋律草稿。" data-description-en="Turn a written idea into full songs, instrumentals, and melodic drafts inside the embedded workbench."><span class="zh">音乐创作</span><span class="en">Music creation</span></button>
+            <button class="workbench-tab" id="workbenchTabVoice" type="button" role="tab" aria-selected="false" aria-controls="workbenchPanel" tabindex="-1" data-image="assets/aurora-workbench-voice.png" data-alt-zh="Aurora 声音工作台" data-alt-en="Aurora voice workbench" data-description-zh="统一管理配音、声音克隆与歌声转换入口，减少环境和端口切换。" data-description-en="Manage speech, voice cloning, and singing conversion without juggling environments or ports."><span class="zh">声音与歌声</span><span class="en">Voice and singing</span></button>
+            <button class="workbench-tab" id="workbenchTabSubtitle" type="button" role="tab" aria-selected="false" aria-controls="workbenchPanel" tabindex="-1" data-image="assets/aurora-workbench-subtitle.png" data-alt-zh="Aurora 视频字幕工作台" data-alt-en="Aurora subtitle workbench" data-description-zh="从视频素材到可校对的时间轴字幕，任务状态和成品位置清楚可见。" data-description-en="Move from video source to editable timed subtitles with visible task status and output location."><span class="zh">视频字幕</span><span class="en">Video subtitles</span></button>
+          </div>
+          <p class="workbench-description" id="workbenchDescription"><span class="zh">从文字灵感开始，在嵌入式工作台里生成完整歌曲、纯音乐与旋律草稿。</span><span class="en">Turn a written idea into full songs, instrumentals, and melodic drafts inside the embedded workbench.</span></p>
+        </div>
+        <div class="workbench-shot" id="workbenchPanel" role="tabpanel" aria-labelledby="workbenchTabMusic"><img id="workbenchImage" src="assets/aurora-workbench-music.png" alt="Aurora 音乐创作工作台" width="1672" height="941" loading="lazy"></div>
+      </div>
+    </section>
+
+    <section class="section flow-section" id="workflows">
+      <div class="flow-layout shell">
+        <div>
+          <h2 class="section-title"><span class="zh">六类创作流程，一套清晰入口。</span><span class="en">Six creative workflows, one clear entry point.</span></h2>
+          <p class="section-intro"><span class="zh">Aurora 不重新分发模型权重，而是把独立项目整理成可理解、可维护的本地制作流程。</span><span class="en">Aurora does not redistribute model weights. It organizes independent projects into understandable, maintainable local workflows.</span></p>
+        </div>
+        <div class="flow-list">
+          <div class="flow-row"><strong><span class="zh">音乐创作</span><span class="en">Music creation</span></strong><span>ACE-Step 1.5 XL Turbo</span></div>
+          <div class="flow-row"><strong><span class="zh">AI 配音与声音克隆</span><span class="en">AI speech and voice cloning</span></strong><span>Qwen3-TTS 1.7B · Optional: Qwen3-TTS 0.6B / F5-TTS</span></div>
+          <div class="flow-row"><strong><span class="zh">歌声克隆</span><span class="en">Singing voice conversion</span></strong><span>Seed-VC 44.1k</span></div>
+          <div class="flow-row"><strong><span class="zh">去人声与 AI 分轨</span><span class="en">Vocal removal and stems</span></strong><span>BS-RoFormer-SW 6-Stem · Optional: Demucs 4</span></div>
+          <div class="flow-row"><strong><span class="zh">AI 扒谱</span><span class="en">MIDI transcription</span></strong><span>YourMT3+ · ByteDance Piano · Optional: Basic Pitch</span></div>
+          <div class="flow-row"><strong><span class="zh">视频 AI 字幕</span><span class="en">Video subtitles</span></strong><span>Subtitle Edit · Faster-Whisper</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section shell" id="local">
+      <div class="local-layout">
+        <div class="local-panel">
+          <h3><span class="zh">你的电脑，你的目录，你的成品。</span><span class="en">Your computer, folders, and output.</span></h3>
+          <p><span class="zh">模型与生成内容不需要经过 Aurora 的云端服务。首次设置时选择位置，之后继续沿用。</span><span class="en">Models and generated files do not pass through an Aurora cloud service. Choose locations once and keep working there.</span></p>
+          <div class="path-line">D:\Creative Tools\LocalAI</div>
+        </div>
+        <div class="local-points">
+          <div class="local-point"><strong><span class="zh">按需占用资源</span><span class="en">Resources only when needed</span></strong><p><span class="zh">不开机自启动。结束当前引擎后，Aurora 会释放由它启动的模型进程。</span><span class="en">No startup service. Ending an engine stops the model processes launched by Aurora.</span></p></div>
+          <div class="local-point"><strong><span class="zh">安全升级与卸载</span><span class="en">Safe upgrades and uninstall</span></strong><p><span class="zh">更新包通过 SHA-256 校验后，安全替换旧版并保留设置；卸载时可选择是否清理个人配置。</span><span class="en">Verified updates safely replace the old version while preserving settings; uninstall offers an explicit personal-data choice.</span></p></div>
+          <div class="local-point"><strong><span class="zh">默认稳定，扩展按需</span><span class="en">Stable defaults, optional extensions</span></strong><p><span class="zh">现有默认模型保持不变；Qwen3-TTS 0.6B、F5-TTS、Demucs 与 Basic Pitch 只在你选择后部署。</span><span class="en">Existing defaults remain unchanged. Qwen3-TTS 0.6B, F5-TTS, Demucs, and Basic Pitch deploy only when selected.</span></p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section requirements shell">
+      <div class="requirement-box">
+        <div><h2><span class="zh">开始之前</span><span class="en">Before you begin</span></h2></div>
+        <ul class="requirement-list">
+          <li><span class="zh">Windows 10 1809 或更高版本</span><span class="en">Windows 10 1809 or later</span></li>
+          <li>Windows 11 x64</li>
+          <li><span class="zh">本地 AI 建议使用 NVIDIA 显卡</span><span class="en">NVIDIA GPU recommended for local AI</span></li>
+          <li><span class="zh">模型根据需要单独下载</span><span class="en">Models download separately on demand</span></li>
+          <li><span class="zh">仅提供标准安装版</span><span class="en">Standard installer only</span></li>
+          <li><span class="zh">模型与第三方工具遵循各自许可</span><span class="en">Models and tools retain their own licenses</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="closing shell" id="download">
+      <h2><span class="zh">把时间留给作品，不留给环境配置。</span><span class="en">Spend time on the work, not the setup.</span></h2>
+      <p><span class="zh">Aurora Audio Studio 1.0.0 正式版提供可断点续传的可靠更新下载、Aurora 专属后台安装进度，以及安装成功后的自动重启。代码已完成不改变功能、界面、交互逻辑和输出的精简审计；设置、模型、项目和成品始终保留。</span><span class="en">Aurora Audio Studio 1.0.0 delivers resumable update downloads, a dedicated Aurora background-install progress window, and relaunch only after success. Its internals were audited and simplified without changing features, UI, interaction logic, or outputs; settings, models, projects, and outputs remain preserved.</span></p>
+      <div class="hero-actions">
+        <a class="button primary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><span class="zh">下载 1.0.0 正式版</span><span class="en">Download 1.0.0</span></a>
+        <a class="button secondary" href="https://github.com/swy2018/Aurora-Audio-Studio/issues"><span class="zh">提交反馈</span><span class="en">Share feedback</span></a>
+      </div>
+      <p class="hero-note">
+        <span class="zh">代码签名政策：Aurora 已向 SignPath Foundation 提交开源代码签名申请，目前等待审核。免费代码签名由 <a href="https://about.signpath.io/">SignPath.io</a> 提供，证书由 <a href="https://signpath.org/">SignPath Foundation</a> 提供。签名仅用于从公开源码自动构建的 Aurora 正式安装包。查看<a href="https://github.com/swy2018/Aurora-Audio-Studio/blob/main/CODE_SIGNING_POLICY.md">完整政策</a>与<a href="https://github.com/swy2018/Aurora-Audio-Studio/blob/main/PRIVACY.md">隐私政策</a>。</span>
+        <span class="en">Code signing policy: Aurora has submitted its SignPath Foundation open-source code-signing application and is awaiting review. Free code signing provided by <a href="https://about.signpath.io/">SignPath.io</a>, certificate by <a href="https://signpath.org/">SignPath Foundation</a>. Signing is limited to official Aurora installers built automatically from public source. Read the <a href="https://github.com/swy2018/Aurora-Audio-Studio/blob/main/CODE_SIGNING_POLICY.md">full policy</a> and <a href="https://github.com/swy2018/Aurora-Audio-Studio/blob/main/PRIVACY.md">privacy policy</a>.</span>
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner shell">
+      <div>© 2026 Aurora Contributors · GNU GPL v3.0</div>
+      <div class="footer-links"><a href="https://github.com/swy2018/Aurora-Audio-Studio">GitHub</a><a href="https://github.com/swy2018/Aurora-Audio-Studio/releases"><span class="zh">发布版本</span><span class="en">Releases</span></a><a href="https://github.com/swy2018/Aurora-Audio-Studio/blob/main/CODE_SIGNING_POLICY.md"><span class="zh">签名政策</span><span class="en">Signing policy</span></a><a href="https://github.com/swy2018/Aurora-Audio-Studio/blob/main/PRIVACY.md"><span class="zh">隐私</span><span class="en">Privacy</span></a><a href="https://github.com/swy2018/Aurora-Audio-Studio/blob/main/LICENSE"><span class="zh">开源协议</span><span class="en">License</span></a></div>
+    </div>
+  </footer>
+
+  <script>
+    const body = document.body;
+    const languageButton = document.getElementById('languageButton');
+    const storedLanguage = localStorage.getItem('aurora-language');
+    const systemLanguage = navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+
+    function setLanguage(language) {
+      body.dataset.lang = language;
+      document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
+      languageButton.textContent = language === 'zh' ? 'English' : '中文';
+      localStorage.setItem('aurora-language', language);
+      const activeTab = document.querySelector('.workbench-tab[aria-selected="true"]');
+      if (activeTab) updateWorkbench(activeTab);
+    }
+
+    function updateWorkbench(tab) {
+      const language = body.dataset.lang;
+      const image = document.getElementById('workbenchImage');
+      const description = document.getElementById('workbenchDescription');
+      image.src = tab.dataset.image;
+      image.alt = language === 'zh' ? tab.dataset.altZh : tab.dataset.altEn;
+      description.innerHTML = `<span>${language === 'zh' ? tab.dataset.descriptionZh : tab.dataset.descriptionEn}</span>`;
+      document.getElementById('workbenchPanel').setAttribute('aria-labelledby', tab.id);
+    }
+
+    languageButton.addEventListener('click', () => setLanguage(body.dataset.lang === 'zh' ? 'en' : 'zh'));
+
+    const workbenchTabs = Array.from(document.querySelectorAll('.workbench-tab'));
+    workbenchTabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => {
+        workbenchTabs.forEach((item) => {
+          item.setAttribute('aria-selected', 'false');
+          item.setAttribute('tabindex', '-1');
+        });
+        tab.setAttribute('aria-selected', 'true');
+        tab.setAttribute('tabindex', '0');
+        updateWorkbench(tab);
+      });
+      tab.addEventListener('keydown', (event) => {
+        if (event.altKey || event.ctrlKey || event.metaKey) return;
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === 'ArrowLeft') nextIndex = (index - 1 + workbenchTabs.length) % workbenchTabs.length;
+        if (event.key === 'ArrowRight') nextIndex = (index + 1) % workbenchTabs.length;
+        if (event.key === 'Home') nextIndex = 0;
+        if (event.key === 'End') nextIndex = workbenchTabs.length - 1;
+        workbenchTabs[nextIndex].click();
+        workbenchTabs[nextIndex].focus();
+      });
+    });
+
+    setLanguage(storedLanguage || systemLanguage);
+  </script>
+</body>
+</html>

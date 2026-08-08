@@ -1,0 +1,23 @@
+Aurora Audio Studio 已安装完成。
+
+你可以从开始菜单启动 Aurora，也可以使用安装时选择创建的桌面快捷方式。
+
+首次启动时，Aurora 默认使用 C:\LocalAI 模型目录和桌面“AI工作流”成品目录，你可以随时在设置中修改。模型更新会先检查并提示，大型权重必须确认后才会下载；不会创建开机启动项。
+
+卸载 Aurora 时，可以选择保留个人配置以便以后重装，或删除设置、日志、任务记录和更新缓存。模型目录、项目、成品文件以及用户自行保存的素材始终保留。
+
+项目主页：https://github.com/swy2018/Aurora-Audio-Studio
+问题反馈：https://github.com/swy2018/Aurora-Audio-Studio/issues
+
+------------------------------------------------------------
+
+Aurora Audio Studio has been installed successfully.
+
+Launch Aurora from the Start menu or from the desktop shortcut if you selected that option during setup.
+
+On first launch, Aurora uses C:\LocalAI for models and the desktop AI workflow folder for outputs. You can change both in Settings. Model updates are checked first and large weights require confirmation; no Windows startup item is created.
+
+When uninstalling Aurora, you can keep personal configuration for a future reinstall or remove settings, logs, task history, and update cache. Model folders, projects, generated outputs, and user media are always kept.
+
+Project: https://github.com/swy2018/Aurora-Audio-Studio
+Support: https://github.com/swy2018/Aurora-Audio-Studio/issues

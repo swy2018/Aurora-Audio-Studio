@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "AuroraAudioStudio (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "AuroraAudioStudio (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
