@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="164" height="42" viewBox="0 0 164 42" role="img" aria-label="下载 1.1.0">
-  <rect width="164" height="42" rx="9" fill="#0AC2B1"/>
-  <text x="82" y="26" text-anchor="middle" fill="#10221E" font-family="Segoe UI, Microsoft YaHei UI, sans-serif" font-size="15" font-weight="700">下载 1.1.0</text>
+  <rect width="164" height="42" rx="9" fill="#4A4A4A"/>
+  <path d="M92 0h63a9 9 0 0 1 9 9v24a9 9 0 0 1-9 9H92z" fill="#0AC2B1"/>
+  <text x="46" y="26" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, Microsoft YaHei UI, sans-serif" font-size="15" font-weight="700">下载</text>
+  <text x="128" y="26" text-anchor="middle" fill="#10221E" font-family="Segoe UI, sans-serif" font-size="15" font-weight="700">1.1.0</text>
 </svg>
