@@ -4,6 +4,38 @@
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
 
+## 1.0.1 — 2026-08-08
+
+### 中文
+
+#### 按需安装模型
+
+- 选择未安装的创作模型时，“进入工作台”会自动改为“自动安装模型”，不再以禁用按钮阻断操作。
+- 安装确认窗口会显示精确目标目录、预计下载量与建议预留空间，并允许改选 Aurora 模型目录。
+- 更改模型目录前会明确说明：它会更新 Aurora 的全局模型目录，现有模型不会自动移动。
+- 模型部署完成后执行完整性检测；检测通过即继续进入对应工作台，失败则保留明确错误，不会假装安装成功。
+
+#### 更清晰的自动更新
+
+- 移除与 Inno Setup 同时出现的 Aurora 自制安装进度窗口。
+- Aurora 继续负责 GitHub 检查、断点续传、自动重试、SHA-256 校验与安全交接；开始覆盖安装后只显示 Windows 标准安装进度界面。
+- 安装成功后仍会自动打开新版，个人设置、任务、模型、项目、素材、成品与安装目录保持不变。
+
+### English
+
+#### On-demand model installation
+
+- Selecting an uninstalled creative model now changes Open workbench to Install model instead of disabling the action.
+- The confirmation dialog shows the exact target path, estimated download, and recommended free space, and lets the user change Aurora's model folder.
+- Aurora clearly explains that changing this location updates the global model folder and does not move existing models.
+- After deployment, Aurora verifies the expected model files and enters the workbench only when that check passes.
+
+#### Clearer automatic updates
+
+- Removed the custom Aurora installation-progress window that appeared alongside Inno Setup.
+- Aurora still owns GitHub checks, resumable downloads, retry, SHA-256 verification, and safe handoff; only the standard Windows installer progress UI remains visible during replacement.
+- Successful installation still reopens the new version while preserving settings, tasks, models, projects, media, outputs, and the chosen install directory.
+
 ## 1.0.0 — 2026-08-08
 
 ### 中文

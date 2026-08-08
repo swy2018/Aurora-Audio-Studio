@@ -49,8 +49,8 @@ public sealed class ModelCatalogService(SettingsService settings)
             installed ? Pick("完整性检查通过", "完整性檢查通過", "Integrity check passed", "整合性チェック済み")
                 : model.IsDefault ? Pick("默认配置 · 需要安装或修复", "預設配置 · 需要安裝或修復", "Default component · install or repair required", "標準コンポーネント · インストールまたは修復が必要")
                 : Pick("可选模型 · 仅在确认后下载", "選用模型 · 僅在確認後下載", "Optional model · downloads only after confirmation", "オプションモデル · 確認後にのみダウンロード"),
-            RecommendedVram(model), FeatureDisplay(model.Feature), Purpose(model.Id), Languages(model.Id), EstimatedDownload(model.Id), License(model.Id),
-            DetailLine(version, RecommendedVram(model), EstimatedDownload(model.Id), License(model.Id), model.Source),
+            RecommendedVram(model), FeatureDisplay(model.Feature), Purpose(model.Id), Languages(model.Id), ModelInstallPlanner.EstimatedDownload(model.Id), License(model.Id),
+            DetailLine(version, RecommendedVram(model), ModelInstallPlanner.EstimatedDownload(model.Id), License(model.Id), model.Source),
             model.IsDefault ? DefaultEditionDisplay : Pick("可选模型", "選用模型", "Optional", "オプション"),
             installed ? Pick("检查 / 修复", "檢查 / 修復", "Check / Repair", "確認 / 修復") : Pick("安装", "安裝", "Install", "インストール"));
     }
@@ -125,13 +125,6 @@ public sealed class ModelCatalogService(SettingsService settings)
         "f5-tts" => Pick("中文 · 英语 · 日语 · 多语言", "中文 · 英語 · 日語 · 多語言", "Chinese · English · Japanese · multilingual", "中国語 · 英語 · 日本語 · 多言語"),
         "faster-whisper" or "whisper-small" or "whisper-large-v3-turbo" or "whisper-large-v3" => Pick("中文 · 英语 · 日语 · 约 100 种语言", "中文 · 英語 · 日語 · 約 100 種語言", "Chinese · English · Japanese · about 100 languages", "中国語 · 英語 · 日本語 · 約 100 言語"),
         _ => Pick("不依赖文本语言", "不依賴文字語言", "Language-independent", "言語非依存")
-    };
-
-    private static string EstimatedDownload(string id) => id switch
-    {
-        "whisper-small" => "≈ 470 MB", "whisper-large-v3-turbo" => "≈ 1.6 GB", "whisper-large-v3" => "≈ 3.1 GB",
-        "qwen3-tts-base" or "qwen3-tts-custom" or "qwen3-tts-design" => "≈ 4 GB", "qwen3-tts-06b-base" or "qwen3-tts-06b-custom" => "≈ 1.5 GB",
-        "ace-step" => "≈ 8 GB", "f5-tts" or "demucs" or "basic-pitch" => "< 1 GB", _ => "—"
     };
 
     private static string License(string id) => id switch

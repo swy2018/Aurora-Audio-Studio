@@ -17,5 +17,5 @@ public sealed class UpdateFlowGuard
     public static string DateKey(DateOnly date) => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
     public static string BuildInstallerArguments(int currentProcessId, string logPath) =>
-        $"/VERYSILENT /CLOSEAPPLICATIONS /NORESTART /KEEPUSERDATA /UPDATE /UPDATEPID={currentProcessId} /LOG=\"{logPath}\"";
+        $"/SILENT /CLOSEAPPLICATIONS /NORESTART /KEEPUSERDATA /UPDATE /UPDATEPID={currentProcessId} /LOG=\"{logPath}\"";
 }

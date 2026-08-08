@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 0, 1), "2026-08-08", [
+            "• 未安装的创作模型现在会显示“自动安装模型”，不再禁用入口。\n• 安装前明确显示目标目录、预计下载量与建议预留空间，并可更改 Aurora 模型目录。\n• 模型安装完成并通过完整性检测后，自动继续进入工作台。\n• 自动更新只保留 Windows 标准安装进度界面，移除重复的 Aurora 自制安装窗口。",
+            "• 未安裝的創作模型現在會顯示「自動安裝模型」，不再停用入口。\n• 安裝前清楚顯示目標目錄、預計下載量與建議預留空間，並可變更 Aurora 模型目錄。\n• 模型安裝完成並通過完整性檢查後，自動繼續進入工作台。\n• 自動更新只保留 Windows 標準安裝進度介面，移除重複的 Aurora 自製安裝視窗。",
+            "• Uninstalled creative models now show an Install model action instead of a disabled workbench button.\n• Before installation, Aurora shows the exact target path, estimated download, and recommended free space, with an option to change the model folder.\n• After installation passes the integrity check, Aurora continues into the workbench automatically.\n• Automatic updates now show only the standard Windows installer progress UI; the duplicate custom updater window was removed.",
+            "• 未インストールの制作モデルでは、無効なボタンではなく「モデルを自動インストール」を表示。\n• インストール前に保存先、推定ダウンロード量、推奨空き容量を表示し、モデルフォルダーも変更可能。\n• インストールと整合性確認の完了後、そのままワークベンチを起動。\n• 自動更新は Windows 標準の進捗画面だけを表示し、重複していた独自更新画面を削除。"]),
         new(new(1, 0, 0), "2026-08-08", [
             "• 首个正式版，整合本地音乐、配音、歌声、分轨、扒谱与字幕工作流。\n• 新增支持断点续传和自动重试的可靠更新下载。\n• 自动更新改用 Aurora 专属进度窗口，后台覆盖完成后才重启新版。\n• 优化 A-wave 图标并使用版本化图标路径，解决桌面与任务栏缓存旧图的问题。\n• 完成保持功能、界面、交互逻辑与输出不变的代码审计和内部精简。",
             "• 首個正式版，整合本機音樂、配音、歌聲、分軌、扒譜與字幕工作流程。\n• 新增支援斷點續傳與自動重試的可靠更新下載。\n• 自動更新改用 Aurora 專屬進度視窗，背景覆蓋完成後才重新啟動新版。\n• 最佳化 A-wave 圖示並使用版本化圖示路徑，解決桌面與工作列快取舊圖的問題。\n• 完成維持功能、介面、互動邏輯與輸出不變的程式碼稽核和內部精簡。",

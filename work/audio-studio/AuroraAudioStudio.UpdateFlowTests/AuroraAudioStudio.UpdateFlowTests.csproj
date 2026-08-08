@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\AuroraAudioStudio\Models\AppModels.cs" Link="AppModels.cs" />
+    <Compile Include="..\AuroraAudioStudio\Services\ModelInstallPlanner.cs" Link="ModelInstallPlanner.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\UpdateFlowGuard.cs" Link="UpdateFlowGuard.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\ReleaseNotesCatalog.cs" Link="ReleaseNotesCatalog.cs" />
   </ItemGroup>

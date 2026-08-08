@@ -38,7 +38,7 @@ public sealed class LocalizationService(SettingsService settings)
         ["updateDownloading"] = ["正在下载 Aurora {0}", "正在下載 Aurora {0}", "Downloading Aurora {0}", "Aurora {0} をダウンロード中"],
         ["updateVerifying"] = ["正在验证安装包完整性", "正在驗證安裝程式完整性", "Verifying installer integrity", "インストーラーを検証中"],
         ["updatePreparingInstall"] = ["正在启动安全安装程序", "正在啟動安全安裝程式", "Starting the verified installer", "検証済みインストーラーを起動中"],
-        ["updateInstallerHandoff"] = ["下载与校验已完成。安装进度窗口即将接管，完成后会自动打开新版。", "下載與驗證已完成。安裝進度視窗即將接管，完成後會自動開啟新版。", "Download and verification are complete. The installer progress window will take over and reopen the new version when finished.", "ダウンロードと検証が完了しました。インストール進捗画面に切り替わり、完了後に新バージョンを自動起動します。"],
+        ["updateInstallerHandoff"] = ["下载与校验已完成。即将交给系统安装界面，完成后会自动打开新版。", "下載與驗證已完成。即將交由系統安裝介面，完成後會自動開啟新版。", "Download and verification are complete. Windows Setup will take over and reopen the new version when finished.", "ダウンロードと検証が完了しました。Windows のインストール画面に切り替わり、完了後に新バージョンを自動起動します。"],
         ["updateUpToDate"] = ["当前已是最新版本。", "目前已是最新版本。", "Aurora Audio Studio is up to date.", "現在のバージョンは最新です。"],
         ["updateReady"] = ["已找到经过校验的正式更新。", "已找到經過驗證的正式更新。", "A verified update is ready to install.", "検証済みの正式アップデートをインストールできます。"],
         ["updateAssetsIncomplete"] = ["发现新版本，但安装包或校验文件尚未完整发布。", "發現新版本，但安裝程式或驗證檔案尚未完整發布。", "A new version exists, but its verified update assets are incomplete.", "新しいバージョンがありますが、検証用ファイルが揃っていません。"],
@@ -53,6 +53,19 @@ public sealed class LocalizationService(SettingsService settings)
         ["updateDialogBody"] = ["当前版本 {0}，最新版本 {1}。Aurora 将从 GitHub 下载并校验安装包，然后自动覆盖安装。", "目前版本 {0}，最新版本 {1}。Aurora 將從 GitHub 下載並驗證安裝程式，然後自動覆蓋安裝。", "Installed: {0}. Latest: {1}. Aurora will download and verify the installer from GitHub, then install it over the current version.", "現在のバージョンは {0}、最新は {1} です。GitHub からインストーラーを取得して検証し、現在のバージョンを更新します。"],
         ["updateInstall"] = ["下载并安装", "下載並安裝", "Download and install", "ダウンロードしてインストール"],
         ["later"] = ["稍后", "稍後", "Later", "後で"],
+        ["openWorkbench"] = ["进入工作台", "進入工作台", "Open workbench", "ワークベンチを開く"],
+        ["installModel"] = ["自动安装模型", "自動安裝模型", "Install model", "モデルを自動インストール"],
+        ["modelReady"] = ["已安装 · 可使用", "已安裝 · 可使用", "Installed · Ready", "インストール済み · 利用可能"],
+        ["modelMissing"] = ["尚未安装", "尚未安裝", "Not installed", "未インストール"],
+        ["modelInstallTitle"] = ["安装创作模型", "安裝創作模型", "Install creative model", "制作モデルをインストール"],
+        ["modelInstallLocation"] = ["安装位置", "安裝位置", "Install location", "インストール先"],
+        ["modelDownloadSize"] = ["预计下载", "預計下載", "Estimated download", "推定ダウンロード"],
+        ["modelFreeSpace"] = ["建议预留空间", "建議預留空間", "Recommended free space", "推奨空き容量"],
+        ["modelRootNotice"] = ["更改位置会同时更新 Aurora 的模型目录；现有模型不会移动。", "變更位置會同時更新 Aurora 的模型目錄；現有模型不會移動。", "Changing this location also changes Aurora's model folder. Existing models will not be moved.", "場所を変更すると Aurora のモデルフォルダーも変更されます。既存モデルは移動しません。"],
+        ["installHere"] = ["安装到此位置", "安裝到此位置", "Install here", "ここにインストール"],
+        ["changeModelFolder"] = ["更改模型目录…", "變更模型目錄…", "Change model folder…", "モデルフォルダーを変更…"],
+        ["modelInstalling"] = ["正在安装 {0}…", "正在安裝 {0}…", "Installing {0}…", "{0} をインストール中…"],
+        ["modelInstallIncomplete"] = ["安装流程已结束，但未检测到完整模型文件。请在模型中心检查或修复。", "安裝流程已結束，但未偵測到完整模型檔案。請在模型中心檢查或修復。", "Installation finished, but the complete model was not detected. Check or repair it in Model Center.", "インストールは終了しましたが、完全なモデルを確認できません。モデルセンターで確認または修復してください。"],
     };
 
     private readonly Dictionary<string, string[]> phrases = new(StringComparer.OrdinalIgnoreCase)

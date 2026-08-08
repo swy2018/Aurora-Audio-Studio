@@ -17,7 +17,7 @@
 
 <p align="center">
   <a href="https://swy2018.github.io/Aurora-Audio-Studio/">官方网站</a> |
-  <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest">下载 1.0.0 正式版</a> |
+  <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest">下载 1.0.1 正式版</a> |
   <a href="CHANGELOG.md">更新记录</a> |
   <a href="#english">English</a>
 </p>
@@ -40,6 +40,12 @@ Aurora Audio Studio 是面向 Windows 创作者的本地 AI 音频工作台。�
     <td align="center">视频识别与字幕制作</td>
   </tr>
 </table>
+
+### 1.0.1：模型需要时，就在工作台入口安装
+
+选择尚未安装的创作模型时，原本灰色的“进入工作台”现在会变成“自动安装模型”。确认窗口会在下载前说明精确安装位置、预计下载量与建议预留空间，也可以改选 Aurora 模型目录；安装完成并通过完整性检查后，会自动继续进入工作台。
+
+自动更新也简化为单一界面：Aurora 仍负责检查版本、断点续传、SHA-256 校验和安装交接，开始覆盖后只保留 Windows 标准安装进度窗口，不再同时显示重复的 Aurora 自制进度窗。
 
 ### 1.0.0：可靠更新，正式启程
 
@@ -113,7 +119,7 @@ Qwen3-TTS 权重通过 Hugging Face 获取。F5-TTS、Demucs 与 Basic Pitch 使
 ## 安装
 
 1. 打开 [最新正式版发布页](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest)。
-2. 下载 `Aurora-Audio-Studio-1.0.0-Setup-x64.exe`。
+2. 下载 `Aurora-Audio-Studio-1.0.1-Setup-x64.exe`。
 3. 允许 Windows 管理员授权，在安装向导中阅读并同意 GPL v3.0，确认安装位置与桌面快捷方式。
 4. 首次打开 Aurora 后，设置模型目录与成品目录，再按需安装创作引擎。
 
@@ -146,7 +152,7 @@ Aurora 每天首次启动时自动读取一次 GitHub 最新正式版本，也�
 ```powershell
 dotnet restore .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj
 dotnet build .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -p:Platform=x64
-dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.0.0
+dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.0.1
 & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' .\work\audio-studio\AuroraAudioStudio.iss
 ```
 
@@ -175,6 +181,12 @@ Aurora Audio Studio 采用 [GNU GPL v3.0](LICENSE)。仓库与发布包不包含
 Aurora Audio Studio is a local-first AI audio workbench for Windows, not another collection of launch buttons. It brings independently installed music, speech, singing, separation, MIDI, and subtitle tools into one native desktop shell. Choose an engine and its local interface opens inside Aurora, with runtime state, output locations, and updates kept in the same workspace.
 
 Source media, models, and generated files remain under your control. Aurora does not bundle model weights or route creative work through an Aurora cloud service. Install only the engines you need, when you need them.
+
+### What 1.0.1 improves
+
+Selecting an uninstalled creative model now changes the disabled workbench action into Install model. Before downloading, Aurora shows the exact target path, estimated download size, and recommended free space, and lets the user change the Aurora model folder. After installation passes its integrity check, Aurora continues into the workbench automatically.
+
+The update experience now has one clear owner. Aurora still checks releases, resumes downloads, verifies SHA-256, and hands off installation, but only the standard Windows installer progress UI remains visible during replacement.
 
 ### What 1.0.0 delivers
 
@@ -236,7 +248,7 @@ Optional engines are never bundled or installed automatically. They complement, 
 ### Install
 
 1. Open the [latest stable release](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest).
-2. Download `Aurora-Audio-Studio-1.0.0-Setup-x64.exe`.
+2. Download `Aurora-Audio-Studio-1.0.1-Setup-x64.exe`.
 3. Approve the Windows administrator prompt, review the GPL v3.0 license, confirm the installation directory, and choose whether to create a desktop shortcut.
 4. On first launch, choose model and output folders, then install only the engines you need.
 

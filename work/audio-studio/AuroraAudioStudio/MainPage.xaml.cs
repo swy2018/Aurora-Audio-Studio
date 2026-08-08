@@ -86,7 +86,7 @@ public sealed partial class MainPage : Page
         if (ModelPicker.Items.Count > 0) ModelPicker.SelectedIndex = 0;
         CurrentModelName.Text = options.FirstOrDefault()?.Name ?? "—";
         CurrentModelState.Text = options.FirstOrDefault() is { } value && catalog.IsInstalled(value) ? "已就绪" : "等待安装";
-        OpenWorkbenchButton.Content = "进入工作台";
+        UpdateSelectedModelState();
         Workbench.Visibility = Visibility.Collapsed; StudioEmpty.Visibility = Visibility.Visible;
     }
 
@@ -118,14 +118,75 @@ public sealed partial class MainPage : Page
 
     private async void OpenWorkbenchButton_Click(object sender, RoutedEventArgs e)
     {
+        if (ModelPicker.SelectedItem is not ComboBoxItem item || item.Tag is not string modelId || catalog.Find(modelId) is not { } model) return;
+        if (!catalog.IsInstalled(model) && !await InstallSelectedModelAsync(model)) return;
         if (settings.Current.SafeMode) { SetStatus("安全模式已启用。关闭安全模式后才能启动创作引擎。"); return; }
-        if (ModelPicker.SelectedItem is not ComboBoxItem item || item.Tag is not string model) return;
         WorkbenchProgress.Visibility = Visibility.Visible; WorkbenchProgress.IsActive = true; StudioEmpty.Visibility = Visibility.Collapsed;
         SetStatus("正在启动 " + item.Content + "…");
-        var result = await backend.StartWorkbenchAsync(feature, model, settings.EffectiveLanguage());
+        var result = await backend.StartWorkbenchAsync(feature, modelId, settings.EffectiveLanguage());
         WorkbenchProgress.IsActive = false; WorkbenchProgress.Visibility = Visibility.Collapsed;
         if (result.Success && result.Url is not null) { Workbench.Source = new Uri(result.Url); Workbench.Visibility = Visibility.Visible; SetStatus("已连接 " + item.Content); }
         else { StudioEmpty.Visibility = Visibility.Visible; EmptyTitle.Text = "暂时无法进入工作台"; EmptyBody.Text = result.Message; SetStatus(result.Message); }
+    }
+
+    private async Task<bool> InstallSelectedModelAsync(ModelDefinition model)
+    {
+        var modelRoot = settings.Current.LocalAiRoot;
+        while (true)
+        {
+            var plan = ModelInstallPlanner.Create(model, modelRoot);
+            var details = new StackPanel { Spacing = 10, Width = 560 };
+            details.Children.Add(new TextBlock { Text = model.Name, FontSize = 18, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold });
+            details.Children.Add(new TextBlock { Text = $"{localization.Get("modelInstallLocation")}\n{plan.TargetPath}", TextWrapping = TextWrapping.Wrap });
+            details.Children.Add(new TextBlock { Text = $"{localization.Get("modelDownloadSize")}：{plan.EstimatedDownload}\n{localization.Get("modelFreeSpace")}：{plan.RecommendedFreeSpace}" });
+            details.Children.Add(new TextBlock { Text = localization.Get("modelRootNotice"), TextWrapping = TextWrapping.Wrap, Opacity = 0.72 });
+            var dialog = new ContentDialog
+            {
+                XamlRoot = XamlRoot,
+                Title = localization.Get("modelInstallTitle"),
+                Content = details,
+                PrimaryButtonText = localization.Get("installHere"),
+                SecondaryButtonText = localization.Get("changeModelFolder"),
+                CloseButtonText = localization.Get("later"),
+                DefaultButton = ContentDialogButton.Primary
+            };
+            var choice = await ShowDialogAsync(dialog);
+            if (choice == ContentDialogResult.None) return false;
+            if (choice == ContentDialogResult.Secondary)
+            {
+                var picker = new FolderPicker { SuggestedStartLocation = PickerLocationId.ComputerFolder };
+                picker.FileTypeFilter.Add("*");
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow));
+                var folder = await picker.PickSingleFolderAsync();
+                if (folder is not null) modelRoot = folder.Path;
+                continue;
+            }
+
+            settings.Current.LocalAiRoot = modelRoot;
+            settings.Save(settings.Current);
+            ModelRootBox.Text = modelRoot;
+            OpenWorkbenchButton.IsEnabled = false;
+            WorkbenchProgress.Visibility = Visibility.Visible;
+            WorkbenchProgress.IsActive = true;
+            SetStatus(localization.Format("modelInstalling", model.Name));
+            var result = await modelUpdater.UpdateAsync(model);
+            WorkbenchProgress.IsActive = false;
+            WorkbenchProgress.Visibility = Visibility.Collapsed;
+            UpdateSelectedModelState();
+            RefreshModels();
+            if (!result.Success)
+            {
+                SetStatus(result.Message);
+                return false;
+            }
+            if (!catalog.IsInstalled(model))
+            {
+                SetStatus(localization.Get("modelInstallIncomplete"));
+                return false;
+            }
+            SetStatus(result.Message);
+            return true;
+        }
     }
 
     private async void BrowseButton_Click(object sender, RoutedEventArgs e)
@@ -406,7 +467,7 @@ public sealed partial class MainPage : Page
     private static string CurrentDisplayVersion()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        if (version is null) return "1.0.0";
+        if (version is null) return "1.0.1";
         return version.Revision > 0 ? version.ToString(4) : version.ToString(3);
     }
 
@@ -429,11 +490,16 @@ public sealed partial class MainPage : Page
     private void ApplyTheme() => RequestedTheme = settings.Current.Theme switch { "dark" => ElementTheme.Dark, "system" => ElementTheme.Default, _ => ElementTheme.Light };
     private static void SelectTag(ComboBox box, string tag) { foreach (var value in box.Items.OfType<ComboBoxItem>()) if ((value.Tag as string) == tag) { box.SelectedItem = value; break; } }
     private void ModelPicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        => UpdateSelectedModelState();
+
+    private void UpdateSelectedModelState()
     {
         if (ModelPicker.SelectedItem is not ComboBoxItem item || item.Tag is not string id || catalog.Find(id) is not { } model) return;
+        var installed = catalog.IsInstalled(model);
         CurrentModelName.Text = model.Name;
-        CurrentModelState.Text = catalog.IsInstalled(model) ? "已安装 · 可使用" : "尚未安装";
-        OpenWorkbenchButton.IsEnabled = catalog.IsInstalled(model);
+        CurrentModelState.Text = localization.Get(installed ? "modelReady" : "modelMissing");
+        OpenWorkbenchButton.Content = localization.Get(installed ? "openWorkbench" : "installModel");
+        OpenWorkbenchButton.IsEnabled = true;
     }
     private void OpenOutputButton_Click(object sender, RoutedEventArgs e) => backend.OpenFolder(settings.Current.OutputRoot);
     private void OpenModelsButton_Click(object sender, RoutedEventArgs e) => backend.OpenFolder(settings.Current.LocalAiRoot);
