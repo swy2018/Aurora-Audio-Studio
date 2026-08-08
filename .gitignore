@@ -11,8 +11,6 @@
 !CODE_SIGNING_POLICY.md
 !PRIVACY.md
 !model-manifest.json
-!.impeccable/
-!.impeccable/design.json
 !.github/
 !.github/workflows/
 !.github/workflows/build.yml
