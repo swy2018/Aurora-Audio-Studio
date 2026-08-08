@@ -4,10 +4,10 @@
   <p><strong>让声音创作，回到创作本身。</strong></p>
   <p>面向 Windows 的本地 AI 音频创作工作台</p>
   <p>
-    <a href="https://swy2018.github.io/Aurora-Audio-Studio/">官方网站</a>
-    · <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest">下载 1.1.0</a>
-    · <a href="CHANGELOG.md">更新日志</a>
-    · <a href="#english">English</a>
+    <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img alt="官方网站" src="https://img.shields.io/badge/%E5%AE%98%E6%96%B9%E7%BD%91%E7%AB%99-Aurora-247f67?style=for-the-badge"></a>
+    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 1.1.0" src="https://img.shields.io/badge/%E4%B8%8B%E8%BD%BD-1.1.0-165f4d?style=for-the-badge"></a>
+    <a href="CHANGELOG.md"><img alt="更新日志" src="https://img.shields.io/badge/%E6%9B%B4%E6%96%B0%E6%97%A5%E5%BF%97-1.1-405a50?style=for-the-badge"></a>
+    <a href="#english"><img alt="English" src="https://img.shields.io/badge/English-README-5f7169?style=for-the-badge"></a>
   </p>
 </div>
 
