@@ -4,6 +4,22 @@
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
 
+## 1.2.0 — 2026-08-11
+
+### 中文
+
+- 首页新增三步首次使用引导，可直接设置保存位置、按需安装模型并开始第一个字幕任务。
+- README、官方网站与音乐人使用说明同步补充低门槛首次体验流程。
+- README 与官方网站的音乐、声音和字幕三张产品截图全部重新实拍为 1.2.0 当前界面。
+- 修正更新回归测试命令，明确 `model-manifest.json` 仅用于带固定地址与 SHA-256 的下载包。
+
+### English
+
+- Added a three-step first-use guide on Home for storage setup, on-demand model installation, and a first subtitle task.
+- Synchronized the README, official website, and musician guide with a lower-friction first-run path.
+- Recaptured all Music, Voice, and Subtitle product screenshots for the current 1.2.0 interface across the README and website.
+- Fixed the update regression command and clarified that `model-manifest.json` is reserved for fixed packages with stable URLs and SHA-256 values.
+
 ## 1.1.0 — 2026-08-09
 
 ### 中文

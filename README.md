@@ -5,7 +5,7 @@
   <p>面向 Windows 的本地 AI 音频创作工作台</p>
   <p>
     <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img alt="官方网站" src="docs/assets/readme-button-website.svg"></a>
-    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.1.0" src="docs/assets/readme-button-download.svg"></a>
+    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.2.0" src="docs/assets/readme-button-download.svg"></a>
     <a href="CHANGELOG.md"><img alt="更新日志" src="docs/assets/readme-button-changelog.svg"></a>
     <a href="#english"><img alt="English" src="docs/assets/readme-button-english.svg"></a>
   </p>
@@ -15,7 +15,7 @@
 
 Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离、MIDI 扒谱和视频字幕集中到同一个本地工作空间。模型、素材、任务、项目与成品关系清楚可见，不再需要手动管理多个启动器、端口和结果目录。
 
-## 1.1 带来了什么
+## 1.2.0 带来了什么
 
 ### 一条完整的本地创作流程
 
@@ -65,11 +65,18 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 ### 标准安装
 
 1. 打开 [Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest)。
-2. 下载 `Aurora-Audio-Studio-1.1.0-Setup-x64.exe` 和同名 `.sha256` 文件。
+2. 下载 `Aurora-Audio-Studio-1.2.0-Setup-x64.exe` 和同名 `.sha256` 文件。
 3. 运行安装程序，阅读并接受 GNU GPL v3.0，选择安装位置和桌面快捷方式。
 4. 首次打开 Aurora，在设置中确认模型、项目和成品目录。
 
 默认安装位置是 `C:\Program Files\Aurora Audio Studio`。覆盖升级会保留用户设置、任务记录、模型、项目和成品；卸载时可选择是否清除个人配置。
+
+### 第一次使用建议
+
+1. 在“设置”中确认模型目录和成品目录，模型目录建议放在空间充足的 SSD。
+2. 打开“模型中心”，只安装第一个工作流需要的模型；Aurora 会在下载前显示体积、目标位置和可用空间。
+3. 想快速验证完整流程，可从“视频 AI 字幕”开始，选择体积较小的 Faster-Whisper Small，导入一段短视频并生成 SRT。
+4. 完成后在“任务中心”查看处理记录，在“成品库”打开输出；项目、素材、模型和结果关系会自动保存。
 
 ## 数据与隐私
 
@@ -86,13 +93,13 @@ Aurora 桌面端使用 .NET 10、WinUI 3 和 Windows App SDK 构建，官网使�
 ```powershell
 dotnet restore .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj --runtime win-x64
 dotnet build .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -p:Platform=x64
-dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.1.0
+dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.2.0
 ```
 
 运行回归检查：
 
 ```powershell
-dotnet run --project .\work\audio-studio\AuroraAudioStudio.UpdateFlowTests\AuroraAudioStudio.UpdateFlowTests.csproj
+dotnet run --project .\work\audio-studio\AuroraAudioStudio.UpdateFlowTests\AuroraAudioStudio.UpdateFlowTests.csproj -- .\work\audio-studio\AuroraAudioStudio.iss
 ```
 
 ## 项目结构
@@ -101,7 +108,7 @@ dotnet run --project .\work\audio-studio\AuroraAudioStudio.UpdateFlowTests\Auror
 docs/                                      官方网站
 work/audio-studio/AuroraAudioStudio/       WinUI 3 桌面端
 work/audio-studio/AuroraAudioStudio.iss    Inno Setup 安装脚本
-model-manifest.json                        可验证模型更新清单
+model-manifest.json                        固定下载包的可验证模型更新清单
 CHANGELOG.md                               中英双语更新日志
 ```
 
@@ -117,7 +124,7 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 Aurora Audio Studio is a local AI audio production workspace for Windows. It brings music generation, voice cloning, singing conversion, stem separation, MIDI transcription, and video subtitles into one coherent product where projects, tasks, models, and results remain connected.
 
-### What version 1.1 adds
+### What version 1.2.0 adds
 
 - Multi-select and drag-and-drop media intake with built-in audio and video preview.
 - Fast, Recommended, and Quality presets for separation, transcription, and subtitles.
@@ -125,6 +132,7 @@ Aurora Audio Studio is a local AI audio production workspace for Windows. It bri
 - Control over pending work without forcing the active local process to stop.
 - A Results library for stems, MIDI, subtitles, and other output.
 - Model disk-space checks, progress and transfer speed, cancellation, resume, checksum verification, and staged integrity checks.
+- A three-step first-use guide for storage, on-demand model installation, and a first subtitle task.
 
 ### Local by design
 
@@ -133,7 +141,7 @@ Aurora does not operate a cloud generation service. Media and generated output r
 ### Install
 
 1. Open the latest [Release](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest).
-2. Download `Aurora-Audio-Studio-1.1.0-Setup-x64.exe` and its `.sha256` file.
+2. Download `Aurora-Audio-Studio-1.2.0-Setup-x64.exe` and its `.sha256` file.
 3. Run Setup, review GNU GPL v3.0, and choose the destination and shortcut options.
 4. Confirm model, project, and output directories on first launch.
 

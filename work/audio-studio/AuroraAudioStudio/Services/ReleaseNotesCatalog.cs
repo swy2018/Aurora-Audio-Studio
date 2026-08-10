@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 2, 0), "2026-08-11", [
+            "• 首页新增三步首次使用引导，可直接设置保存位置、按需安装模型并开始第一个字幕任务。\n• README、官网与音乐人使用说明同步补充低门槛首次体验流程。\n• README 与官网的音乐、声音和字幕产品截图全部重新实拍为 1.2.0 当前界面。\n• 修正开发文档中的更新回归测试命令，并明确固定下载包模型清单的用途。",
+            "• 首頁新增三步首次使用引導，可直接設定儲存位置、按需安裝模型並開始第一個字幕任務。\n• README、官網與音樂人使用說明同步補充低門檻首次體驗流程。\n• README 與官網的音樂、聲音和字幕產品截圖全部重新拍攝為 1.2.0 當前介面。\n• 修正開發文件中的更新回歸測試指令，並說明固定下載套件模型清單的用途。",
+            "• Added a three-step first-use guide on Home for storage setup, on-demand model installation, and a first subtitle task.\n• Synchronized the README, website, and musician guide with a lower-friction first-run path.\n• Recaptured all Music, Voice, and Subtitle product screenshots for the current 1.2.0 interface across the README and website.\n• Fixed the documented update regression command and clarified the role of the verified fixed-package model manifest.",
+            "• ホームに、保存先設定、必要なモデル導入、最初の字幕タスクへ進む3ステップガイドを追加。\n• README、公式サイト、利用ガイドに初回体験フローを反映。\n• README と公式サイトの音楽、音声、字幕の製品画像を 1.2.0 の現行画面で再撮影。\n• 更新回帰テストのコマンドを修正し、固定パッケージ用モデルマニフェストの役割を明確化。"]),
         new(new(1, 1, 0), "2026-08-09", [
             "• 新增批量素材工作流，可多选或拖入音频与视频，并在提交前直接预览。\n• 新增快速草稿、推荐质量与高质量三档处理预设。\n• 任务中心接入引擎实时进度、当前阶段、持续时间与持久日志，并可暂停后续队列。\n• 新增成品库，按项目与时间汇总音轨、MIDI、字幕及其他结果。\n• 模型部署新增磁盘空间检查、下载进度与速度、取消、断点续传及安装完整性检查。\n• 全面重构官方网站，以原始比例清晰展示真实工作台并支持全屏查看。",
             "• 新增批次素材工作流程，可多選或拖入音訊與影片，並在提交前直接預覽。\n• 新增快速草稿、建議品質與高品質三種處理預設。\n• 任務中心接入引擎即時進度、目前階段、持續時間與持久記錄，並可暫停後續佇列。\n• 新增成品庫，依專案與時間彙整音軌、MIDI、字幕及其他結果。\n• 模型部署新增磁碟空間檢查、下載進度與速度、取消、續傳及安裝完整性檢查。\n• 全面重構官方網站，以原始比例清楚展示真實工作台並支援全螢幕查看。",
