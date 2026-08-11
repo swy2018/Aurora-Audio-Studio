@@ -12,7 +12,7 @@ public sealed class MaintenanceService(SettingsService settings, ModelCatalogSer
         checks.Add(new("创作引擎", models.All(x => x.Installed) ? "良好" : "需要检查", $"{models.Count(x => x.Installed)}/{models.Count} 个组件可用", "\uE896"));
         checks.Add(new("模型存储", Directory.Exists(settings.Current.LocalAiRoot) ? "良好" : "不可用", settings.Current.LocalAiRoot, "\uEDA2"));
         checks.Add(new("成品存储", Directory.Exists(settings.Current.OutputRoot) ? "良好" : "需要创建", DiskDetail(settings.Current.OutputRoot), "\uE8B7"));
-        checks.Add(new("任务恢复", "已启用", "异常退出后保留任务、项目与诊断记录", "\uE777"));
+        checks.Add(new("任务恢复", "已启用", "异常退出后保留任务、处理记录与诊断记录", "\uE777"));
         checks.Add(new("安全模式", settings.Current.SafeMode ? "已启用" : "未启用", settings.Current.SafeMode ? "第三方创作引擎不会自动启动" : "所有已安装引擎均可启动", "\uE72E"));
         return checks;
     }

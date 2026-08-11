@@ -4,6 +4,22 @@
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
 
+## 1.2.5 — 2026-08-12
+
+### 中文
+
+- 修复首页首次使用引导中“设置保存位置”和“按需安装模型”按钮无响应的问题；统一支持主导航与底部导航跳转。
+- 首页改为六个独立功能直接进入，不再要求用户先创建并不存在的统一工程。
+- 将 `.arr` 的用户可见定位从“项目文件”纠正为分轨、扒谱和字幕任务的轻量处理记录，并同步调整最近记录、设置与恢复提示。
+- README、官方网站、关于页、音乐人使用说明、版本信息与产品截图全部同步至 1.2.5。
+
+### English
+
+- Fixed unresponsive first-use actions for storage and model setup by resolving both main and footer navigation destinations.
+- Rebuilt Home around six independent feature entry points, with no fictional unified-project setup step.
+- Clarified `.arr` as a lightweight processing record for separation, transcription, and subtitle tasks, and updated related history, settings, and recovery labels.
+- Synchronized the README, official website, About page, musician guide, version metadata, and product screenshots for 1.2.5.
+
 ## 1.2.0 — 2026-08-11
 
 ### 中文

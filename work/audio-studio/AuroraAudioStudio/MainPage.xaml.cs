@@ -411,7 +411,7 @@ public sealed partial class MainPage : Page
     private async void ModelRollbackButton_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as Button)?.Tag is not string id || catalog.Find(id) is not { } model) return;
-        var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = "恢复模型版本", Content = $"将 {model.Name} 恢复到上一个已记录版本。项目文件和成品不会受影响。", PrimaryButtonText = "恢复", CloseButtonText = "取消" };
+        var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = "恢复模型版本", Content = $"将 {model.Name} 恢复到上一个已记录版本。处理记录和成品不会受影响。", PrimaryButtonText = "恢复", CloseButtonText = "取消" };
         if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
         var result = await modelUpdater.RollbackAsync(model); SetStatus(result.Message); RefreshModels();
     }
@@ -421,7 +421,7 @@ public sealed partial class MainPage : Page
         if ((sender as Button)?.Tag is not string id || catalog.Find(id) is not { } model) return;
         var path = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
         if (!Directory.Exists(path)) { SetStatus("此模型当前未安装。 "); return; }
-        var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = "卸载模型", Content = $"将 {model.Name} 移到 Windows 回收站。Aurora、项目和成品会保留。", PrimaryButtonText = "移到回收站", CloseButtonText = "取消", DefaultButton = ContentDialogButton.Close };
+        var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = "卸载模型", Content = $"将 {model.Name} 移到 Windows 回收站。Aurora、处理记录和成品会保留。", PrimaryButtonText = "移到回收站", CloseButtonText = "取消", DefaultButton = ContentDialogButton.Close };
         if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
         try { Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(path, Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin); SetStatus(model.Name + " 已移到回收站。 "); }
         catch (Exception ex) { SetStatus("卸载未完成：" + ex.Message); }
@@ -636,7 +636,7 @@ public sealed partial class MainPage : Page
     private static string CurrentDisplayVersion()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        if (version is null) return "1.2.0";
+        if (version is null) return "1.2.5";
         return version.Revision > 0 ? version.ToString(4) : version.ToString(3);
     }
 
@@ -717,7 +717,7 @@ public sealed partial class MainPage : Page
             if (File.Exists(project.SourcePath)) utilitySources.Add(new MediaSourceItem { Path = project.SourcePath });
             InputPathBox.Text = project.SourcePath;
             SelectTag(UtilityModelPicker, project.ModelId);
-            UtilityStatusText.Text = "项目已恢复，可以重新处理或查看原素材。";
+            UtilityStatusText.Text = "处理记录已载入，可以重新处理或查看原素材。";
         }
     }
 
@@ -764,7 +764,9 @@ public sealed partial class MainPage : Page
 
     private void SelectNavigation(string tag)
     {
-        var target = Shell.MenuItems.OfType<NavigationViewItem>().FirstOrDefault(x => (x.Tag as string) == tag);
+        var target = Shell.MenuItems.Concat(Shell.FooterMenuItems)
+            .OfType<NavigationViewItem>()
+            .FirstOrDefault(x => (x.Tag as string) == tag);
         if (target is not null) Shell.SelectedItem = target;
     }
     private void ClearUtilityLogButton_Click(object sender, RoutedEventArgs e) { utilityLogs.Clear(); AppendUtilityLog("活动记录已清空。"); }

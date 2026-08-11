@@ -66,6 +66,9 @@ Require(notes110.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.1.0 rele
 var notes120 = ReleaseNotesCatalog.CurrentAndRecent("1.2.0", "zh-CN");
 Require(notes120.Count == 5 && notes120[0].Version == "1.2.0" && notes120[^1].Version == "0.9.9", "Version 1.2.0 must show itself and its four previous releases.");
 Require(notes120.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.2.0 release note must have localized content.");
+var notes125 = ReleaseNotesCatalog.CurrentAndRecent("1.2.5", "zh-CN");
+Require(notes125.Count == 5 && notes125[0].Version == "1.2.5" && notes125[^1].Version == "1.0.0", "Version 1.2.5 must show itself and its four previous releases.");
+Require(notes125.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.2.5 release note must have localized content.");
 var validationNotes = ReleaseNotesCatalog.CurrentAndRecent("0.9.8.9", "zh-CN");
 Require(validationNotes[0].Version == "0.9.8" && validationNotes[0].IsCurrent, "The validation build must identify its nearest public release history as current.");
 

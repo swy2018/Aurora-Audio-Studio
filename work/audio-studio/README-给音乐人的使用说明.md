@@ -1,8 +1,8 @@
-# Aurora Audio Studio 1.2.0 使用说明
+# Aurora Audio Studio 1.2.5 使用说明
 
-Aurora 会自动保存项目与任务记录。完成一次分轨、扒谱或字幕任务时，会在“项目目录”创建 `.arr` 项目文件；它记录素材、模型、任务与成品之间的关系，但不会复制你的大型素材或模型权重。旧版 `.aurora` 项目仍可继续读取。
+完成一次分轨、扒谱或字幕任务时，Aurora 会在“处理记录目录”创建 `.arr` 记录文件。它只是保存源文件路径、模型、参数、任务与输出关系的轻量 JSON 清单，不是类似 PS、PR 的可编辑工程文件，也不会复制素材、模型或成品。旧版 `.aurora` 记录仍可继续读取。
 
-- 从“首页”选择创作类型，或继续最近项目。
+- 从“首页”直接选择六个独立功能之一，或再次运行最近处理记录。
 - 在“任务中心”查看排队、处理中、已完成和中断后可重试的任务。
 - 在“模型中心”安装、修复、更新、回退或安全卸载模型；默认模型与可选扩展会明确区分。
 - 启动异常时进入“维护与恢复”，开启安全模式并导出诊断包。
@@ -16,8 +16,8 @@ Aurora 是一套 Windows 本地 AI 音频工作台。音乐生成、AI 配音、
 1. 从 GitHub Release 下载正式安装程序。
 2. 允许 Windows 管理员授权，并阅读、同意 GNU GPL v3.0 协议。
 3. 默认安装到 `C:\Program Files\Aurora Audio Studio`；也可以选择其他位置，并决定是否创建桌面快捷方式。
-4. 打开 Aurora，在“设置”中选择模型目录和成品目录。
-5. 从左栏选择创作流程，再选择需要的模型。
+4. 打开 Aurora，直接从首页选择六个独立功能之一，不需要新建项目。
+5. 进入功能后，再按当前任务提示添加素材、选择模型和确认输出位置。
 6. 选择未安装的创作模型时，点击“自动安装模型”；确认目标目录、预计下载量和建议预留空间后才会下载或部署。
 
 例如把模型位置设为 `D:\Creative Tools`，Aurora 会使用：
@@ -79,11 +79,11 @@ Subtitle Edit 与 Faster-Whisper 用于语音识别、时间轴校对和 SRT 导
 
 ## 应用更新
 
-Aurora 每天首次启动时会自动检查一次，也可以在“关于”页随时点击“检查更新”。如果 GitHub 上有更新，确认后会显示全局下载和 SHA-256 校验进度；随后只显示 Windows 标准安装进度窗口。只有安装成功后才自动打开新版。个人设置、任务记录、模型、项目、成品和原安装目录都会保留。如果已经是最新版，会直接提示无需更新。“检查更新”旁的“更新日志”可查看当前和最近四个版本的更新内容。
+Aurora 每天首次启动时会自动检查一次，也可以在“关于”页随时点击“检查更新”。如果 GitHub 上有更新，确认后会显示全局下载和 SHA-256 校验进度；随后只显示 Windows 标准安装进度窗口。只有安装成功后才自动打开新版。个人设置、任务记录、模型、处理记录、成品和原安装目录都会保留。如果已经是最新版，会直接提示无需更新。“检查更新”旁的“更新日志”可查看当前和最近四个版本的更新内容。
 
 ## 卸载
 
-请从 Windows“已安装的应用”或开始菜单运行标准卸载程序。卸载时可以选择保留个人配置，或删除设置、日志、任务记录、模型元数据和更新缓存。AI 模型、项目、生成成品与个人素材始终保留。
+请从 Windows“已安装的应用”或开始菜单运行标准卸载程序。卸载时可以选择保留个人配置，或删除设置、日志、任务记录、模型元数据和更新缓存。AI 模型、处理记录、生成成品与个人素材始终保留。
 
 ## 使用与版权提醒
 
@@ -101,4 +101,4 @@ Aurora Audio Studio is a local-first Windows workbench for music generation, spe
 4. Open Settings and choose model and output folders.
 5. Pick a workflow and install only the models you need.
 
-Aurora supports Simplified Chinese, Traditional Chinese, English, and Japanese UI. It does not start with Windows or bundle model weights. Uninstall can optionally remove Aurora settings and history, but never models, projects, source media, or outputs.
+Aurora supports Simplified Chinese, Traditional Chinese, English, and Japanese UI. It does not start with Windows or bundle model weights. Uninstall can optionally remove Aurora settings and history, but never models, processing records, source media, or outputs.

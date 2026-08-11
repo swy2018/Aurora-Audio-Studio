@@ -5,7 +5,7 @@
   <p>面向 Windows 的本地 AI 音频创作工作台</p>
   <p>
     <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img alt="官方网站" src="docs/assets/readme-button-website.svg"></a>
-    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.2.0" src="docs/assets/readme-button-download.svg"></a>
+    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.2.5" src="docs/assets/readme-button-download.svg"></a>
     <a href="CHANGELOG.md"><img alt="更新日志" src="docs/assets/readme-button-changelog.svg"></a>
     <a href="#english"><img alt="English" src="docs/assets/readme-button-english.svg"></a>
   </p>
@@ -13,9 +13,21 @@
 
 ![Aurora Audio Studio 音乐创作工作台](docs/assets/aurora-workbench-music.png)
 
-Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离、MIDI 扒谱和视频字幕集中到同一个本地工作空间。模型、素材、任务、项目与成品关系清楚可见，不再需要手动管理多个启动器、端口和结果目录。
+Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离、MIDI 扒谱和视频字幕集中到同一个本地入口。六个功能互相独立，可直接开始当前任务，不再需要手动管理多个启动器、端口和结果目录。
 
-## 1.2.0 带来了什么
+## 1.2.5 带来了什么
+
+### 更直接的首页
+
+- 六个独立功能以两行三列完整展示，点击即可进入对应工作台。
+- 首次使用引导不再要求创建并不存在的统一工程，而是按当前功能提示素材、模型和输出位置。
+- 修复原引导按钮无法跳转到底部“模型管理”和“设置”的问题。
+
+### 更准确的处理记录
+
+- `.arr` 明确为分轨、扒谱和字幕任务的轻量 JSON 处理记录，不是类似 PS、PR 的可编辑工程文件。
+- “最近项目”“项目目录”等用户可见名称改为“最近处理记录”“处理记录目录”。
+- `.arr` 只关联源文件路径、模型、参数、任务和输出，不复制或打包大型素材、模型与成品。
 
 ### 一条完整的本地创作流程
 
@@ -34,8 +46,7 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 
 ### 更像产品，而不是工具集合
 
-- `.arr` 项目保存素材、模型、参数、任务和成品关系。
-- 旧 `.aurora` 项目继续兼容。
+- 旧 `.aurora` 处理记录继续兼容。
 - 每天首次启动可自动检查应用更新，也可随时手动检查。
 - 应用更新从 GitHub 获取安装包并验证 SHA-256，随后交给标准 Windows 安装界面覆盖升级。
 - 界面支持简体中文、繁體中文、English 和日本語。
@@ -65,18 +76,18 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 ### 标准安装
 
 1. 打开 [Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest)。
-2. 下载 `Aurora-Audio-Studio-1.2.0-Setup-x64.exe` 和同名 `.sha256` 文件。
+2. 下载 `Aurora-Audio-Studio-1.2.5-Setup-x64.exe` 和同名 `.sha256` 文件。
 3. 运行安装程序，阅读并接受 GNU GPL v3.0，选择安装位置和桌面快捷方式。
-4. 首次打开 Aurora，在设置中确认模型、项目和成品目录。
+4. 首次打开 Aurora，直接选择需要的功能；需要时再确认模型、处理记录和成品目录。
 
-默认安装位置是 `C:\Program Files\Aurora Audio Studio`。覆盖升级会保留用户设置、任务记录、模型、项目和成品；卸载时可选择是否清除个人配置。
+默认安装位置是 `C:\Program Files\Aurora Audio Studio`。覆盖升级会保留用户设置、任务记录、模型、处理记录和成品；卸载时可选择是否清除个人配置。
 
 ### 第一次使用建议
 
-1. 在“设置”中确认模型目录和成品目录，模型目录建议放在空间充足的 SSD。
-2. 打开“模型中心”，只安装第一个工作流需要的模型；Aurora 会在下载前显示体积、目标位置和可用空间。
-3. 想快速验证完整流程，可从“视频 AI 字幕”开始，选择体积较小的 Faster-Whisper Small，导入一段短视频并生成 SRT。
-4. 完成后在“任务中心”查看处理记录，在“成品库”打开输出；项目、素材、模型和结果关系会自动保存。
+1. 在首页直接选择音乐、配音、歌声、分轨、扒谱或字幕功能，不需要先新建项目。
+2. Aurora 会根据当前功能提示所需模型；下载前会显示体积、目标位置和可用空间。
+3. 导入素材的功能会在进入后提示添加文件；音乐、配音和歌声工作台可直接选择引擎进入。
+4. 分轨、扒谱和字幕完成后，可在“最近处理记录”再次处理，在“成品库”打开输出。
 
 ## 数据与隐私
 
@@ -93,7 +104,7 @@ Aurora 桌面端使用 .NET 10、WinUI 3 和 Windows App SDK 构建，官网使�
 ```powershell
 dotnet restore .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj --runtime win-x64
 dotnet build .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -p:Platform=x64
-dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.2.0
+dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.2.5
 ```
 
 运行回归检查：
@@ -122,17 +133,14 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 ## English
 
-Aurora Audio Studio is a local AI audio production workspace for Windows. It brings music generation, voice cloning, singing conversion, stem separation, MIDI transcription, and video subtitles into one coherent product where projects, tasks, models, and results remain connected.
+Aurora Audio Studio is a local AI audio production workspace for Windows. Its six independent features provide direct entry points for music generation, voice cloning, singing conversion, stem separation, MIDI transcription, and video subtitles.
 
-### What version 1.2.0 adds
+### What version 1.2.5 adds
 
-- Multi-select and drag-and-drop media intake with built-in audio and video preview.
-- Fast, Recommended, and Quality presets for separation, transcription, and subtitles.
-- Live engine progress, stage, elapsed time, and persistent logs in Task Center.
-- Control over pending work without forcing the active local process to stop.
-- A Results library for stems, MIDI, subtitles, and other output.
-- Model disk-space checks, progress and transfer speed, cancellation, resume, checksum verification, and staged integrity checks.
-- A three-step first-use guide for storage, on-demand model installation, and a first subtitle task.
+- Six direct, independent feature entry points on Home with no unified-project setup step.
+- Fixed first-use navigation for both main-menu and footer destinations.
+- Honest `.arr` terminology: a lightweight JSON processing record for separation, transcription, and subtitle tasks—not a Photoshop- or Premiere-style editable project.
+- Updated recent-history, settings, recovery, About, documentation, website, and product imagery.
 
 ### Local by design
 
@@ -141,11 +149,11 @@ Aurora does not operate a cloud generation service. Media and generated output r
 ### Install
 
 1. Open the latest [Release](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest).
-2. Download `Aurora-Audio-Studio-1.2.0-Setup-x64.exe` and its `.sha256` file.
+2. Download `Aurora-Audio-Studio-1.2.5-Setup-x64.exe` and its `.sha256` file.
 3. Run Setup, review GNU GPL v3.0, and choose the destination and shortcut options.
-4. Confirm model, project, and output directories on first launch.
+4. Choose a feature on first launch; confirm model, processing-record, and output folders only when needed.
 
-Aurora defaults to `C:\Program Files\Aurora Audio Studio`. In-place upgrades preserve settings, task history, models, projects, and output. Uninstall offers an optional personal-configuration cleanup.
+Aurora defaults to `C:\Program Files\Aurora Audio Studio`. In-place upgrades preserve settings, task history, models, processing records, and output. Uninstall offers an optional personal-configuration cleanup.
 
 ### Technology
 

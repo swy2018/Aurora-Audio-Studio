@@ -1,15 +1,15 @@
 #define MyAppName "Aurora Audio Studio"
 #ifndef MyAppVersion
-  #define MyAppVersion "1.2.0"
+  #define MyAppVersion "1.2.5"
 #endif
 #ifndef PublishFolder
-  #define PublishFolder "Aurora-Audio-Studio-1.2.0"
+  #define PublishFolder "Aurora-Audio-Studio-1.2.5"
 #endif
 #ifndef InstallerFolder
-  #define InstallerFolder "Aurora-Audio-Studio-1.2.0-installer"
+  #define InstallerFolder "Aurora-Audio-Studio-1.2.5-installer"
 #endif
 #ifndef InstallerBaseName
-  #define InstallerBaseName "Aurora-Audio-Studio-1.2.0-Setup-x64"
+  #define InstallerBaseName "Aurora-Audio-Studio-1.2.5-Setup-x64"
 #endif
 #define MyAppPublisher "Aurora Contributors"
 #define MyAppURL "https://github.com/swy2018/Aurora-Audio-Studio"
@@ -110,8 +110,8 @@ english.desktopicon=Create a desktop shortcut
 chinesesimplified.desktopicon=创建桌面快捷方式
 chinesetraditional.desktopicon=建立桌面捷徑
 japanese.desktopicon=デスクトップにショートカットを作成する
-english.RemovePersonalDataPrompt=Remove Aurora personal settings from this Windows account?%n%nThis deletes Aurora settings, logs, task history, and update cache. AI models, projects, source media, and generated outputs are always kept.%n%nChoose No to keep your settings for a future installation.
-chinesesimplified.RemovePersonalDataPrompt=是否删除此 Windows 账户中的 Aurora 个人配置？%n%n这将删除 Aurora 的设置、日志、任务记录和更新缓存。AI 模型、项目、源素材与生成成品始终保留。%n%n选择“否”可保留配置，便于以后重新安装。
+english.RemovePersonalDataPrompt=Remove Aurora personal settings from this Windows account?%n%nThis deletes Aurora settings, logs, task history, and update cache. AI models, processing records, source media, and generated outputs are always kept.%n%nChoose No to keep your settings for a future installation.
+chinesesimplified.RemovePersonalDataPrompt=是否删除此 Windows 账户中的 Aurora 个人配置？%n%n这将删除 Aurora 的设置、日志、任务记录和更新缓存。AI 模型、处理记录、源素材与生成成品始终保留。%n%n选择“否”可保留配置，便于以后重新安装。
 chinesetraditional.RemovePersonalDataPrompt=是否刪除此 Windows 帳戶中的 Aurora 個人設定？%n%n這將刪除 Aurora 的設定、記錄、任務記錄和更新快取。AI 模型、專案、來源素材與生成成品始終保留。%n%n選擇「否」可保留設定，方便日後重新安裝。
 japanese.RemovePersonalDataPrompt=この Windows アカウントの Aurora 個人設定を削除しますか？%n%nAurora の設定、ログ、タスク履歴、更新キャッシュが削除されます。AI モデル、プロジェクト、素材、生成ファイルは常に保持されます。%n%n再インストール用に設定を残す場合は「いいえ」を選択してください。
 [Code]
@@ -165,7 +165,7 @@ begin
     usUninstall:
     begin
       ConfigurePersonalDataRemoval();
-      Log('Aurora Audio Studio uninstall started. Models, projects, source media, and outputs will be preserved.');
+      Log('Aurora Audio Studio uninstall started. Models, processing records, source media, and outputs will be preserved.');
     end;
     usPostUninstall:
     begin
@@ -174,7 +174,7 @@ begin
         Log('Removing Aurora settings, logs, task history, model metadata, and update cache for the current Windows account.');
         DelTree(ExpandConstant('{localappdata}\Aurora Audio Studio'), True, True, True);
       end;
-      Log('Aurora Audio Studio uninstall completed. Models, projects, source media, and outputs were preserved.');
+      Log('Aurora Audio Studio uninstall completed. Models, processing records, source media, and outputs were preserved.');
     end;
   end;
 end;

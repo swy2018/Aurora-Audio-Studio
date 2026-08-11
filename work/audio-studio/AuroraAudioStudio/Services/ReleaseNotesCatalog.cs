@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 2, 5), "2026-08-12", [
+            "• 修复首次使用引导中保存位置和模型按钮无响应的问题，主导航与底部导航现在都能正确跳转。\n• 首页改为六个独立功能直接进入，不再要求先创建统一项目。\n• 明确 .arr 只是分轨、扒谱和字幕任务的轻量处理记录，并同步调整相关界面文案。\n• README、官网、关于页、音乐人使用说明、版本信息与产品截图全部同步至 1.2.5。",
+            "• 修正首次使用引導中儲存位置和模型按鈕無回應的問題，主導覽與底部導覽現在都能正確跳轉。\n• 首頁改為六個獨立功能直接進入，不再要求先建立統一專案。\n• 明確 .arr 只是分軌、扒譜和字幕任務的輕量處理記錄，並同步調整相關介面文字。\n• README、官網、關於頁、音樂人使用說明、版本資訊與產品截圖全部同步至 1.2.5。",
+            "• Fixed unresponsive storage and model actions in the first-use guide; main and footer navigation destinations now resolve correctly.\n• Rebuilt Home around six independent feature entry points with no unified-project setup step.\n• Clarified .arr as a lightweight processing record for separation, transcription, and subtitle tasks, with matching UI terminology.\n• Synchronized the README, website, About page, musician guide, version metadata, and product screenshots for 1.2.5.",
+            "• 初回ガイドの保存先とモデルボタンが反応しない問題を修正し、メインとフッターの両ナビゲーションへ正しく移動できるようにしました。\n• ホームを6つの独立した機能から直接開始できる構成へ変更し、統一プロジェクトの作成手順を廃止しました。\n• .arr を分離、採譜、字幕タスク用の軽量な処理履歴として明確化し、関連する画面表記も更新しました。\n• README、公式サイト、情報ページ、利用ガイド、バージョン情報、製品画像を 1.2.5 に同期しました。"]),
         new(new(1, 2, 0), "2026-08-11", [
             "• 首页新增三步首次使用引导，可直接设置保存位置、按需安装模型并开始第一个字幕任务。\n• README、官网与音乐人使用说明同步补充低门槛首次体验流程。\n• README 与官网的音乐、声音和字幕产品截图全部重新实拍为 1.2.0 当前界面。\n• 修正开发文档中的更新回归测试命令，并明确固定下载包模型清单的用途。",
             "• 首頁新增三步首次使用引導，可直接設定儲存位置、按需安裝模型並開始第一個字幕任務。\n• README、官網與音樂人使用說明同步補充低門檻首次體驗流程。\n• README 與官網的音樂、聲音和字幕產品截圖全部重新拍攝為 1.2.0 當前介面。\n• 修正開發文件中的更新回歸測試指令，並說明固定下載套件模型清單的用途。",
