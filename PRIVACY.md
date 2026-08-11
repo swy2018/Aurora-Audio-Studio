@@ -10,7 +10,7 @@ Aurora Audio Studio 是本地优先的开源 Windows 应用，不提供 Aurora �
 
 - 应用设置、日志、任务记录、模型元数据和更新缓存保存在当前 Windows 账户的本地应用数据目录中。
 - 处理记录、源素材、模型和生成成品保存在用户选择的目录中。
-- “导出诊断”只在本机生成诊断包；除非用户主动分享，否则 Aurora 不会上传该文件。
+- “导出诊断”会先显示将包含的本地日志数量，并隐藏 Windows 用户目录、用户名、模型目录、成品目录和处理记录目录；诊断包只在本机生成，除非用户主动分享，否则 Aurora 不会上传该文件。
 
 ### 网络连接
 
@@ -33,7 +33,7 @@ Aurora Audio Studio is a local-first, open-source Windows application. It does n
 
 - Application settings, logs, task history, model metadata, and update cache are stored in the current Windows account's local application-data directory.
 - Processing records, source media, models, and generated outputs are stored in directories selected by the user.
-- Export Diagnostics creates a local diagnostic package only. Aurora does not upload it unless the user chooses to share it.
+- Export Diagnostics previews the local log count and redacts the Windows profile, user name, model folder, output folder, and processing-record folder. The archive is created locally and is never uploaded unless the user chooses to share it.
 
 ### Network access
 

@@ -95,6 +95,10 @@ public sealed class AuroraTaskRecord
     public int QueueOrder { get; set; }
     [JsonIgnore] public bool CanCancel => Status is AuroraTaskStates.Waiting or AuroraTaskStates.Preparing or AuroraTaskStates.Running;
     [JsonIgnore] public bool CanRetry => Status is AuroraTaskStates.Failed or AuroraTaskStates.Canceled or AuroraTaskStates.Interrupted;
+    [JsonIgnore] public string DisplayStatus { get; set; } = "";
+    [JsonIgnore] public string DisplayProgress { get; set; } = "";
+    [JsonIgnore] public string DisplayStage { get; set; } = "";
+    [JsonIgnore] public string DisplayMessage { get; set; } = "";
     [JsonIgnore] public string CreatedDisplay => CreatedAt.LocalDateTime.ToString("MM-dd HH:mm");
     [JsonIgnore] public string InputDisplay => string.IsNullOrWhiteSpace(InputPath) ? "-" : Path.GetFileName(InputPath);
     [JsonIgnore] public string ProgressDisplay => Progress <= 0 ? "等待" : $"{Math.Round(Progress * 100):0}%";

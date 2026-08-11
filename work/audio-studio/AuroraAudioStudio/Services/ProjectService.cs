@@ -7,6 +7,8 @@ namespace AuroraAudioStudio.Services;
 public sealed class ProjectService(SettingsService settings)
 {
     private readonly JsonSerializerOptions json = new() { WriteIndented = true };
+    private readonly HashSet<string> recoveryPaths = new(StringComparer.OrdinalIgnoreCase);
+    public int RecoveryCount => recoveryPaths.Count;
     public IReadOnlyList<AuroraTemplate> Templates { get; } =
     [
         new("music", "从文字开始创作", "生成完整歌曲或纯音乐", "music", "ace-step", "\uE8D6"),
@@ -90,11 +92,24 @@ public sealed class ProjectService(SettingsService settings)
     {
         try
         {
-            var project = JsonSerializer.Deserialize<AuroraProject>(File.ReadAllText(path), json);
+            var project = ProjectDocumentMigrator.Read(File.ReadAllText(path));
             if (project is not null) project.FilePath = path;
+            recoveryPaths.Remove(path);
             return project;
         }
-        catch { return null; }
+        catch (Exception ex)
+        {
+            recoveryPaths.Add(path);
+            try
+            {
+                var recovery = path + ".recovery";
+                if (!File.Exists(recovery)) File.Copy(path, recovery);
+                Directory.CreateDirectory(settings.LogsRoot);
+                File.AppendAllText(Path.Combine(settings.LogsRoot, "project-recovery.log"), $"[{DateTimeOffset.Now:O}] {path}{Environment.NewLine}{ex.Message}{Environment.NewLine}");
+            }
+            catch { }
+            return null;
+        }
     }
 
     private static async Task<string> HashSourceAsync(string path)

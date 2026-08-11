@@ -43,7 +43,7 @@ Aurora unifies independently installed local audio models behind one bilingual d
 - Model selection, resumable on-demand deployment with disk checks and cancellation, model manager, output-folder selection, verified app updates, per-model update checks, VRAM release, diagnostics export, and four-language switching.
 - Closing Aurora stops the backends it launched.
 - A redesign must preserve every existing workflow, control, and product behavior unless the user explicitly approves a functional change.
-- The approved A workbench and dark rounded A-wave icon remain the visual baseline for version 1.2.5.
+- The approved A workbench and dark rounded A-wave icon remain the visual baseline for version 1.3.0.
 - The existing model suite remains the default. Optional engines never install automatically and do not create maintenance warnings when absent.
 - The installer defaults to Program Files, performs guarded in-place upgrades under the same AppId, and preserves user-owned data and the selected install location.
 - Interactive uninstall offers an explicit personal-configuration cleanup choice without touching models, processing records, source media, or outputs.

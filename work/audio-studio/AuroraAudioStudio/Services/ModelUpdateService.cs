@@ -126,24 +126,21 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             var actual = Convert.ToHexString(await SHA256.HashDataAsync(stream));
             if (!actual.Equals(entry.Sha256, StringComparison.OrdinalIgnoreCase)) { File.Delete(package); return new(false, "更新包校验失败，已安全停止。"); }
         }
-        var isNewInstall = !catalog.IsInstalled(model) && !Directory.Exists(root);
-        var installRoot = isNewInstall ? root + ".aurora-installing" : root;
-        Directory.CreateDirectory(installRoot);
+        ModelInstallTransaction.Prepare(root);
+        var installRoot = ModelInstallTransaction.StagingPath(root);
         progress?.Report(new(null, "正在安装模型文件"));
         if (entry.PackageKind.Equals("zip", StringComparison.OrdinalIgnoreCase)) ZipFile.ExtractToDirectory(package, installRoot, true);
         else
         {
             if (string.IsNullOrWhiteSpace(entry.RelativePath)) return new(false, "更新清单缺少安装位置。");
             var destination = Path.GetFullPath(Path.Combine(installRoot, entry.RelativePath));
-            if (!destination.StartsWith(Path.GetFullPath(installRoot), StringComparison.OrdinalIgnoreCase)) return new(false, "更新路径不安全，已停止更新。");
+            var installBoundary = Path.TrimEndingDirectorySeparator(Path.GetFullPath(installRoot)) + Path.DirectorySeparatorChar;
+            if (!destination.StartsWith(installBoundary, StringComparison.OrdinalIgnoreCase)) return new(false, "更新路径不安全，已停止更新。");
             Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
             File.Copy(package, destination, true);
         }
-        if (isNewInstall)
-        {
-            if (!File.Exists(Path.Combine(installRoot, model.Marker))) return new(false, "模型包已解压，但完整性检查未通过。临时文件已保留以便重试。");
-            Directory.Move(installRoot, root);
-        }
+        if (!File.Exists(Path.Combine(installRoot, model.Marker))) return new(false, "模型包已解压，但完整性检查未通过。正式模型目录未被修改。");
+        ModelInstallTransaction.Commit(root);
         WriteInstalledVersion(model.Id, entry.Version);
         return new(true, $"{model.Name} 已更新至 {entry.Version}");
     }
@@ -175,15 +172,22 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         progress?.Report(new(null, "正在读取模型版本"));
         var revision = await GetHuggingFaceRevisionAsync(model.Repository!);
         if (string.IsNullOrWhiteSpace(revision)) return new(false, "暂时无法连接 Hugging Face");
-        var previous = ReadModelRevision(root);
-        if (!string.IsNullOrWhiteSpace(previous) && !previous.Equals(revision, StringComparison.OrdinalIgnoreCase))
-            File.WriteAllText(Path.Combine(root, ".aurora-previous-revision"), previous);
         return await DownloadHuggingFaceRevisionAsync(model, root, revision, progress, cancellationToken);
     }
 
     public async Task<OperationResult> RollbackAsync(ModelDefinition model)
     {
         var root = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
+        try
+        {
+            if (ModelInstallTransaction.RestorePrevious(root))
+            {
+                var restoredRevision = ReadModelRevision(root);
+                if (!string.IsNullOrWhiteSpace(restoredRevision)) WriteInstalledVersion(model.Id, restoredRevision);
+                return new(true, $"{model.Name} 已恢复到上一个可用版本。", "current");
+            }
+        }
+        catch (Exception ex) { return new(false, $"恢复失败：{ex.Message}"); }
         var snapshot = Path.Combine(root, ".aurora-previous-revision");
         if (!File.Exists(snapshot) || string.IsNullOrWhiteSpace(model.Repository)) return new(false, "此模型还没有可恢复的版本快照。 ");
         var revision = File.ReadAllText(snapshot).Trim();
@@ -197,17 +201,19 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         var info = new ProcessStartInfo(launcher) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
         info.ArgumentList.Add("download"); info.ArgumentList.Add(model.Repository!);
         info.ArgumentList.Add("--revision"); info.ArgumentList.Add(revision);
-        info.ArgumentList.Add("--local-dir"); info.ArgumentList.Add(root);
+        ModelInstallTransaction.Prepare(root);
+        var staging = ModelInstallTransaction.StagingPath(root);
+        info.ArgumentList.Add("--local-dir"); info.ArgumentList.Add(staging);
         info.Environment["HF_XET_HIGH_PERFORMANCE"] = "1";
         info.Environment["HF_HUB_DOWNLOAD_TIMEOUT"] = "300";
-        Directory.CreateDirectory(root);
-        File.WriteAllText(Path.Combine(root, ".aurora-installing"), DateTimeOffset.UtcNow.ToString("O"));
+        File.WriteAllText(Path.Combine(staging, ".aurora-installing"), DateTimeOffset.UtcNow.ToString("O"));
         progress?.Report(new(null, $"正在从 Hugging Face 下载 {model.Name}"));
         var result = await RunProcessAsync(info, cancellationToken, progress);
         if (result.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(result.Error) ? "模型更新失败" : result.Error);
-        if (!File.Exists(Path.Combine(root, model.Marker))) return new(false, "下载已结束，但模型完整性检查未通过。可直接重试以继续下载。");
-        File.WriteAllText(Path.Combine(root, ".aurora-revision"), revision);
-        File.Delete(Path.Combine(root, ".aurora-installing"));
+        if (!File.Exists(Path.Combine(staging, model.Marker))) return new(false, "下载已结束，但模型完整性检查未通过。正式模型目录未被修改。");
+        File.WriteAllText(Path.Combine(staging, ".aurora-revision"), revision);
+        File.Delete(Path.Combine(staging, ".aurora-installing"));
+        ModelInstallTransaction.Commit(root);
         return new(true, $"{model.Name} 已安装并校验", "current");
     }
 
@@ -304,7 +310,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
     private static HttpClient CreateClient()
     {
         var value = new HttpClient { Timeout = TimeSpan.FromHours(8) };
-        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.2.5"));
+        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.3.0"));
         return value;
     }
 }
