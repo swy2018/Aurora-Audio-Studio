@@ -8,6 +8,7 @@ using Windows.Media.Core;
 using Windows.Storage;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Media;
 using Windows.Storage.Pickers;
 
@@ -41,7 +42,7 @@ public sealed partial class MainPage : Page
         modelUpdater = new(catalog, settings);
         projects = new(settings);
         taskQueue = new(settings);
-        maintenance = new(settings, catalog);
+        maintenance = new(settings, catalog, projects, localization);
         ModelPicker.SelectionChanged += ModelPicker_SelectionChanged;
         UtilityLogList.ItemsSource = utilityLogs;
         UtilitySourcesList.ItemsSource = utilitySources;
@@ -371,15 +372,27 @@ public sealed partial class MainPage : Page
         var recent = projects.Recent();
         RecentProjectsList.ItemsSource = recent;
         ProjectsEmpty.Visibility = recent.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        foreach (var task in taskQueue.Items)
+        {
+            task.DisplayStatus = localization.Get(task.Status switch
+            {
+                AuroraTaskStates.Waiting => "taskWaiting", AuroraTaskStates.Preparing => "taskPreparing", AuroraTaskStates.Running => "taskRunning",
+                AuroraTaskStates.Completed => "taskCompleted", AuroraTaskStates.Failed => "taskFailed", AuroraTaskStates.Canceled => "taskCanceled",
+                AuroraTaskStates.Interrupted => "taskInterrupted", _ => "taskInterrupted"
+            });
+            task.DisplayProgress = task.Progress <= 0 ? localization.Translate("等待") : $"{Math.Round(task.Progress * 100):0}%";
+            task.DisplayStage = localization.Translate(task.Stage);
+            task.DisplayMessage = localization.Translate(task.Message);
+        }
         var active = taskQueue.Items.Where(x => x.Status is AuroraTaskStates.Waiting or AuroraTaskStates.Preparing or AuroraTaskStates.Running).ToList();
         HomeTasksList.ItemsSource = active.Take(4).ToList();
         TasksList.ItemsSource = taskQueue.Items.ToList();
         TasksEmpty.Visibility = taskQueue.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        QueueSummaryText.Text = active.Count == 0 ? "当前没有排队任务" : $"{active.Count} 个任务正在等待或处理";
+        QueueSummaryText.Text = active.Count == 0 ? localization.Translate("当前没有排队任务") : localization.Format("activeTaskCount", active.Count);
         var artifacts = projects.Artifacts();
         ResultsList.ItemsSource = artifacts;
         ResultsEmpty.Visibility = artifacts.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        PauseQueueButton.Content = taskQueue.IsPaused ? "继续队列" : "暂停队列";
+        PauseQueueButton.Content = localization.Translate(taskQueue.IsPaused ? "继续队列" : "暂停队列");
         var current = active.FirstOrDefault(x => x.Status == AuroraTaskStates.Running);
         if (current is not null)
         {
@@ -609,7 +622,7 @@ public sealed partial class MainPage : Page
         if (!string.IsNullOrWhiteSpace(ProjectsRootBox.Text)) settings.Current.ProjectsRoot = ProjectsRootBox.Text.Trim();
         settings.Current.AutoCheckAppUpdates = AppAutoUpdateToggle.IsOn; settings.Current.AutoCheckModelUpdates = ModelAutoUpdateToggle.IsOn; settings.Current.ConfirmLargeModelDownloads = ConfirmLargeToggle.IsOn;
         settings.Current.AutoReleaseVram = AutoReleaseSettingsToggle.IsOn;
-        settings.Save(settings.Current); ApplyTheme(); ApplyLocalization(); RefreshModels(); SetStatus("设置已保存。");
+        settings.Save(settings.Current); ApplyTheme(); ApplyLocalization(); RefreshModels(); RefreshWorkspace(); SetStatus("设置已保存。");
     }
 
     private void ApplySettingsToControls()
@@ -630,13 +643,23 @@ public sealed partial class MainPage : Page
         var current = CurrentDisplayVersion();
         AboutVersionText.Text = $"{current} · {localization.Get("workbenchLabel")}";
         AboutReleaseSummary.Text = ReleaseNotesCatalog.CurrentAndRecent(current, settings.EffectiveLanguage(), 1).FirstOrDefault()?.Body ?? string.Empty;
+        AutomationProperties.SetName(Shell, localization.Get("navigationName"));
+        AutomationProperties.SetName(MusicTemplateButton, localization.Translate("创作音乐"));
+        AutomationProperties.SetName(VoiceTemplateButton, localization.Translate("制作配音"));
+        AutomationProperties.SetName(SingingTemplateButton, localization.Translate("克隆歌声"));
+        AutomationProperties.SetName(SeparationTemplateButton, localization.Translate("拆分混音"));
+        AutomationProperties.SetName(TranscriptionTemplateButton, localization.Translate("音频转 MIDI"));
+        AutomationProperties.SetName(SubtitlesTemplateButton, localization.Translate("生成字幕"));
+        AutomationProperties.SetName(WorkbenchProgress, localization.Get("workbenchLoadingAutomation"));
+        AutomationProperties.SetName(Workbench, localization.Get("workbenchAutomation"));
+        AutomationProperties.SetName(UpdateProgress, localization.Get("updateProgressAutomation"));
         LocalizeTree(this);
     }
 
     private static string CurrentDisplayVersion()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        if (version is null) return "1.2.5";
+        if (version is null) return "1.3.0";
         return version.Revision > 0 ? version.ToString(4) : version.ToString(3);
     }
 
@@ -673,7 +696,21 @@ public sealed partial class MainPage : Page
     private void OpenOutputButton_Click(object sender, RoutedEventArgs e) => backend.OpenFolder(settings.Current.OutputRoot);
     private void OpenModelsButton_Click(object sender, RoutedEventArgs e) => backend.OpenFolder(settings.Current.LocalAiRoot);
     private void ReleaseButton_Click(object sender, RoutedEventArgs e) { backend.StopAll(); Workbench.Visibility = Visibility.Collapsed; StudioEmpty.Visibility = Visibility.Visible; SetStatus("当前创作引擎已安全结束。"); }
-    private void DiagnosticsButton_Click(object sender, RoutedEventArgs e) { var result = backend.CreateDiagnostics(); SetStatus(result.Message + (result.Path is null ? "" : " " + result.Path)); }
+    private async void DiagnosticsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = localization.Get("diagnosticsPreviewTitle"),
+            Content = localization.Format("diagnosticsPreviewBody", backend.DiagnosticsLogCount()),
+            PrimaryButtonText = localization.Get("diagnosticsExportRedacted"),
+            CloseButtonText = localization.Get("later"),
+            DefaultButton = ContentDialogButton.Primary
+        };
+        if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
+        var result = backend.CreateDiagnostics();
+        SetStatus(localization.Get(result.Message) + (result.Path is null ? "" : " " + result.Path));
+    }
     private void OpenLogsButton_Click(object sender, RoutedEventArgs e) => backend.OpenFolder(settings.LogsRoot);
     private void RunHealthScanButton_Click(object sender, RoutedEventArgs e) => RunHealthScan();
     private void RunHealthScan()
@@ -773,7 +810,7 @@ public sealed partial class MainPage : Page
     private void AppendUtilityLog(string message) => utilityLogs.Add($"{DateTime.Now:HH:mm:ss}  {message}");
     private async Task CheckModelsSilentlyAsync() { try { await modelUpdater.CheckAllAsync(); } catch { } }
     private void ShowUtility(bool success, string message) { UtilityInfo.Severity = success ? InfoBarSeverity.Success : InfoBarSeverity.Error; UtilityInfo.Message = message; UtilityInfo.IsOpen = true; SetStatus(message); }
-    private void SetStatus(string value) { FooterStatus.Text = value; TaskStatusText.Text = value; }
+    private void SetStatus(string value) { var translated = localization.Translate(value); FooterStatus.Text = translated; TaskStatusText.Text = translated; }
     private static string FormatBackendStatus(string value)
     {
         if (value.Equals("released", StringComparison.OrdinalIgnoreCase)) return "创作引擎已结束，显存已释放。";

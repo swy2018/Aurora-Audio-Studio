@@ -5,7 +5,7 @@
   <p>面向 Windows 的本地 AI 音频创作工作台</p>
   <p>
     <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img alt="官方网站" src="docs/assets/readme-button-website.svg"></a>
-    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.2.5" src="docs/assets/readme-button-download.svg"></a>
+    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.3.0" src="docs/assets/readme-button-download.svg"></a>
     <a href="CHANGELOG.md"><img alt="更新日志" src="docs/assets/readme-button-changelog.svg"></a>
     <a href="#english"><img alt="English" src="docs/assets/readme-button-english.svg"></a>
   </p>
@@ -15,41 +15,31 @@
 
 Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离、MIDI 扒谱和视频字幕集中到同一个本地入口。六个功能互相独立，可直接开始当前任务，不再需要手动管理多个启动器、端口和结果目录。
 
-## 1.2.5 带来了什么
+## 1.3.0 带来了什么
 
-### 更直接的首页
+### 更可靠的运行边界
 
-- 六个独立功能以两行三列完整展示，点击即可进入对应工作台。
-- 首次使用引导不再要求创建并不存在的统一工程，而是按当前功能提示素材、模型和输出位置。
-- 修复原引导按钮无法跳转到底部“模型管理”和“设置”的问题。
+- Aurora 只允许一个应用实例同时操作任务、设置和模型状态，避免多个窗口互相覆盖数据。
+- CI 在构建安装包前自动执行更新流程、单实例、模型事务和处理记录兼容检查。
+- 现有六个独立功能、按钮、输出流程和高清产品截图保持不变。
 
-### 更准确的处理记录
+### 可恢复的模型更新
 
-- `.arr` 明确为分轨、扒谱和字幕任务的轻量 JSON 处理记录，不是类似 PS、PR 的可编辑工程文件。
-- “最近项目”“项目目录”等用户可见名称改为“最近处理记录”“处理记录目录”。
-- `.arr` 只关联源文件路径、模型、参数、任务和输出，不复制或打包大型素材、模型与成品。
+- 模型先下载或解压到暂存目录，通过 marker 与完整性检查后才切换到正式目录。
+- 更新失败或取消不会覆盖当前可用模型；上一可用版本留在本机，可直接回退。
+- 固定下载包继续执行 SHA-256 校验，Hugging Face 模型也使用相同的暂存切换边界。
 
-### 一条完整的本地创作流程
+### 处理记录与隐私恢复
 
-- 多选或拖入音频与视频素材，在提交前直接预览。
-- 使用快速草稿、推荐质量和高质量三档处理预设。
-- 在任务中心查看引擎实时进度、当前阶段、持续时间与持久日志。
-- 暂停后续队列，不强行中断正在执行的本地任务。
-- 在成品库集中查看音轨、MIDI、字幕和其他输出。
+- `.arr` 记录开始显式检查格式版本；旧记录自动迁移。
+- 损坏或由未来版本生成的记录不会被误读，会保留 `.recovery` 副本并写入诊断日志。
+- 导出诊断前显示日志数量，并自动隐藏用户目录、用户名、模型、成品和处理记录路径。
 
-### 更可靠的模型部署
+### 四语言与辅助功能
 
-- 安装前显示准确目标目录、预计下载量、建议空间和当前可用磁盘空间。
-- 显示下载进度与传输速度，支持取消和断点续传。
-- 模型包执行 SHA-256 校验，新安装先完成临时目录完整性检查。
-- 模型按需安装；默认工作流保持不变，可选引擎由用户自行决定。
-
-### 更像产品，而不是工具集合
-
-- 旧 `.aurora` 处理记录继续兼容。
-- 每天首次启动可自动检查应用更新，也可随时手动检查。
-- 应用更新从 GitHub 获取安装包并验证 SHA-256，随后交给标准 Windows 安装界面覆盖升级。
-- 界面支持简体中文、繁體中文、English 和日本語。
+- 动态任务状态、恢复提示和主要运行文案补齐简体中文、繁體中文、English 和日本語。
+- 六个首页入口新增访问键，主要导航、工作台和进度状态增加屏幕阅读器名称与实时通知。
+- 高对比度继续使用 Windows 系统颜色，现有布局和视觉风格不变。
 
 ## 工作流
 
@@ -76,7 +66,7 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 ### 标准安装
 
 1. 打开 [Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest)。
-2. 下载 `Aurora-Audio-Studio-1.2.5-Setup-x64.exe` 和同名 `.sha256` 文件。
+2. 下载 `Aurora-Audio-Studio-1.3.0-Setup-x64.exe` 和同名 `.sha256` 文件。
 3. 运行安装程序，阅读并接受 GNU GPL v3.0，选择安装位置和桌面快捷方式。
 4. 首次打开 Aurora，直接选择需要的功能；需要时再确认模型、处理记录和成品目录。
 
@@ -104,7 +94,7 @@ Aurora 桌面端使用 .NET 10、WinUI 3 和 Windows App SDK 构建，官网使�
 ```powershell
 dotnet restore .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj --runtime win-x64
 dotnet build .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -p:Platform=x64
-dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.2.5
+dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.3.0
 ```
 
 运行回归检查：
@@ -135,12 +125,14 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 Aurora Audio Studio is a local AI audio production workspace for Windows. Its six independent features provide direct entry points for music generation, voice cloning, singing conversion, stem separation, MIDI transcription, and video subtitles.
 
-### What version 1.2.5 adds
+### What version 1.3.0 adds
 
-- Six direct, independent feature entry points on Home with no unified-project setup step.
-- Fixed first-use navigation for both main-menu and footer destinations.
-- Honest `.arr` terminology: a lightweight JSON processing record for separation, transcription, and subtitle tasks—not a Photoshop- or Premiere-style editable project.
-- Updated recent-history, settings, recovery, About, documentation, website, and product imagery.
+- Single-instance operation prevents concurrent task, settings, and model-state writes.
+- Model updates stage and verify before switching, retain the previous working version, and leave the active model untouched on failure.
+- `.arr` schema migration plus `.recovery` copies for damaged or newer records.
+- Privacy preview and path redaction for diagnostics exports.
+- Four-language dynamic task states, Home access keys, screen-reader names, and live progress announcements.
+- CI runs the critical regression suite before packaging.
 
 ### Local by design
 
@@ -149,7 +141,7 @@ Aurora does not operate a cloud generation service. Media and generated output r
 ### Install
 
 1. Open the latest [Release](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest).
-2. Download `Aurora-Audio-Studio-1.2.5-Setup-x64.exe` and its `.sha256` file.
+2. Download `Aurora-Audio-Studio-1.3.0-Setup-x64.exe` and its `.sha256` file.
 3. Run Setup, review GNU GPL v3.0, and choose the destination and shortcut options.
 4. Choose a feature on first launch; confirm model, processing-record, and output folders only when needed.
 

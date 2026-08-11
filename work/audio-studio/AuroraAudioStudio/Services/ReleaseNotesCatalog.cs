@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 3, 0), "2026-08-12", [
+            "• CI 在生成安装包前自动执行关键回归检查。\n• Aurora 改为单实例运行，模型更新先暂存校验再切换，并保留上一可用版本。\n• 动态任务状态完整支持四语言；.arr 记录增加版本迁移和恢复副本。\n• 诊断导出新增隐私预览与路径脱敏。\n• 首页访问键、屏幕阅读器名称和实时进度提示提升键盘与辅助功能体验。",
+            "• CI 在產生安裝程式前自動執行關鍵回歸檢查。\n• Aurora 改為單一執行個體，模型更新會先暫存驗證再切換，並保留上一個可用版本。\n• 動態任務狀態完整支援四種語言；.arr 記錄加入版本遷移與復原副本。\n• 診斷匯出新增隱私預覽與路徑遮蔽。\n• 首頁快速鍵、螢幕閱讀器名稱與即時進度提示改善鍵盤及輔助功能體驗。",
+            "• CI now runs critical regression checks before packaging.\n• Aurora now runs as a single instance; model updates stage and verify before switching while retaining the previous working version.\n• Dynamic task states cover all four languages, and .arr records gain schema migration and recovery copies.\n• Diagnostics export adds privacy preview and path redaction.\n• Home access keys, screen-reader names, and live progress improve keyboard and assistive use.",
+            "• インストーラー作成前に CI が重要な回帰テストを自動実行します。\n• Aurora を単一インスタンス化し、モデル更新は一時領域で検証後に切り替え、直前の正常版を保持します。\n• 動的タスク表示を4言語に対応し、.arr に形式移行と復旧コピーを追加しました。\n• 診断出力にプライバシー確認とパスの伏せ字を追加しました。\n• ホームのアクセスキー、読み上げ名、進捗通知でキーボードと支援技術の操作性を改善しました。"]),
         new(new(1, 2, 5), "2026-08-12", [
             "• 修复首次使用引导中保存位置和模型按钮无响应的问题，主导航与底部导航现在都能正确跳转。\n• 首页改为六个独立功能直接进入，不再要求先创建统一项目。\n• 明确 .arr 只是分轨、扒谱和字幕任务的轻量处理记录，并同步调整相关界面文案。\n• README、官网、关于页、音乐人使用说明、版本信息与产品截图全部同步至 1.2.5。",
             "• 修正首次使用引導中儲存位置和模型按鈕無回應的問題，主導覽與底部導覽現在都能正確跳轉。\n• 首頁改為六個獨立功能直接進入，不再要求先建立統一專案。\n• 明確 .arr 只是分軌、扒譜和字幕任務的輕量處理記錄，並同步調整相關介面文字。\n• README、官網、關於頁、音樂人使用說明、版本資訊與產品截圖全部同步至 1.2.5。",

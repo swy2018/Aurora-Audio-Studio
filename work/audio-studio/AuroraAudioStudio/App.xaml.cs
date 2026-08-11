@@ -10,6 +10,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Shapes;
+using AuroraAudioStudio.Services;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -22,6 +23,7 @@ namespace AuroraAudioStudio;
 public partial class App : Application
 {
     public static MainWindow MainWindow { get; private set; } = null!;
+    private readonly SingleInstanceGuard singleInstance = new();
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -48,6 +50,7 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
+        if (!singleInstance.IsPrimary) { Exit(); return; }
         MainWindow = new MainWindow();
         MainWindow.Activate();
     }

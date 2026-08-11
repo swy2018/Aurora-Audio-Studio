@@ -10,5 +10,8 @@
     <Compile Include="..\AuroraAudioStudio\Services\ModelInstallPlanner.cs" Link="ModelInstallPlanner.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\UpdateFlowGuard.cs" Link="UpdateFlowGuard.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\ReleaseNotesCatalog.cs" Link="ReleaseNotesCatalog.cs" />
+    <Compile Include="..\AuroraAudioStudio\Services\SingleInstanceGuard.cs" Link="SingleInstanceGuard.cs" />
+    <Compile Include="..\AuroraAudioStudio\Services\ModelInstallTransaction.cs" Link="ModelInstallTransaction.cs" />
+    <Compile Include="..\AuroraAudioStudio\Services\ProjectDocumentMigrator.cs" Link="ProjectDocumentMigrator.cs" />
   </ItemGroup>
 </Project>

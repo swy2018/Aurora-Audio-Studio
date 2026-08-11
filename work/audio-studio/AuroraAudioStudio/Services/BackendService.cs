@@ -328,16 +328,42 @@ public sealed class BackendService(SettingsService settings)
         return path;
     }
 
+    public int DiagnosticsLogCount() => Directory.Exists(Logs) ? Directory.EnumerateFiles(Logs, "*", SearchOption.AllDirectories).Count() : 0;
+
     public OperationResult CreateDiagnostics()
     {
         try
         {
             var destination = Path.Combine(settings.Current.OutputRoot, $"Aurora-Diagnostics-{DateTime.Now:yyyyMMdd-HHmmss}.zip");
-            if (Directory.Exists(Logs)) ZipFile.CreateFromDirectory(Logs, destination, CompressionLevel.Fastest, false);
-            else using (ZipFile.Open(destination, ZipArchiveMode.Create)) { }
-            return new OperationResult(true, "Diagnostics exported.", destination);
+            Directory.CreateDirectory(settings.Current.OutputRoot);
+            using var archive = ZipFile.Open(destination, ZipArchiveMode.Create);
+            if (Directory.Exists(Logs))
+            {
+                foreach (var path in Directory.EnumerateFiles(Logs, "*", SearchOption.AllDirectories))
+                {
+                    var entry = archive.CreateEntry(Path.GetRelativePath(Logs, path), CompressionLevel.Fastest);
+                    using var writer = new StreamWriter(entry.Open());
+                    writer.Write(RedactDiagnostics(File.ReadAllText(path)));
+                }
+            }
+            return new OperationResult(true, "diagnosticsExported", destination);
         }
         catch (Exception ex) { return new OperationResult(false, ex.Message); }
+    }
+
+    private string RedactDiagnostics(string value)
+    {
+        var replacements = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            [Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)] = "%USERPROFILE%",
+            [Environment.UserName] = "%USERNAME%",
+            [settings.Current.LocalAiRoot] = "%AURORA_MODEL_ROOT%",
+            [settings.Current.OutputRoot] = "%AURORA_OUTPUT_ROOT%",
+            [settings.Current.ProjectsRoot] = "%AURORA_RECORDS_ROOT%"
+        };
+        foreach (var item in replacements.Where(x => !string.IsNullOrWhiteSpace(x.Key)).OrderByDescending(x => x.Key.Length))
+            value = value.Replace(item.Key, item.Value, StringComparison.OrdinalIgnoreCase);
+        return value;
     }
 
     public void OpenFolder(string path)

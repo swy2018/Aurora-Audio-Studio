@@ -4,6 +4,30 @@
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
 
+## 1.3.0 — 2026-08-12
+
+### 中文
+
+- CI 现在会在构建安装包前执行更新、模型事务、单实例与处理记录兼容回归检查。
+- Aurora 改为单实例运行，避免多个进程同时写入任务、设置和模型状态。
+- 模型安装与更新改为暂存、完整性检查和目录切换；上一可用版本保留在本机，可直接回退，失败不会覆盖正式模型目录。
+- 动态任务状态、恢复提示和主要运行文案补齐简体中文、繁體中文、English 与日本語。
+- `.arr` 处理记录开始显式检查格式版本；旧记录自动迁移，损坏或过新的记录保留 `.recovery` 恢复副本并写入诊断日志。
+- 诊断导出新增内容预览并自动隐藏用户目录、用户名、模型、成品和处理记录路径。
+- 六个首页入口新增访问键，主要导航、工作台和进度状态补充屏幕阅读器名称与实时状态提示；高对比度主题继续使用 Windows 系统颜色。
+- README、官方网站、关于页、音乐人使用说明和版本信息同步至 1.3.0；界面布局未改变，因此沿用现有高清产品截图。
+
+### English
+
+- CI now runs update, model transaction, single-instance, and processing-record compatibility regression checks before packaging.
+- Aurora now runs as a single instance to prevent concurrent writes to tasks, settings, and model state.
+- Model installs and updates now use staging, integrity verification, and directory switching. The previous working version remains locally recoverable, and failures do not overwrite the active model.
+- Dynamic task states, recovery messages, and primary runtime copy now cover Simplified Chinese, Traditional Chinese, English, and Japanese.
+- `.arr` processing records now enforce schema compatibility: legacy records migrate, while damaged or newer records receive `.recovery` copies and diagnostic log entries.
+- Diagnostics export now previews the included log count and redacts user, profile, model, output, and processing-record paths.
+- The six Home actions now have access keys, while navigation, workbench, and progress states expose screen-reader names and live status; high contrast continues to use Windows system colors.
+- Updated the README, official website, About page, musician guide, and version metadata for 1.3.0. Existing high-resolution screenshots remain because the visual layout is unchanged.
+
 ## 1.2.5 — 2026-08-12
 
 ### 中文
