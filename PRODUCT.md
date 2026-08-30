@@ -33,17 +33,17 @@ Aurora unifies independently installed local audio models behind one bilingual d
 
 ## Capabilities and Constraints
 
-- Music generation with ACE-Step 1.5 XL Turbo.
+- Music generation with ACE-Step 1.5 XL Turbo, plus optional on-demand MiniMax-Music3 with an isolated low-VRAM CUDA runtime.
 - AI voice creation with the default Qwen3-TTS 1.7B suite, plus optional Qwen3-TTS 0.6B and F5-TTS engines.
 - Singing voice cloning with Seed-VC at 44.1 kHz.
 - Six-stem separation with BS-RoFormer-SW, plus optional general-purpose Demucs 4 separation.
-- Multi-instrument MIDI transcription with YourMT3+ and a dedicated piano model, plus optional lightweight Spotify Basic Pitch transcription.
+- Default piano MIDI transcription with TransKun V2, plus YourMT3+, legacy ByteDance Piano, and lightweight Spotify Basic Pitch options.
 - Video subtitles with Subtitle Edit and Faster-Whisper, plus optional Small, Large v3 Turbo, and Large v3 CTranslate2 model packs.
 - Batch media intake with drag and drop, built-in preview, quality presets, live task progress, persistent logs, pending-queue pause, and a unified Results library.
 - Model selection, resumable on-demand deployment with disk checks and cancellation, model manager, output-folder selection, verified app updates, per-model update checks, VRAM release, diagnostics export, and four-language switching.
 - Closing Aurora stops the backends it launched.
 - A redesign must preserve every existing workflow, control, and product behavior unless the user explicitly approves a functional change.
-- The approved A workbench and dark rounded A-wave icon remain the visual baseline for version 1.3.0.
+- The approved A workbench and dark rounded A-wave icon remain the visual baseline for version 1.4.0.
 - The existing model suite remains the default. Optional engines never install automatically and do not create maintenance warnings when absent.
 - The installer defaults to Program Files, performs guarded in-place upgrades under the same AppId, and preserves user-owned data and the selected install location.
 - Interactive uninstall offers an explicit personal-configuration cleanup choice without touching models, processing records, source media, or outputs.

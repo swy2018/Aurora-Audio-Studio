@@ -27,6 +27,7 @@ public sealed class BackendService(SettingsService settings)
         {
             return feature switch
             {
+                "music" when model.Equals("minimax-music3", StringComparison.OrdinalIgnoreCase) => await StartMiniMaxMusic3Async(language),
                 "music" => await StartMusicAsync(language),
                 "voice" when model.StartsWith("qwen3-tts-", StringComparison.OrdinalIgnoreCase) => await StartTtsAsync(model),
                 "voice" when model.Equals("f5-tts", StringComparison.OrdinalIgnoreCase) => await StartF5TtsAsync(),
@@ -51,9 +52,34 @@ public sealed class BackendService(SettingsService settings)
         if (!HasXlLoadHeadroom(out var ram, out var commit))
             return new OperationResult(false, $"ACE-Step needs more memory headroom. Available RAM: {ram:F1} GB, commit headroom: {commit:F1} GB.");
         Stop("singing");
-        if (!IsRunning("music"))
+        if (!IsRunning("music") || !activeModels.TryGetValue("music", out var current) || !current.Equals("ace-step", StringComparison.OrdinalIgnoreCase))
+        {
+            Stop("music");
             processes["music"] = StartHidden("music", python, $"\"{script}\" --port 7860 --server-name 127.0.0.1 --language {(language.StartsWith("en") ? "en" : "zh")} --config_path acestep-v15-xl-turbo --lm_model_path acestep-5Hz-lm-1.7B --offload_to_cpu true --init_service true", MusicRoot);
+            activeModels["music"] = "ace-step";
+        }
         return await WaitForUrlAsync("http://127.0.0.1:7860", "Starting ACE-Step 1.5 XL Turbo");
+    }
+
+    private async Task<OperationResult> StartMiniMaxMusic3Async(string language)
+    {
+        var modelRoot = Path.Combine(Root, "MiniMax-Music3");
+        var environmentRoot = Path.Combine(Root, "AudioTools", "minimax-music3-env");
+        var python = Path.Combine(environmentRoot, "Scripts", "python.exe");
+        var script = Path.Combine(AppContext.BaseDirectory, "Tools", "minimax_music3_webui.py");
+        if (!File.Exists(python) || !File.Exists(Path.Combine(modelRoot, "modular_model_index.json")) || !File.Exists(script)) return Missing("MiniMax-Music3");
+        if (!HasXlLoadHeadroom(out var ram, out var commit))
+            return new OperationResult(false, $"MiniMax-Music3 needs more memory headroom. Available RAM: {ram:F1} GB, commit headroom: {commit:F1} GB.");
+        Stop("singing");
+        if (!IsRunning("music") || !activeModels.TryGetValue("music", out var current) || !current.Equals("minimax-music3", StringComparison.OrdinalIgnoreCase))
+        {
+            Stop("music");
+            var output = OutputFolder("AI音乐");
+            processes["music"] = StartHidden("music", python, $"\"{script}\" --model \"{modelRoot}\" --output \"{output}\" --port 7860 --language {(language.StartsWith("en") ? "en" : "zh")}", environmentRoot,
+                new Dictionary<string, string> { ["GRADIO_TEMP_DIR"] = output, ["PYTHONUTF8"] = "1", ["HF_HUB_OFFLINE"] = "1" });
+            activeModels["music"] = "minimax-music3";
+        }
+        return await WaitForUrlAsync("http://127.0.0.1:7860", "正在启动 MiniMax-Music3");
     }
 
     private async Task<OperationResult> StartTtsAsync(string modelId)
@@ -192,6 +218,20 @@ public sealed class BackendService(SettingsService settings)
             basicPitchInfo.ArgumentList.Add(basicPitchOutput); basicPitchInfo.ArgumentList.Add(source);
             basicPitchInfo.Environment["PYTHONUTF8"] = "1";
             return await RunCapturedAsync("utility", basicPitchInfo, "basic-pitch", basicPitchOutput, progress, cancellationToken);
+        }
+        if (modelId.Equals("transkun", StringComparison.OrdinalIgnoreCase))
+        {
+            var transkun = Path.Combine(Root, "AudioTools", "transkun-env", "Scripts", "transkun.exe");
+            if (!File.Exists(transkun)) return Missing("TransKun V2");
+            var transkunOutput = OutputFolder("AI扒谱");
+            var transkunMidi = Path.Combine(transkunOutput, $"{Path.GetFileNameWithoutExtension(source)}-{DateTime.Now:yyyyMMdd-HHmmss}.mid");
+            var transkunInfo = Hidden(transkun, transkunOutput);
+            transkunInfo.ArgumentList.Add(source);
+            transkunInfo.ArgumentList.Add(transkunMidi);
+            transkunInfo.ArgumentList.Add("--device");
+            transkunInfo.ArgumentList.Add("cuda");
+            transkunInfo.Environment["PYTHONUTF8"] = "1";
+            return await RunCapturedAsync("utility", transkunInfo, "transkun", transkunOutput, progress, cancellationToken);
         }
         var piano = modelId.Equals("piano", StringComparison.OrdinalIgnoreCase);
         var output = OutputFolder("AI扒谱");

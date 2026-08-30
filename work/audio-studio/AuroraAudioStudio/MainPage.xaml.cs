@@ -296,8 +296,7 @@ public sealed partial class MainPage : Page
             ("separation", "fast") => "demucs",
             ("separation", _) => "roformer",
             ("transcription", "fast") => "basic-pitch",
-            ("transcription", "quality") => "piano",
-            ("transcription", _) => "yourmt3",
+            ("transcription", _) => "transkun",
             ("subtitles", "fast") => "whisper-small",
             ("subtitles", "quality") => "whisper-large-v3",
             ("subtitles", _) => "faster-whisper",
@@ -406,7 +405,10 @@ public sealed partial class MainPage : Page
         SetStatus("正在检查模型更新…");
         var results = await modelUpdater.CheckAllAsync();
         var available = results.Count(x => x.Value.Path == "available");
-        SetStatus(available == 0 ? "所有可检查的模型均为最新。" : $"发现 {available} 个模型更新。请逐项确认更新。");
+        var manual = results.Count(x => x.Value.Path == "manual");
+        SetStatus(available == 0
+            ? $"可自动检查的模型均为最新；{manual} 个固定组件需随 Aurora 或上游安装器升级。"
+            : $"发现 {available} 个模型更新；另有 {manual} 个固定组件需随 Aurora 或上游安装器升级。");
     }
 
     private async void ModelUpdateButton_Click(object sender, RoutedEventArgs e)
@@ -442,6 +444,11 @@ public sealed partial class MainPage : Page
     }
 
     private async void CheckAppUpdateButton_Click(object sender, RoutedEventArgs e) => await RunAppUpdateFlowAsync(true);
+
+    private void FeedbackButton_Click(object sender, RoutedEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo("https://github.com/swy2018/Aurora-Audio-Studio/issues/new/choose") { UseShellExecute = true });
+    }
 
     private async void ReleaseNotesButton_Click(object sender, RoutedEventArgs e)
     {
@@ -659,7 +666,7 @@ public sealed partial class MainPage : Page
     private static string CurrentDisplayVersion()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        if (version is null) return "1.3.0";
+        if (version is null) return "1.4.0";
         return version.Revision > 0 ? version.ToString(4) : version.ToString(3);
     }
 

@@ -7,6 +7,7 @@ public sealed class ModelCatalogService(SettingsService settings)
     public IReadOnlyList<ModelDefinition> Definitions { get; } =
     [
         new("ace-step", "ACE-Step 1.5 XL Turbo", "music", "ACE-Step-1.5", @"acestep\acestep_v15_pipeline.py", "GitHub + Hugging Face", "git-hf", "https://github.com/ACE-Step/ACE-Step-1.5.git", true),
+        new("minimax-music3", "MiniMax-Music3", "music", "MiniMax-Music3", "modular_model_index.json", "MiniMax · Hugging Face", "minimax-music3", "MiniMaxAI/MiniMax-Music3"),
         new("qwen3-tts-base", "Qwen3-TTS 1.7B · 声音克隆", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-1.7B-Base", "model.safetensors", "Qwen · Hugging Face", "huggingface", "Qwen/Qwen3-TTS-12Hz-1.7B-Base", true),
         new("qwen3-tts-custom", "Qwen3-TTS 1.7B · 专业音色", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-1.7B-CustomVoice", "model.safetensors", "Qwen · Hugging Face", "huggingface", "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice", true),
         new("qwen3-tts-design", "Qwen3-TTS 1.7B · 音色设计", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-1.7B-VoiceDesign", "model.safetensors", "Qwen · Hugging Face", "huggingface", "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign", true),
@@ -16,8 +17,9 @@ public sealed class ModelCatalogService(SettingsService settings)
         new("seed-vc", "Seed-VC 44.1k", "singing", "Seed-VC", "app_svc_local.py", "GitHub + Hugging Face", "git-hf", "https://github.com/Plachtaa/seed-vc.git", true),
         new("roformer", "BS-RoFormer-SW 6-Stem", "separation", @"AudioTools\roformer-env", @"Scripts\bs-roformer-infer.exe", "PyPI model registry", "python-tool", null, true),
         new("demucs", "Demucs 4 · 通用四轨分离", "separation", @"AudioTools\demucs-env", @"Scripts\demucs.exe", "Meta Research · PyPI", "uv-package", "demucs"),
-        new("yourmt3", "YourMT3+ Multi-Instrument", "transcription", @"AudioTools\mt3-env", @"Scripts\mt3-infer.exe", "PyPI model registry", "python-tool", null, true),
-        new("piano", "ByteDance Piano", "transcription", @"AudioTools\piano-models", "note_F1=0.9677_pedal_F1=0.9186.pth", "Zenodo", "direct", null, true),
+        new("yourmt3", "YourMT3+ Multi-Instrument", "transcription", @"AudioTools\mt3-env", @"Scripts\mt3-infer.exe", "PyPI model registry", "python-tool"),
+        new("transkun", "TransKun V2 · 钢琴扒谱", "transcription", @"AudioTools\transkun-env", @"Scripts\transkun.exe", "TransKun · PyPI", "uv-package", "transkun", true),
+        new("piano", "ByteDance Piano · 经典模型", "transcription", @"AudioTools\piano-models", "note_F1=0.9677_pedal_F1=0.9186.pth", "Zenodo", "direct"),
         new("basic-pitch", "Spotify Basic Pitch · 轻量扒谱", "transcription", @"AudioTools\basic-pitch-env", @"Scripts\basic-pitch.exe", "Spotify · PyPI", "uv-package", "basic-pitch"),
         new("faster-whisper", "Faster-Whisper XXL", "subtitles", @"Faster-Whisper-XXL\Faster-Whisper-XXL", "faster-whisper-xxl.exe", "GitHub Release", "github-release", "https://github.com/Purfview/whisper-standalone-win.git", true),
         new("whisper-small", "Faster-Whisper Small", "subtitles", @"Faster-Whisper-XXL\Models\small", "model.bin", "SYSTRAN · Hugging Face", "huggingface", "Systran/faster-whisper-small"),
@@ -81,7 +83,7 @@ public sealed class ModelCatalogService(SettingsService settings)
 
     private static string RecommendedVram(ModelDefinition model) => model.Id switch
     {
-        "ace-step" => "12 GB+", "qwen3-tts-base" or "qwen3-tts-custom" or "qwen3-tts-design" => "8 GB+",
+        "ace-step" => "12 GB+", "minimax-music3" => "8 GB+ · 16 GB 推荐", "qwen3-tts-base" or "qwen3-tts-custom" or "qwen3-tts-design" => "8 GB+",
         "qwen3-tts-06b-base" or "qwen3-tts-06b-custom" => "4 GB+", "f5-tts" => "6 GB+",
         "seed-vc" => "8 GB+", "roformer" => "8 GB+", "demucs" => "4 GB+", "faster-whisper" => "6 GB+",
         "whisper-small" => "2 GB+", "whisper-large-v3-turbo" => "6 GB+", "whisper-large-v3" => "10 GB+", _ => "4 GB+"
@@ -100,6 +102,7 @@ public sealed class ModelCatalogService(SettingsService settings)
     private string Purpose(string id) => id switch
     {
         "ace-step" => Pick("完整歌曲与纯音乐生成", "完整歌曲與純音樂生成", "Full songs and instrumental generation", "楽曲・インスト生成"),
+        "minimax-music3" => Pick("最长五分钟的完整歌曲与纯音乐生成", "最長五分鐘的完整歌曲與純音樂生成", "Full songs and instrumentals up to five minutes", "最長5分の楽曲・インスト生成"),
         "qwen3-tts-base" => Pick("参考音频声音克隆", "參考音訊聲音複製", "Reference-audio voice cloning", "参照音声からのクローン"),
         "qwen3-tts-custom" => Pick("稳定的预设专业音色", "穩定的預設專業音色", "Consistent professional voices", "安定したプロ音声"),
         "qwen3-tts-design" => Pick("用文字设计新音色", "以文字設計新音色", "Design voices from text", "テキストから声を設計"),
@@ -110,6 +113,7 @@ public sealed class ModelCatalogService(SettingsService settings)
         "roformer" => Pick("精细六轨分离", "精細六軌分離", "Detailed six-stem separation", "高精度 6 ステム分離"),
         "demucs" => Pick("通用快速四轨分离", "通用快速四軌分離", "General fast four-stem separation", "汎用高速 4 ステム分離"),
         "yourmt3" => Pick("多乐器 MIDI 转写", "多樂器 MIDI 轉寫", "Multi-instrument MIDI transcription", "複数楽器の MIDI 採譜"),
+        "transkun" => Pick("默认高精度钢琴 MIDI 转写", "預設高精度鋼琴 MIDI 轉寫", "Default high-accuracy piano MIDI transcription", "標準の高精度ピアノ MIDI 採譜"),
         "piano" => Pick("高精度钢琴 MIDI 与踏板", "高精度鋼琴 MIDI 與踏板", "Detailed piano MIDI with pedals", "高精度ピアノ MIDI・ペダル"),
         "basic-pitch" => Pick("轻量快速旋律扒谱", "輕量快速旋律扒譜", "Lightweight melodic transcription", "軽量なメロディ採譜"),
         "whisper-small" => Pick("低占用快速多语言字幕", "低佔用快速多語言字幕", "Fast multilingual subtitles with low resource use", "軽量な多言語字幕"),
@@ -121,7 +125,7 @@ public sealed class ModelCatalogService(SettingsService settings)
 
     private string Languages(string id) => id switch
     {
-        "qwen3-tts-base" or "qwen3-tts-custom" or "qwen3-tts-design" or "qwen3-tts-06b-base" or "qwen3-tts-06b-custom" => "中文 · English · 日本語 · 多语言",
+        "minimax-music3" or "qwen3-tts-base" or "qwen3-tts-custom" or "qwen3-tts-design" or "qwen3-tts-06b-base" or "qwen3-tts-06b-custom" => "中文 · English · 日本語 · 多语言",
         "f5-tts" => Pick("中文 · 英语 · 日语 · 多语言", "中文 · 英語 · 日語 · 多語言", "Chinese · English · Japanese · multilingual", "中国語 · 英語 · 日本語 · 多言語"),
         "faster-whisper" or "whisper-small" or "whisper-large-v3-turbo" or "whisper-large-v3" => Pick("中文 · 英语 · 日语 · 约 100 种语言", "中文 · 英語 · 日語 · 約 100 種語言", "Chinese · English · Japanese · about 100 languages", "中国語 · 英語 · 日本語 · 約 100 言語"),
         _ => Pick("不依赖文本语言", "不依賴文字語言", "Language-independent", "言語非依存")
@@ -130,7 +134,8 @@ public sealed class ModelCatalogService(SettingsService settings)
     private static string License(string id) => id switch
     {
         "ace-step" or "qwen3-tts-base" or "qwen3-tts-custom" or "qwen3-tts-design" or "qwen3-tts-06b-base" or "qwen3-tts-06b-custom" or "basic-pitch" => "Apache-2.0",
-        "f5-tts" or "demucs" or "faster-whisper" or "whisper-small" or "whisper-large-v3-turbo" or "whisper-large-v3" => "MIT",
+        "f5-tts" or "demucs" or "faster-whisper" or "whisper-small" or "whisper-large-v3-turbo" or "whisper-large-v3" or "transkun" => "MIT",
+        "minimax-music3" => "MiniMax-Music3 Community License",
         "subtitle-edit" => "GPL-3.0",
         _ => "上游许可"
     };

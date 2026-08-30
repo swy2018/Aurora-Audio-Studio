@@ -14,7 +14,7 @@ public sealed class ProjectService(SettingsService settings)
         new("music", "从文字开始创作", "生成完整歌曲或纯音乐", "music", "ace-step", "\uE8D6"),
         new("voice", "制作一段配音", "设计音色、克隆声音并合成", "voice", "qwen3-tts-custom", "\uE720"),
         new("separation", "拆分一首混音", "分离人声、鼓、贝斯与伴奏", "separation", "roformer", "\uE9E9"),
-        new("transcription", "把录音变成 MIDI", "识别钢琴或多乐器演奏", "transcription", "yourmt3", "\uE70F"),
+        new("transcription", "把录音变成 MIDI", "默认使用 TransKun V2 识别钢琴演奏", "transcription", "transkun", "\uE70F"),
         new("subtitles", "为视频生成字幕", "本地识别并输出时间轴字幕", "subtitles", "faster-whisper", "\uE8BA")
     ];
 

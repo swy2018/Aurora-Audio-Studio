@@ -1,0 +1,31 @@
+name: 功能建议 / Feature request
+description: 建议新的工作流、模型支持或体验改进
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 想解决的问题
+      description: 请先描述实际创作场景和当前困难。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+      description: 希望 Aurora 怎样帮助你完成它？
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: 模型或参考资料
+      description: 如涉及新模型，请提供官方仓库、许可和大致硬件需求。
+  - type: checkboxes
+    id: local
+    attributes:
+      label: 本地优先
+      options:
+        - label: 我理解 Aurora 优先支持可在本地运行且许可清晰的方案。
+          required: true

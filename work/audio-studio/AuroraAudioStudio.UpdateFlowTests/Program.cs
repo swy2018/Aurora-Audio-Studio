@@ -87,6 +87,20 @@ var plan = ModelInstallPlanner.Create(qwen, @"D:\AuroraModels");
 Require(plan.TargetPath == @"D:\AuroraModels\Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "The model plan must show the exact target directory.");
 Require(plan.EstimatedDownload == "≈ 1.5 GB", "The Qwen 0.6B plan must show its estimated download size.");
 Require(plan.RecommendedFreeSpace == "≈ 3 GB", "The Qwen 0.6B plan must show recommended free disk space.");
+var minimax = new ModelDefinition("minimax-music3", "MiniMax-Music3", "music", "MiniMax-Music3", "modular_model_index.json", "MiniMax", "minimax-music3", "MiniMaxAI/MiniMax-Music3");
+var minimaxPlan = ModelInstallPlanner.Create(minimax, @"D:\AuroraModels");
+Require(minimaxPlan.EstimatedDownload == "≈ 27 GB" && minimaxPlan.RecommendedFreeSpace == "≈ 55 GB", "MiniMax-Music3 must disclose its large on-demand download and staging space.");
+var transkun = new ModelDefinition("transkun", "TransKun V2", "transcription", @"AudioTools\transkun-env", @"Scripts\transkun.exe", "PyPI", "uv-package", "transkun", true);
+var transkunPlan = ModelInstallPlanner.Create(transkun, @"D:\AuroraModels");
+Require(transkunPlan.TargetPath.EndsWith(@"AudioTools\transkun-env", StringComparison.OrdinalIgnoreCase), "TransKun must use an isolated model environment.");
+
+var catalogSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Services", "ModelCatalogService.cs"));
+Require(catalogSource.Contains("new(\"minimax-music3\"", StringComparison.Ordinal), "Model Management must expose MiniMax-Music3.");
+Require(catalogSource.Contains("new(\"transkun\"", StringComparison.Ordinal), "Model Management must expose TransKun V2.");
+var mainPageSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "MainPage.xaml.cs"));
+Require(mainPageSource.Contains("(\"transcription\", _) => \"transkun\"", StringComparison.Ordinal), "TransKun must be the default recommended piano transcription engine.");
+var minimaxTool = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Tools", "minimax_music3_webui.py"));
+Require(minimaxTool.Contains("MiniMax-Music3 Community License", StringComparison.Ordinal), "The MiniMax-Music3 workbench must display the upstream model and license name.");
 
 var notes098 = ReleaseNotesCatalog.CurrentAndRecent("0.9.8", "zh-CN");
 Require(notes098.Count == 5 && notes098[0].Version == "0.9.8" && notes098[^1].Version == "0.7.0", "Version 0.9.8 must show itself and its four previous releases.");
@@ -111,6 +125,9 @@ Require(notes125.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.2.5 rele
 var notes130 = ReleaseNotesCatalog.CurrentAndRecent("1.3.0", "ja-JP");
 Require(notes130.Count == 5 && notes130[0].Version == "1.3.0" && notes130[^1].Version == "1.0.1", "Version 1.3.0 must show itself and its four previous releases.");
 Require(notes130.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.3.0 release note must have localized content.");
+var notes140 = ReleaseNotesCatalog.CurrentAndRecent("1.4.0", "zh-CN");
+Require(notes140.Count == 5 && notes140[0].Version == "1.4.0" && notes140[^1].Version == "1.1.0", "Version 1.4.0 must show itself and its four previous releases.");
+Require(notes140.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.4.0 release note must have localized content.");
 var validationNotes = ReleaseNotesCatalog.CurrentAndRecent("0.9.8.9", "zh-CN");
 Require(validationNotes[0].Version == "0.9.8" && validationNotes[0].IsCurrent, "The validation build must identify its nearest public release history as current.");
 

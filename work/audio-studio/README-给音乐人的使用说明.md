@@ -1,4 +1,4 @@
-# Aurora Audio Studio 1.3.0 使用说明
+# Aurora Audio Studio 1.4.0 使用说明
 
 完成一次分轨、扒谱或字幕任务时，Aurora 会在“处理记录目录”创建 `.arr` 记录文件。它只是保存源文件路径、模型、参数、任务与输出关系的轻量 JSON 清单，不是类似 PS、PR 的可编辑工程文件，也不会复制素材、模型或成品。旧版 `.aurora` 记录仍可继续读取。
 
@@ -7,7 +7,7 @@
 - 在“模型中心”安装、修复、更新、回退或安全卸载模型；默认模型与可选扩展会明确区分。
 - 启动异常时进入“维护与恢复”，开启安全模式并在确认预览后导出脱敏诊断包。
 
-Aurora 1.3.0 只允许一个应用实例同时操作任务、设置和模型；模型更新会先在暂存目录完成校验，再切换到正式目录并保留上一版本。损坏或过新的 `.arr` 记录会保留 `.recovery` 恢复副本，不会静默当作有效记录覆盖。
+Aurora 1.4.0 只允许一个应用实例同时操作任务、设置和模型；Hugging Face、Git 与 PyPI 模型可比较真实上游版本，固定运行组件会明确显示升级渠道。模型更新会先在暂存目录完成校验，再切换到正式目录并保留上一版本。
 
 Aurora 是一套 Windows 本地 AI 音频工作台。音乐生成、AI 配音、歌声克隆、去人声分轨、AI 扒谱和视频字幕，都可以从同一个窗口进入。
 
@@ -45,7 +45,7 @@ AI 模型通常体积较大，建议使用空间充足的 SSD。
 
 ### 音乐创作
 
-默认引擎为 ACE-Step 1.5 XL Turbo，适合从文字灵感生成歌曲、纯音乐、旋律和编曲草稿。进入工作台后，模型界面会直接显示在 Aurora 中。
+默认引擎为 ACE-Step 1.5 XL Turbo。MiniMax-Music3 可在模型管理中按需安装：确认约 27 GB 下载与约 55 GB 建议空间后，Aurora 自动配置独立 CUDA 环境并启用本地工作台；不会自动下载。
 
 ### AI 配音与声音克隆
 
@@ -61,7 +61,7 @@ BS-RoFormer-SW 6-Stem 可输出人声、鼓、贝斯、吉他、钢琴、其他�
 
 ### AI 扒谱
 
-YourMT3+ 用于多乐器内容，ByteDance Piano 用于钢琴独奏。两者都输出可继续编辑的 MIDI。素材越干净，识别越稳定。
+TransKun V2 是默认钢琴扒谱引擎；YourMT3+ 适合多乐器内容，ByteDance Piano 作为经典钢琴模型保留，Basic Pitch 适合快速草稿。它们都输出可继续编辑的 MIDI。
 
 ### 视频 AI 字幕
 
@@ -70,7 +70,7 @@ Subtitle Edit 与 Faster-Whisper 用于语音识别、时间轴校对和 SRT 导
 ## 模型与成品管理
 
 - 已安装模型可直接进入工作台；未安装模型会先显示安装确认，完成并通过检查后自动进入工作台。
-- 现有默认套件保持不变；Qwen3-TTS 0.6B、F5-TTS、Demucs 4 与 Spotify Basic Pitch 作为可选扩展提供。
+- MiniMax-Music3、Qwen3-TTS 0.6B、F5-TTS、Demucs 4 与 Spotify Basic Pitch 均按需提供；TransKun V2 是新的默认钢琴扒谱引擎。
 - Qwen3-TTS 权重从 Hugging Face 获取；F5-TTS、Demucs 与 Basic Pitch 使用 uv 创建独立 Python 3.11 环境。
 - 可选模型不会随 Aurora 安装包预装，未安装时也不会触发维护警告。
 - 模型管理页可检查单个模型或全部模型的更新。

@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 4, 0), "2026-08-30", [
+            "• 模型管理新增 MiniMax-Music3 按需安装，可自动配置独立 CUDA 环境并在音乐创作中启用；不会未经确认下载模型。\n• TransKun V2 加入模型管理并替换为默认钢琴扒谱引擎，ByteDance Piano 作为经典可选模型保留。\n• Hugging Face、Git 与 PyPI 模型现在可按官方版本真实比对；固定运行组件不再误报最新，而会明确提示其升级渠道。\n• 关于页新增反馈问题与建议入口，并同步更新网站、README 与发布文档。",
+            "• 模型管理新增 MiniMax-Music3 隨選安裝，可自動設定獨立 CUDA 環境並在音樂創作中啟用；不會未經確認下載模型。\n• TransKun V2 加入模型管理並取代為預設鋼琴扒譜引擎，ByteDance Piano 保留為經典選用模型。\n• Hugging Face、Git 與 PyPI 模型現在可依官方版本真實比對；固定執行元件不再誤報最新，並會清楚提示升級方式。\n• 關於頁新增問題與建議回饋入口，並同步更新網站、README 與發布文件。",
+            "• Added on-demand MiniMax-Music3 installation to Model Management, including automatic isolated CUDA setup and Music workbench enablement; Aurora never downloads it without confirmation.\n• Added TransKun V2 to Model Management and made it the default piano transcription engine, while retaining ByteDance Piano as a classic option.\n• Hugging Face, Git, and PyPI models now compare real upstream versions; fixed runtime components no longer claim to be current and instead identify their upgrade path.\n• Added a feedback entry to About and synchronized the website, README, and release documentation.",
+            "• モデル管理に MiniMax-Music3 のオンデマンド導入を追加し、独立 CUDA 環境を自動設定して音楽制作から利用可能にしました。確認なしのダウンロードは行いません。\n• TransKun V2 をモデル管理に追加して標準のピアノ採譜エンジンとし、ByteDance Piano は従来モデルとして残しました。\n• Hugging Face、Git、PyPI モデルは公式版と実際に比較し、固定ランタイムは最新版と誤表示せず更新経路を明示します。\n• 情報ページに問題・提案のフィードバック入口を追加し、サイト、README、公開資料を同期しました。"]),
         new(new(1, 3, 0), "2026-08-12", [
             "• CI 在生成安装包前自动执行关键回归检查。\n• Aurora 改为单实例运行，模型更新先暂存校验再切换，并保留上一可用版本。\n• 动态任务状态完整支持四语言；.arr 记录增加版本迁移和恢复副本。\n• 诊断导出新增隐私预览与路径脱敏。\n• 首页访问键、屏幕阅读器名称和实时进度提示提升键盘与辅助功能体验。",
             "• CI 在產生安裝程式前自動執行關鍵回歸檢查。\n• Aurora 改為單一執行個體，模型更新會先暫存驗證再切換，並保留上一個可用版本。\n• 動態任務狀態完整支援四種語言；.arr 記錄加入版本遷移與復原副本。\n• 診斷匯出新增隱私預覽與路徑遮蔽。\n• 首頁快速鍵、螢幕閱讀器名稱與即時進度提示改善鍵盤及輔助功能體驗。",

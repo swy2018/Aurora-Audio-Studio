@@ -1,0 +1,34 @@
+name: 问题反馈 / Bug report
+description: 报告可复现的 Aurora 功能、安装或模型管理问题
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: 感谢反馈。请勿上传私人音频、密码、访问令牌或未经检查的诊断包。
+  - type: input
+    id: version
+    attributes:
+      label: Aurora 版本
+      placeholder: 例如 1.4.0
+    validations:
+      required: true
+  - type: dropdown
+    id: workflow
+    attributes:
+      label: 功能
+      options: [音乐创作, AI 配音, 歌声克隆, AI 分轨, AI 扒谱, 视频字幕, 模型管理, 安装或更新, 其他]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请说明做了什么、预期结果和实际结果。
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境与补充信息
+      description: Windows 版本、显卡、所选模型及已脱敏日志（如适用）。

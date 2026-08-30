@@ -4,6 +4,24 @@
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
 
+## 1.4.0 — 2026-08-30
+
+### 中文
+
+- 模型管理新增 MiniMax-Music3 按需安装入口；确认后自动创建独立 Python/CUDA 环境、下载所需官方 Diffusers 权重并在音乐创作中启用，不会随安装包预装或未经确认下载。
+- TransKun V2 加入模型管理并成为默认钢琴扒谱引擎；YourMT3+、ByteDance Piano 与 Spotify Basic Pitch 继续保留为可选模型。
+- Hugging Face、Git 与 PyPI 模型现在会比较真实上游版本；固定运行包不再误报“最新”，而会明确提示随 Aurora 或上游安装器升级。
+- 关于页新增“反馈问题 / 建议”，GitHub 新增结构化问题与功能建议模板。
+- README、官方网站、关于页、音乐人使用说明、产品与架构文档同步至 1.4.0；界面布局未改变，因此沿用现有高清截图。
+
+### English
+
+- Added on-demand MiniMax-Music3 installation to Model Management. After confirmation, Aurora creates an isolated Python/CUDA environment, downloads only the required official Diffusers weights, and enables the Music workbench; it is never bundled or downloaded silently.
+- Added TransKun V2 to Model Management and made it the default piano transcription engine, while retaining YourMT3+, ByteDance Piano, and Spotify Basic Pitch as options.
+- Hugging Face, Git, and PyPI models now compare real upstream versions. Fixed runtime bundles no longer claim to be current and instead state whether Aurora or the upstream installer owns upgrades.
+- Added a feedback action to About and structured GitHub forms for bugs and feature requests.
+- Synchronized the README, official website, About page, musician guide, product, and architecture documentation for 1.4.0. Existing high-resolution screenshots remain because the layout is unchanged.
+
 ## 1.3.0 — 2026-08-12
 
 ### 中文

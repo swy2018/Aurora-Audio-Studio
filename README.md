@@ -5,7 +5,7 @@
   <p>面向 Windows 的本地 AI 音频创作工作台</p>
   <p>
     <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img alt="官方网站" src="docs/assets/readme-button-website.svg"></a>
-    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.3.0" src="docs/assets/readme-button-download.svg"></a>
+    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.4.0" src="docs/assets/readme-button-download.svg"></a>
     <a href="CHANGELOG.md"><img alt="更新日志" src="docs/assets/readme-button-changelog.svg"></a>
     <a href="#english"><img alt="English" src="docs/assets/readme-button-english.svg"></a>
   </p>
@@ -15,25 +15,25 @@
 
 Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离、MIDI 扒谱和视频字幕集中到同一个本地入口。六个功能互相独立，可直接开始当前任务，不再需要手动管理多个启动器、端口和结果目录。
 
-## 1.3.0 带来了什么
+## 1.4.0 带来了什么
 
-### 更可靠的运行边界
+### 新模型按需启用
 
-- Aurora 只允许一个应用实例同时操作任务、设置和模型状态，避免多个窗口互相覆盖数据。
-- CI 在构建安装包前自动执行更新流程、单实例、模型事务和处理记录兼容检查。
-- 现有六个独立功能、按钮、输出流程和高清产品截图保持不变。
+- 模型管理新增 MiniMax-Music3；确认后才下载约 27 GB 官方模型，并自动配置独立 CUDA 环境与本地音乐工作台。
+- TransKun V2 加入模型管理并成为默认钢琴扒谱引擎；YourMT3+、ByteDance Piano 和 Basic Pitch 继续作为可选方案。
+- 两个新模型都不会随 Aurora 安装包预装，也不会在未经用户确认时下载。
 
-### 可恢复的模型更新
+### 真实的模型升级状态
 
-- 模型先下载或解压到暂存目录，通过 marker 与完整性检查后才切换到正式目录。
-- 更新失败或取消不会覆盖当前可用模型；上一可用版本留在本机，可直接回退。
-- 固定下载包继续执行 SHA-256 校验，Hugging Face 模型也使用相同的暂存切换边界。
+- Hugging Face 权重、Git 仓库和 PyPI 隔离环境会比较真实官方版本，并在确认后升级。
+- RoFormer、YourMT3、ByteDance、Faster-Whisper XXL 与 Subtitle Edit 等固定组件会明确显示其升级渠道，不再误报“最新”。
+- Hugging Face 模型仍先下载到暂存目录并验证，再安全切换到正式目录。
 
-### 处理记录与隐私恢复
+### 反馈与发布同步
 
-- `.arr` 记录开始显式检查格式版本；旧记录自动迁移。
-- 损坏或由未来版本生成的记录不会被误读，会保留 `.recovery` 副本并写入诊断日志。
-- 导出诊断前显示日志数量，并自动隐藏用户目录、用户名、模型、成品和处理记录路径。
+- 关于页新增“反馈问题 / 建议”，可直接进入 GitHub 的问题或功能建议模板。
+- README、官网、关于页、音乐人使用说明和更新日志同步到 1.4.0。
+- 工作台布局没有改变，因此继续使用现有高清产品截图。
 
 ### 四语言与辅助功能
 
@@ -45,11 +45,11 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 
 | 工作流 | 默认引擎 | 可选引擎 | 主要输出 |
 |---|---|---|---|
-| 音乐创作 | ACE-Step 1.5 XL Turbo | 后续按模型中心扩展 | 完整歌曲、纯音乐与草稿 |
+| 音乐创作 | ACE-Step 1.5 XL Turbo | MiniMax-Music3 | 完整歌曲、纯音乐与草稿 |
 | AI 配音与声音克隆 | Qwen3-TTS 1.7B | Qwen3-TTS 0.6B、F5-TTS | 配音与克隆音频 |
 | 歌声克隆 | Seed-VC 44.1k | 按模型中心扩展 | 歌声与音色转换 |
 | 去人声 / AI 分轨 | BS-RoFormer-SW 6-Stem | Demucs 4 | 独立 WAV 音轨 |
-| AI 扒谱 | YourMT3+ | ByteDance Piano、Basic Pitch | 标准 MIDI |
+| AI 扒谱 | TransKun V2 | YourMT3+、ByteDance Piano、Basic Pitch | 标准 MIDI |
 | 视频 AI 字幕 | Faster-Whisper XXL | Small、Large v3 Turbo、Large v3 | SRT 与转写数据 |
 
 模型与第三方工具保留各自上游许可。模型大小、显存建议、语言能力和来源会在模型中心逐项显示。
@@ -66,7 +66,7 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 ### 标准安装
 
 1. 打开 [Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest)。
-2. 下载 `Aurora-Audio-Studio-1.3.0-Setup-x64.exe` 和同名 `.sha256` 文件。
+2. 下载 `Aurora-Audio-Studio-1.4.0-Setup-x64.exe` 和同名 `.sha256` 文件。
 3. 运行安装程序，阅读并接受 GNU GPL v3.0，选择安装位置和桌面快捷方式。
 4. 首次打开 Aurora，直接选择需要的功能；需要时再确认模型、处理记录和成品目录。
 
@@ -86,6 +86,7 @@ Aurora 本身不提供云端生成服务。素材与生成结果留在用户指�
 - [隐私说明](PRIVACY.md)
 - [代码签名政策](CODE_SIGNING_POLICY.md)
 - [GNU GPL v3.0](LICENSE)
+- [反馈问题或提出建议](https://github.com/swy2018/Aurora-Audio-Studio/issues/new/choose)
 
 ## 开发
 
@@ -94,7 +95,7 @@ Aurora 桌面端使用 .NET 10、WinUI 3 和 Windows App SDK 构建，官网使�
 ```powershell
 dotnet restore .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj --runtime win-x64
 dotnet build .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -p:Platform=x64
-dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.3.0
+dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.4.0
 ```
 
 运行回归检查：
@@ -125,14 +126,12 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 Aurora Audio Studio is a local AI audio production workspace for Windows. Its six independent features provide direct entry points for music generation, voice cloning, singing conversion, stem separation, MIDI transcription, and video subtitles.
 
-### What version 1.3.0 adds
+### What version 1.4.0 adds
 
-- Single-instance operation prevents concurrent task, settings, and model-state writes.
-- Model updates stage and verify before switching, retain the previous working version, and leave the active model untouched on failure.
-- `.arr` schema migration plus `.recovery` copies for damaged or newer records.
-- Privacy preview and path redaction for diagnostics exports.
-- Four-language dynamic task states, Home access keys, screen-reader names, and live progress announcements.
-- CI runs the critical regression suite before packaging.
+- On-demand MiniMax-Music3 setup with an isolated CUDA environment and a local Music workbench; nothing downloads without confirmation.
+- TransKun V2 is now the default piano transcription engine, with YourMT3+, ByteDance Piano, and Basic Pitch retained as options.
+- Hugging Face, Git, and PyPI models compare real upstream versions; fixed runtime bundles clearly identify their manual upgrade path.
+- About now links to structured bug and feature-request forms.
 
 ### Local by design
 
@@ -141,7 +140,7 @@ Aurora does not operate a cloud generation service. Media and generated output r
 ### Install
 
 1. Open the latest [Release](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest).
-2. Download `Aurora-Audio-Studio-1.3.0-Setup-x64.exe` and its `.sha256` file.
+2. Download `Aurora-Audio-Studio-1.4.0-Setup-x64.exe` and its `.sha256` file.
 3. Run Setup, review GNU GPL v3.0, and choose the destination and shortcut options.
 4. Choose a feature on first launch; confirm model, processing-record, and output folders only when needed.
 

@@ -17,7 +17,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
     {
         var root = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
         if (!catalog.IsInstalled(model)) return new(false, "尚未安装");
-        if (model.UpdateKind.Equals("huggingface", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(model.Repository))
+        if ((model.UpdateKind.Equals("huggingface", StringComparison.OrdinalIgnoreCase) || model.UpdateKind.Equals("minimax-music3", StringComparison.OrdinalIgnoreCase)) && !string.IsNullOrWhiteSpace(model.Repository))
         {
             var remoteRevision = await GetHuggingFaceRevisionAsync(model.Repository);
             if (string.IsNullOrWhiteSpace(remoteRevision)) return new(false, "暂时无法连接 Hugging Face");
@@ -31,6 +31,8 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             var localVersion = ReadInstalledVersion(model.Id);
             return new(true, localVersion == entry.Version ? "已是最新版本" : $"发现新版本 {entry.Version}", localVersion == entry.Version ? "current" : "available");
         }
+        if (model.UpdateKind.Equals("uv-package", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(model.Repository))
+            return await CheckPyPiPackageAsync(model, root);
         if (model.UpdateKind.StartsWith("git", StringComparison.OrdinalIgnoreCase) && Directory.Exists(Path.Combine(root, ".git")))
         {
             var fetch = await RunGitAsync(root, "fetch --quiet origin");
@@ -40,12 +42,20 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             if (!local.Success || !remote.Success) return new(false, "暂时无法比较版本");
             return new(true, local.Path == remote.Path ? "已是最新版本" : "发现新版本", local.Path == remote.Path ? "current" : "available");
         }
-        return new(true, "当前已是推荐版本", "current");
+        return new(false, model.UpdateKind switch
+        {
+            "python-tool" => "此固定运行组件随 Aurora 安装程序升级",
+            "github-release" => "此独立程序需使用上游安装包升级",
+            "direct" => "此固定模型需随 Aurora 安装程序升级",
+            _ => "此组件暂不支持自动升级"
+        }, "manual");
     }
 
     public async Task<OperationResult> UpdateAsync(ModelDefinition model, IProgress<ModelInstallProgress>? progress = null, CancellationToken cancellationToken = default)
     {
         var root = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
+        if (model.UpdateKind.Equals("minimax-music3", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(model.Repository))
+            return await InstallMiniMaxMusic3Async(model, root, progress, cancellationToken);
         if (model.UpdateKind.Equals("huggingface", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(model.Repository))
             return await UpdateHuggingFaceAsync(model, root, progress, cancellationToken);
         if (model.UpdateKind.Equals("uv-package", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(model.Repository))
@@ -72,14 +82,17 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             if (uv is null) return new(false, "uv 已安装，但当前 Aurora 会话尚未找到它。请重新打开 Aurora 后重试。");
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(root)!);
-        var create = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var value in new[] { "venv", "--python", "3.11", root }) create.ArgumentList.Add(value);
-        progress?.Report(new(null, "正在创建隔离运行环境"));
-        var createResult = await RunProcessAsync(create, cancellationToken, progress);
-        if (createResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(createResult.Error) ? "无法创建模型隔离环境。" : createResult.Error);
-
         var python = Path.Combine(root, "Scripts", "python.exe");
+        var environment = await EnsureUvEnvironmentAsync(uv, root, python, progress, cancellationToken);
+        if (!environment.Success) return environment;
+        if (model.Id.Equals("transkun", StringComparison.OrdinalIgnoreCase))
+        {
+            progress?.Report(new(null, "正在配置 TransKun CUDA 运行环境"));
+            var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "torch", "torchaudio", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
+            var torchResult = await RunProcessAsync(torch, cancellationToken, progress);
+            if (torchResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(torchResult.Error) ? "TransKun CUDA 环境配置失败。" : torchResult.Error);
+        }
         var install = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
         foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, model.Repository! }) install.ArgumentList.Add(value);
         progress?.Report(new(null, $"正在部署 {model.Name}"));
@@ -88,6 +101,100 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         if (!catalog.IsInstalled(model)) return new(false, $"{model.Name} 已完成环境安装，但启动组件未通过完整性检查。");
         WriteInstalledVersion(model.Id, DateTime.UtcNow.ToString("yyyy.MM.dd"));
         return new(true, $"{model.Name} 已下载并部署完成", "current");
+    }
+
+    private async Task<OperationResult> CheckPyPiPackageAsync(ModelDefinition model, string root)
+    {
+        var python = Path.Combine(root, "Scripts", "python.exe");
+        if (!File.Exists(python)) return new(false, "隔离运行环境不完整", "manual");
+        var package = PyPiPackageName(model.Repository!);
+        var localInfo = new ProcessStartInfo(python) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        localInfo.ArgumentList.Add("-c");
+        localInfo.ArgumentList.Add("import importlib.metadata as m,sys; print(m.version(sys.argv[1]))");
+        localInfo.ArgumentList.Add(package);
+        var local = await RunProcessAsync(localInfo);
+        if (local.ExitCode != 0 || string.IsNullOrWhiteSpace(local.Output)) return new(false, "无法读取已安装版本", "manual");
+        try
+        {
+            using var document = JsonDocument.Parse(await client.GetStringAsync($"https://pypi.org/pypi/{Uri.EscapeDataString(package)}/json"));
+            var latest = document.RootElement.GetProperty("info").GetProperty("version").GetString() ?? "";
+            var current = local.Output.Trim().Split('\n', StringSplitOptions.RemoveEmptyEntries).LastOrDefault()?.Trim() ?? "";
+            var same = current.Equals(latest, StringComparison.OrdinalIgnoreCase);
+            return new(true, same ? $"已是最新版本 {current}" : $"发现新版本 {latest}", same ? "current" : "available");
+        }
+        catch { return new(false, "暂时无法连接 PyPI"); }
+    }
+
+    public static string PyPiPackageName(string repository)
+    {
+        var end = repository.IndexOfAny(['[', '=', '<', '>', ' ', ';']);
+        return (end < 0 ? repository : repository[..end]).Trim();
+    }
+
+    private static async Task<OperationResult> EnsureUvEnvironmentAsync(string uv, string root, string python, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    {
+        if (File.Exists(python)) return new(true, "隔离运行环境已就绪", "current");
+        Directory.CreateDirectory(Path.GetDirectoryName(root)!);
+        var create = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "venv", "--python", "3.11", root }) create.ArgumentList.Add(value);
+        progress?.Report(new(null, "正在创建隔离运行环境"));
+        var result = await RunProcessAsync(create, cancellationToken, progress);
+        return result.ExitCode == 0 && File.Exists(python)
+            ? new(true, "隔离运行环境已就绪", "current")
+            : new(false, string.IsNullOrWhiteSpace(result.Error) ? "无法创建模型隔离环境。" : result.Error);
+    }
+
+    private async Task<OperationResult> InstallMiniMaxMusic3Async(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    {
+        var uv = ResolveUvExecutable();
+        if (uv is null)
+        {
+            progress?.Report(new(null, "正在安装模型部署组件 uv"));
+            var installUv = new ProcessStartInfo("winget.exe") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var value in new[] { "install", "--id", "astral-sh.uv", "-e", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity" }) installUv.ArgumentList.Add(value);
+            var uvResult = await RunProcessAsync(installUv, cancellationToken, progress);
+            if (uvResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(uvResult.Error) ? "无法安装模型部署组件 uv。" : uvResult.Error);
+            uv = ResolveUvExecutable();
+            if (uv is null) return new(false, "uv 已安装，但当前 Aurora 会话尚未找到它。请重新打开 Aurora 后重试。");
+        }
+        var environmentRoot = Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "minimax-music3-env");
+        var python = Path.Combine(environmentRoot, "Scripts", "python.exe");
+        var environment = await EnsureUvEnvironmentAsync(uv, environmentRoot, python, progress, cancellationToken);
+        if (!environment.Success) return environment;
+
+        progress?.Report(new(null, "正在配置 MiniMax-Music3 CUDA 运行环境"));
+        var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "torch", "torchaudio", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
+        var torchResult = await RunProcessAsync(torch, cancellationToken, progress);
+        if (torchResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(torchResult.Error) ? "MiniMax-Music3 CUDA 环境配置失败。" : torchResult.Error);
+
+        var dependencies = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "git+https://github.com/huggingface/diffusers@dafe3733fcfdbf3c48915fe77be3aef65b5d6a2d", "transformers", "accelerate", "soundfile", "gradio", "huggingface_hub[hf_xet]" }) dependencies.ArgumentList.Add(value);
+        var dependencyResult = await RunProcessAsync(dependencies, cancellationToken, progress);
+        if (dependencyResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(dependencyResult.Error) ? "MiniMax-Music3 依赖配置失败。" : dependencyResult.Error);
+
+        var revision = await GetHuggingFaceRevisionAsync(model.Repository!);
+        if (string.IsNullOrWhiteSpace(revision)) return new(false, "暂时无法读取 MiniMax-Music3 官方版本。");
+        var hf = Path.Combine(environmentRoot, "Scripts", "hf.exe");
+        if (!File.Exists(hf)) return new(false, "MiniMax-Music3 下载组件未正确安装。");
+        ModelInstallTransaction.Prepare(root);
+        var staging = ModelInstallTransaction.StagingPath(root);
+        var download = new ProcessStartInfo(hf) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "download", model.Repository!, "--revision", revision, "--local-dir", staging }) download.ArgumentList.Add(value);
+        download.ArgumentList.Add("--include");
+        foreach (var include in new[] { "modular_model_index.json", "config.json", "condition_encoder/*", "language_model/*", "rvq_depth_decoder/*", "scheduler/*", "tokenizer/*", "transformer/*", "vocoder/*" })
+            download.ArgumentList.Add(include);
+        download.Environment["HF_XET_HIGH_PERFORMANCE"] = "1";
+        download.Environment["HF_HUB_DOWNLOAD_TIMEOUT"] = "300";
+        progress?.Report(new(null, "正在下载 MiniMax-Music3 官方模型（约 27 GB）"));
+        var result = await RunProcessAsync(download, cancellationToken, progress);
+        if (result.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(result.Error) ? "MiniMax-Music3 下载失败。" : result.Error);
+        if (!File.Exists(Path.Combine(staging, model.Marker)) || !Directory.Exists(Path.Combine(staging, "language_model")) || !Directory.Exists(Path.Combine(staging, "transformer")))
+            return new(false, "MiniMax-Music3 下载完成，但完整性检查未通过。正式模型目录未被修改。");
+        File.WriteAllText(Path.Combine(staging, ".aurora-revision"), revision);
+        ModelInstallTransaction.Commit(root);
+        WriteInstalledVersion(model.Id, revision);
+        return new(true, "MiniMax-Music3 已安装、自动配置并可在音乐创作中启用", "current");
     }
 
     private string? ResolveUvExecutable()
@@ -310,7 +417,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
     private static HttpClient CreateClient()
     {
         var value = new HttpClient { Timeout = TimeSpan.FromHours(8) };
-        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.3.0"));
+        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.4.0"));
         return value;
     }
 }
