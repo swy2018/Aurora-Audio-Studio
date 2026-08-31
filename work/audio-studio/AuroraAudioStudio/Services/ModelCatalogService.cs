@@ -15,11 +15,12 @@ public sealed class ModelCatalogService(SettingsService settings)
         new("qwen3-tts-06b-custom", "Qwen3-TTS 0.6B · 轻量专业音色", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-CustomVoice", "model.safetensors", "Qwen · Hugging Face", "huggingface", "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice"),
         new("f5-tts", "F5-TTS · 多语言声音克隆", "voice", @"AudioTools\f5-tts-env", @"Scripts\f5-tts_infer-gradio.exe", "SWivid · PyPI", "uv-package", "f5-tts"),
         new("seed-vc", "Seed-VC 44.1k", "singing", "Seed-VC", "app_svc_local.py", "GitHub + Hugging Face", "git-hf", "https://github.com/Plachtaa/seed-vc.git", true),
-        new("roformer", "BS-RoFormer-SW 6-Stem", "separation", @"AudioTools\roformer-env", @"Scripts\bs-roformer-infer.exe", "PyPI model registry", "python-tool", null, true),
+        new("roformer", "BS-RoFormer-SW · 多轨高质量", "separation", @"AudioTools\roformer-env", @"Scripts\bs-roformer-infer.exe", "PyPI model registry", "uv-package", "bs-roformer-infer", true),
+        new("roformer-vocals", "BS-RoFormer Vocals Revive V3e · 二轨", "separation", @"AudioTools\roformer-models\roformer-model-bs-roformer-vocals-revive-v3e-by-unwa", "bs_roformer_vocals_revive_v3e_unwa.ckpt", "BS-RoFormer model registry", "roformer-registry", "roformer-model-bs-roformer-vocals-revive-v3e-by-unwa", true),
         new("demucs", "Demucs 4 · 通用四轨分离", "separation", @"AudioTools\demucs-env", @"Scripts\demucs.exe", "Meta Research · PyPI", "uv-package", "demucs"),
-        new("yourmt3", "YourMT3+ Multi-Instrument", "transcription", @"AudioTools\mt3-env", @"Scripts\mt3-infer.exe", "PyPI model registry", "python-tool"),
+        new("yourmt3", "YourMT3+ Multi-Instrument", "transcription", @"AudioTools\mt3-env", @"Scripts\mt3-infer.exe", "PyPI model registry", "uv-package", "mt3-infer"),
         new("transkun", "TransKun V2 · 钢琴扒谱", "transcription", @"AudioTools\transkun-env", @"Scripts\transkun.exe", "TransKun · PyPI", "uv-package", "transkun", true),
-        new("piano", "ByteDance Piano · 经典模型", "transcription", @"AudioTools\piano-models", "note_F1=0.9677_pedal_F1=0.9186.pth", "Zenodo", "direct"),
+        new("piano", "ByteDance Piano · 经典模型", "transcription", @"AudioTools\piano-models", "note_F1=0.9677_pedal_F1=0.9186.pth", "Zenodo", "fixed-file", "https://zenodo.org/records/4034264/files/CRNN_note_F1%3D0.9677_pedal_F1%3D0.9186.pth?download=1"),
         new("basic-pitch", "Spotify Basic Pitch · 轻量扒谱", "transcription", @"AudioTools\basic-pitch-env", @"Scripts\basic-pitch.exe", "Spotify · PyPI", "uv-package", "basic-pitch"),
         new("faster-whisper", "Faster-Whisper XXL", "subtitles", @"Faster-Whisper-XXL\Faster-Whisper-XXL", "faster-whisper-xxl.exe", "GitHub Release", "github-release", "https://github.com/Purfview/whisper-standalone-win.git", true),
         new("whisper-small", "Faster-Whisper Small", "subtitles", @"Faster-Whisper-XXL\Models\small", "model.bin", "SYSTRAN · Hugging Face", "huggingface", "Systran/faster-whisper-small"),
@@ -85,7 +86,7 @@ public sealed class ModelCatalogService(SettingsService settings)
     {
         "ace-step" => "12 GB+", "minimax-music3" => "8 GB+ · 16 GB 推荐", "qwen3-tts-base" or "qwen3-tts-custom" or "qwen3-tts-design" => "8 GB+",
         "qwen3-tts-06b-base" or "qwen3-tts-06b-custom" => "4 GB+", "f5-tts" => "6 GB+",
-        "seed-vc" => "8 GB+", "roformer" => "8 GB+", "demucs" => "4 GB+", "faster-whisper" => "6 GB+",
+        "seed-vc" => "8 GB+", "roformer" or "roformer-vocals" => "8 GB+", "demucs" => "4 GB+", "faster-whisper" => "6 GB+",
         "whisper-small" => "2 GB+", "whisper-large-v3-turbo" => "6 GB+", "whisper-large-v3" => "10 GB+", _ => "4 GB+"
     };
 
@@ -111,6 +112,7 @@ public sealed class ModelCatalogService(SettingsService settings)
         "f5-tts" => Pick("多语言参考音频克隆", "多語言參考音訊複製", "Multilingual reference-audio cloning", "多言語ボイスクローン"),
         "seed-vc" => Pick("44.1 kHz 歌声与音色转换", "44.1 kHz 歌聲與音色轉換", "44.1 kHz singing and timbre conversion", "44.1 kHz 歌声・音色変換"),
         "roformer" => Pick("精细六轨分离", "精細六軌分離", "Detailed six-stem separation", "高精度 6 ステム分離"),
+        "roformer-vocals" => Pick("纯人声与纯伴奏二轨分离", "純人聲與純伴奏二軌分離", "Two-stem vocals and instrumental separation", "ボーカル・伴奏の 2 ステム分離"),
         "demucs" => Pick("通用快速四轨分离", "通用快速四軌分離", "General fast four-stem separation", "汎用高速 4 ステム分離"),
         "yourmt3" => Pick("多乐器 MIDI 转写", "多樂器 MIDI 轉寫", "Multi-instrument MIDI transcription", "複数楽器の MIDI 採譜"),
         "transkun" => Pick("默认高精度钢琴 MIDI 转写", "預設高精度鋼琴 MIDI 轉寫", "Default high-accuracy piano MIDI transcription", "標準の高精度ピアノ MIDI 採譜"),

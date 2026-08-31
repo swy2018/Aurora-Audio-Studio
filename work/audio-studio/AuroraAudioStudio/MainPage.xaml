@@ -191,9 +191,10 @@
 
                                 <StackPanel Grid.Row="2" Margin="0,24,0,0" Spacing="10">
                                     <TextBlock Text="处理引擎" FontSize="15" FontWeight="SemiBold"/>
-                                    <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="210"/></Grid.ColumnDefinitions>
+                                    <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="190"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions>
                                         <ComboBox x:Name="UtilityModelPicker" HorizontalAlignment="Stretch" SelectedIndex="0" />
-                                        <ComboBox x:Name="UtilityPresetPicker" Grid.Column="1" Header="处理预设" SelectedIndex="1" SelectionChanged="UtilityPresetPicker_SelectionChanged"><ComboBoxItem Content="快速草稿" Tag="fast"/><ComboBoxItem Content="推荐质量" Tag="recommended"/><ComboBoxItem Content="高质量" Tag="quality"/></ComboBox>
+                                        <ComboBox x:Name="UtilityTrackModePicker" Grid.Column="1" Header="分轨模式" SelectedIndex="0" Visibility="Collapsed" SelectionChanged="UtilityTrackModePicker_SelectionChanged"><ComboBoxItem Content="二轨：人声 + 伴奏" Tag="two-stem"/><ComboBoxItem Content="多轨：完整分轨" Tag="multi-stem"/></ComboBox>
+                                        <ComboBox x:Name="UtilityPresetPicker" Grid.Column="2" Header="处理预设" SelectedIndex="1" SelectionChanged="UtilityPresetPicker_SelectionChanged"><ComboBoxItem Content="快速草稿" Tag="fast"/><ComboBoxItem Content="推荐质量" Tag="recommended"/><ComboBoxItem Content="高质量" Tag="quality"/></ComboBox>
                                     </Grid>
                                     <TextBlock x:Name="UtilityOutputHint" Text="处理结果会自动保存到 Aurora 成品目录。" TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
                                     <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,8,0,0">

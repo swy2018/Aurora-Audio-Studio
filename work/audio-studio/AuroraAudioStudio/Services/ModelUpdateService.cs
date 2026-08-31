@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using AuroraAudioStudio.Models;
 
 namespace AuroraAudioStudio.Services;
@@ -17,6 +18,12 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
     {
         var root = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
         if (!catalog.IsInstalled(model)) return new(false, "尚未安装");
+        if (model.UpdateKind.Equals("fixed-file", StringComparison.OrdinalIgnoreCase))
+            return await CheckFixedFileAsync(model, root);
+        if (model.UpdateKind.Equals("roformer-registry", StringComparison.OrdinalIgnoreCase))
+            return new(true, "已安装；模型校验由 BS-RoFormer 官方注册表管理", "current");
+        if (model.UpdateKind.Equals("github-release", StringComparison.OrdinalIgnoreCase))
+            return await CheckGitHubReleaseAsync(model, root);
         if ((model.UpdateKind.Equals("huggingface", StringComparison.OrdinalIgnoreCase) || model.UpdateKind.Equals("minimax-music3", StringComparison.OrdinalIgnoreCase)) && !string.IsNullOrWhiteSpace(model.Repository))
         {
             var remoteRevision = await GetHuggingFaceRevisionAsync(model.Repository);
@@ -60,6 +67,12 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             return await UpdateHuggingFaceAsync(model, root, progress, cancellationToken);
         if (model.UpdateKind.Equals("uv-package", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(model.Repository))
             return await InstallUvPackageAsync(model, root, progress, cancellationToken);
+        if (model.UpdateKind.Equals("fixed-file", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(model.Repository))
+            return await InstallFixedFileAsync(model, root, progress, cancellationToken);
+        if (model.UpdateKind.Equals("roformer-registry", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(model.Repository))
+            return await InstallRoformerRegistryModelAsync(model, root, progress, cancellationToken);
+        if (model.UpdateKind.Equals("github-release", StringComparison.OrdinalIgnoreCase))
+            return await InstallGitHubReleaseAsync(model, root, progress, cancellationToken);
         var entry = await FindManifestEntryAsync(model.Id);
         if (entry is not null) return await InstallManifestEntryAsync(model, entry, root, progress, cancellationToken);
         if (!catalog.IsInstalled(model)) return new(false, "此引擎需要通过 Aurora 安装程序添加运行环境。 ");
@@ -68,6 +81,198 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         return new(false, "当前没有可安装的新版本。");
     }
 
+    private const string PianoCheckpointSha256 = "C3FA9730725BF4A762F1C14BC80CD5986EACDA01B026F5A4A2525CD607876141";
+
+    private async Task<OperationResult> CheckFixedFileAsync(ModelDefinition model, string root)
+    {
+        var path = Path.Combine(root, model.Marker);
+        try
+        {
+            await using var stream = File.OpenRead(path);
+            var actual = Convert.ToHexString(await SHA256.HashDataAsync(stream));
+            return actual.Equals(PianoCheckpointSha256, StringComparison.OrdinalIgnoreCase)
+                ? new(true, "已是上游固定版本，校验通过", "current")
+                : new(true, "文件校验异常，可自动修复", "available");
+        }
+        catch (Exception ex) { return new(false, $"无法校验固定模型：{ex.Message}", "available"); }
+    }
+
+    private async Task<OperationResult> InstallFixedFileAsync(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    {
+        ModelInstallTransaction.Prepare(root);
+        var staging = ModelInstallTransaction.StagingPath(root);
+        var destination = Path.Combine(staging, model.Marker);
+        Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+        await DownloadFileAsync(model.Repository!, destination, progress, cancellationToken);
+        progress?.Report(new(null, "正在校验官方模型文件"));
+        await using (var stream = File.OpenRead(destination))
+        {
+            var actual = Convert.ToHexString(await SHA256.HashDataAsync(stream));
+            if (!actual.Equals(PianoCheckpointSha256, StringComparison.OrdinalIgnoreCase))
+                return new(false, "官方模型文件校验失败，正式模型目录未被修改。");
+        }
+        ModelInstallTransaction.Commit(root);
+        WriteInstalledVersion(model.Id, "Zenodo 4034264");
+        return new(true, $"{model.Name} 已安装并通过 SHA-256 校验", "current");
+    }
+
+    private async Task<OperationResult> InstallRoformerRegistryModelAsync(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    {
+        var downloader = Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "roformer-env", "Scripts", "bs-roformer-download.exe");
+        if (!File.Exists(downloader)) return new(false, "请先在模型中心安装 BS-RoFormer-SW 运行环境。");
+        var modelsRoot = Path.GetDirectoryName(root)!;
+        var info = new ProcessStartInfo(downloader) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "--output-dir", modelsRoot, "--model", model.Repository! }) info.ArgumentList.Add(value);
+        progress?.Report(new(null, $"正在从 BS-RoFormer 官方注册表下载 {model.Name}"));
+        var result = await RunProcessAsync(info, cancellationToken, progress);
+        if (result.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(result.Error) ? "分轨模型下载失败。" : result.Error);
+        if (!catalog.IsInstalled(model)) return new(false, "下载已结束，但模型校验未通过。");
+        WriteInstalledVersion(model.Id, "registry");
+        return new(true, $"{model.Name} 已安装并通过上游校验", "current");
+    }
+
+    private sealed record GitHubReleaseAsset(string Version, string Name, string Url, long Size, string? Digest, string PackageKind);
+
+    private async Task<OperationResult> CheckGitHubReleaseAsync(ModelDefinition model, string root)
+    {
+        var release = await GetGitHubReleaseAssetAsync(model);
+        if (release is null) return new(false, "暂时无法读取 GitHub Release");
+        var local = InstalledFileVersion(Path.Combine(root, model.Marker));
+        var same = VersionsEqual(local, release.Version);
+        return new(true, same ? $"已是最新版本 {release.Version}" : $"发现新版本 {release.Version}", same ? "current" : "available");
+    }
+
+    private async Task<OperationResult> InstallGitHubReleaseAsync(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    {
+        var release = await GetGitHubReleaseAssetAsync(model);
+        if (release is null) return new(false, "暂时无法读取 GitHub Release");
+        var folder = Path.Combine(settings.UpdatesRoot, "Models", model.Id, release.Version);
+        Directory.CreateDirectory(folder);
+        var package = Path.Combine(folder, release.Name);
+        await DownloadFileAsync(release.Url, package, progress, cancellationToken);
+        var packageInfo = new FileInfo(package);
+        if (packageInfo.Length != release.Size) return new(false, "下载文件大小与 GitHub Release 不一致，已停止更新。");
+        if (!string.IsNullOrWhiteSpace(release.Digest))
+        {
+            progress?.Report(new(null, "正在校验 GitHub Release 摘要"));
+            await using var stream = File.OpenRead(package);
+            var actual = Convert.ToHexString(await SHA256.HashDataAsync(stream));
+            if (!actual.Equals(release.Digest, StringComparison.OrdinalIgnoreCase))
+                return new(false, "GitHub Release SHA-256 校验失败，正式目录未被修改。");
+        }
+
+        ModelInstallTransaction.Prepare(root);
+        var staging = ModelInstallTransaction.StagingPath(root);
+        progress?.Report(new(null, $"正在安装 {model.Name}"));
+        if (release.PackageKind == "zip")
+        {
+            ZipFile.ExtractToDirectory(package, staging, true);
+        }
+        else
+        {
+            var tar = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "tar.exe");
+            if (!File.Exists(tar)) return new(false, "Windows 解压组件缺失，无法安装 7z 更新包。");
+            var extract = new ProcessStartInfo(tar) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var value in new[] { "-xf", package, "-C", staging }) extract.ArgumentList.Add(value);
+            var result = await RunProcessAsync(extract, cancellationToken, progress);
+            if (result.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(result.Error) ? "更新包解压失败。" : result.Error);
+        }
+
+        var marker = Path.Combine(staging, model.Marker);
+        if (!File.Exists(marker) && !NormalizeNestedPackageRoot(staging, model.Marker))
+            return new(false, "更新包已解压，但完整性检查未通过。正式目录未被修改。");
+        if (model.Id.Equals("subtitle-edit", StringComparison.OrdinalIgnoreCase))
+        {
+            var oldSettings = Path.Combine(root, "Settings.json");
+            var newSettings = Path.Combine(staging, "Settings.json");
+            if (File.Exists(oldSettings) && !File.Exists(newSettings)) File.Copy(oldSettings, newSettings);
+        }
+        ModelInstallTransaction.Commit(root);
+        WriteInstalledVersion(model.Id, release.Version);
+        return new(true, $"{model.Name} 已更新至 {release.Version}", "current");
+    }
+
+    private async Task<GitHubReleaseAsset?> GetGitHubReleaseAssetAsync(ModelDefinition model)
+    {
+        try
+        {
+            var endpoint = model.Id.Equals("subtitle-edit", StringComparison.OrdinalIgnoreCase)
+                ? "https://api.github.com/repos/SubtitleEdit/subtitleedit/releases/latest"
+                : "https://api.github.com/repos/Purfview/whisper-standalone-win/releases/tags/Faster-Whisper-XXL";
+            using var document = JsonDocument.Parse(await client.GetStringAsync(endpoint));
+            var assets = document.RootElement.GetProperty("assets").EnumerateArray().ToArray();
+            JsonElement asset;
+            string version;
+            string kind;
+            if (model.Id.Equals("subtitle-edit", StringComparison.OrdinalIgnoreCase))
+            {
+                asset = assets.First(x => x.GetProperty("name").GetString() == "SubtitleEdit-Windows-x64.zip");
+                version = (document.RootElement.GetProperty("tag_name").GetString() ?? "").TrimStart('v', 'V');
+                kind = "zip";
+            }
+            else
+            {
+                var candidates = assets.Select(x => new
+                    {
+                        Asset = x,
+                        Name = x.GetProperty("name").GetString() ?? "",
+                        Match = Regex.Match(x.GetProperty("name").GetString() ?? "", @"_r(?<version>\d+(?:\.\d+)+)_windows\.7z$", RegexOptions.IgnoreCase)
+                    })
+                    .Where(x => x.Match.Success)
+                    .Select(x => new { x.Asset, x.Name, Version = Version.Parse(x.Match.Groups["version"].Value) })
+                    .OrderByDescending(x => x.Version)
+                    .ToList();
+                if (candidates.Count == 0) return null;
+                asset = candidates[0].Asset;
+                version = candidates[0].Version.ToString();
+                kind = "7z";
+            }
+            var digest = asset.TryGetProperty("digest", out var digestElement) ? digestElement.GetString() : null;
+            if (digest?.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase) == true) digest = digest[7..];
+            return new(version, asset.GetProperty("name").GetString()!, asset.GetProperty("browser_download_url").GetString()!,
+                asset.GetProperty("size").GetInt64(), digest, kind);
+        }
+        catch { return null; }
+    }
+
+    private static bool NormalizeNestedPackageRoot(string staging, string marker)
+    {
+        var found = Directory.EnumerateFiles(staging, Path.GetFileName(marker), SearchOption.AllDirectories)
+            .FirstOrDefault(path => Path.GetRelativePath(Path.GetDirectoryName(path)!, path).Equals(marker, StringComparison.OrdinalIgnoreCase)
+                || Path.GetFileName(path).Equals(Path.GetFileName(marker), StringComparison.OrdinalIgnoreCase));
+        if (found is null) return false;
+        var packageRoot = Path.GetDirectoryName(found)!;
+        while (!Path.GetRelativePath(packageRoot, found).Equals(marker, StringComparison.OrdinalIgnoreCase)
+            && !packageRoot.Equals(staging, StringComparison.OrdinalIgnoreCase))
+            packageRoot = Path.GetDirectoryName(packageRoot)!;
+        if (packageRoot.Equals(staging, StringComparison.OrdinalIgnoreCase)) return File.Exists(Path.Combine(staging, marker));
+        var normalized = staging + ".normalized";
+        if (Directory.Exists(normalized)) Directory.Delete(normalized, true);
+        Directory.Move(packageRoot, normalized);
+        Directory.Delete(staging, true);
+        Directory.Move(normalized, staging);
+        return File.Exists(Path.Combine(staging, marker));
+    }
+    private static string InstalledFileVersion(string path)
+    {
+        try
+        {
+            var info = FileVersionInfo.GetVersionInfo(path);
+            return info.ProductVersion ?? info.FileVersion ?? "";
+        }
+        catch { return ""; }
+    }
+
+    private static bool VersionsEqual(string local, string remote)
+    {
+        static string Normalize(string value)
+        {
+            var match = Regex.Match(value ?? "", @"\d+(?:\.\d+)+");
+            if (!match.Success) return "";
+            return Version.TryParse(match.Value, out var parsed) ? parsed.ToString() : match.Value;
+        }
+        return Normalize(local).Equals(Normalize(remote), StringComparison.OrdinalIgnoreCase);
+    }
     private async Task<OperationResult> InstallUvPackageAsync(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
         progress?.Report(new(null, "正在检查模型部署组件"));
@@ -98,6 +303,31 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         progress?.Report(new(null, $"正在部署 {model.Name}"));
         var installResult = await RunProcessAsync(install, cancellationToken, progress);
         if (installResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(installResult.Error) ? $"{model.Name} 部署失败。" : installResult.Error);
+        if (model.Id.Equals("roformer", StringComparison.OrdinalIgnoreCase))
+        {
+            var downloader = Path.Combine(root, "Scripts", "bs-roformer-download.exe");
+            var modelsRoot = Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "roformer-models");
+            Directory.CreateDirectory(modelsRoot);
+            var assets = new ProcessStartInfo(downloader) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var value in new[] { "--output-dir", modelsRoot, "--model", "roformer-model-bs-roformer-sw-by-jarredou" }) assets.ArgumentList.Add(value);
+            assets.Environment["PYTHONUTF8"] = "1";
+            progress?.Report(new(null, "正在下载 BS-RoFormer-SW 多轨权重"));
+            var assetResult = await RunProcessAsync(assets, cancellationToken, progress);
+            if (assetResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(assetResult.Error) ? "BS-RoFormer-SW 权重下载失败。" : assetResult.Error);
+        }
+        if (model.Id.Equals("yourmt3", StringComparison.OrdinalIgnoreCase))
+        {
+            var downloader = Path.Combine(root, "Scripts", "mt3-infer.exe");
+            var modelsRoot = Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "mt3-models");
+            Directory.CreateDirectory(modelsRoot);
+            var assets = new ProcessStartInfo(downloader) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            assets.ArgumentList.Add("download"); assets.ArgumentList.Add("yourmt3");
+            assets.Environment["MT3_CHECKPOINT_DIR"] = modelsRoot;
+            assets.Environment["PYTHONUTF8"] = "1";
+            progress?.Report(new(null, "正在下载 YourMT3+ 多乐器权重"));
+            var assetResult = await RunProcessAsync(assets, cancellationToken, progress);
+            if (assetResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(assetResult.Error) ? "YourMT3+ 权重下载失败。" : assetResult.Error);
+        }
         if (!catalog.IsInstalled(model)) return new(false, $"{model.Name} 已完成环境安装，但启动组件未通过完整性检查。");
         WriteInstalledVersion(model.Id, DateTime.UtcNow.ToString("yyyy.MM.dd"));
         return new(true, $"{model.Name} 已下载并部署完成", "current");
@@ -417,7 +647,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
     private static HttpClient CreateClient()
     {
         var value = new HttpClient { Timeout = TimeSpan.FromHours(8) };
-        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.4.0"));
+        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.4.1"));
         return value;
     }
 }

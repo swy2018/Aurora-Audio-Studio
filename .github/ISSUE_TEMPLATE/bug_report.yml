@@ -10,7 +10,7 @@ body:
     id: version
     attributes:
       label: Aurora 版本
-      placeholder: 例如 1.4.0
+      placeholder: 例如 1.4.1
     validations:
       required: true
   - type: dropdown

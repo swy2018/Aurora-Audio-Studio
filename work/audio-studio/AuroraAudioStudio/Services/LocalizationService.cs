@@ -108,6 +108,9 @@ public sealed class LocalizationService(SettingsService settings)
 
     private readonly Dictionary<string, string[]> phrases = new(StringComparer.OrdinalIgnoreCase)
     {
+        ["分轨模式"] = ["分轨模式", "分軌模式", "Stem mode", "ステムモード"],
+        ["二轨：人声 + 伴奏"] = ["二轨：人声 + 伴奏", "二軌：人聲 + 伴奏", "Two stems: vocals + instrumental", "2 ステム：ボーカル + 伴奏"],
+        ["多轨：完整分轨"] = ["多轨：完整分轨", "多軌：完整分軌", "Multi-stem: full separation", "マルチステム：完全分離"],
         ["今天想创作什么？"] = ["今天想创作什么？", "今天想創作什麼？", "What would you like to create?", "今日は何を作りますか？"],
         ["六个功能互相独立，不需要先新建项目。选择功能后，再按提示添加素材、模型和输出位置。"] = ["六个功能互相独立，不需要先新建项目。选择功能后，再按提示添加素材、模型和输出位置。", "六個功能彼此獨立，不需要先建立專案。選擇功能後，再依提示加入素材、模型和輸出位置。", "All six features work independently—no project setup required. Choose a feature, then follow the prompts for media, models, and output location.", "6つの機能はそれぞれ独立しており、プロジェクト作成は不要です。機能を選び、素材、モデル、出力先の案内に従ってください。"],
         ["创作音乐"] = ["创作音乐", "創作音樂", "Create music", "音楽を作る"],

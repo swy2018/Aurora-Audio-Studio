@@ -98,7 +98,13 @@ var catalogSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioS
 Require(catalogSource.Contains("new(\"minimax-music3\"", StringComparison.Ordinal), "Model Management must expose MiniMax-Music3.");
 Require(catalogSource.Contains("new(\"transkun\"", StringComparison.Ordinal), "Model Management must expose TransKun V2.");
 var mainPageSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "MainPage.xaml.cs"));
-Require(mainPageSource.Contains("(\"transcription\", _) => \"transkun\"", StringComparison.Ordinal), "TransKun must be the default recommended piano transcription engine.");
+Require(mainPageSource.Contains("(\"transcription\", _, _) => \"transkun\"", StringComparison.Ordinal), "TransKun must be the default recommended piano transcription engine.");
+Require(mainPageSource.Contains("OpenWorkbenchButton.Content = localization.Get(installed ? \"openWorkbench\" : \"installModel\")", StringComparison.Ordinal), "An uninstalled workbench model must expose an Install button.");
+Require(mainPageSource.Contains("!await InstallSelectedModelAsync(model)", StringComparison.Ordinal), "Opening an uninstalled workbench model must start the on-demand installer.");
+Require(mainPageSource.Contains("(\"separation\", \"two-stem\", _) => \"roformer-vocals\"", StringComparison.Ordinal), "Two-stem separation must select the dedicated vocals/instrumental model.");
+Require(mainPageSource.Contains("(\"separation\", \"multi-stem\", \"fast\") => \"demucs\"", StringComparison.Ordinal), "Fast multi-stem separation must retain Demucs.");
+Require(catalogSource.Contains("new(\"roformer-vocals\"", StringComparison.Ordinal), "Model Management must expose the dedicated two-stem BS-RoFormer model.");
+Require(!catalogSource.Contains("\"python-tool\"", StringComparison.Ordinal) && !catalogSource.Contains("\"direct\"", StringComparison.Ordinal), "All catalog components must use an automatic update or repair adapter.");
 var minimaxTool = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Tools", "minimax_music3_webui.py"));
 Require(minimaxTool.Contains("MiniMax-Music3 Community License", StringComparison.Ordinal), "The MiniMax-Music3 workbench must display the upstream model and license name.");
 
@@ -125,6 +131,9 @@ Require(notes125.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.2.5 rele
 var notes130 = ReleaseNotesCatalog.CurrentAndRecent("1.3.0", "ja-JP");
 Require(notes130.Count == 5 && notes130[0].Version == "1.3.0" && notes130[^1].Version == "1.0.1", "Version 1.3.0 must show itself and its four previous releases.");
 Require(notes130.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.3.0 release note must have localized content.");
+var notes141 = ReleaseNotesCatalog.CurrentAndRecent("1.4.1", "zh-CN");
+Require(notes141.Count == 5 && notes141[0].Version == "1.4.1" && notes141[^1].Version == "1.2.0", "Version 1.4.1 must show itself and its four previous releases.");
+Require(notes141.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.4.1 release note must have localized content.");
 var notes140 = ReleaseNotesCatalog.CurrentAndRecent("1.4.0", "zh-CN");
 Require(notes140.Count == 5 && notes140[0].Version == "1.4.0" && notes140[^1].Version == "1.1.0", "Version 1.4.0 must show itself and its four previous releases.");
 Require(notes140.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.4.0 release note must have localized content.");

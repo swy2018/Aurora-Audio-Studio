@@ -125,6 +125,8 @@ public sealed partial class MainPage : Page
         UtilityModelPicker.Items.Clear();
         foreach (var model in catalog.Definitions.Where(x => x.Feature == tag)) UtilityModelPicker.Items.Add(new ComboBoxItem { Content = model.Name, Tag = model.Id });
         if (UtilityModelPicker.Items.Count > 0) UtilityModelPicker.SelectedIndex = 0;
+        UtilityTrackModePicker.Visibility = tag == "separation" ? Visibility.Visible : Visibility.Collapsed;
+        UtilityTrackModePicker.SelectedIndex = 0;
         UtilityPresetPicker.SelectedIndex = 1;
         ApplyUtilityPreset();
     }
@@ -288,18 +290,25 @@ public sealed partial class MainPage : Page
         if (IsLoaded) ApplyUtilityPreset();
     }
 
+    private void UtilityTrackModePicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (IsLoaded) ApplyUtilityPreset();
+    }
+
     private void ApplyUtilityPreset()
     {
         if (UtilityPresetPicker?.SelectedItem is not ComboBoxItem presetItem || presetItem.Tag is not string preset) return;
-        var modelId = (feature, preset) switch
+        var trackMode = (UtilityTrackModePicker?.SelectedItem as ComboBoxItem)?.Tag as string ?? "two-stem";
+        var modelId = (feature, trackMode, preset) switch
         {
-            ("separation", "fast") => "demucs",
-            ("separation", _) => "roformer",
-            ("transcription", "fast") => "basic-pitch",
-            ("transcription", _) => "transkun",
-            ("subtitles", "fast") => "whisper-small",
-            ("subtitles", "quality") => "whisper-large-v3",
-            ("subtitles", _) => "faster-whisper",
+            ("separation", "two-stem", _) => "roformer-vocals",
+            ("separation", "multi-stem", "fast") => "demucs",
+            ("separation", "multi-stem", _) => "roformer",
+            ("transcription", _, "fast") => "basic-pitch",
+            ("transcription", _, _) => "transkun",
+            ("subtitles", _, "fast") => "whisper-small",
+            ("subtitles", _, "quality") => "whisper-large-v3",
+            ("subtitles", _, _) => "whisper-large-v3-turbo",
             _ => ""
         };
         if (!string.IsNullOrWhiteSpace(modelId)) SelectTag(UtilityModelPicker, modelId);
@@ -319,6 +328,7 @@ public sealed partial class MainPage : Page
         {
             var project = await projects.CreateAsync(feature, source.Path, model);
             project.Parameters["preset"] = preset;
+            if (feature == "separation") project.Parameters["trackMode"] = (UtilityTrackModePicker.SelectedItem as ComboBoxItem)?.Tag as string ?? "two-stem";
             await projects.SaveAsync(project);
             var task = taskQueue.Create(project.Id, $"{UtilityTitle.Text} · {source.Name}", feature, source.Path, model, preset);
             await projects.AddTaskAsync(project, task);
@@ -405,10 +415,11 @@ public sealed partial class MainPage : Page
         SetStatus("正在检查模型更新…");
         var results = await modelUpdater.CheckAllAsync();
         var available = results.Count(x => x.Value.Path == "available");
-        var manual = results.Count(x => x.Value.Path == "manual");
+        var currentCount = results.Count(x => x.Value.Path == "current");
+        var unavailable = results.Count - available - currentCount;
         SetStatus(available == 0
-            ? $"可自动检查的模型均为最新；{manual} 个固定组件需随 Aurora 或上游安装器升级。"
-            : $"发现 {available} 个模型更新；另有 {manual} 个固定组件需随 Aurora 或上游安装器升级。");
+            ? $"检查完成：{currentCount} 个已安装组件为最新，{unavailable} 个未安装或暂时无法检查。"
+            : $"发现 {available} 个可自动安装的更新；{currentCount} 个已是最新，{unavailable} 个未安装或暂时无法检查。");
     }
 
     private async void ModelUpdateButton_Click(object sender, RoutedEventArgs e)
@@ -666,7 +677,7 @@ public sealed partial class MainPage : Page
     private static string CurrentDisplayVersion()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        if (version is null) return "1.4.0";
+        if (version is null) return "1.4.1";
         return version.Revision > 0 ? version.ToString(4) : version.ToString(3);
     }
 

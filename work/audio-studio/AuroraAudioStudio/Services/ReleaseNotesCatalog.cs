@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 4, 1), "2026-09-01", [
+            "• BS-RoFormer、YourMT3+、ByteDance Piano、Faster-Whisper XXL 与 Subtitle Edit 现在都可在模型中心自动检查、安装、修复或更新；更新仍先暂存校验再安全切换。\n• 任务工作台选择未安装模型时会直接显示安装入口，不再留下无法继续的选择状态。\n• 分轨新增二轨与多轨选择：二轨使用专用 Vocals Revive 模型生成纯人声与纯伴奏，多轨继续提供质量与速度方案。\n• 字幕预设现在明确对应 Small、Large v3 Turbo 与 Large v3，方便在速度、显存和准确率之间选择。",
+            "• BS-RoFormer、YourMT3+、ByteDance Piano、Faster-Whisper XXL 與 Subtitle Edit 現在都可在模型中心自動檢查、安裝、修復或更新；更新仍會先暫存驗證再安全切換。\n• 任務工作台選擇未安裝模型時會直接顯示安裝入口，不再留下無法繼續的選擇狀態。\n• 分軌新增二軌與多軌選擇：二軌使用專用 Vocals Revive 模型產生純人聲與純伴奏，多軌繼續提供品質與速度方案。\n• 字幕預設現在明確對應 Small、Large v3 Turbo 與 Large v3，方便在速度、顯示記憶體和準確率之間選擇。",
+            "• BS-RoFormer, YourMT3+, ByteDance Piano, Faster-Whisper XXL, and Subtitle Edit can now be checked, installed, repaired, or updated automatically from Model Management; replacements still stage and verify before switching.\n• Selecting an uninstalled model in a task workbench now exposes the install action immediately instead of leaving a blocked selection.\n• Separation now offers two-stem and multi-stem modes. Two-stem uses the dedicated Vocals Revive model for clean vocals and instrumental output, while multi-stem retains quality and speed choices.\n• Subtitle presets now map explicitly to Small, Large v3 Turbo, and Large v3 for clearer speed, VRAM, and accuracy trade-offs.",
+            "• BS-RoFormer、YourMT3+、ByteDance Piano、Faster-Whisper XXL、Subtitle Edit をモデル管理から自動確認、導入、修復、更新できるようにしました。更新は従来どおり一時領域で検証してから安全に切り替えます。\n• タスク画面で未導入モデルを選ぶと、その場でインストール操作を表示し、進めない状態を解消しました。\n• 分離に 2 ステムとマルチステムを追加しました。2 ステムは専用 Vocals Revive でボーカルと伴奏を出力し、マルチステムは品質と速度を選べます。\n• 字幕プリセットを Small、Large v3 Turbo、Large v3 に明確に対応させ、速度、VRAM、精度の選択を分かりやすくしました。"]),
         new(new(1, 4, 0), "2026-08-30", [
             "• 模型管理新增 MiniMax-Music3 按需安装，可自动配置独立 CUDA 环境并在音乐创作中启用；不会未经确认下载模型。\n• TransKun V2 加入模型管理并替换为默认钢琴扒谱引擎，ByteDance Piano 作为经典可选模型保留。\n• Hugging Face、Git 与 PyPI 模型现在可按官方版本真实比对；固定运行组件不再误报最新，而会明确提示其升级渠道。\n• 关于页新增反馈问题与建议入口，并同步更新网站、README 与发布文档。",
             "• 模型管理新增 MiniMax-Music3 隨選安裝，可自動設定獨立 CUDA 環境並在音樂創作中啟用；不會未經確認下載模型。\n• TransKun V2 加入模型管理並取代為預設鋼琴扒譜引擎，ByteDance Piano 保留為經典選用模型。\n• Hugging Face、Git 與 PyPI 模型現在可依官方版本真實比對；固定執行元件不再誤報最新，並會清楚提示升級方式。\n• 關於頁新增問題與建議回饋入口，並同步更新網站、README 與發布文件。",

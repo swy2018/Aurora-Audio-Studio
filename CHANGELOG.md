@@ -4,6 +4,23 @@
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
 
+## 1.4.1 — 2026-09-01
+
+### 中文
+
+- 为 BS-RoFormer、YourMT3+、ByteDance Piano、Faster-Whisper XXL 与 Subtitle Edit 增加可验证的自动检查、安装、修复和更新通道；所有替换仍在暂存目录完成校验后再切换。
+- 任务工作台选择未安装模型时会直接提供安装按钮，并沿用模型位置、磁盘空间和明确确认流程。
+- 去人声 / AI 分轨新增二轨与多轨选择；二轨使用专用 BS-RoFormer Vocals Revive V3e 输出纯人声和纯伴奏，多轨继续提供质量与速度方案。
+- 字幕预设明确对应 Faster-Whisper Small、Large v3 Turbo 与 Large v3。
+- 新增自动更新适配器 ADR、组件来源与完整性回归检查，并同步应用内更新日志、README、官网、About 与音乐人指南。
+
+### English
+
+- Added verified automatic check, install, repair, and update paths for BS-RoFormer, YourMT3+, ByteDance Piano, Faster-Whisper XXL, and Subtitle Edit. Replacements still stage and verify before activation.
+- Task workbenches now expose the install action immediately when an uninstalled model is selected, using the existing location, disk-space, and explicit-confirmation flow.
+- Added two-stem and multi-stem separation. The dedicated BS-RoFormer Vocals Revive V3e model produces clean vocals and instrumental output, while multi-stem retains quality and speed choices.
+- Mapped subtitle presets explicitly to Faster-Whisper Small, Large v3 Turbo, and Large v3.
+- Added an updater ADR and regression coverage for component sources and integrity, and synchronized in-app notes, README, website, About, and the musician guide.
 ## 1.4.0 — 2026-08-30
 
 ### 中文

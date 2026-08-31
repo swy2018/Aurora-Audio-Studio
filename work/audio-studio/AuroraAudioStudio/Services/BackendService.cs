@@ -197,6 +197,11 @@ public sealed class BackendService(SettingsService settings)
             info.ArgumentList.Add("--input_folder"); info.ArgumentList.Add(tempFolder);
             info.ArgumentList.Add("--store_dir"); info.ArgumentList.Add(output);
             info.ArgumentList.Add("--models_dir"); info.ArgumentList.Add(models);
+            if (modelId.Equals("roformer-vocals", StringComparison.OrdinalIgnoreCase))
+            {
+                info.ArgumentList.Add("--model");
+                info.ArgumentList.Add("roformer-model-bs-roformer-vocals-revive-v3e-by-unwa");
+            }
             info.Environment["PATH"] = FfmpegRoot + ";" + Environment.GetEnvironmentVariable("PATH");
             return await RunCapturedAsync("utility", info, "separator", output, progress, cancellationToken);
         }
