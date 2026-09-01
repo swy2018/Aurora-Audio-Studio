@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 5, 1), "2026-09-01", [
+            "• 任务工作台选择未安装模型时，现在会显示独立的“下载安装模型”按钮；安装完成后才切换为“进入工作台”，模型切换会立即刷新状态。\n• 修复已完整下载的组件包因断点续传收到 HTTP 416 而被误判为失败的问题；Aurora 会核对官方文件大小，并继续执行原有 SHA-256 完整性校验。\n• 增加工作台安装入口、断点文件大小与下载恢复路径的回归检查。",
+            "• 任務工作台選擇未安裝模型時，現在會顯示獨立的「下載安裝模型」按鈕；安裝完成後才切換為「進入工作台」，切換模型會立即更新狀態。\n• 修正已完整下載的元件套件因續傳收到 HTTP 416 而被誤判為失敗的問題；Aurora 會核對官方檔案大小，並繼續執行原有 SHA-256 完整性驗證。\n• 新增工作台安裝入口、續傳檔案大小與下載恢復路徑的回歸檢查。",
+            "• Selecting an uninstalled workbench model now shows a dedicated Download and install model action. Enter workbench appears only after installation, and switching models refreshes the state immediately.\n• Fixed completed component downloads being reported as failures when a resume request receives HTTP 416. Aurora checks the official asset size and then continues through the existing SHA-256 integrity validation.\n• Added regression coverage for the workbench install action, partial-file sizing, and download recovery path.",
+            "• ワークベンチで未導入モデルを選ぶと、専用の「モデルをダウンロードしてインストール」操作を表示します。導入完了後にのみワークベンチ操作へ切り替わり、モデル変更時も状態を即時更新します。\n• ダウンロード済みのコンポーネントに対する再開要求が HTTP 416 を返した際、失敗と誤判定する問題を修正しました。公式ファイルサイズを確認し、既存の SHA-256 完全性検証を続行します。\n• ワークベンチ導入操作、部分ファイルサイズ、ダウンロード復旧経路の回帰テストを追加しました。"]),
         new(new(1, 5, 0), "2026-09-01", [
             "• 模型中心改为更直观的分层卡片，集中展示用途、功能、语言、版本、许可、状态与本地路径。\n• 检查更新后，存在新版的组件会直接显示更新按钮，并提供可重试的更新全部入口。\n• 更新前会检测正在运行的组件；Aurora 不会强制关闭它们，而会提示先保存工作并关闭后重试，避免未保存内容丢失。\n• 更新失败仍保留可更新状态，文件占用竞态会返回明确提示；相关行为加入回归测试。",
             "• 模型中心改為更直觀的分層卡片，集中顯示用途、功能、語言、版本、授權、狀態與本機路徑。\n• 檢查更新後，存在新版本的元件會直接顯示更新按鈕，並提供可重試的全部更新入口。\n• 更新前會偵測正在執行的元件；Aurora 不會強制關閉它們，而會提示先儲存工作並關閉後重試，避免未儲存內容遺失。\n• 更新失敗仍保留可更新狀態，檔案佔用競態會顯示明確提示；相關行為已加入回歸測試。",

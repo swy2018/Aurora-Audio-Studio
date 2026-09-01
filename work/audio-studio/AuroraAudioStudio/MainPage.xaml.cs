@@ -145,6 +145,11 @@ public sealed partial class MainPage : Page
         else { StudioEmpty.Visibility = Visibility.Visible; EmptyTitle.Text = "暂时无法进入工作台"; EmptyBody.Text = result.Message; SetStatus(result.Message); }
     }
 
+    private async void InstallWorkbenchModelButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ModelPicker.SelectedItem is not ComboBoxItem item || item.Tag is not string modelId || catalog.Find(modelId) is not { } model) return;
+        await InstallSelectedModelAsync(model);
+    }
     private async Task<bool> InstallSelectedModelAsync(ModelDefinition model)
     {
         var modelRoot = settings.Current.LocalAiRoot;
@@ -184,6 +189,7 @@ public sealed partial class MainPage : Page
             settings.Save(settings.Current);
             ModelRootBox.Text = modelRoot;
             OpenWorkbenchButton.IsEnabled = false;
+            InstallWorkbenchModelButton.IsEnabled = false;
             WorkbenchProgress.Visibility = Visibility.Visible;
             WorkbenchProgress.IsActive = true;
             SetStatus(localization.Format("modelInstalling", model.Name));
@@ -796,7 +802,7 @@ public sealed partial class MainPage : Page
     private static string CurrentDisplayVersion()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        if (version is null) return "1.5.0";
+        if (version is null) return "1.5.1";
         return version.Revision > 0 ? version.ToString(4) : version.ToString(3);
     }
 
@@ -827,8 +833,12 @@ public sealed partial class MainPage : Page
         var installed = catalog.IsInstalled(model);
         CurrentModelName.Text = model.Name;
         CurrentModelState.Text = localization.Get(installed ? "modelReady" : "modelMissing");
-        OpenWorkbenchButton.Content = localization.Get(installed ? "openWorkbench" : "installModel");
+        OpenWorkbenchButton.Content = localization.Get("openWorkbench");
+        OpenWorkbenchButton.Visibility = installed ? Visibility.Visible : Visibility.Collapsed;
+        InstallWorkbenchModelButton.Content = localization.Get("installModel");
+        InstallWorkbenchModelButton.Visibility = installed ? Visibility.Collapsed : Visibility.Visible;
         OpenWorkbenchButton.IsEnabled = true;
+        InstallWorkbenchModelButton.IsEnabled = true;
     }
     private void OpenOutputButton_Click(object sender, RoutedEventArgs e) => backend.OpenFolder(settings.Current.OutputRoot);
     private void OpenModelsButton_Click(object sender, RoutedEventArgs e) => backend.OpenFolder(settings.Current.LocalAiRoot);

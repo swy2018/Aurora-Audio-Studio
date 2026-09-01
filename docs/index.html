@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#f4faf7">
   <meta name="description" content="Aurora Audio Studio 是面向 Windows 的本地 AI 音频创作工作台，统一音乐、声音、分轨、MIDI 与字幕工作流。">
-  <meta property="og:title" content="Aurora Audio Studio 1.5.0">
+  <meta property="og:title" content="Aurora Audio Studio 1.5.1">
   <meta property="og:description" content="六个独立音频功能直接开始，模型、任务与成品留在本地。">
   <meta property="og:image" content="https://swy2018.github.io/Aurora-Audio-Studio/assets/aurora-workbench-music.png?v=125-sharp">
   <title>Aurora Audio Studio | 本地音频创作工作台</title>
@@ -36,17 +36,17 @@
   <main id="content">
     <section class="hero shell" id="top">
       <div class="hero-copy reveal">
-        <p class="release"><span class="zh">Aurora Audio Studio 1.5.0</span><span class="en">Aurora Audio Studio 1.5.0</span></p>
+        <p class="release"><span class="zh">Aurora Audio Studio 1.5.1</span><span class="en">Aurora Audio Studio 1.5.1</span></p>
         <h1><span class="zh">让声音创作，<br>回到创作本身。</span><span class="en">Keep audio creation<br>focused on the work.</span></h1>
         <p class="hero-lead"><span class="zh">音乐生成、声音克隆、歌声转换、AI 分轨、MIDI 扒谱与视频字幕，集中在一套本地 Windows 工作台里。</span><span class="en">Music, voice cloning, singing conversion, stem separation, MIDI transcription, and subtitles in one local Windows workspace.</span></p>
         <div class="hero-actions">
-          <a class="button primary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><span class="zh">下载 1.5.0</span><span class="en">Download 1.5.0</span></a>
+          <a class="button primary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><span class="zh">下载 1.5.1</span><span class="en">Download 1.5.1</span></a>
           <a class="button secondary" href="https://github.com/swy2018/Aurora-Audio-Studio"><span class="zh">查看源代码</span><span class="en">View source</span></a>
         </div>
       </div>
       <figure class="hero-product reveal">
         <button class="image-button" type="button" data-lightbox="assets/aurora-workbench-music.png?v=125-sharp" aria-label="全屏查看 Aurora 音乐创作工作台">
-          <img src="assets/aurora-workbench-music.png?v=125-sharp" width="3840" height="2088" alt="Aurora Audio Studio 1.5.0 音乐创作工作台完整界面" fetchpriority="high">
+          <img src="assets/aurora-workbench-music.png?v=125-sharp" width="3840" height="2088" alt="Aurora Audio Studio 1.5.1 音乐创作工作台完整界面" fetchpriority="high">
         </button>
         <figcaption><span class="zh">真实工作台界面。点击图片可按原始尺寸查看。</span><span class="en">The real workspace. Open the image for a full-resolution view.</span></figcaption>
       </figure>
@@ -73,7 +73,7 @@
         </div>
         <p class="workspace-description"><span class="zh">输入创作描述，选择模型与时长，在嵌入式工作台里完成音乐生成。</span><span class="en">Describe the piece, choose a model and duration, then create inside the embedded music workspace.</span></p>
         <button class="image-button workspace-image" type="button" data-lightbox="assets/aurora-workbench-music.png?v=125-sharp" aria-label="全屏查看当前工作台">
-          <img src="assets/aurora-workbench-music.png?v=125-sharp" width="3840" height="2088" alt="Aurora 1.5.0 音乐创作工作台" loading="lazy">
+          <img src="assets/aurora-workbench-music.png?v=125-sharp" width="3840" height="2088" alt="Aurora 1.5.1 音乐创作工作台" loading="lazy">
         </button>
       </div>
     </section>
@@ -81,9 +81,9 @@
     <section class="workflow-section" id="workflow">
       <div class="shell workflow-grid">
         <div class="workflow-intro reveal">
-          <p class="eyebrow"><span class="zh">1.5.0 模型管理与安全更新</span><span class="en">Clearer model management and safer updates in 1.5.0</span></p>
+          <p class="eyebrow"><span class="zh">1.5.1 安装入口与可靠续传</span><span class="en">Clear installation and reliable resume in 1.5.1</span></p>
           <h2><span class="zh">模型更好维护，<br>选择也更明确。</span><span class="en">Models are easier to maintain.<br>Choices are clearer.</span></h2>
-          <p><span class="zh">检查完成后直接更新单个或全部组件；模型卡片重新分层展示用途、语言、版本、许可与路径。运行中的组件会先提示保存并关闭，不强制结束程序。</span><span class="en">Detected updates now expose direct single or batch actions. Layered model cards clarify purpose, languages, version, license, and path, while running components are never force-closed.</span></p>
+          <p><span class="zh">未安装模型会明确显示下载安装按钮；完整下载包遇到 HTTP 416 时会核对官方大小并继续 SHA-256 校验，不再误报失败。</span><span class="en">Missing models now expose a clear install action. Completed packages that receive HTTP 416 are checked against the official size and continue through SHA-256 validation instead of failing.</span></p>
         </div>
         <ol class="workflow-list reveal">
           <li><div><strong><span class="zh">拖入或批量选择素材</span><span class="en">Drop or batch-select media</span></strong><p><span class="zh">音频和视频在提交前即可预览，并保留大小与格式信息。</span><span class="en">Preview audio and video before submitting, with format and size visible.</span></p></div></li>
@@ -122,9 +122,9 @@
     <section class="download-section shell" id="download">
       <div class="download-inner reveal">
         <h2><span class="zh">把工作流留在一处。</span><span class="en">Keep the workflow in one place.</span></h2>
-        <p><span class="zh">Aurora Audio Studio 1.5.0 让模型列表更直观，检测后可直接更新单个或全部组件，并在文件被占用时保护未保存内容。</span><span class="en">Aurora Audio Studio 1.5.0 makes models easier to scan, adds direct single and batch updates, and protects unsaved work when component files are in use.</span></p>
+        <p><span class="zh">Aurora Audio Studio 1.5.1 为未安装模型提供明确入口，并修复组件断点续传误报失败。</span><span class="en">Aurora Audio Studio 1.5.1 adds a clear path for missing models and fixes false failures during component download resume.</span></p>
         <div class="hero-actions">
-          <a class="button primary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><span class="zh">下载 1.5.0 安装版</span><span class="en">Download 1.5.0</span></a>
+          <a class="button primary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><span class="zh">下载 1.5.1 安装版</span><span class="en">Download 1.5.1</span></a>
           <a class="button secondary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases"><span class="zh">查看更新日志</span><span class="en">Release notes</span></a>
         </div>
       </div>

@@ -4,6 +4,21 @@
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
 
+## 1.5.1 — 2026-09-01
+
+### 中文
+
+- 任务工作台选择未安装模型时，改为显示独立的“下载安装模型”按钮；安装完成后才显示“进入工作台”，切换模型会立即刷新状态。
+- 修复组件包已经完整下载却因断点续传收到 HTTP 416 而被误判为失败的问题；恢复流程会核对 GitHub Release 官方文件大小，再继续执行 SHA-256 完整性校验。
+- 增加工作台安装入口、断点文件大小、HTTP 416 恢复路径和发布版本同步回归检查。
+- 同步应用版本、四语内置更新日志、README、官网、About、产品文档与音乐人使用说明。
+
+### English
+
+- Uninstalled workbench models now expose a dedicated Download and install model action. Enter workbench appears only after installation, and model changes refresh state immediately.
+- Fixed completed component packages being reported as failed when a resume request receives HTTP 416. Aurora checks the official GitHub Release asset size before continuing through SHA-256 integrity validation.
+- Added regression coverage for the workbench install action, partial-file sizing, HTTP 416 recovery, and release-version synchronization.
+- Synchronized application metadata, four-language in-app notes, README, website, About, product documentation, and the musician guide.
 ## 1.5.0 — 2026-09-01
 
 ### 中文

@@ -151,7 +151,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         var folder = Path.Combine(settings.UpdatesRoot, "Models", model.Id, release.Version);
         Directory.CreateDirectory(folder);
         var package = Path.Combine(folder, release.Name);
-        await DownloadFileAsync(release.Url, package, progress, cancellationToken);
+        await DownloadFileAsync(release.Url, package, progress, cancellationToken, release.Size);
         var packageInfo = new FileInfo(package);
         if (packageInfo.Length != release.Size) return new(false, "下载文件大小与 GitHub Release 不一致，已停止更新。");
         if (!string.IsNullOrWhiteSpace(release.Digest))
@@ -609,36 +609,52 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         catch (Exception ex) { return new(false, ex.Message); }
     }
 
-    private async Task DownloadFileAsync(string url, string destination, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    private async Task DownloadFileAsync(string url, string destination, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken, long? expectedLength = null)
     {
         var partial = destination + ".part";
-        var existing = File.Exists(partial) ? new FileInfo(partial).Length : 0;
-        using var request = new HttpRequestMessage(HttpMethod.Get, url);
-        if (existing > 0) request.Headers.Range = new RangeHeaderValue(existing, null);
-        using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        var resumed = response.StatusCode == System.Net.HttpStatusCode.PartialContent;
-        if (!resumed) existing = 0;
-        long? total = response.Content.Headers.ContentLength is { } length ? length + existing : null;
-        await using var input = await response.Content.ReadAsStreamAsync(cancellationToken);
-        await using var output = new FileStream(partial, resumed ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.Read, 1024 * 1024, true);
-        var buffer = new byte[1024 * 1024];
-        var received = existing;
-        var watch = Stopwatch.StartNew();
-        var lastReport = TimeSpan.Zero;
-        while (true)
+        for (var attempt = 0; attempt < 2; attempt++)
         {
-            var read = await input.ReadAsync(buffer, cancellationToken);
-            if (read == 0) break;
-            await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
-            received += read;
-            if (watch.Elapsed - lastReport < TimeSpan.FromMilliseconds(180)) continue;
-            lastReport = watch.Elapsed;
-            var speed = (received - existing) / Math.Max(.1, watch.Elapsed.TotalSeconds);
-            progress?.Report(new(total is > 0 ? received * 100d / total.Value : null, "正在下载模型包", received, total, speed));
+            var existing = File.Exists(partial) ? new FileInfo(partial).Length : 0;
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            if (existing > 0) request.Headers.Range = new RangeHeaderValue(existing, null);
+            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            if (response.StatusCode == System.Net.HttpStatusCode.RequestedRangeNotSatisfiable && existing > 0)
+            {
+                var serverLength = response.Content.Headers.ContentRange?.Length;
+                if (DownloadResumeGuard.CanPromotePartial(response.StatusCode, existing, expectedLength ?? serverLength))
+                {
+                    File.Move(partial, destination, true);
+                    return;
+                }
+                File.Delete(partial);
+                continue;
+            }
+            response.EnsureSuccessStatusCode();
+            var resumed = response.StatusCode == System.Net.HttpStatusCode.PartialContent;
+            if (!resumed) existing = 0;
+            long? total = response.Content.Headers.ContentLength is { } length ? length + existing : null;
+            await using var input = await response.Content.ReadAsStreamAsync(cancellationToken);
+            await using var output = new FileStream(partial, resumed ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.Read, 1024 * 1024, true);
+            var buffer = new byte[1024 * 1024];
+            var received = existing;
+            var watch = Stopwatch.StartNew();
+            var lastReport = TimeSpan.Zero;
+            while (true)
+            {
+                var read = await input.ReadAsync(buffer, cancellationToken);
+                if (read == 0) break;
+                await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+                received += read;
+                if (watch.Elapsed - lastReport < TimeSpan.FromMilliseconds(180)) continue;
+                lastReport = watch.Elapsed;
+                var speed = (received - existing) / Math.Max(.1, watch.Elapsed.TotalSeconds);
+                progress?.Report(new(total is > 0 ? received * 100d / total.Value : null, "正在下载模型包", received, total, speed));
+            }
+            await output.FlushAsync(cancellationToken);
+            File.Move(partial, destination, true);
+            return;
         }
-        await output.FlushAsync(cancellationToken);
-        File.Move(partial, destination, true);
+        throw new IOException("服务器拒绝了断点位置，重新下载仍未成功。");
     }
 
     private static async Task<(int ExitCode, string Output, string Error)> RunProcessAsync(ProcessStartInfo info, CancellationToken cancellationToken = default, IProgress<ModelInstallProgress>? progress = null)
@@ -663,7 +679,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
     private static HttpClient CreateClient()
     {
         var value = new HttpClient { Timeout = TimeSpan.FromHours(8) };
-        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.5.0"));
+        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.5.1"));
         return value;
     }
 }

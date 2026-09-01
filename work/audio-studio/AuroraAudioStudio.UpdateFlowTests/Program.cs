@@ -1,5 +1,6 @@
 using AuroraAudioStudio.Services;
 using AuroraAudioStudio.Models;
+using System.Net;
 using System.Text.RegularExpressions;
 
 static void Require(bool condition, string message)
@@ -21,6 +22,9 @@ Require(!guard.TryBegin(), "A concurrent update flow must be rejected.");
 guard.End();
 Require(guard.TryBegin(), "The guard must be reusable after the active flow ends.");
 guard.End();
+
+Require(DownloadResumeGuard.CanPromotePartial(HttpStatusCode.RequestedRangeNotSatisfiable, 109_471_580, 109_471_580), "A complete saved package rejected with HTTP 416 must proceed to the caller's integrity check.");
+Require(!DownloadResumeGuard.CanPromotePartial(HttpStatusCode.RequestedRangeNotSatisfiable, 109_471_579, 109_471_580), "A partial package whose size differs from the official asset must restart instead of being promoted.");
 
 var instanceName = @"Local\AuroraAudioStudio.Tests." + Guid.NewGuid().ToString("N");
 using (var primary = new SingleInstanceGuard(instanceName))
@@ -83,6 +87,10 @@ Require(mainPageXaml.Contains("AutomationProperties.Name=\"本地 AI 创作工�
 var repositoryRoot = Path.GetFullPath(Path.Combine(audioStudioRoot, "..", ".."));
 var workflow = File.ReadAllText(Path.Combine(repositoryRoot, ".github", "workflows", "build.yml"));
 Require(workflow.Contains("AuroraAudioStudio.UpdateFlowTests", StringComparison.Ordinal), "CI must run the regression program before packaging.");
+Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains("<Version>1.5.1</Version>", StringComparison.Ordinal), "The application project must publish version 1.5.1.");
+Require(installerScript.Contains("MyAppVersion \"1.5.1\"", StringComparison.Ordinal), "The installer fallback version must match 1.5.1.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains("Aurora-Audio-Studio-1.5.1-Setup-x64.exe", StringComparison.Ordinal), "README download instructions must match 1.5.1.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains("Download 1.5.1", StringComparison.Ordinal), "The website download action must match 1.5.1.");
 
 var qwen = new ModelDefinition("qwen3-tts-06b-base", "Qwen3-TTS 0.6B", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "model.safetensors", "Qwen", "huggingface", "Qwen/Qwen3-TTS-12Hz-0.6B-Base");
 var plan = ModelInstallPlanner.Create(qwen, @"D:\AuroraModels");
@@ -102,6 +110,8 @@ Require(catalogSource.Contains("new(\"transkun\"", StringComparison.Ordinal), "M
 var mainPageSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "MainPage.xaml.cs"));
 var modelUpdateSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Services", "ModelUpdateService.cs"));
 Require(mainPageXaml.Contains("x:Name=\"UpdateAllModelsButton\"", StringComparison.Ordinal), "Model Management must expose an Update all button after checking updates.");
+Require(mainPageXaml.Contains("x:Name=\"InstallWorkbenchModelButton\"", StringComparison.Ordinal), "The workbench must expose a dedicated install button for the selected missing model.");
+Require(mainPageSource.Contains("ModelPicker.SelectionChanged += ModelPicker_SelectionChanged", StringComparison.Ordinal), "The workbench model picker must refresh its actions after page initialization.");
 Require(mainPageXaml.Contains("AutomationProperties.Name=\"{Binding Name}\"", StringComparison.Ordinal), "Every model row must expose its model name to assistive technologies.");
 Require(mainPageXaml.Contains("ToolTipService.ToolTip=\"{Binding LocalPath}\"", StringComparison.Ordinal), "A truncated model path must remain discoverable.");
 Require(mainPageXaml.Contains("Content=\"{Binding RollbackAction}\"", StringComparison.Ordinal) && mainPageXaml.Contains("Content=\"{Binding UninstallAction}\"", StringComparison.Ordinal), "Virtualized model actions must use localized data instead of fixed Chinese labels.");
@@ -111,10 +121,12 @@ Require(mainPageSource.Contains("UpdateAllModelsButton_Click", StringComparison.
 Require(mainPageSource.Contains("PrimaryAction = localization.Translate(\"更新\")", StringComparison.Ordinal), "A detected model update must replace the generic card action with Update.");
 Require(mainPageSource.Contains("new OperationResult(false, result.Message, \"available\")", StringComparison.Ordinal), "A failed batch update must remain available for retry.");
 Require(modelUpdateSource.Contains("RunningProcessGuard.FindInRoot", StringComparison.Ordinal), "Model updates must detect a running component before replacing its files.");
+Require(modelUpdateSource.Contains("DownloadResumeGuard.CanPromotePartial", StringComparison.Ordinal) && modelUpdateSource.Contains("cancellationToken, release.Size", StringComparison.Ordinal), "GitHub Release downloads must route HTTP 416 through the verified partial-package guard.");
+Require(mainPageSource.Contains("InstallWorkbenchModelButton_Click", StringComparison.Ordinal), "The dedicated workbench install button must invoke the on-demand installer.");
 Require(mainPageSource.Contains("ShowModelInUseDialogAsync", StringComparison.Ordinal), "A blocked model update must explain how to close the component and retry safely.");
 Require(modelUpdateSource.Contains("catch (IOException", StringComparison.Ordinal), "A late file-lock race must return an actionable retry state instead of a raw exception.");
 Require(mainPageSource.Contains("(\"transcription\", _, _) => \"transkun\"", StringComparison.Ordinal), "TransKun must be the default recommended piano transcription engine.");
-Require(mainPageSource.Contains("OpenWorkbenchButton.Content = localization.Get(installed ? \"openWorkbench\" : \"installModel\")", StringComparison.Ordinal), "An uninstalled workbench model must expose an Install button.");
+Require(mainPageSource.Contains("InstallWorkbenchModelButton.Visibility = installed ? Visibility.Collapsed : Visibility.Visible", StringComparison.Ordinal) && mainPageSource.Contains("OpenWorkbenchButton.Visibility = installed ? Visibility.Visible : Visibility.Collapsed", StringComparison.Ordinal), "An uninstalled workbench model must expose a dedicated Install button instead of the Open button.");
 Require(mainPageSource.Contains("!await InstallSelectedModelAsync(model)", StringComparison.Ordinal), "Opening an uninstalled workbench model must start the on-demand installer.");
 Require(mainPageSource.Contains("(\"separation\", \"two-stem\", _) => \"roformer-vocals\"", StringComparison.Ordinal), "Two-stem separation must select the dedicated vocals/instrumental model.");
 Require(mainPageSource.Contains("(\"separation\", \"multi-stem\", \"fast\") => \"demucs\"", StringComparison.Ordinal), "Fast multi-stem separation must retain Demucs.");
@@ -146,6 +158,9 @@ Require(notes125.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.2.5 rele
 var notes130 = ReleaseNotesCatalog.CurrentAndRecent("1.3.0", "ja-JP");
 Require(notes130.Count == 5 && notes130[0].Version == "1.3.0" && notes130[^1].Version == "1.0.1", "Version 1.3.0 must show itself and its four previous releases.");
 Require(notes130.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.3.0 release note must have localized content.");
+var notes151 = ReleaseNotesCatalog.CurrentAndRecent("1.5.1", "en-US");
+Require(notes151.Count == 5 && notes151[0].Version == "1.5.1" && notes151[^1].Version == "1.3.0", "Version 1.5.1 must show itself and its four previous releases.");
+Require(notes151.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.5.1 release note must have localized content.");
 var notes150 = ReleaseNotesCatalog.CurrentAndRecent("1.5.0", "en-US");
 Require(notes150.Count == 5 && notes150[0].Version == "1.5.0" && notes150[^1].Version == "1.2.5", "Version 1.5.0 must show itself and its four previous releases.");
 Require(notes150.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.5.0 release note must have localized content.");

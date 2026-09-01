@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net;
 using System.Threading;
 
 namespace AuroraAudioStudio.Services;
@@ -18,4 +19,12 @@ public sealed class UpdateFlowGuard
 
     public static string BuildInstallerArguments(int currentProcessId, string logPath) =>
         $"/SILENT /CLOSEAPPLICATIONS /NORESTART /KEEPUSERDATA /UPDATE /UPDATEPID={currentProcessId} /LOG=\"{logPath}\"";
+}
+
+public static class DownloadResumeGuard
+{
+    public static bool CanPromotePartial(HttpStatusCode status, long existingLength, long? expectedLength) =>
+        status == HttpStatusCode.RequestedRangeNotSatisfiable
+        && existingLength > 0
+        && (expectedLength is null || existingLength == expectedLength.Value);
 }
