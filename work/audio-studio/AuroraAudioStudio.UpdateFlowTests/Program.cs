@@ -129,6 +129,10 @@ Require(mainPageXaml.Contains("Content=\"{Binding RollbackAction}\"", StringComp
 Require(!mainPageXaml.Contains("<ColumnDefinition Width=\"260\"/><ColumnDefinition Width=\"210\"/>", StringComparison.Ordinal), "Model rows must not rely on the old fixed-width four-column table layout.");
 Require(mainPageSource.Contains("modelUpdateChecks", StringComparison.Ordinal), "Model update check results must remain available to drive update actions.");
 Require(mainPageSource.Contains("UpdateAllModelsButton_Click", StringComparison.Ordinal), "The Update all button must execute available model updates.");
+Require(mainPageSource.Contains("private readonly UpdateFlowGuard modelInstallFlow = new();", StringComparison.Ordinal)
+    && mainPageSource.Contains("if (!modelInstallFlow.TryBegin())", StringComparison.Ordinal)
+    && mainPageSource.Contains("modelInstallFlow.End();", StringComparison.Ordinal), "Model installation must reject a second concurrent operation and release its guard afterward.");
+Require(mainPageSource.Contains("$\"{model.Name} · {value.Detail}\"", StringComparison.Ordinal), "Model installation progress must identify the active model.");
 Require(mainPageSource.Contains("PrimaryAction = localization.Translate(\"更新\")", StringComparison.Ordinal), "A detected model update must replace the generic card action with Update.");
 Require(mainPageSource.Contains("new OperationResult(false, result.Message, \"available\")", StringComparison.Ordinal), "A failed batch update must remain available for retry.");
 Require(modelUpdateSource.Contains("RunningProcessGuard.FindInRoot", StringComparison.Ordinal), "Model updates must detect a running component before replacing its files.");

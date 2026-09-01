@@ -29,6 +29,7 @@ public sealed partial class MainPage : Page
     private readonly ObservableCollection<string> utilityLogs = [];
     private readonly ObservableCollection<MediaSourceItem> utilitySources = [];
     private readonly UpdateFlowGuard updateFlow = new();
+    private readonly UpdateFlowGuard modelInstallFlow = new();
     private readonly SemaphoreSlim dialogGate = new(1, 1);
     private CancellationTokenSource? modelInstallCancellation;
     private readonly Dictionary<string, OperationResult> modelUpdateChecks = new(StringComparer.OrdinalIgnoreCase);
@@ -705,14 +706,16 @@ public sealed partial class MainPage : Page
 
     private async Task<OperationResult> RunModelInstallAsync(ModelDefinition model)
     {
-        modelInstallCancellation?.Dispose();
-        modelInstallCancellation = new CancellationTokenSource();
+        if (!modelInstallFlow.TryBegin())
+            return new OperationResult(false, "已有模型正在安装，请等待当前任务完成或取消后再试。");
+        using var cancellation = new CancellationTokenSource();
+        modelInstallCancellation = cancellation;
         try
         {
             var progress = new Progress<ModelInstallProgress>(value =>
-                ShowGlobalUpdate(value.Percentage ?? 0, value.Detail, value.Percentage is null, true));
+                ShowGlobalUpdate(value.Percentage ?? 0, $"{model.Name} · {value.Detail}", value.Percentage is null, true));
             ShowGlobalUpdate(0, $"正在准备 {model.Name}", true, true);
-            var result = await modelUpdater.UpdateAsync(model, progress, modelInstallCancellation.Token);
+            var result = await modelUpdater.UpdateAsync(model, progress, cancellation.Token);
             HideGlobalUpdate();
             return result;
         }
@@ -728,8 +731,8 @@ public sealed partial class MainPage : Page
         }
         finally
         {
-            modelInstallCancellation?.Dispose();
-            modelInstallCancellation = null;
+            if (ReferenceEquals(modelInstallCancellation, cancellation)) modelInstallCancellation = null;
+            modelInstallFlow.End();
         }
     }
 
