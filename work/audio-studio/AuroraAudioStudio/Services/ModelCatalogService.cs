@@ -55,7 +55,8 @@ public sealed class ModelCatalogService(SettingsService settings)
             RecommendedVram(model), FeatureDisplay(model.Feature), Purpose(model.Id), Languages(model.Id), ModelInstallPlanner.EstimatedDownload(model.Id), License(model.Id),
             DetailLine(version, RecommendedVram(model), ModelInstallPlanner.EstimatedDownload(model.Id), License(model.Id), model.Source),
             model.IsDefault ? DefaultEditionDisplay : Pick("可选模型", "選用模型", "Optional", "オプション"),
-            installed ? Pick("检查 / 修复", "檢查 / 修復", "Check / Repair", "確認 / 修復") : Pick("安装", "安裝", "Install", "インストール"));
+            installed ? Pick("检查 / 修复", "檢查 / 修復", "Check / Repair", "確認 / 修復") : Pick("安装", "安裝", "Install", "インストール"),
+            Pick("回退", "回復", "Roll back", "ロールバック"), Pick("卸载", "解除安裝", "Uninstall", "アンインストール"));
     }
 
     public string FormatSummary(IReadOnlyList<ModelState> states)
@@ -84,10 +85,19 @@ public sealed class ModelCatalogService(SettingsService settings)
 
     private static string RecommendedVram(ModelDefinition model) => model.Id switch
     {
-        "ace-step" => "12 GB+", "minimax-music3" => "8 GB+ · 16 GB 推荐", "qwen3-tts-base" or "qwen3-tts-custom" or "qwen3-tts-design" => "8 GB+",
-        "qwen3-tts-06b-base" or "qwen3-tts-06b-custom" => "4 GB+", "f5-tts" => "6 GB+",
-        "seed-vc" => "8 GB+", "roformer" or "roformer-vocals" => "8 GB+", "demucs" => "4 GB+", "faster-whisper" => "6 GB+",
-        "whisper-small" => "2 GB+", "whisper-large-v3-turbo" => "6 GB+", "whisper-large-v3" => "10 GB+", _ => "4 GB+"
+        "ace-step" => "12 GB+",
+        "minimax-music3" => "8 GB+ · 16 GB 推荐",
+        "qwen3-tts-base" or "qwen3-tts-custom" or "qwen3-tts-design" => "8 GB+",
+        "qwen3-tts-06b-base" or "qwen3-tts-06b-custom" => "4 GB+",
+        "f5-tts" => "6 GB+",
+        "seed-vc" => "8 GB+",
+        "roformer" or "roformer-vocals" => "8 GB+",
+        "demucs" => "4 GB+",
+        "faster-whisper" => "6 GB+",
+        "whisper-small" => "2 GB+",
+        "whisper-large-v3-turbo" => "6 GB+",
+        "whisper-large-v3" => "10 GB+",
+        _ => "4 GB+"
     };
 
     private string FeatureDisplay(string feature) => feature switch
@@ -144,7 +154,10 @@ public sealed class ModelCatalogService(SettingsService settings)
 
     private string Pick(string zh, string zhTw, string en, string ja) => settings.EffectiveLanguage() switch
     {
-        "zh-TW" => zhTw, "en-US" => en, "ja-JP" => ja, _ => zh
+        "zh-TW" => zhTw,
+        "en-US" => en,
+        "ja-JP" => ja,
+        _ => zh
     };
 
     private string DetailLine(string version, string vram, string download, string license, string source) => settings.EffectiveLanguage() switch

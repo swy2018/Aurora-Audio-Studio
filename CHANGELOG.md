@@ -4,6 +4,23 @@
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
 
+## 1.5.0 — 2026-09-01
+
+### 中文
+
+- 模型中心重构为更直观的分层卡片，集中展示用途、功能、语言、版本、许可、状态和本地路径；过长路径可通过提示查看完整内容。
+- 检查模型更新后，存在新版的组件会直接显示“更新”，并提供带数量的“更新全部”；批量更新逐项执行，失败项保留为可更新状态供重试。
+- 更新前检测正在运行的组件。Aurora 不会强制关闭 Subtitle Edit 等工具，而会提示先保存工作、关闭组件后重试，避免未保存内容丢失。
+- 文件占用竞态改为明确的可重试提示，并加入真实进程路径、更新按钮、批量更新和无障碍模型卡片的回归检查。
+- 同步应用版本、四语内置更新日志、README、官网、About、问题模板、产品文档与音乐人使用说明。
+
+### English
+
+- Rebuilt Model Management with clearer layered cards for purpose, workflow, languages, version, license, status, and local path; full paths remain available through tooltips.
+- Detected updates now expose direct Update actions and a counted Update all flow. Batch updates run sequentially and failed items remain retryable.
+- Aurora detects running components before replacement. It never force-closes tools such as Subtitle Edit, protecting unsaved work and asking users to close the component before retrying.
+- File-lock races now return actionable retry guidance, backed by regression checks for real process detection, update actions, batch updates, and accessible model cards.
+- Synchronized application metadata, four-language in-app notes, README, website, About, issue template, product documentation, and the musician guide.
 ## 1.4.1 — 2026-09-01
 
 ### 中文

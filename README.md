@@ -5,7 +5,7 @@
   <p>面向 Windows 的本地 AI 音频创作工作台</p>
   <p>
     <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img alt="官方网站" src="docs/assets/readme-button-website.svg"></a>
-    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.4.1" src="docs/assets/readme-button-download.svg"></a>
+    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.5.0" src="docs/assets/readme-button-download.svg"></a>
     <a href="CHANGELOG.md"><img alt="更新日志" src="docs/assets/readme-button-changelog.svg"></a>
     <a href="#english"><img alt="English" src="docs/assets/readme-button-english.svg"></a>
   </p>
@@ -15,26 +15,19 @@
 
 Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离、MIDI 扒谱和视频字幕集中到同一个本地入口。六个功能互相独立，可直接开始当前任务，不再需要手动管理多个启动器、端口和结果目录。
 
-## 1.4.1 带来了什么
+## 1.5.0 带来了什么
 
-### 五个固定组件也能自动更新
+### 更新不再只告诉你“有新版”
 
-- BS-RoFormer、YourMT3+、ByteDance Piano、Faster-Whisper XXL 与 Subtitle Edit 现在都接入模型中心的自动检查、安装、修复和更新流程。
-- PyPI 组件使用各自隔离环境升级，并通过官方命令下载对应权重；ByteDance Piano 仅接受原始 Zenodo 文件的固定 SHA-256。
-- GitHub Release 组件会选择匹配的 Windows x64 资产，校验上游摘要或固定资产信息后，才从暂存目录切换为正式版本。
+- 检查完成后，有新版的模型或组件会直接显示“更新”，并在页首提供带数量的“更新全部”。
+- 批量更新按顺序处理，成功项立即变为最新；失败项保留为可更新状态，可关闭占用程序后直接重试。
+- Aurora 会在替换文件前检测仍在运行的组件，不会强制关闭 Subtitle Edit 等工具，避免未保存内容丢失。
 
-### 未安装模型可直接继续
+### 模型中心更容易看懂
 
-- 在任务工作台选择未安装的模型时，主按钮会立即变为“安装此模型”，使用同一套位置、空间和确认流程。
-- Aurora 启动时仍不会自动下载任何模型；只有用户明确点击安装后才开始部署。
-- 安装通过标记文件与完整性检查后，才会继续打开对应工作台。
-
-### 更清楚的分轨与字幕选择
-
-- 去人声 / AI 分轨新增“二轨”和“多轨”：二轨使用专用 BS-RoFormer Vocals Revive V3e，输出纯人声与纯伴奏；多轨继续提供质量与速度方案。
-- 字幕的快速、推荐与高质量预设分别对应 Faster-Whisper Small、Large v3 Turbo 与 Large v3。
-- 所有更新继续采用暂存、校验、原子切换和上一版本恢复机制。
-
+- 每个模型改为分层卡片，名称、用途、功能、语言、版本、许可、状态、本地路径和操作区不再挤在同一行。
+- 本地路径过长时会省略显示，但鼠标悬停仍可查看完整位置。
+- 更新、回退和卸载动作保持四语言，并补充屏幕阅读器名称与状态说明。
 ## 工作流
 
 | 工作流 | 默认引擎 | 可选引擎 | 主要输出 |
@@ -60,7 +53,7 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 ### 标准安装
 
 1. 打开 [Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest)。
-2. 下载 `Aurora-Audio-Studio-1.4.1-Setup-x64.exe` 和同名 `.sha256` 文件。
+2. 下载 `Aurora-Audio-Studio-1.5.0-Setup-x64.exe` 和同名 `.sha256` 文件。
 3. 运行安装程序，阅读并接受 GNU GPL v3.0，选择安装位置和桌面快捷方式。
 4. 首次打开 Aurora，直接选择需要的功能；需要时再确认模型、处理记录和成品目录。
 
@@ -89,7 +82,7 @@ Aurora 桌面端使用 .NET 10、WinUI 3 和 Windows App SDK 构建，官网使�
 ```powershell
 dotnet restore .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj --runtime win-x64
 dotnet build .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -p:Platform=x64
-dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.4.1
+dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.5.0
 ```
 
 运行回归检查：
@@ -120,14 +113,13 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 Aurora Audio Studio is a local AI audio production workspace for Windows. Its six independent features provide direct entry points for music generation, voice cloning, singing conversion, stem separation, MIDI transcription, and video subtitles.
 
-### What version 1.4.1 adds
+### What version 1.5.0 adds
 
-- BS-RoFormer, YourMT3+, ByteDance Piano, Faster-Whisper XXL, and Subtitle Edit now support automatic checks, installation, repair, and updates from Model Management.
-- Selecting an uninstalled model in a task workbench exposes the install action immediately, while Aurora still downloads nothing without explicit confirmation.
-- Separation now distinguishes two-stem vocals/instrumental output from multi-stem processing. The dedicated Vocals Revive V3e model powers the two-stem path.
-- Subtitle presets map clearly to Faster-Whisper Small, Large v3 Turbo, and Large v3.
-- Every replacement remains staged and verified before activation, with the previous working version retained for recovery.
-
+- Model Management now turns detected updates into direct Update actions and exposes a counted Update all flow.
+- Batch updates run sequentially; successful items become current immediately, while failures remain retryable.
+- Aurora detects running components before file replacement and never force-closes tools such as Subtitle Edit, protecting unsaved work.
+- Model cards now separate purpose, workflow, languages, version, license, status, local path, and actions for faster scanning.
+- Long paths remain available through tooltips, and actions retain four-language and screen-reader support.
 ### Local by design
 
 Aurora does not operate a cloud generation service. Media and generated output remain in the directories chosen by the user. App updates and model deployment connect only to GitHub, Hugging Face, or the official source identified for each model.
@@ -135,7 +127,7 @@ Aurora does not operate a cloud generation service. Media and generated output r
 ### Install
 
 1. Open the latest [Release](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest).
-2. Download `Aurora-Audio-Studio-1.4.1-Setup-x64.exe` and its `.sha256` file.
+2. Download `Aurora-Audio-Studio-1.5.0-Setup-x64.exe` and its `.sha256` file.
 3. Run Setup, review GNU GPL v3.0, and choose the destination and shortcut options.
 4. Choose a feature on first launch; confirm model, processing-record, and output folders only when needed.
 

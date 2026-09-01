@@ -18,6 +18,7 @@ Updates must remain opt-in, preserve the active version until verification succe
 - Subtitle Edit follows the latest stable GitHub Release, selects the Windows x64 portable ZIP, verifies GitHub's SHA-256 digest, stages the replacement, and preserves Settings.json.
 - Faster-Whisper XXL follows the highest Windows archive on its named public GitHub Release. Aurora verifies the immutable asset size and uses a GitHub-provided SHA-256 digest when available. The active runtime remains recoverable through the model transaction.
 - Selecting an uninstalled workbench model or processing engine starts the same explicit, location-aware installer. No model downloads merely because Aurora starts.
+- After a check, available updates remain in UI state until installed, expose single and sequential batch actions, and remain retryable after failure. Before replacement, Aurora detects executables running inside the component root and asks users to save and close them instead of force-terminating a process.
 
 ## Consequences
 

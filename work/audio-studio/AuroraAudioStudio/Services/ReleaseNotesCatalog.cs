@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 5, 0), "2026-09-01", [
+            "• 模型中心改为更直观的分层卡片，集中展示用途、功能、语言、版本、许可、状态与本地路径。\n• 检查更新后，存在新版的组件会直接显示更新按钮，并提供可重试的更新全部入口。\n• 更新前会检测正在运行的组件；Aurora 不会强制关闭它们，而会提示先保存工作并关闭后重试，避免未保存内容丢失。\n• 更新失败仍保留可更新状态，文件占用竞态会返回明确提示；相关行为加入回归测试。",
+            "• 模型中心改為更直觀的分層卡片，集中顯示用途、功能、語言、版本、授權、狀態與本機路徑。\n• 檢查更新後，存在新版本的元件會直接顯示更新按鈕，並提供可重試的全部更新入口。\n• 更新前會偵測正在執行的元件；Aurora 不會強制關閉它們，而會提示先儲存工作並關閉後重試，避免未儲存內容遺失。\n• 更新失敗仍保留可更新狀態，檔案佔用競態會顯示明確提示；相關行為已加入回歸測試。",
+            "• Model Management now uses clearer layered cards that group purpose, workflow, languages, version, license, status, and local path.\n• After checking, components with newer versions expose an Update action plus a retryable Update all flow.\n• Aurora detects running components before replacement. It never force-closes them; users are asked to save work, close the component, and retry so unsaved work is protected.\n• Failed updates remain available to retry, file-lock races return actionable guidance, and regression coverage protects the flow.",
+            "• モデル管理を見やすい階層カードに変更し、用途、機能、言語、バージョン、ライセンス、状態、保存先をまとめて表示します。\n• 更新確認後、新しい版があるコンポーネントには更新操作と、再試行可能な一括更新を表示します。\n• 置換前に実行中のコンポーネントを検出し、強制終了せず、作業を保存して終了後に再試行するよう案内します。\n• 失敗した更新は再試行可能な状態を保ち、ファイル占有競合を分かりやすく案内し、回帰テストで保護します。"]),
         new(new(1, 4, 1), "2026-09-01", [
             "• BS-RoFormer、YourMT3+、ByteDance Piano、Faster-Whisper XXL 与 Subtitle Edit 现在都可在模型中心自动检查、安装、修复或更新；更新仍先暂存校验再安全切换。\n• 任务工作台选择未安装模型时会直接显示安装入口，不再留下无法继续的选择状态。\n• 分轨新增二轨与多轨选择：二轨使用专用 Vocals Revive 模型生成纯人声与纯伴奏，多轨继续提供质量与速度方案。\n• 字幕预设现在明确对应 Small、Large v3 Turbo 与 Large v3，方便在速度、显存和准确率之间选择。",
             "• BS-RoFormer、YourMT3+、ByteDance Piano、Faster-Whisper XXL 與 Subtitle Edit 現在都可在模型中心自動檢查、安裝、修復或更新；更新仍會先暫存驗證再安全切換。\n• 任務工作台選擇未安裝模型時會直接顯示安裝入口，不再留下無法繼續的選擇狀態。\n• 分軌新增二軌與多軌選擇：二軌使用專用 Vocals Revive 模型產生純人聲與純伴奏，多軌繼續提供品質與速度方案。\n• 字幕預設現在明確對應 Small、Large v3 Turbo 與 Large v3，方便在速度、顯示記憶體和準確率之間選擇。",

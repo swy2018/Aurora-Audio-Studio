@@ -275,36 +275,65 @@
                                 <ComboBox x:Name="ModelFilterPicker" Width="150" SelectedIndex="0" SelectionChanged="ModelFilterPicker_SelectionChanged">
                                     <ComboBoxItem Content="全部模型" Tag="all"/><ComboBoxItem Content="已安装" Tag="installed"/><ComboBoxItem Content="默认组件" Tag="default"/><ComboBoxItem Content="可选模型" Tag="optional"/>
                                 </ComboBox>
-                                <Button Content="检查全部更新" Click="CheckAllModelsButton_Click" Style="{StaticResource AccentButtonStyle}"/>
+                                <Button x:Name="CheckAllModelsButton" Content="检查全部更新" Click="CheckAllModelsButton_Click" Style="{StaticResource AccentButtonStyle}"/>
+                                <Button x:Name="UpdateAllModelsButton" Content="更新全部" Click="UpdateAllModelsButton_Click" Visibility="Collapsed"/>
                                 <Button Content="查看本地文件" Click="OpenModelsButton_Click"/>
                             </StackPanel>
                         </Grid>
                         <ListView x:Name="ModelsList" Grid.Row="1" SelectionMode="None">
-                            <ListView.ItemTemplate><DataTemplate>
-                                <Grid Padding="16,14" RowSpacing="8" ColumnSpacing="22">
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="260"/><ColumnDefinition Width="210"/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-                                    <StackPanel Spacing="3">
-                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                                        <TextBlock Text="{Binding Purpose}" FontSize="12" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1" Spacing="3">
-                                        <TextBlock Text="{Binding FeatureDisplay}"/>
-                                        <TextBlock Text="{Binding Languages}" FontSize="12" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2" Spacing="3">
-                                        <TextBlock><Run Text="{Binding EditionDisplay}"/><Run Text=" · "/><Run Text="{Binding Status}"/></TextBlock>
-                                        <TextBlock Text="{Binding Health}" FontSize="12" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
-                                        <Button Content="{Binding PrimaryAction}" Tag="{Binding Id}" Click="ModelUpdateButton_Click"/>
-                                        <Button Content="回退" Tag="{Binding Id}" Click="ModelRollbackButton_Click" IsEnabled="{Binding Installed}"/>
-                                        <Button Content="卸载" Tag="{Binding Id}" Click="ModelUninstallButton_Click" IsEnabled="{Binding Installed}"/>
-                                    </StackPanel>
-                                    <TextBlock Grid.Row="1" Grid.ColumnSpan="3" Text="{Binding DetailsDisplay}" TextWrapping="Wrap"/>
-                                    <TextBlock Grid.Row="2" Grid.ColumnSpan="4" Text="{Binding LocalPath}" TextTrimming="CharacterEllipsis" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
-                                </Grid>
-                            </DataTemplate></ListView.ItemTemplate>
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="Margin" Value="0,0,0,10"/>
+                                    <Setter Property="Background" Value="{ThemeResource AuroraSurfaceBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{ThemeResource AuroraStrokeBrush}"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="CornerRadius" Value="12"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Padding="20,18" ColumnSpacing="24" AutomationProperties.Name="{Binding Name}" AutomationProperties.HelpText="{Binding Health}">
+                                        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                        <StackPanel Spacing="10">
+                                            <Grid ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                <StackPanel Spacing="3">
+                                                    <TextBlock Text="{Binding Name}" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                                    <TextBlock Text="{Binding Purpose}" FontSize="13" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
+                                                    <Border Padding="8,4" CornerRadius="6" Background="{ThemeResource AuroraPaneBrush}">
+                                                        <TextBlock Text="{Binding EditionDisplay}" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                                                    </Border>
+                                                    <Border Padding="8,4" CornerRadius="6" Background="{ThemeResource AuroraPaneBrush}">
+                                                        <TextBlock Text="{Binding Status}" FontSize="12" FontWeight="SemiBold"/>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Grid>
+                                            <TextBlock TextWrapping="Wrap">
+                                                <Run Text="{Binding FeatureDisplay}" FontWeight="SemiBold"/><Run Text="  ·  "/><Run Text="{Binding Languages}"/>
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding DetailsDisplay}" TextWrapping="Wrap" FontSize="13"/>
+                                            <Grid ColumnSpacing="8">
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                                <FontIcon Glyph="&#xE946;" FontSize="14" Foreground="{ThemeResource AuroraAccentBrush}" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Health}" TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}" VerticalAlignment="Center"/>
+                                            </Grid>
+                                            <TextBlock Text="{Binding LocalPath}" ToolTipService.ToolTip="{Binding LocalPath}" TextTrimming="CharacterEllipsis" FontFamily="Consolas" FontSize="11" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Spacing="8" MinWidth="176" VerticalAlignment="Center">
+                                            <Button Content="{Binding PrimaryAction}" Tag="{Binding Id}" Click="ModelUpdateButton_Click" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="{Binding PrimaryAction}"/>
+                                            <Grid ColumnSpacing="8">
+                                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                                <Button Content="{Binding RollbackAction}" Tag="{Binding Id}" Click="ModelRollbackButton_Click" IsEnabled="{Binding Installed}" HorizontalAlignment="Stretch"/>
+                                                <Button Grid.Column="1" Content="{Binding UninstallAction}" Tag="{Binding Id}" Click="ModelUninstallButton_Click" IsEnabled="{Binding Installed}" HorizontalAlignment="Stretch"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
                         </ListView>
                     </Grid>
 

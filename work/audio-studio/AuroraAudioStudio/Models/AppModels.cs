@@ -61,7 +61,9 @@ public sealed record ModelState(
     string License,
     string DetailsDisplay,
     string EditionDisplay,
-    string PrimaryAction);
+    string PrimaryAction,
+    string RollbackAction,
+    string UninstallAction);
 
 public static class AuroraTaskStates
 {
@@ -103,7 +105,8 @@ public sealed class AuroraTaskRecord
     [JsonIgnore] public string InputDisplay => string.IsNullOrWhiteSpace(InputPath) ? "-" : Path.GetFileName(InputPath);
     [JsonIgnore] public string ProgressDisplay => Progress <= 0 ? "等待" : $"{Math.Round(Progress * 100):0}%";
     [JsonIgnore] public double ProgressPercent => Math.Clamp(Progress * 100, 0, 100);
-    [JsonIgnore] public string DurationDisplay
+    [JsonIgnore]
+    public string DurationDisplay
     {
         get
         {
@@ -113,7 +116,8 @@ public sealed class AuroraTaskRecord
             return duration.TotalHours >= 1 ? duration.ToString(@"h\:mm\:ss") : duration.ToString(@"m\:ss");
         }
     }
-    [JsonIgnore] public string StatusDisplay => Status switch
+    [JsonIgnore]
+    public string StatusDisplay => Status switch
     {
         AuroraTaskStates.Waiting => "等待中",
         AuroraTaskStates.Preparing => "准备中",

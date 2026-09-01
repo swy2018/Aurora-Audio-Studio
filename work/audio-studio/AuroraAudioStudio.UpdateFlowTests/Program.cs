@@ -50,6 +50,8 @@ try { ProjectDocumentMigrator.Read("{\"SchemaVersion\":99}"); }
 catch (InvalidDataException) { rejectedFutureRecord = true; }
 Require(rejectedFutureRecord, "A processing record from a newer unsupported schema must be preserved for recovery instead of being misread.");
 
+var currentProcessRoot = Path.GetDirectoryName(Environment.ProcessPath!)!;
+Require(!string.IsNullOrWhiteSpace(RunningProcessGuard.FindInRoot(currentProcessRoot)), "The process guard must detect a running executable inside the component root.");
 var arguments = UpdateFlowGuard.BuildInstallerArguments(321, @"C:\Logs\update.log");
 Require(arguments.Contains("/SILENT", StringComparison.Ordinal), "Automatic updates must show only Inno Setup's standard installation progress window.");
 Require(!arguments.Contains("/VERYSILENT", StringComparison.Ordinal), "Automatic updates must not hide the standard installer progress window.");
@@ -98,6 +100,19 @@ var catalogSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioS
 Require(catalogSource.Contains("new(\"minimax-music3\"", StringComparison.Ordinal), "Model Management must expose MiniMax-Music3.");
 Require(catalogSource.Contains("new(\"transkun\"", StringComparison.Ordinal), "Model Management must expose TransKun V2.");
 var mainPageSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "MainPage.xaml.cs"));
+var modelUpdateSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Services", "ModelUpdateService.cs"));
+Require(mainPageXaml.Contains("x:Name=\"UpdateAllModelsButton\"", StringComparison.Ordinal), "Model Management must expose an Update all button after checking updates.");
+Require(mainPageXaml.Contains("AutomationProperties.Name=\"{Binding Name}\"", StringComparison.Ordinal), "Every model row must expose its model name to assistive technologies.");
+Require(mainPageXaml.Contains("ToolTipService.ToolTip=\"{Binding LocalPath}\"", StringComparison.Ordinal), "A truncated model path must remain discoverable.");
+Require(mainPageXaml.Contains("Content=\"{Binding RollbackAction}\"", StringComparison.Ordinal) && mainPageXaml.Contains("Content=\"{Binding UninstallAction}\"", StringComparison.Ordinal), "Virtualized model actions must use localized data instead of fixed Chinese labels.");
+Require(!mainPageXaml.Contains("<ColumnDefinition Width=\"260\"/><ColumnDefinition Width=\"210\"/>", StringComparison.Ordinal), "Model rows must not rely on the old fixed-width four-column table layout.");
+Require(mainPageSource.Contains("modelUpdateChecks", StringComparison.Ordinal), "Model update check results must remain available to drive update actions.");
+Require(mainPageSource.Contains("UpdateAllModelsButton_Click", StringComparison.Ordinal), "The Update all button must execute available model updates.");
+Require(mainPageSource.Contains("PrimaryAction = localization.Translate(\"更新\")", StringComparison.Ordinal), "A detected model update must replace the generic card action with Update.");
+Require(mainPageSource.Contains("new OperationResult(false, result.Message, \"available\")", StringComparison.Ordinal), "A failed batch update must remain available for retry.");
+Require(modelUpdateSource.Contains("RunningProcessGuard.FindInRoot", StringComparison.Ordinal), "Model updates must detect a running component before replacing its files.");
+Require(mainPageSource.Contains("ShowModelInUseDialogAsync", StringComparison.Ordinal), "A blocked model update must explain how to close the component and retry safely.");
+Require(modelUpdateSource.Contains("catch (IOException", StringComparison.Ordinal), "A late file-lock race must return an actionable retry state instead of a raw exception.");
 Require(mainPageSource.Contains("(\"transcription\", _, _) => \"transkun\"", StringComparison.Ordinal), "TransKun must be the default recommended piano transcription engine.");
 Require(mainPageSource.Contains("OpenWorkbenchButton.Content = localization.Get(installed ? \"openWorkbench\" : \"installModel\")", StringComparison.Ordinal), "An uninstalled workbench model must expose an Install button.");
 Require(mainPageSource.Contains("!await InstallSelectedModelAsync(model)", StringComparison.Ordinal), "Opening an uninstalled workbench model must start the on-demand installer.");
@@ -131,6 +146,9 @@ Require(notes125.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.2.5 rele
 var notes130 = ReleaseNotesCatalog.CurrentAndRecent("1.3.0", "ja-JP");
 Require(notes130.Count == 5 && notes130[0].Version == "1.3.0" && notes130[^1].Version == "1.0.1", "Version 1.3.0 must show itself and its four previous releases.");
 Require(notes130.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.3.0 release note must have localized content.");
+var notes150 = ReleaseNotesCatalog.CurrentAndRecent("1.5.0", "en-US");
+Require(notes150.Count == 5 && notes150[0].Version == "1.5.0" && notes150[^1].Version == "1.2.5", "Version 1.5.0 must show itself and its four previous releases.");
+Require(notes150.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.5.0 release note must have localized content.");
 var notes141 = ReleaseNotesCatalog.CurrentAndRecent("1.4.1", "zh-CN");
 Require(notes141.Count == 5 && notes141[0].Version == "1.4.1" && notes141[^1].Version == "1.2.0", "Version 1.4.1 must show itself and its four previous releases.");
 Require(notes141.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.4.1 release note must have localized content.");

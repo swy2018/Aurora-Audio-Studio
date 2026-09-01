@@ -30,6 +30,7 @@ public sealed partial class MainPage : Page
     private readonly UpdateFlowGuard updateFlow = new();
     private readonly SemaphoreSlim dialogGate = new(1, 1);
     private CancellationTokenSource? modelInstallCancellation;
+    private readonly Dictionary<string, OperationResult> modelUpdateChecks = new(StringComparer.OrdinalIgnoreCase);
     private string feature = "music";
 
     public MainPage()
@@ -358,7 +359,16 @@ public sealed partial class MainPage : Page
 
     private void RefreshModels()
     {
-        var states = catalog.GetStates();
+        var states = catalog.GetStates().Select(state =>
+        {
+            if (!modelUpdateChecks.TryGetValue(state.Id, out var check)) return state;
+            if (check.Path == "available")
+                return state with { Status = localization.Translate("有更新"), Health = check.Message, PrimaryAction = localization.Translate("更新") };
+            return state with { Health = check.Message };
+        }).ToList();
+        var availableUpdates = modelUpdateChecks.Count(x => x.Value.Path == "available");
+        UpdateAllModelsButton.Content = localization.Translate("更新全部") + $" ({availableUpdates})";
+        UpdateAllModelsButton.Visibility = availableUpdates > 0 ? Visibility.Visible : Visibility.Collapsed;
         var filter = (ModelFilterPicker.SelectedItem as ComboBoxItem)?.Tag as string ?? "all";
         ModelsList.ItemsSource = filter switch
         {
@@ -385,9 +395,14 @@ public sealed partial class MainPage : Page
         {
             task.DisplayStatus = localization.Get(task.Status switch
             {
-                AuroraTaskStates.Waiting => "taskWaiting", AuroraTaskStates.Preparing => "taskPreparing", AuroraTaskStates.Running => "taskRunning",
-                AuroraTaskStates.Completed => "taskCompleted", AuroraTaskStates.Failed => "taskFailed", AuroraTaskStates.Canceled => "taskCanceled",
-                AuroraTaskStates.Interrupted => "taskInterrupted", _ => "taskInterrupted"
+                AuroraTaskStates.Waiting => "taskWaiting",
+                AuroraTaskStates.Preparing => "taskPreparing",
+                AuroraTaskStates.Running => "taskRunning",
+                AuroraTaskStates.Completed => "taskCompleted",
+                AuroraTaskStates.Failed => "taskFailed",
+                AuroraTaskStates.Canceled => "taskCanceled",
+                AuroraTaskStates.Interrupted => "taskInterrupted",
+                _ => "taskInterrupted"
             });
             task.DisplayProgress = task.Progress <= 0 ? localization.Translate("等待") : $"{Math.Round(task.Progress * 100):0}%";
             task.DisplayStage = localization.Translate(task.Stage);
@@ -412,26 +427,130 @@ public sealed partial class MainPage : Page
 
     private async void CheckAllModelsButton_Click(object sender, RoutedEventArgs e)
     {
-        SetStatus("正在检查模型更新…");
-        var results = await modelUpdater.CheckAllAsync();
-        var available = results.Count(x => x.Value.Path == "available");
-        var currentCount = results.Count(x => x.Value.Path == "current");
-        var unavailable = results.Count - available - currentCount;
-        SetStatus(available == 0
-            ? $"检查完成：{currentCount} 个已安装组件为最新，{unavailable} 个未安装或暂时无法检查。"
-            : $"发现 {available} 个可自动安装的更新；{currentCount} 个已是最新，{unavailable} 个未安装或暂时无法检查。");
+        CheckAllModelsButton.IsEnabled = false;
+        UpdateAllModelsButton.IsEnabled = false;
+        try
+        {
+            SetStatus("正在检查模型更新…");
+            var results = await modelUpdater.CheckAllAsync();
+            modelUpdateChecks.Clear();
+            foreach (var result in results) modelUpdateChecks[result.Key] = result.Value;
+            var available = results.Count(x => x.Value.Path == "available");
+            var currentCount = results.Count(x => x.Value.Path == "current");
+            var unavailable = results.Count - available - currentCount;
+            SetStatus(available == 0
+                ? $"检查完成：{currentCount} 个已安装组件为最新，{unavailable} 个未安装或暂时无法检查。"
+                : $"发现 {available} 个可自动安装的更新；{currentCount} 个已是最新，{unavailable} 个未安装或暂时无法检查。");
+            RefreshModels();
+        }
+        finally
+        {
+            CheckAllModelsButton.IsEnabled = true;
+            UpdateAllModelsButton.IsEnabled = true;
+        }
     }
 
     private async void ModelUpdateButton_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as Button)?.Tag is not string id || catalog.Find(id) is not { } model) return;
         var check = await modelUpdater.CheckAsync(model);
-        if (!catalog.IsInstalled(model) || check.Path == "available")
+        modelUpdateChecks[id] = check;
+        RefreshModels();
+        var isUpdate = check.Path == "available";
+        if (isUpdate && modelUpdater.FindRunningProcess(model) is { } runningProcess)
         {
-            var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = model.Name, Content = catalog.IsInstalled(model) ? "发现新版本。Aurora 会保留可恢复的版本信息，是否现在更新？" : "此模型尚未安装。Aurora 将从官方来源下载并校验文件，是否继续？", PrimaryButtonText = catalog.IsInstalled(model) ? "更新" : "安装", CloseButtonText = "稍后" };
-            if (await ShowDialogAsync(dialog) == ContentDialogResult.Primary) check = await RunModelInstallAsync(model);
+            await ShowModelInUseDialogAsync(runningProcess);
+            SetStatus(string.Format(localization.Translate("请先保存并关闭 {0}，然后重新点击更新。Aurora 不会强制关闭它，以免丢失未保存内容。"), runningProcess));
+            return;
+        }
+        if (!catalog.IsInstalled(model) || isUpdate)
+        {
+            var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = model.Name, Content = catalog.IsInstalled(model) ? "发现新版本。Aurora 会保留可恢复的版本信息，是否现在更新？" : "此模型尚未安装。Aurora 将从官方来源下载并校验文件，是否继续？", PrimaryButtonText = localization.Translate(catalog.IsInstalled(model) ? "更新" : "安装"), CloseButtonText = localization.Translate("稍后") };
+            if (await ShowDialogAsync(dialog) == ContentDialogResult.Primary)
+            {
+                check = await RunModelInstallAsync(model);
+                modelUpdateChecks[id] = check.Success ? new OperationResult(true, check.Message, "current")
+                    : isUpdate ? new OperationResult(false, check.Message, "available") : check;
+            }
         }
         SetStatus(model.Name + "：" + check.Message); RefreshModels();
+    }
+
+    private async Task ShowModelInUseDialogAsync(string processName)
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = localization.Translate("组件正在使用"),
+            Content = string.Format(localization.Translate("请先保存并关闭 {0}，然后重新点击更新。Aurora 不会强制关闭它，以免丢失未保存内容。"), processName),
+            CloseButtonText = localization.Translate("知道了")
+        };
+        await ShowDialogAsync(dialog);
+    }
+
+    private async void UpdateAllModelsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var pending = modelUpdateChecks.Where(x => x.Value.Path == "available").Select(x => x.Key).ToList();
+        if (pending.Count == 0) { RefreshModels(); return; }
+        var blockers = new List<string>();
+        foreach (var id in pending)
+        {
+            if (catalog.Find(id) is not { } model) continue;
+            if (modelUpdater.FindRunningProcess(model) is { } runningProcess) blockers.Add($"{model.Name} — {runningProcess}");
+        }
+        if (blockers.Count > 0)
+        {
+            var blockedDialog = new ContentDialog
+            {
+                XamlRoot = XamlRoot,
+                Title = localization.Translate("组件正在使用"),
+                Content = string.Format(localization.Translate("以下组件仍在运行，请先保存并关闭后再更新：\n{0}"), string.Join("\n", blockers)),
+                CloseButtonText = localization.Translate("知道了")
+            };
+            await ShowDialogAsync(blockedDialog);
+            return;
+        }
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = localization.Translate("更新全部"),
+            Content = localization.Translate("将按顺序更新所有已发现的新版本，并保留可回退版本。是否继续？"),
+            PrimaryButtonText = localization.Translate("更新"),
+            CloseButtonText = localization.Translate("取消")
+        };
+        if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
+
+        CheckAllModelsButton.IsEnabled = false;
+        UpdateAllModelsButton.IsEnabled = false;
+        var succeeded = 0;
+        var failed = 0;
+        try
+        {
+            foreach (var id in pending)
+            {
+                if (catalog.Find(id) is not { } model) continue;
+                SetStatus($"正在更新 {model.Name}…");
+                var result = await RunModelInstallAsync(model);
+                if (result.Success)
+                {
+                    succeeded++;
+                    modelUpdateChecks[id] = new OperationResult(true, result.Message, "current");
+                }
+                else
+                {
+                    failed++;
+                    modelUpdateChecks[id] = new OperationResult(false, result.Message, "available");
+                }
+                RefreshModels();
+            }
+            SetStatus(failed == 0 ? $"已更新 {succeeded} 个组件。" : $"已更新 {succeeded} 个组件，{failed} 个未完成。可再次检查后重试。");
+        }
+        finally
+        {
+            CheckAllModelsButton.IsEnabled = true;
+            UpdateAllModelsButton.IsEnabled = true;
+            RefreshModels();
+        }
     }
 
     private async void ModelRollbackButton_Click(object sender, RoutedEventArgs e)
@@ -677,7 +796,7 @@ public sealed partial class MainPage : Page
     private static string CurrentDisplayVersion()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        if (version is null) return "1.4.1";
+        if (version is null) return "1.5.0";
         return version.Revision > 0 ? version.ToString(4) : version.ToString(3);
     }
 
@@ -826,7 +945,17 @@ public sealed partial class MainPage : Page
     }
     private void ClearUtilityLogButton_Click(object sender, RoutedEventArgs e) { utilityLogs.Clear(); AppendUtilityLog("活动记录已清空。"); }
     private void AppendUtilityLog(string message) => utilityLogs.Add($"{DateTime.Now:HH:mm:ss}  {message}");
-    private async Task CheckModelsSilentlyAsync() { try { await modelUpdater.CheckAllAsync(); } catch { } }
+    private async Task CheckModelsSilentlyAsync()
+    {
+        try
+        {
+            var results = await modelUpdater.CheckAllAsync();
+            modelUpdateChecks.Clear();
+            foreach (var result in results) modelUpdateChecks[result.Key] = result.Value;
+            RefreshModels();
+        }
+        catch { }
+    }
     private void ShowUtility(bool success, string message) { UtilityInfo.Severity = success ? InfoBarSeverity.Success : InfoBarSeverity.Error; UtilityInfo.Message = message; UtilityInfo.IsOpen = true; SetStatus(message); }
     private void SetStatus(string value) { var translated = localization.Translate(value); FooterStatus.Text = translated; TaskStatusText.Text = translated; }
     private static string FormatBackendStatus(string value)

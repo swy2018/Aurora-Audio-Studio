@@ -13,6 +13,8 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
 {
     private const string ManifestUrl = "https://raw.githubusercontent.com/swy2018/Aurora-Audio-Studio/main/model-manifest.json";
     private readonly HttpClient client = CreateClient();
+    public string? FindRunningProcess(ModelDefinition model)
+        => RunningProcessGuard.FindInRoot(Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot));
 
     public async Task<OperationResult> CheckAsync(ModelDefinition model)
     {
@@ -161,7 +163,14 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
                 return new(false, "GitHub Release SHA-256 校验失败，正式目录未被修改。");
         }
 
-        ModelInstallTransaction.Prepare(root);
+        try
+        {
+            ModelInstallTransaction.Prepare(root);
+        }
+        catch (IOException)
+        {
+            return new(false, $"{model.Name} 正在运行或文件被占用。请保存并关闭后重试；Aurora 不会强制关闭它。", "available");
+        }
         var staging = ModelInstallTransaction.StagingPath(root);
         progress?.Report(new(null, $"正在安装 {model.Name}"));
         if (release.PackageKind == "zip")
@@ -187,7 +196,14 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             var newSettings = Path.Combine(staging, "Settings.json");
             if (File.Exists(oldSettings) && !File.Exists(newSettings)) File.Copy(oldSettings, newSettings);
         }
-        ModelInstallTransaction.Commit(root);
+        try
+        {
+            ModelInstallTransaction.Commit(root);
+        }
+        catch (IOException)
+        {
+            return new(false, $"{model.Name} 正在运行或文件被占用。请保存并关闭后重试；Aurora 不会强制关闭它。", "available");
+        }
         WriteInstalledVersion(model.Id, release.Version);
         return new(true, $"{model.Name} 已更新至 {release.Version}", "current");
     }
@@ -213,11 +229,11 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             else
             {
                 var candidates = assets.Select(x => new
-                    {
-                        Asset = x,
-                        Name = x.GetProperty("name").GetString() ?? "",
-                        Match = Regex.Match(x.GetProperty("name").GetString() ?? "", @"_r(?<version>\d+(?:\.\d+)+)_windows\.7z$", RegexOptions.IgnoreCase)
-                    })
+                {
+                    Asset = x,
+                    Name = x.GetProperty("name").GetString() ?? "",
+                    Match = Regex.Match(x.GetProperty("name").GetString() ?? "", @"_r(?<version>\d+(?:\.\d+)+)_windows\.7z$", RegexOptions.IgnoreCase)
+                })
                     .Where(x => x.Match.Success)
                     .Select(x => new { x.Asset, x.Name, Version = Version.Parse(x.Match.Groups["version"].Value) })
                     .OrderByDescending(x => x.Version)
@@ -647,7 +663,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
     private static HttpClient CreateClient()
     {
         var value = new HttpClient { Timeout = TimeSpan.FromHours(8) };
-        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.4.1"));
+        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.5.0"));
         return value;
     }
 }
