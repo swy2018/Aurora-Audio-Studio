@@ -87,10 +87,10 @@ Require(mainPageXaml.Contains("AutomationProperties.Name=\"本地 AI 创作工�
 var repositoryRoot = Path.GetFullPath(Path.Combine(audioStudioRoot, "..", ".."));
 var workflow = File.ReadAllText(Path.Combine(repositoryRoot, ".github", "workflows", "build.yml"));
 Require(workflow.Contains("AuroraAudioStudio.UpdateFlowTests", StringComparison.Ordinal), "CI must run the regression program before packaging.");
-Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains("<Version>1.5.1</Version>", StringComparison.Ordinal), "The application project must publish version 1.5.1.");
-Require(installerScript.Contains("MyAppVersion \"1.5.1\"", StringComparison.Ordinal), "The installer fallback version must match 1.5.1.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains("Aurora-Audio-Studio-1.5.1-Setup-x64.exe", StringComparison.Ordinal), "README download instructions must match 1.5.1.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains("Download 1.5.1", StringComparison.Ordinal), "The website download action must match 1.5.1.");
+Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains("<Version>1.6.0</Version>", StringComparison.Ordinal), "The application project must publish version 1.6.0.");
+Require(installerScript.Contains("MyAppVersion \"1.6.0\"", StringComparison.Ordinal), "The installer fallback version must match 1.6.0.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains("Aurora-Audio-Studio-1.6.0-Setup-x64.exe", StringComparison.Ordinal), "README download instructions must match 1.6.0.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains("Download 1.6.0", StringComparison.Ordinal), "The website download action must match 1.6.0.");
 
 var qwen = new ModelDefinition("qwen3-tts-06b-base", "Qwen3-TTS 0.6B", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "model.safetensors", "Qwen", "huggingface", "Qwen/Qwen3-TTS-12Hz-0.6B-Base");
 var plan = ModelInstallPlanner.Create(qwen, @"D:\AuroraModels");
@@ -100,6 +100,12 @@ Require(plan.RecommendedFreeSpace == "≈ 3 GB", "The Qwen 0.6B plan must show r
 var minimax = new ModelDefinition("minimax-music3", "MiniMax-Music3", "music", "MiniMax-Music3", "modular_model_index.json", "MiniMax", "minimax-music3", "MiniMaxAI/MiniMax-Music3");
 var minimaxPlan = ModelInstallPlanner.Create(minimax, @"D:\AuroraModels");
 Require(minimaxPlan.EstimatedDownload == "≈ 27 GB" && minimaxPlan.RecommendedFreeSpace == "≈ 55 GB", "MiniMax-Music3 must disclose its large on-demand download and staging space.");
+var heartmula = new ModelDefinition("heartmula-3b", "HeartMuLa 3B", "music", @"AudioTools\heartmula-models\HeartMuLa-oss-3B-happy-new-year", "model.safetensors.index.json", "HeartMuLa", "huggingface", "HeartMuLa/HeartMuLa-oss-3B-happy-new-year");
+var heartmulaPlan = ModelInstallPlanner.Create(heartmula, @"D:\AuroraModels");
+Require(heartmulaPlan.EstimatedDownload == "≈ 15.8 GB" && heartmulaPlan.RecommendedFreeSpace == "≈ 32 GB", "HeartMuLa must disclose its full official checkpoint and staging space.");
+var qwenAsr = new ModelDefinition("qwen3-asr-17b", "Qwen3-ASR 1.7B", "subtitles", @"AudioTools\qwen3-asr-models\Qwen3-ASR-1.7B-hf", "model.safetensors", "Qwen", "huggingface", "Qwen/Qwen3-ASR-1.7B-hf");
+var qwenAsrPlan = ModelInstallPlanner.Create(qwenAsr, @"D:\AuroraModels");
+Require(qwenAsrPlan.EstimatedDownload == "≈ 4.1 GB" && qwenAsrPlan.RecommendedFreeSpace == "≈ 9 GB", "Qwen3-ASR 1.7B must disclose its official checkpoint and staging space.");
 var transkun = new ModelDefinition("transkun", "TransKun V2", "transcription", @"AudioTools\transkun-env", @"Scripts\transkun.exe", "PyPI", "uv-package", "transkun", true);
 var transkunPlan = ModelInstallPlanner.Create(transkun, @"D:\AuroraModels");
 Require(transkunPlan.TargetPath.EndsWith(@"AudioTools\transkun-env", StringComparison.OrdinalIgnoreCase), "TransKun must use an isolated model environment.");
@@ -107,11 +113,14 @@ Require(transkunPlan.TargetPath.EndsWith(@"AudioTools\transkun-env", StringCompa
 var catalogSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Services", "ModelCatalogService.cs"));
 Require(catalogSource.Contains("new(\"minimax-music3\"", StringComparison.Ordinal), "Model Management must expose MiniMax-Music3.");
 Require(catalogSource.Contains("new(\"transkun\"", StringComparison.Ordinal), "Model Management must expose TransKun V2.");
+foreach (var candidate in new[] { "heartmula-3b", "indextts-2-5", "soulx-singer-svc", "qwen3-asr-06b", "qwen3-asr-17b", "qwen3-forced-aligner" })
+    Require(catalogSource.Contains($"new(\"{candidate}\"", StringComparison.Ordinal), $"Model Management must expose optional candidate {candidate}.");
 var mainPageSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "MainPage.xaml.cs"));
 var modelUpdateSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Services", "ModelUpdateService.cs"));
 Require(mainPageXaml.Contains("x:Name=\"UpdateAllModelsButton\"", StringComparison.Ordinal), "Model Management must expose an Update all button after checking updates.");
 Require(mainPageXaml.Contains("x:Name=\"InstallWorkbenchModelButton\"", StringComparison.Ordinal), "The workbench must expose a dedicated install button for the selected missing model.");
 Require(mainPageSource.Contains("ModelPicker.SelectionChanged += ModelPicker_SelectionChanged", StringComparison.Ordinal), "The workbench model picker must refresh its actions after page initialization.");
+Require(mainPageSource.Contains("x.Feature == tag && x.IsRunnable", StringComparison.Ordinal), "Model-management-only candidates must not appear in a workflow before an execution adapter exists.");
 Require(mainPageXaml.Contains("AutomationProperties.Name=\"{Binding Name}\"", StringComparison.Ordinal), "Every model row must expose its model name to assistive technologies.");
 Require(mainPageXaml.Contains("ToolTipService.ToolTip=\"{Binding LocalPath}\"", StringComparison.Ordinal), "A truncated model path must remain discoverable.");
 Require(mainPageXaml.Contains("Content=\"{Binding RollbackAction}\"", StringComparison.Ordinal) && mainPageXaml.Contains("Content=\"{Binding UninstallAction}\"", StringComparison.Ordinal), "Virtualized model actions must use localized data instead of fixed Chinese labels.");
@@ -121,6 +130,23 @@ Require(mainPageSource.Contains("UpdateAllModelsButton_Click", StringComparison.
 Require(mainPageSource.Contains("PrimaryAction = localization.Translate(\"更新\")", StringComparison.Ordinal), "A detected model update must replace the generic card action with Update.");
 Require(mainPageSource.Contains("new OperationResult(false, result.Message, \"available\")", StringComparison.Ordinal), "A failed batch update must remain available for retry.");
 Require(modelUpdateSource.Contains("RunningProcessGuard.FindInRoot", StringComparison.Ordinal), "Model updates must detect a running component before replacing its files.");
+Require(modelUpdateSource.Contains("CheckGitHubRepositoryReleaseAsync", StringComparison.Ordinal)
+    && modelUpdateSource.Contains("/releases/latest", StringComparison.Ordinal)
+    && modelUpdateSource.Contains("checkout --detach refs/tags/", StringComparison.Ordinal), "ACE updates must follow GitHub formal releases instead of the development branch.");
+Require(modelUpdateSource.Contains("default_branch", StringComparison.Ordinal)
+    && modelUpdateSource.Contains("/commits/", StringComparison.Ordinal)
+    && modelUpdateSource.Contains("refs/heads/", StringComparison.Ordinal)
+    && modelUpdateSource.Contains("日期版", StringComparison.Ordinal), "A Git repository without formal Releases must fall back to its official default-branch date version and exact commit.");
+Require(modelUpdateSource.Contains("lastModified", StringComparison.Ordinal)
+    && modelUpdateSource.Contains("HuggingFaceVersion", StringComparison.Ordinal)
+    && modelUpdateSource.Contains(".aurora-version", StringComparison.Ordinal), "Hugging Face models must display the official date version while retaining an exact snapshot revision.");
+Require(catalogSource.Contains("\"github-release-git\"", StringComparison.Ordinal), "ACE must use the formal GitHub Release update policy.");
+Require(catalogSource.Contains("\"seed-vc\"", StringComparison.Ordinal)
+    && Regex.Matches(catalogSource, "\"github-release-git\"").Count == 2, "Every Git-backed model must prefer formal GitHub Releases before the date-version fallback.");
+Require(!catalogSource.Contains("\"git-hf\"", StringComparison.Ordinal), "No model may continue tracking Git development branches.");
+Require(mainPageXaml.Contains("x:Name=\"ModelGroupsSource\"", StringComparison.Ordinal)
+    && mainPageXaml.Contains("<ListView.GroupStyle>", StringComparison.Ordinal)
+    && mainPageSource.Contains("ModelFeatureOrder = [\"music\", \"voice\", \"singing\", \"separation\", \"transcription\", \"subtitles\"]", StringComparison.Ordinal), "Model Management must group models in the six product-feature categories.");
 Require(modelUpdateSource.Contains("DownloadResumeGuard.CanPromotePartial", StringComparison.Ordinal) && modelUpdateSource.Contains("cancellationToken, release.Size", StringComparison.Ordinal), "GitHub Release downloads must route HTTP 416 through the verified partial-package guard.");
 Require(mainPageSource.Contains("InstallWorkbenchModelButton_Click", StringComparison.Ordinal), "The dedicated workbench install button must invoke the on-demand installer.");
 Require(mainPageSource.Contains("ShowModelInUseDialogAsync", StringComparison.Ordinal), "A blocked model update must explain how to close the component and retry safely.");
@@ -158,6 +184,9 @@ Require(notes125.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.2.5 rele
 var notes130 = ReleaseNotesCatalog.CurrentAndRecent("1.3.0", "ja-JP");
 Require(notes130.Count == 5 && notes130[0].Version == "1.3.0" && notes130[^1].Version == "1.0.1", "Version 1.3.0 must show itself and its four previous releases.");
 Require(notes130.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.3.0 release note must have localized content.");
+var notes160 = ReleaseNotesCatalog.CurrentAndRecent("1.6.0", "en-US");
+Require(notes160.Count == 5 && notes160[0].Version == "1.6.0" && notes160[^1].Version == "1.4.0", "Version 1.6.0 must show itself and its four previous releases.");
+Require(notes160.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.6.0 release note must have localized content.");
 var notes151 = ReleaseNotesCatalog.CurrentAndRecent("1.5.1", "en-US");
 Require(notes151.Count == 5 && notes151[0].Version == "1.5.1" && notes151[^1].Version == "1.3.0", "Version 1.5.1 must show itself and its four previous releases.");
 Require(notes151.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.5.1 release note must have localized content.");

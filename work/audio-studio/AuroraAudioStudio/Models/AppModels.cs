@@ -41,7 +41,8 @@ public sealed record ModelDefinition(
     string Source,
     string UpdateKind,
     string? Repository = null,
-    bool IsDefault = false);
+    bool IsDefault = false,
+    bool IsRunnable = true);
 
 public sealed record ModelState(
     string Id,
@@ -64,6 +65,8 @@ public sealed record ModelState(
     string PrimaryAction,
     string RollbackAction,
     string UninstallAction);
+
+public sealed record ModelGroup(string Name, IReadOnlyList<ModelState> Items);
 
 public static class AuroraTaskStates
 {

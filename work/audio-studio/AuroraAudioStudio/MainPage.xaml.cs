@@ -16,6 +16,7 @@ namespace AuroraAudioStudio;
 
 public sealed partial class MainPage : Page
 {
+    private static readonly string[] ModelFeatureOrder = ["music", "voice", "singing", "separation", "transcription", "subtitles"];
     private readonly SettingsService settings = new();
     private readonly LocalizationService localization;
     private readonly ModelCatalogService catalog;
@@ -90,7 +91,7 @@ public sealed partial class MainPage : Page
         PageTitle.Text = localization.Get(tag);
         PageSubtitle.Text = "从灵感到成品，一站完成生成、编辑与导出。";
         ModelPicker.Items.Clear();
-        var options = catalog.Definitions.Where(x => x.Feature == tag).ToList();
+        var options = catalog.Definitions.Where(x => x.Feature == tag && x.IsRunnable).ToList();
         foreach (var model in options) ModelPicker.Items.Add(new ComboBoxItem { Content = model.Name, Tag = model.Id });
         if (ModelPicker.Items.Count > 0) ModelPicker.SelectedIndex = 0;
         CurrentModelName.Text = options.FirstOrDefault()?.Name ?? "—";
@@ -124,7 +125,7 @@ public sealed partial class MainPage : Page
         utilityLogs.Clear();
         AppendUtilityLog("工作区已准备，可以添加素材。");
         UtilityModelPicker.Items.Clear();
-        foreach (var model in catalog.Definitions.Where(x => x.Feature == tag)) UtilityModelPicker.Items.Add(new ComboBoxItem { Content = model.Name, Tag = model.Id });
+        foreach (var model in catalog.Definitions.Where(x => x.Feature == tag && x.IsRunnable)) UtilityModelPicker.Items.Add(new ComboBoxItem { Content = model.Name, Tag = model.Id });
         if (UtilityModelPicker.Items.Count > 0) UtilityModelPicker.SelectedIndex = 0;
         UtilityTrackModePicker.Visibility = tag == "separation" ? Visibility.Visible : Visibility.Collapsed;
         UtilityTrackModePicker.SelectedIndex = 0;
@@ -376,13 +377,21 @@ public sealed partial class MainPage : Page
         UpdateAllModelsButton.Content = localization.Translate("更新全部") + $" ({availableUpdates})";
         UpdateAllModelsButton.Visibility = availableUpdates > 0 ? Visibility.Visible : Visibility.Collapsed;
         var filter = (ModelFilterPicker.SelectedItem as ComboBoxItem)?.Tag as string ?? "all";
-        ModelsList.ItemsSource = filter switch
+        var filteredStates = filter switch
         {
             "installed" => states.Where(x => x.Installed).ToList(),
             "default" => states.Where(x => x.EditionDisplay == catalog.DefaultEditionDisplay).ToList(),
             "optional" => states.Where(x => x.EditionDisplay != catalog.DefaultEditionDisplay).ToList(),
             _ => states
         };
+        var groups = new List<ModelGroup>();
+        foreach (var featureId in ModelFeatureOrder)
+        {
+            var items = filteredStates.Where(x => x.Feature == featureId).ToList();
+            if (items.Count > 0) groups.Add(new(items[0].FeatureDisplay, items));
+        }
+        ModelGroupsSource.Source = groups;
+        ModelsList.ItemsSource = ModelGroupsSource.View;
         ModelSummaryText.Text = catalog.FormatSummary(states);
         OutputPathText.Text = settings.Current.OutputRoot;
     }
@@ -802,7 +811,7 @@ public sealed partial class MainPage : Page
     private static string CurrentDisplayVersion()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        if (version is null) return "1.5.1";
+        if (version is null) return "1.6.0";
         return version.Revision > 0 ? version.ToString(4) : version.ToString(3);
     }
 

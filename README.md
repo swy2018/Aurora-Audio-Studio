@@ -5,7 +5,7 @@
   <p>面向 Windows 的本地 AI 音频创作工作台</p>
   <p>
     <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img alt="官方网站" src="docs/assets/readme-button-website.svg"></a>
-    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.5.1" src="docs/assets/readme-button-download.svg"></a>
+    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.6.0" src="docs/assets/readme-button-download.svg"></a>
     <a href="CHANGELOG.md"><img alt="更新日志" src="docs/assets/readme-button-changelog.svg"></a>
     <a href="#english"><img alt="English" src="docs/assets/readme-button-english.svg"></a>
   </p>
@@ -15,19 +15,19 @@
 
 Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离、MIDI 扒谱和视频字幕集中到同一个本地入口。六个功能互相独立，可直接开始当前任务，不再需要手动管理多个启动器、端口和结果目录。
 
-## 1.5.1 带来了什么
+## 1.6.0 带来了什么
 
-### 未安装模型现在有明确入口
+### 六类功能，一眼找到模型
 
-- 在任务工作台选择未安装模型时，会显示独立的“下载安装模型”按钮。
-- 安装完成后按钮才切换为“进入工作台”；切换模型时，状态与操作会立即刷新。
-- 模型仍然只在用户明确点击并确认安装位置后下载，不会随软件启动静默安装。
+- 模型管理按音乐、配音与声音克隆、歌声克隆、分轨、扒谱、字幕六类分组。
+- 新增 HeartMuLa、IndexTTS 2.5、SoulX-Singer SVC、Qwen3-ASR 0.6B / 1.7B 与 Qwen3-ForcedAligner 的可选管理入口。
+- 新模型不会自动下载；只有用户主动点击安装并确认位置后才会部署。
 
-### 组件断点更新更可靠
+### 正式版优先，日期版兜底
 
-- 已完整下载的组件包即使在续传时收到 HTTP 416，也不会再被直接判定为失败。
-- Aurora 会核对 GitHub Release 官方文件大小，并继续执行 SHA-256 完整性校验；尺寸不匹配的残留文件会重新下载。
-- Subtitle Edit、Faster-Whisper XXL 等组件继续使用暂存、校验和安全替换流程。
+- ACE-Step、Seed-VC 等 GitHub 模型优先检测正式 Release。
+- 没有正式 Release 的仓库显示默认分支最新提交日期，并以精确提交判断更新。
+- Hugging Face 模型显示官方更新时间，并以精确快照 SHA 判断是否需要更新。
 
 ## 工作流
 
@@ -54,7 +54,7 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 ### 标准安装
 
 1. 打开 [Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest)。
-2. 下载 `Aurora-Audio-Studio-1.5.1-Setup-x64.exe` 和同名 `.sha256` 文件。
+2. 下载 `Aurora-Audio-Studio-1.6.0-Setup-x64.exe` 和同名 `.sha256` 文件。
 3. 运行安装程序，阅读并接受 GNU GPL v3.0，选择安装位置和桌面快捷方式。
 4. 首次打开 Aurora，直接选择需要的功能；需要时再确认模型、处理记录和成品目录。
 
@@ -83,7 +83,7 @@ Aurora 桌面端使用 .NET 10、WinUI 3 和 Windows App SDK 构建，官网使�
 ```powershell
 dotnet restore .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj --runtime win-x64
 dotnet build .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -p:Platform=x64
-dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.5.1
+dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.6.0
 ```
 
 运行回归检查：
@@ -114,12 +114,12 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 Aurora Audio Studio is a local AI audio production workspace for Windows. Its six independent features provide direct entry points for music generation, voice cloning, singing conversion, stem separation, MIDI transcription, and video subtitles.
 
-### What version 1.5.1 adds
+### What version 1.6.0 adds
 
-- Uninstalled workbench models now show a dedicated Download and install model action.
-- Enter workbench appears only after installation, and changing models refreshes state immediately.
-- Completed component packages are no longer reported as failed when a resume request receives HTTP 416.
-- Aurora verifies the official GitHub Release asset size and continues through SHA-256 integrity validation; mismatched partial files restart cleanly.
+- Model Management is grouped into music, voice and cloning, singing conversion, stem separation, MIDI transcription, and video subtitles.
+- Optional entries now cover HeartMuLa, IndexTTS 2.5, SoulX-Singer SVC, Qwen3-ASR 0.6B / 1.7B, and Qwen3-ForcedAligner. Installation is always user-initiated.
+- GitHub-backed models prefer stable Releases and fall back to exact default-branch commits with date versions when no stable Release exists.
+- Hugging Face models display the official update date and compare exact snapshot SHAs.
 
 ### Local by design
 
@@ -128,7 +128,7 @@ Aurora does not operate a cloud generation service. Media and generated output r
 ### Install
 
 1. Open the latest [Release](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest).
-2. Download `Aurora-Audio-Studio-1.5.1-Setup-x64.exe` and its `.sha256` file.
+2. Download `Aurora-Audio-Studio-1.6.0-Setup-x64.exe` and its `.sha256` file.
 3. Run Setup, review GNU GPL v3.0, and choose the destination and shortcut options.
 4. Choose a feature on first launch; confirm model, processing-record, and output folders only when needed.
 

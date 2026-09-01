@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 6, 0), "2026-09-02", [
+            "• 模型管理按音乐创作、AI 配音与声音克隆、歌声克隆、去人声 / AI 分轨、AI 扒谱、视频 AI 字幕六类分组，模型较多时也能快速定位。\n• ACE-Step、Seed-VC 等 GitHub 模型优先检测正式 Release；没有正式 Release 的仓库改用默认分支最新提交日期作为日期版，Hugging Face 模型使用官方更新时间与精确快照比较。\n• 新增 HeartMuLa、IndexTTS 2.5、SoulX-Singer SVC、Qwen3-ASR 0.6B / 1.7B 与 Qwen3-ForcedAligner 的模型管理入口；它们不会自动下载，需用户主动安装。",
+            "• 模型管理依音樂創作、AI 配音與聲音複製、歌聲複製、去人聲 / AI 分軌、AI 扒譜、影片 AI 字幕六類分組，模型較多時也能快速定位。\n• ACE-Step、Seed-VC 等 GitHub 模型優先偵測正式 Release；沒有正式 Release 的儲存庫改用預設分支最新提交日期作為日期版，Hugging Face 模型使用官方更新時間與精確快照比較。\n• 新增 HeartMuLa、IndexTTS 2.5、SoulX-Singer SVC、Qwen3-ASR 0.6B / 1.7B 與 Qwen3-ForcedAligner 的模型管理入口；它們不會自動下載，需由使用者主動安裝。",
+            "• Model Management is now grouped into the six product workflows: music, voice and cloning, singing conversion, stem separation, MIDI transcription, and video subtitles.\n• GitHub-backed models such as ACE-Step and Seed-VC prefer stable Releases. Repositories without a stable Release use the latest default-branch commit date, while Hugging Face models compare official update dates and exact snapshots.\n• Added optional management entries for HeartMuLa, IndexTTS 2.5, SoulX-Singer SVC, Qwen3-ASR 0.6B / 1.7B, and Qwen3-ForcedAligner. Aurora never downloads them automatically; installation remains user-initiated.",
+            "• モデル管理を音楽制作、AI 音声・音声クローン、歌声クローン、ボーカル除去・ステム分離、MIDI 採譜、動画 AI 字幕の 6 機能別に整理しました。\n• ACE-Step や Seed-VC などの GitHub モデルは安定版 Release を優先します。安定版がない場合は既定ブランチの最新コミット日を日付版として扱い、Hugging Face は公式更新日と正確なスナップショットを比較します。\n• HeartMuLa、IndexTTS 2.5、SoulX-Singer SVC、Qwen3-ASR 0.6B / 1.7B、Qwen3-ForcedAligner を任意モデルとして追加しました。自動ダウンロードは行わず、導入はユーザー操作時のみです。"]),
         new(new(1, 5, 1), "2026-09-01", [
             "• 任务工作台选择未安装模型时，现在会显示独立的“下载安装模型”按钮；安装完成后才切换为“进入工作台”，模型切换会立即刷新状态。\n• 修复已完整下载的组件包因断点续传收到 HTTP 416 而被误判为失败的问题；Aurora 会核对官方文件大小，并继续执行原有 SHA-256 完整性校验。\n• 增加工作台安装入口、断点文件大小与下载恢复路径的回归检查。",
             "• 任務工作台選擇未安裝模型時，現在會顯示獨立的「下載安裝模型」按鈕；安裝完成後才切換為「進入工作台」，切換模型會立即更新狀態。\n• 修正已完整下載的元件套件因續傳收到 HTTP 416 而被誤判為失敗的問題；Aurora 會核對官方檔案大小，並繼續執行原有 SHA-256 完整性驗證。\n• 新增工作台安裝入口、續傳檔案大小與下載恢復路徑的回歸檢查。",

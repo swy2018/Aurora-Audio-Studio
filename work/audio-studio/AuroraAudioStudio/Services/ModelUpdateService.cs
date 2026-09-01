@@ -26,13 +26,16 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             return new(true, "已安装；模型校验由 BS-RoFormer 官方注册表管理", "current");
         if (model.UpdateKind.Equals("github-release", StringComparison.OrdinalIgnoreCase))
             return await CheckGitHubReleaseAsync(model, root);
+        if (model.UpdateKind.Equals("github-release-git", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(model.Repository))
+            return await CheckGitHubRepositoryReleaseAsync(model, root);
         if ((model.UpdateKind.Equals("huggingface", StringComparison.OrdinalIgnoreCase) || model.UpdateKind.Equals("minimax-music3", StringComparison.OrdinalIgnoreCase)) && !string.IsNullOrWhiteSpace(model.Repository))
         {
-            var remoteRevision = await GetHuggingFaceRevisionAsync(model.Repository);
-            if (string.IsNullOrWhiteSpace(remoteRevision)) return new(false, "暂时无法连接 Hugging Face");
+            var remoteVersion = await GetHuggingFaceVersionAsync(model.Repository);
+            if (remoteVersion is null) return new(false, "暂时无法连接 Hugging Face");
             var localRevision = ReadModelRevision(root);
-            return new(true, localRevision.Equals(remoteRevision, StringComparison.OrdinalIgnoreCase) ? "已是最新版本" : "发现新版本",
-                localRevision.Equals(remoteRevision, StringComparison.OrdinalIgnoreCase) ? "current" : "available");
+            var current = localRevision.Equals(remoteVersion.Revision, StringComparison.OrdinalIgnoreCase);
+            return new(true, current ? $"已是最新日期版 {remoteVersion.DateVersion}" : $"发现日期版 {remoteVersion.DateVersion}",
+                current ? "current" : "available");
         }
         var entry = await FindManifestEntryAsync(model.Id);
         if (entry is not null)
@@ -75,6 +78,8 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             return await InstallRoformerRegistryModelAsync(model, root, progress, cancellationToken);
         if (model.UpdateKind.Equals("github-release", StringComparison.OrdinalIgnoreCase))
             return await InstallGitHubReleaseAsync(model, root, progress, cancellationToken);
+        if (model.UpdateKind.Equals("github-release-git", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(model.Repository))
+            return await InstallGitHubRepositoryReleaseAsync(model, root, cancellationToken);
         var entry = await FindManifestEntryAsync(model.Id);
         if (entry is not null) return await InstallManifestEntryAsync(model, entry, root, progress, cancellationToken);
         if (!catalog.IsInstalled(model)) return new(false, "此引擎需要通过 Aurora 安装程序添加运行环境。 ");
@@ -134,6 +139,89 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
     }
 
     private sealed record GitHubReleaseAsset(string Version, string Name, string Url, long Size, string? Digest, string PackageKind);
+    private sealed record GitHubRepositoryRelease(string Owner, string Repository, string Tag, string Branch, string Commit, string DateVersion);
+
+    private async Task<OperationResult> CheckGitHubRepositoryReleaseAsync(ModelDefinition model, string root)
+    {
+        var release = await GetGitHubRepositoryReleaseAsync(model.Repository!);
+        if (release is null) return new(false, "暂时无法读取 GitHub 上游版本");
+        var local = await RunGitAsync(root, "rev-parse HEAD");
+        if (!local.Success || string.IsNullOrWhiteSpace(local.Path)) return new(false, $"暂时无法读取已安装的 {model.Name} 版本");
+        if (string.IsNullOrWhiteSpace(release.Tag))
+        {
+            var current = local.Path.Equals(release.Commit, StringComparison.OrdinalIgnoreCase);
+            return new(true, current ? $"已是最新日期版 {release.DateVersion}" : $"发现日期版 {release.DateVersion}", current ? "current" : "available");
+        }
+        try
+        {
+            var compareUrl = $"https://api.github.com/repos/{release.Owner}/{release.Repository}/compare/{local.Path}...{Uri.EscapeDataString(release.Tag)}";
+            using var document = JsonDocument.Parse(await client.GetStringAsync(compareUrl));
+            var status = document.RootElement.GetProperty("status").GetString();
+            var available = status is "ahead" or "diverged";
+            return new(true, available ? $"发现正式版 {release.Tag}" : $"已是最新正式版 {release.Tag}", available ? "available" : "current");
+        }
+        catch { return new(false, $"暂时无法比较 {model.Name} 正式版"); }
+    }
+
+    private async Task<OperationResult> InstallGitHubRepositoryReleaseAsync(ModelDefinition model, string root, CancellationToken cancellationToken)
+    {
+        var release = await GetGitHubRepositoryReleaseAsync(model.Repository!);
+        if (release is null) return new(false, "暂时无法读取 GitHub 上游版本");
+        var dirty = await RunGitAsync(root, "status --porcelain --untracked-files=no");
+        if (!dirty.Success) return dirty;
+        if (!string.IsNullOrWhiteSpace(dirty.Path)) return new(false, $"{model.Name} 存在本地代码修改，为避免覆盖，已停止更新。", "available");
+        cancellationToken.ThrowIfCancellationRequested();
+        if (string.IsNullOrWhiteSpace(release.Tag))
+        {
+            var fetchDate = await RunGitAsync(root, $"fetch --quiet --force {model.Repository} refs/heads/{release.Branch}");
+            if (!fetchDate.Success) return fetchDate;
+            cancellationToken.ThrowIfCancellationRequested();
+            var checkoutDate = await RunGitAsync(root, $"checkout --detach {release.Commit}");
+            if (!checkoutDate.Success) return checkoutDate;
+            File.WriteAllText(Path.Combine(root, ".aurora-revision"), release.Commit);
+            File.WriteAllText(Path.Combine(root, ".aurora-version"), release.DateVersion);
+            WriteInstalledVersion(model.Id, release.DateVersion);
+            return new(true, $"{model.Name} 已更新至日期版 {release.DateVersion}", "current");
+        }
+        var fetch = await RunGitAsync(root, $"fetch --quiet --force {model.Repository} refs/tags/{release.Tag}:refs/tags/{release.Tag}");
+        if (!fetch.Success) return fetch;
+        cancellationToken.ThrowIfCancellationRequested();
+        var checkout = await RunGitAsync(root, $"checkout --detach refs/tags/{release.Tag}");
+        if (!checkout.Success) return checkout;
+        File.WriteAllText(Path.Combine(root, ".aurora-version"), release.Tag);
+        WriteInstalledVersion(model.Id, release.Tag);
+        return new(true, $"{model.Name} 已更新至正式版 {release.Tag}", "current");
+    }
+
+    private async Task<GitHubRepositoryRelease?> GetGitHubRepositoryReleaseAsync(string repositoryUrl)
+    {
+        try
+        {
+            var uri = new Uri(repositoryUrl);
+            var segments = uri.AbsolutePath.Trim('/').Split('/');
+            if (segments.Length != 2) return null;
+            var owner = segments[0];
+            var repository = segments[1].EndsWith(".git", StringComparison.OrdinalIgnoreCase) ? segments[1][..^4] : segments[1];
+            var apiRoot = $"https://api.github.com/repos/{owner}/{repository}";
+            using var response = await client.GetAsync(apiRoot + "/releases/latest");
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                using var repositoryDocument = JsonDocument.Parse(await client.GetStringAsync(apiRoot));
+                var branch = repositoryDocument.RootElement.GetProperty("default_branch").GetString();
+                if (string.IsNullOrWhiteSpace(branch)) return null;
+                using var commitDocument = JsonDocument.Parse(await client.GetStringAsync(apiRoot + "/commits/" + Uri.EscapeDataString(branch)));
+                var commit = commitDocument.RootElement.GetProperty("sha").GetString();
+                var dateText = commitDocument.RootElement.GetProperty("commit").GetProperty("committer").GetProperty("date").GetString();
+                if (string.IsNullOrWhiteSpace(commit) || !DateTimeOffset.TryParse(dateText, out var date)) return null;
+                return new(owner, repository, "", branch, commit, date.UtcDateTime.ToString("yyyy.MM.dd"));
+            }
+            response.EnsureSuccessStatusCode();
+            using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            var tag = document.RootElement.GetProperty("tag_name").GetString();
+            return string.IsNullOrWhiteSpace(tag) ? null : new(owner, repository, tag, "", "", "");
+        }
+        catch { return null; }
+    }
 
     private async Task<OperationResult> CheckGitHubReleaseAsync(ModelDefinition model, string root)
     {
@@ -419,14 +507,14 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         var dependencyResult = await RunProcessAsync(dependencies, cancellationToken, progress);
         if (dependencyResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(dependencyResult.Error) ? "MiniMax-Music3 依赖配置失败。" : dependencyResult.Error);
 
-        var revision = await GetHuggingFaceRevisionAsync(model.Repository!);
-        if (string.IsNullOrWhiteSpace(revision)) return new(false, "暂时无法读取 MiniMax-Music3 官方版本。");
+        var version = await GetHuggingFaceVersionAsync(model.Repository!);
+        if (version is null) return new(false, "暂时无法读取 MiniMax-Music3 官方版本。");
         var hf = Path.Combine(environmentRoot, "Scripts", "hf.exe");
         if (!File.Exists(hf)) return new(false, "MiniMax-Music3 下载组件未正确安装。");
         ModelInstallTransaction.Prepare(root);
         var staging = ModelInstallTransaction.StagingPath(root);
         var download = new ProcessStartInfo(hf) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var value in new[] { "download", model.Repository!, "--revision", revision, "--local-dir", staging }) download.ArgumentList.Add(value);
+        foreach (var value in new[] { "download", model.Repository!, "--revision", version.Revision, "--local-dir", staging }) download.ArgumentList.Add(value);
         download.ArgumentList.Add("--include");
         foreach (var include in new[] { "modular_model_index.json", "config.json", "condition_encoder/*", "language_model/*", "rvq_depth_decoder/*", "scheduler/*", "tokenizer/*", "transformer/*", "vocoder/*" })
             download.ArgumentList.Add(include);
@@ -437,9 +525,10 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         if (result.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(result.Error) ? "MiniMax-Music3 下载失败。" : result.Error);
         if (!File.Exists(Path.Combine(staging, model.Marker)) || !Directory.Exists(Path.Combine(staging, "language_model")) || !Directory.Exists(Path.Combine(staging, "transformer")))
             return new(false, "MiniMax-Music3 下载完成，但完整性检查未通过。正式模型目录未被修改。");
-        File.WriteAllText(Path.Combine(staging, ".aurora-revision"), revision);
+        File.WriteAllText(Path.Combine(staging, ".aurora-revision"), version.Revision);
+        File.WriteAllText(Path.Combine(staging, ".aurora-version"), version.DateVersion);
         ModelInstallTransaction.Commit(root);
-        WriteInstalledVersion(model.Id, revision);
+        WriteInstalledVersion(model.Id, version.DateVersion);
         return new(true, "MiniMax-Music3 已安装、自动配置并可在音乐创作中启用", "current");
     }
 
@@ -509,13 +598,18 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         catch { return null; }
     }
 
-    private async Task<string?> GetHuggingFaceRevisionAsync(string repository)
+    private sealed record HuggingFaceVersion(string Revision, string DateVersion);
+
+    private async Task<HuggingFaceVersion?> GetHuggingFaceVersionAsync(string repository)
     {
         try
         {
             var json = await client.GetStringAsync("https://huggingface.co/api/models/" + repository);
             using var document = JsonDocument.Parse(json);
-            return document.RootElement.TryGetProperty("sha", out var value) ? value.GetString() : null;
+            var revision = document.RootElement.TryGetProperty("sha", out var sha) ? sha.GetString() : null;
+            var modified = document.RootElement.TryGetProperty("lastModified", out var lastModified) ? lastModified.GetString() : null;
+            if (string.IsNullOrWhiteSpace(revision) || !DateTimeOffset.TryParse(modified, out var date)) return null;
+            return new(revision, date.UtcDateTime.ToString("yyyy.MM.dd"));
         }
         catch { return null; }
     }
@@ -523,9 +617,9 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
     private async Task<OperationResult> UpdateHuggingFaceAsync(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
         progress?.Report(new(null, "正在读取模型版本"));
-        var revision = await GetHuggingFaceRevisionAsync(model.Repository!);
-        if (string.IsNullOrWhiteSpace(revision)) return new(false, "暂时无法连接 Hugging Face");
-        return await DownloadHuggingFaceRevisionAsync(model, root, revision, progress, cancellationToken);
+        var version = await GetHuggingFaceVersionAsync(model.Repository!);
+        if (version is null) return new(false, "暂时无法连接 Hugging Face");
+        return await DownloadHuggingFaceRevisionAsync(model, root, version.Revision, progress, cancellationToken, version.DateVersion);
     }
 
     public async Task<OperationResult> RollbackAsync(ModelDefinition model)
@@ -547,7 +641,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         return await DownloadHuggingFaceRevisionAsync(model, root, revision, null, CancellationToken.None);
     }
 
-    private async Task<OperationResult> DownloadHuggingFaceRevisionAsync(ModelDefinition model, string root, string revision, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    private async Task<OperationResult> DownloadHuggingFaceRevisionAsync(ModelDefinition model, string root, string revision, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken, string? dateVersion = null)
     {
         var launcher = Path.Combine(settings.Current.LocalAiRoot, "Qwen3-TTS", "Python312", "Scripts", "hf.exe");
         if (!File.Exists(launcher)) return new(false, "Qwen3-TTS 更新组件缺失，请运行安装程序修复。");
@@ -557,6 +651,11 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         ModelInstallTransaction.Prepare(root);
         var staging = ModelInstallTransaction.StagingPath(root);
         info.ArgumentList.Add("--local-dir"); info.ArgumentList.Add(staging);
+        if (model.Id.Equals("soulx-singer-svc", StringComparison.OrdinalIgnoreCase))
+        {
+            info.ArgumentList.Add("--include");
+            foreach (var include in new[] { "model-svc.pt", "config.yaml", "README.md" }) info.ArgumentList.Add(include);
+        }
         info.Environment["HF_XET_HIGH_PERFORMANCE"] = "1";
         info.Environment["HF_HUB_DOWNLOAD_TIMEOUT"] = "300";
         File.WriteAllText(Path.Combine(staging, ".aurora-installing"), DateTimeOffset.UtcNow.ToString("O"));
@@ -565,6 +664,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         if (result.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(result.Error) ? "模型更新失败" : result.Error);
         if (!File.Exists(Path.Combine(staging, model.Marker))) return new(false, "下载已结束，但模型完整性检查未通过。正式模型目录未被修改。");
         File.WriteAllText(Path.Combine(staging, ".aurora-revision"), revision);
+        if (!string.IsNullOrWhiteSpace(dateVersion)) File.WriteAllText(Path.Combine(staging, ".aurora-version"), dateVersion);
         File.Delete(Path.Combine(staging, ".aurora-installing"));
         ModelInstallTransaction.Commit(root);
         return new(true, $"{model.Name} 已安装并校验", "current");
@@ -679,7 +779,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
     private static HttpClient CreateClient()
     {
         var value = new HttpClient { Timeout = TimeSpan.FromHours(8) };
-        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.5.1"));
+        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.6.0"));
         return value;
     }
 }

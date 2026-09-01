@@ -3,6 +3,9 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Background="{ThemeResource AuroraBackgroundBrush}">
+    <Page.Resources>
+        <CollectionViewSource x:Name="ModelGroupsSource" IsSourceGrouped="True" ItemsPath="Items"/>
+    </Page.Resources>
     <Grid>
         <NavigationView x:Name="Shell" IsBackButtonVisible="Collapsed" IsSettingsVisible="False" AutomationProperties.Name="Aurora 主导航"
             PaneDisplayMode="Left" OpenPaneLength="248" CompactPaneLength="52"
@@ -282,6 +285,15 @@
                             </StackPanel>
                         </Grid>
                         <ListView x:Name="ModelsList" Grid.Row="1" SelectionMode="None">
+                            <ListView.GroupStyle>
+                                <GroupStyle>
+                                    <GroupStyle.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" Margin="2,16,0,10" FontSize="18" FontWeight="SemiBold" AutomationProperties.HeadingLevel="Level2"/>
+                                        </DataTemplate>
+                                    </GroupStyle.HeaderTemplate>
+                                </GroupStyle>
+                            </ListView.GroupStyle>
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -391,7 +403,7 @@
 
                     <ScrollViewer x:Name="AboutView" Visibility="Collapsed"><StackPanel Padding="30,30" MaxWidth="760" HorizontalAlignment="Left" Spacing="18">
                         <TextBlock Text="Aurora Audio Studio" FontSize="30" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="AboutVersionText" Text="1.5.1 · 本地 AI 音频创作工作台" FontSize="16" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                        <TextBlock x:Name="AboutVersionText" Text="1.6.0 · 本地 AI 音频创作工作台" FontSize="16" Foreground="{ThemeResource AuroraMutedBrush}"/>
                         <TextBlock Text="苏晚颜 · Aurora Studio" FontSize="18" FontWeight="SemiBold" Margin="0,12,0,0"/>
                         <TextBlock Text="为音乐、声音与影像创作者打造的一站式本地工作台。灵感、素材与成品，始终由你掌控。" TextWrapping="Wrap"/>
                         <Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}" Margin="0,10"/>

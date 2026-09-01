@@ -4,6 +4,24 @@
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
 
+## 1.6.0 — 2026-09-02
+
+### 中文
+
+- 模型管理按音乐创作、AI 配音与声音克隆、歌声克隆、去人声 / AI 分轨、AI 扒谱、视频 AI 字幕六个产品功能分组，模型较多时也能快速定位。
+- ACE-Step、Seed-VC 等 GitHub 模型优先检测正式 Release；没有正式 Release 时，改用默认分支最新提交日期作为日期版，并以精确提交比较更新。
+- Hugging Face 模型使用官方 `lastModified` 日期展示版本，并用精确快照 SHA 判断是否需要更新。
+- 新增 HeartMuLa、IndexTTS 2.5、SoulX-Singer SVC、Qwen3-ASR 0.6B / 1.7B 与 Qwen3-ForcedAligner 的模型管理入口；不会自动下载，需用户主动安装。
+- 同步应用版本、四语内置更新日志、README、官网、About、产品文档与音乐人使用说明。
+
+### English
+
+- Grouped Model Management by the six product workflows: music, voice and cloning, singing conversion, stem separation, MIDI transcription, and video subtitles.
+- GitHub-backed models such as ACE-Step and Seed-VC now prefer stable Releases. When no stable Release exists, Aurora presents the latest default-branch commit date and compares the exact commit.
+- Hugging Face models display the official `lastModified` date and use the exact snapshot SHA for update decisions.
+- Added optional management entries for HeartMuLa, IndexTTS 2.5, SoulX-Singer SVC, Qwen3-ASR 0.6B / 1.7B, and Qwen3-ForcedAligner. They are never downloaded automatically and require a user-initiated installation.
+- Synchronized application metadata, four-language in-app notes, README, website, About, product documentation, and the musician guide.
+
 ## 1.5.1 — 2026-09-01
 
 ### 中文
