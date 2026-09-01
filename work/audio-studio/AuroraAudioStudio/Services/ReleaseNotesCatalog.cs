@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 6, 1), "2026-09-02", [
+            "• 模型安装改为单任务串行执行；已有安装进行时再次点击其他模型，会明确提示等待，不再启动第二个部署进程写入同一环境。\n• 安装进度会标明当前模型；大型 PyTorch CUDA 下载会保留等待提示，取消操作始终绑定正在运行的安装。\n• 增加安装并发保护与进度归属回归检查；1.6.0 的六类分组和可靠版本检测继续保留。",
+            "• 模型安裝改為單一任務依序執行；已有安裝進行時再次點擊其他模型，會清楚提示等待，不再啟動第二個部署程序寫入同一環境。\n• 安裝進度會標明目前模型；大型 PyTorch CUDA 下載會保留等待提示，取消操作始終綁定正在執行的安裝。\n• 新增安裝並行保護與進度歸屬回歸檢查；1.6.0 的六類分組和可靠版本偵測繼續保留。",
+            "• Model installation is now serialized. Starting another model while one is active returns a clear wait message instead of deploying concurrently into the same environment.\n• Progress identifies the active model. Large PyTorch CUDA downloads retain a clear wait message, and Cancel remains bound to the active operation.\n• Added regression coverage for installation concurrency and progress ownership while retaining the six workflow groups and reliable version checks from 1.6.0.",
+            "• モデルのインストールを一件ずつ実行するようにしました。進行中に別のモデルを選んだ場合は待機案内を表示し、同じ環境へ二重に導入しません。\n• 進捗には対象モデル名を表示し、大容量 PyTorch CUDA の取得中も待機案内を保ち、キャンセルは実行中の導入だけに作用します。\n• 同時導入防止と進捗の所属を回帰テストで保護し、1.6.0 の6分類と信頼できる版確認を引き続き提供します。"]),
         new(new(1, 6, 0), "2026-09-02", [
             "• 模型管理按音乐创作、AI 配音与声音克隆、歌声克隆、去人声 / AI 分轨、AI 扒谱、视频 AI 字幕六类分组，模型较多时也能快速定位。\n• ACE-Step、Seed-VC 等 GitHub 模型优先检测正式 Release；没有正式 Release 的仓库改用默认分支最新提交日期作为日期版，Hugging Face 模型使用官方更新时间与精确快照比较。\n• 新增 HeartMuLa、IndexTTS 2.5、SoulX-Singer SVC、Qwen3-ASR 0.6B / 1.7B 与 Qwen3-ForcedAligner 的模型管理入口；它们不会自动下载，需用户主动安装。",
             "• 模型管理依音樂創作、AI 配音與聲音複製、歌聲複製、去人聲 / AI 分軌、AI 扒譜、影片 AI 字幕六類分組，模型較多時也能快速定位。\n• ACE-Step、Seed-VC 等 GitHub 模型優先偵測正式 Release；沒有正式 Release 的儲存庫改用預設分支最新提交日期作為日期版，Hugging Face 模型使用官方更新時間與精確快照比較。\n• 新增 HeartMuLa、IndexTTS 2.5、SoulX-Singer SVC、Qwen3-ASR 0.6B / 1.7B 與 Qwen3-ForcedAligner 的模型管理入口；它們不會自動下載，需由使用者主動安裝。",

@@ -87,12 +87,12 @@ Require(mainPageXaml.Contains("AutomationProperties.Name=\"本地 AI 创作工�
 var repositoryRoot = Path.GetFullPath(Path.Combine(audioStudioRoot, "..", ".."));
 var workflow = File.ReadAllText(Path.Combine(repositoryRoot, ".github", "workflows", "build.yml"));
 Require(workflow.Contains("AuroraAudioStudio.UpdateFlowTests", StringComparison.Ordinal), "CI must run the regression program before packaging.");
-Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains("<Version>1.6.0</Version>", StringComparison.Ordinal), "The application project must publish version 1.6.0.");
-Require(installerScript.Contains("MyAppVersion \"1.6.0\"", StringComparison.Ordinal), "The installer fallback version must match 1.6.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains("Aurora-Audio-Studio-1.6.0-Setup-x64.exe", StringComparison.Ordinal), "README download instructions must match 1.6.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains("Download 1.6.0", StringComparison.Ordinal), "The website download action must match 1.6.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-download-160.svg")).Contains(">1.6.0</text>", StringComparison.Ordinal), "The README download badge must render version 1.6.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-changelog-160.svg")).Contains(">1.6.0</text>", StringComparison.Ordinal), "The README changelog badge must render version 1.6.0.");
+Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains("<Version>1.6.1</Version>", StringComparison.Ordinal), "The application project must publish version 1.6.1.");
+Require(installerScript.Contains("MyAppVersion \"1.6.1\"", StringComparison.Ordinal), "The installer fallback version must match 1.6.1.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains("Aurora-Audio-Studio-1.6.1-Setup-x64.exe", StringComparison.Ordinal), "README download instructions must match 1.6.1.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains("Download 1.6.1", StringComparison.Ordinal), "The website download action must match 1.6.1.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-download-161.svg")).Contains(">1.6.1</text>", StringComparison.Ordinal), "The README download badge must render version 1.6.1.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-changelog-161.svg")).Contains(">1.6.1</text>", StringComparison.Ordinal), "The README changelog badge must render version 1.6.1.");
 
 var qwen = new ModelDefinition("qwen3-tts-06b-base", "Qwen3-TTS 0.6B", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "model.safetensors", "Qwen", "huggingface", "Qwen/Qwen3-TTS-12Hz-0.6B-Base");
 var plan = ModelInstallPlanner.Create(qwen, @"D:\AuroraModels");
@@ -133,6 +133,9 @@ Require(mainPageSource.Contains("private readonly UpdateFlowGuard modelInstallFl
     && mainPageSource.Contains("if (!modelInstallFlow.TryBegin())", StringComparison.Ordinal)
     && mainPageSource.Contains("modelInstallFlow.End();", StringComparison.Ordinal), "Model installation must reject a second concurrent operation and release its guard afterward.");
 Require(mainPageSource.Contains("$\"{model.Name} · {value.Detail}\"", StringComparison.Ordinal), "Model installation progress must identify the active model.");
+Require(modelUpdateSource.Contains("PyTorch 组件较大，请耐心等待", StringComparison.Ordinal), "Large CUDA dependency installs must explain that an indeterminate wait can still be active.");
+Require(modelUpdateSource.Contains("IsProgressNoise", StringComparison.Ordinal)
+    && modelUpdateSource.Contains("Using Python", StringComparison.Ordinal), "uv environment headers must not replace the active installation stage in the progress UI.");
 Require(mainPageSource.Contains("PrimaryAction = localization.Translate(\"更新\")", StringComparison.Ordinal), "A detected model update must replace the generic card action with Update.");
 Require(mainPageSource.Contains("new OperationResult(false, result.Message, \"available\")", StringComparison.Ordinal), "A failed batch update must remain available for retry.");
 Require(modelUpdateSource.Contains("RunningProcessGuard.FindInRoot", StringComparison.Ordinal), "Model updates must detect a running component before replacing its files.");
@@ -193,6 +196,9 @@ Require(notes130.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.3.0 rele
 var notes160 = ReleaseNotesCatalog.CurrentAndRecent("1.6.0", "en-US");
 Require(notes160.Count == 5 && notes160[0].Version == "1.6.0" && notes160[^1].Version == "1.4.0", "Version 1.6.0 must show itself and its four previous releases.");
 Require(notes160.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.6.0 release note must have localized content.");
+var notes161 = ReleaseNotesCatalog.CurrentAndRecent("1.6.1", "zh-TW");
+Require(notes161.Count == 5 && notes161[0].Version == "1.6.1" && notes161[^1].Version == "1.4.1", "Version 1.6.1 must show itself and its four previous releases.");
+Require(notes161.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.6.1 release note must have localized content.");
 var notes151 = ReleaseNotesCatalog.CurrentAndRecent("1.5.1", "en-US");
 Require(notes151.Count == 5 && notes151[0].Version == "1.5.1" && notes151[^1].Version == "1.3.0", "Version 1.5.1 must show itself and its four previous releases.");
 Require(notes151.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.5.1 release note must have localized content.");

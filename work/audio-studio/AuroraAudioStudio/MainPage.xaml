@@ -403,7 +403,7 @@
 
                     <ScrollViewer x:Name="AboutView" Visibility="Collapsed"><StackPanel Padding="30,30" MaxWidth="760" HorizontalAlignment="Left" Spacing="18">
                         <TextBlock Text="Aurora Audio Studio" FontSize="30" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="AboutVersionText" Text="1.6.0 · 本地 AI 音频创作工作台" FontSize="16" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                        <TextBlock x:Name="AboutVersionText" Text="1.6.1 · 本地 AI 音频创作工作台" FontSize="16" Foreground="{ThemeResource AuroraMutedBrush}"/>
                         <TextBlock Text="苏晚颜 · Aurora Studio" FontSize="18" FontWeight="SemiBold" Margin="0,12,0,0"/>
                         <TextBlock Text="为音乐、声音与影像创作者打造的一站式本地工作台。灵感、素材与成品，始终由你掌控。" TextWrapping="Wrap"/>
                         <Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}" Margin="0,10"/>

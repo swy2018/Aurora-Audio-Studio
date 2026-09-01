@@ -4,6 +4,22 @@
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
 
+## 1.6.1 — 2026-09-02
+
+### 中文
+
+- 模型安装改为单任务串行执行；已有安装进行时再次点击其他模型，会明确提示等待，不再启动第二个部署进程写入同一环境。
+- 安装进度增加当前模型名称，取消操作始终绑定正在运行的安装任务，不会被后一次点击覆盖；下载大型 PyTorch CUDA 组件时保留明确的等待提示，不再被 `uv` 的 Python 环境标题覆盖。
+- 增加模型安装并发保护与进度归属回归检查，保留 1.6.0 的六类模型分组、正式 Release 优先和日期版更新检测。
+- 同步应用版本、四语内置更新日志、README、官网、About、产品文档与音乐人使用说明；界面布局未变，继续使用现有截图。
+
+### English
+
+- Model installation is now serialized. Starting another model while one is active returns a clear wait message instead of launching a second deployment into the same environment.
+- Installation progress identifies the active model, and Cancel remains bound to that operation rather than being replaced by a later click. Large PyTorch CUDA downloads retain an explicit wait message instead of being overwritten by uv's Python environment header.
+- Added regression coverage for installation concurrency and progress ownership while retaining the six workflow groups, stable-Release-first policy, and date-version fallback from 1.6.0.
+- Synchronized application metadata, four-language in-app notes, README, website, About, product documentation, and the musician guide. Existing screenshots remain because the interface layout is unchanged.
+
 ## 1.6.0 — 2026-09-02
 
 ### 中文

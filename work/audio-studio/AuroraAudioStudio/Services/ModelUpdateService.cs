@@ -396,7 +396,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         if (!environment.Success) return environment;
         if (model.Id.Equals("transkun", StringComparison.OrdinalIgnoreCase))
         {
-            progress?.Report(new(null, "正在配置 TransKun CUDA 运行环境"));
+            progress?.Report(new(null, "正在下载并配置 TransKun CUDA 运行环境（PyTorch 组件较大，请耐心等待）"));
             var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
             foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "torch", "torchaudio", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
             var torchResult = await RunProcessAsync(torch, cancellationToken, progress);
@@ -496,7 +496,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         var environment = await EnsureUvEnvironmentAsync(uv, environmentRoot, python, progress, cancellationToken);
         if (!environment.Success) return environment;
 
-        progress?.Report(new(null, "正在配置 MiniMax-Music3 CUDA 运行环境"));
+        progress?.Report(new(null, "正在下载并配置 MiniMax-Music3 CUDA 运行环境（PyTorch 组件较大，请耐心等待）"));
         var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
         foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "torch", "torchaudio", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
         var torchResult = await RunProcessAsync(torch, cancellationToken, progress);
@@ -763,8 +763,13 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         var output = new List<string>();
         var errors = new List<string>();
         var sync = new object();
-        process.OutputDataReceived += (_, args) => { if (!string.IsNullOrWhiteSpace(args.Data)) { lock (sync) output.Add(args.Data); progress?.Report(new(null, LogLine(args.Data))); } };
-        process.ErrorDataReceived += (_, args) => { if (!string.IsNullOrWhiteSpace(args.Data)) { lock (sync) errors.Add(args.Data); progress?.Report(new(null, LogLine(args.Data))); } };
+        void RecordLine(List<string> destination, string value)
+        {
+            lock (sync) destination.Add(value);
+            if (!IsProgressNoise(value)) progress?.Report(new(null, LogLine(value)));
+        }
+        process.OutputDataReceived += (_, args) => { if (!string.IsNullOrWhiteSpace(args.Data)) RecordLine(output, args.Data); };
+        process.ErrorDataReceived += (_, args) => { if (!string.IsNullOrWhiteSpace(args.Data)) RecordLine(errors, args.Data); };
         process.Start();
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
@@ -774,12 +779,16 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         lock (sync) return (process.ExitCode, string.Join(Environment.NewLine, output), string.Join(Environment.NewLine, errors));
     }
 
+    private static bool IsProgressNoise(string value) =>
+        value.StartsWith("Using Python ", StringComparison.OrdinalIgnoreCase)
+        && value.Contains(" environment at:", StringComparison.OrdinalIgnoreCase);
+
     private static string LogLine(string value) => value.Length > 180 ? value[..180] : value;
 
     private static HttpClient CreateClient()
     {
         var value = new HttpClient { Timeout = TimeSpan.FromHours(8) };
-        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.6.0"));
+        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.6.1"));
         return value;
     }
 }

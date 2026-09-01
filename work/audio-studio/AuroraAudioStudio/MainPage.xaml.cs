@@ -814,7 +814,7 @@ public sealed partial class MainPage : Page
     private static string CurrentDisplayVersion()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        if (version is null) return "1.6.0";
+        if (version is null) return "1.6.1";
         return version.Revision > 0 ? version.ToString(4) : version.ToString(3);
     }
 
