@@ -91,8 +91,8 @@ Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Aur
 Require(installerScript.Contains("MyAppVersion \"1.6.0\"", StringComparison.Ordinal), "The installer fallback version must match 1.6.0.");
 Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains("Aurora-Audio-Studio-1.6.0-Setup-x64.exe", StringComparison.Ordinal), "README download instructions must match 1.6.0.");
 Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains("Download 1.6.0", StringComparison.Ordinal), "The website download action must match 1.6.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-download.svg")).Contains(">1.6.0</text>", StringComparison.Ordinal), "The README download badge must render version 1.6.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-changelog.svg")).Contains(">1.6.0</text>", StringComparison.Ordinal), "The README changelog badge must render version 1.6.0.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-download-160.svg")).Contains(">1.6.0</text>", StringComparison.Ordinal), "The README download badge must render version 1.6.0.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-changelog-160.svg")).Contains(">1.6.0</text>", StringComparison.Ordinal), "The README changelog badge must render version 1.6.0.");
 
 var qwen = new ModelDefinition("qwen3-tts-06b-base", "Qwen3-TTS 0.6B", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "model.safetensors", "Qwen", "huggingface", "Qwen/Qwen3-TTS-12Hz-0.6B-Base");
 var plan = ModelInstallPlanner.Create(qwen, @"D:\AuroraModels");
