@@ -86,12 +86,12 @@ Require(mainPageXaml.Contains("AutomationProperties.Name=\"本地 AI 创作工�
 var repositoryRoot = Path.GetFullPath(Path.Combine(audioStudioRoot, "..", ".."));
 var workflow = File.ReadAllText(Path.Combine(repositoryRoot, ".github", "workflows", "build.yml"));
 Require(workflow.Contains("AuroraAudioStudio.UpdateFlowTests", StringComparison.Ordinal), "CI must run the regression program before packaging.");
-Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains("<Version>1.8.0</Version>", StringComparison.Ordinal), "The application project must publish version 1.8.0.");
-Require(installerScript.Contains("MyAppVersion \"1.8.0\"", StringComparison.Ordinal), "The installer fallback version must match 1.8.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains("Aurora-Audio-Studio-1.8.0-Setup-x64.exe", StringComparison.Ordinal), "README download instructions must match 1.8.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains("Download 1.8.0", StringComparison.Ordinal), "The website download action must match 1.8.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-download-180.svg")).Contains(">1.8.0</text>", StringComparison.Ordinal), "The README download badge must render version 1.8.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-changelog-180.svg")).Contains(">1.8.0</text>", StringComparison.Ordinal), "The README changelog badge must render version 1.8.0.");
+Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains("<Version>1.8.1</Version>", StringComparison.Ordinal), "The application project must publish version 1.8.1.");
+Require(installerScript.Contains("MyAppVersion \"1.8.1\"", StringComparison.Ordinal), "The installer fallback version must match 1.8.1.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains("Aurora-Audio-Studio-1.8.1-Setup-x64.exe", StringComparison.Ordinal), "README download instructions must match 1.8.1.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains("Download 1.8.1", StringComparison.Ordinal), "The website download action must match 1.8.1.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-download-181.svg")).Contains(">1.8.1</text>", StringComparison.Ordinal), "The README download badge must render version 1.8.1.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-changelog-181.svg")).Contains(">1.8.1</text>", StringComparison.Ordinal), "The README changelog badge must render version 1.8.1.");
 
 var qwen = new ModelDefinition("qwen3-tts-06b-base", "Qwen3-TTS 0.6B", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "model.safetensors", "Qwen", "huggingface", "Qwen/Qwen3-TTS-12Hz-0.6B-Base");
 var plan = ModelInstallPlanner.Create(qwen, @"D:\AuroraModels");
@@ -363,6 +363,9 @@ var notes170 = ReleaseNotesCatalog.CurrentAndRecent("1.7.0", "zh-CN");
 Require(notes170.Count == 5 && notes170[0].Version == "1.7.0" && notes170[^1].Version == "1.5.0", "Version 1.7.0 must show itself and its four previous releases.");
 Require(notes170.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.7.0 release note must have localized content.");
 var notes151 = ReleaseNotesCatalog.CurrentAndRecent("1.5.1", "en-US");
+var notes181 = ReleaseNotesCatalog.CurrentAndRecent("1.8.1", "en-US");
+Require(notes181.Count == 5 && notes181[0].Version == "1.8.1" && notes181[^1].Version == "1.6.0", "Version 1.8.1 must show itself and its four previous releases.");
+Require(notes181.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.8.1 release note must have localized content.");
 var notes180 = ReleaseNotesCatalog.CurrentAndRecent("1.8.0", "ja-JP");
 Require(notes180.Count == 5 && notes180[0].Version == "1.8.0" && notes180[^1].Version == "1.5.1", "Version 1.8.0 must show itself and its four previous releases.");
 Require(notes180.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.8.0 release note must have localized content.");

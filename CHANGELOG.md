@@ -3,6 +3,24 @@
 本文件记录正式发布版本的重要变化。每个版本先提供中文说明，再提供英文说明。
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
+
+## 1.8.1 — 2026-09-03
+
+### 中文
+
+- 修复 1.8.0 正式安装到 `C:\Program Files\Aurora Audio Studio` 后，创作引擎显示“已连接”、中央工作区却完全空白的问题。
+- WebView2 用户数据目录不再跟随只读安装目录，而是显式保存到 `%LOCALAPPDATA%\Aurora Audio Studio\WebView2`；音乐、配音和歌声三个嵌入式工作台可正常呈现并操作。
+- 新增安装目录回归门禁，防止将 WebView2 默认数据目录重新放回 Program Files。
+- 实机验证 Qwen3-TTS 与 Seed-VC 嵌入式工作台可见；分轨、扒谱与字幕原生页保留素材、引擎和开始处理入口。
+- 同步应用版本、四语内置更新日志、README、官网、About、产品文档与音乐人使用说明；界面没有改版，继续沿用现有截图。
+
+### English
+
+- Fixed the 1.8.0 installed build reporting Connected while every embedded creative workspace remained blank under `C:\Program Files\Aurora Audio Studio`.
+- WebView2 user data now explicitly lives in `%LOCALAPPDATA%\Aurora Audio Studio\WebView2` instead of beside the read-only executable, restoring the music, voice, and singing workbenches.
+- Added an installed-location regression gate so the default WebView2 data directory cannot silently move back under Program Files.
+- Verified visible Qwen3-TTS and Seed-VC embedded controls, while separation, MIDI, and subtitle native pages retain their media, engine, and start-processing actions.
+- Synchronized application metadata, four-language in-app notes, README, website, About, product documentation, and the musician guide while retaining existing screenshots.
 ## 1.8.0 — 2026-09-03
 
 ### 中文

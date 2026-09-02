@@ -5,8 +5,8 @@
   <p>面向 Windows 的本地 AI 音频创作工作台</p>
   <p>
     <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img alt="官方网站" src="docs/assets/readme-button-website.svg"></a>
-    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.8.0" src="docs/assets/readme-button-download-180.svg"></a>
-    <a href="CHANGELOG.md"><img alt="更新日志" src="docs/assets/readme-button-changelog-180.svg"></a>
+    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.8.1" src="docs/assets/readme-button-download-181.svg"></a>
+    <a href="CHANGELOG.md"><img alt="更新日志" src="docs/assets/readme-button-changelog-181.svg"></a>
     <a href="#english"><img alt="English" src="docs/assets/readme-button-english.svg"></a>
   </p>
 </div>
@@ -15,7 +15,13 @@
 
 Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离、MIDI 扒谱和视频字幕集中到同一个本地入口。六个功能互相独立，可直接开始当前任务，不再需要手动管理多个启动器、端口和结果目录。
 
-## 1.8.0 带来了什么
+## 1.8.1 热修复
+
+- 修复 1.8.0 安装到 Program Files 后，引擎显示“已连接”但中央创作区为空白的问题。
+- WebView2 用户数据固定保存到可写的 `%LOCALAPPDATA%\Aurora Audio Studio\WebView2`，音乐、配音和歌声工作台可真正显示并操作。
+- 新增安装目录回归门禁；已验证 Qwen3-TTS、Seed-VC 嵌入式界面和分轨、扒谱、字幕原生操作页。
+
+### 1.8.0 工作流升级
 
 ### 六条工作流真正可操作
 
@@ -54,7 +60,7 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 ### 标准安装
 
 1. 打开 [Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest)。
-2. 下载 `Aurora-Audio-Studio-1.8.0-Setup-x64.exe` 和同名 `.sha256` 文件。
+2. 下载 `Aurora-Audio-Studio-1.8.1-Setup-x64.exe` 和同名 `.sha256` 文件。
 3. 运行安装程序，阅读并接受 GNU GPL v3.0，选择安装位置和桌面快捷方式。
 4. 首次打开 Aurora，直接选择需要的功能；需要时再确认模型、处理记录和成品目录。
 
@@ -83,7 +89,7 @@ Aurora 桌面端使用 .NET 10、WinUI 3 和 Windows App SDK 构建，官网使�
 ```powershell
 dotnet restore .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj --runtime win-x64
 dotnet build .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -p:Platform=x64
-dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.8.0
+dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.8.1
 ```
 
 运行回归检查：
@@ -114,7 +120,13 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 Aurora Audio Studio is a local AI audio production workspace for Windows. Its six independent features provide direct entry points for music generation, voice cloning, singing conversion, stem separation, MIDI transcription, and video subtitles.
 
-### What version 1.8.0 adds
+### Version 1.8.1 hotfix
+
+- Fixed 1.8.0 installed builds reporting Connected while the central creative workspace stayed blank under Program Files.
+- WebView2 user data now lives in writable `%LOCALAPPDATA%\Aurora Audio Studio\WebView2`, restoring the music, voice, and singing workbenches.
+- Added an installed-location regression gate and verified the Qwen3-TTS, Seed-VC, separation, MIDI, and subtitle workspaces.
+
+### Version 1.8.0 workflow upgrade
 
 - All six workflows expose real inputs, parameters, execution, progress, cancellation, and result actions.
 - Fixed installed builds remaining on Starting after the backend was ready. WebView2 initialization and navigation now have 30-second timeout, cancellation, and scoped engine cleanup; ACE-Step also validates its process, port, and logs.
@@ -129,7 +141,7 @@ Aurora does not operate a cloud generation service. Media and generated output r
 ### Install
 
 1. Open the latest [Release](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest).
-2. Download `Aurora-Audio-Studio-1.8.0-Setup-x64.exe` and its `.sha256` file.
+2. Download `Aurora-Audio-Studio-1.8.1-Setup-x64.exe` and its `.sha256` file.
 3. Run Setup, review GNU GPL v3.0, and choose the destination and shortcut options.
 4. Choose a feature on first launch; confirm model, processing-record, and output folders only when needed.
 

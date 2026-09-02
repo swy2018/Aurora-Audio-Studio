@@ -1,15 +1,15 @@
 #define MyAppName "Aurora Audio Studio"
 #ifndef MyAppVersion
-  #define MyAppVersion "1.8.0"
+  #define MyAppVersion "1.8.1"
 #endif
 #ifndef PublishFolder
-  #define PublishFolder "Aurora-Audio-Studio-1.8.0"
+  #define PublishFolder "Aurora-Audio-Studio-1.8.1"
 #endif
 #ifndef InstallerFolder
-  #define InstallerFolder "Aurora-Audio-Studio-1.8.0-installer"
+  #define InstallerFolder "Aurora-Audio-Studio-1.8.1-installer"
 #endif
 #ifndef InstallerBaseName
-  #define InstallerBaseName "Aurora-Audio-Studio-1.8.0-Setup-x64"
+  #define InstallerBaseName "Aurora-Audio-Studio-1.8.1-Setup-x64"
 #endif
 #define MyAppPublisher "Aurora Contributors"
 #define MyAppURL "https://github.com/swy2018/Aurora-Audio-Studio"

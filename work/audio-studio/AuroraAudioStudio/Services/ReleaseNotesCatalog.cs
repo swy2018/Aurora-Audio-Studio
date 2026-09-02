@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 8, 1), "2026-09-03", [
+            "• 修复安装到 Program Files 后创作引擎显示‘已连接’、中央工作区却为空白的问题。WebView2 用户数据现在固定保存到可写的本地应用数据目录，音乐、配音和歌声工作台可真正显示。\n• 新增安装目录回归门禁，并验证 Qwen3-TTS、Seed-VC 嵌入式工作台与分轨、扒谱、字幕原生操作页。",
+            "• 修正安裝到 Program Files 後創作引擎顯示「已連線」、中央工作區卻空白的問題。WebView2 使用者資料現在固定儲存在可寫入的本機應用程式資料目錄，音樂、配音和歌聲工作台可正常顯示。\n• 新增安裝目錄回歸門檻，並驗證 Qwen3-TTS、Seed-VC 嵌入式工作台及分軌、扒譜、字幕原生操作頁。",
+            "• Fixed installed Program Files builds reporting Connected while the central creative workspace remained blank. WebView2 user data now lives in writable LocalAppData so music, voice, and singing workbenches render correctly.\n• Added an installed-location regression gate and verified the Qwen3-TTS and Seed-VC embedded workbenches plus the native separation, MIDI, and subtitle pages.",
+            "• Program Files へのインストール後、接続済みと表示されても中央の制作画面が空白になる問題を修正しました。WebView2 のユーザーデータを LocalAppData に保存し、音楽・音声・歌声ワークベンチを正しく表示します。\n• インストール先を想定した回帰テストを追加し、Qwen3-TTS、Seed-VC、分離、MIDI、字幕の操作画面を確認しました。"]),
         new(new(1, 8, 0), "2026-09-03", [
             "• 修复正式安装版后端已就绪却仍停在正在启动的问题；WebView2 初始化和导航均有 30 秒超时、取消和对应引擎清理。六条工作流补齐真实输入、参数、执行、进度、取消与结果入口。\n• GPU 可用时优先 CUDA；字幕只在 GPU 实际失败后回退 CPU。模型健康检查会同时验证权重、运行时和关键依赖。\n• Qwen3-TTS 补齐 SoX，Seed-VC 下载全部固定依赖，TransKun 防止 CUDA PyTorch 被 CPU 包覆盖。\n• 文件选择、窄窗口滚动、动态本地化、状态播报与执行门禁得到加强。",
             "• 六條工作流程補齊真實輸入、參數、執行、進度、取消與結果入口；ACE-Step 啟動會檢查程序、連接埠、逾時和記錄，失敗時不再留下空白框架。\n• GPU 可用時優先 CUDA；字幕只在 GPU 實際失敗後退回 CPU。模型健康檢查會同時驗證權重、執行環境和關鍵相依套件。\n• Qwen3-TTS 補齊 SoX，Seed-VC 下載全部固定相依套件，TransKun 防止 CUDA PyTorch 被 CPU 套件覆蓋。\n• WebView2、檔案選擇、窄視窗捲動、動態本地化、狀態播報與執行門檻得到加強。",
