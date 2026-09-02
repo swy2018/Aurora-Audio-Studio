@@ -45,7 +45,6 @@ Require(File.ReadAllText(Path.Combine(modelTarget, "version.txt")) == "new", "A 
 Require(File.ReadAllText(Path.Combine(ModelInstallTransaction.PreviousPath(modelTarget), "version.txt")) == "old", "The previous model version must remain recoverable.");
 Require(ModelInstallTransaction.RestorePrevious(modelTarget), "The previous model version must be restorable without downloading it again.");
 Require(File.ReadAllText(Path.Combine(modelTarget, "version.txt")) == "old", "Rollback must restore the previous model directory.");
-Directory.Delete(transactionRoot, true);
 
 var legacyRecord = ProjectDocumentMigrator.Read("{\"Name\":\"Legacy record\",\"Feature\":\"subtitles\"}");
 Require(legacyRecord.SchemaVersion == ProjectDocumentMigrator.CurrentSchemaVersion, "Legacy processing records without a schema number must migrate to the current schema.");
@@ -87,12 +86,12 @@ Require(mainPageXaml.Contains("AutomationProperties.Name=\"本地 AI 创作工�
 var repositoryRoot = Path.GetFullPath(Path.Combine(audioStudioRoot, "..", ".."));
 var workflow = File.ReadAllText(Path.Combine(repositoryRoot, ".github", "workflows", "build.yml"));
 Require(workflow.Contains("AuroraAudioStudio.UpdateFlowTests", StringComparison.Ordinal), "CI must run the regression program before packaging.");
-Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains("<Version>1.7.0</Version>", StringComparison.Ordinal), "The application project must publish version 1.7.0.");
-Require(installerScript.Contains("MyAppVersion \"1.7.0\"", StringComparison.Ordinal), "The installer fallback version must match 1.7.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains("Aurora-Audio-Studio-1.7.0-Setup-x64.exe", StringComparison.Ordinal), "README download instructions must match 1.7.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains("Download 1.7.0", StringComparison.Ordinal), "The website download action must match 1.7.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-download-170.svg")).Contains(">1.7.0</text>", StringComparison.Ordinal), "The README download badge must render version 1.7.0.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-changelog-170.svg")).Contains(">1.7.0</text>", StringComparison.Ordinal), "The README changelog badge must render version 1.7.0.");
+Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains("<Version>1.8.0</Version>", StringComparison.Ordinal), "The application project must publish version 1.8.0.");
+Require(installerScript.Contains("MyAppVersion \"1.8.0\"", StringComparison.Ordinal), "The installer fallback version must match 1.8.0.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains("Aurora-Audio-Studio-1.8.0-Setup-x64.exe", StringComparison.Ordinal), "README download instructions must match 1.8.0.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains("Download 1.8.0", StringComparison.Ordinal), "The website download action must match 1.8.0.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-download-180.svg")).Contains(">1.8.0</text>", StringComparison.Ordinal), "The README download badge must render version 1.8.0.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-changelog-180.svg")).Contains(">1.8.0</text>", StringComparison.Ordinal), "The README changelog badge must render version 1.8.0.");
 
 var qwen = new ModelDefinition("qwen3-tts-06b-base", "Qwen3-TTS 0.6B", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "model.safetensors", "Qwen", "huggingface", "Qwen/Qwen3-TTS-12Hz-0.6B-Base");
 var plan = ModelInstallPlanner.Create(qwen, @"D:\AuroraModels");
@@ -111,6 +110,42 @@ Require(qwenAsrPlan.EstimatedDownload == "≈ 4.1 GB" && qwenAsrPlan.Recommended
 var transkun = new ModelDefinition("transkun", "TransKun V2", "transcription", @"AudioTools\transkun-env", @"Scripts\transkun.exe", "PyPI", "uv-package", "transkun", true);
 var transkunPlan = ModelInstallPlanner.Create(transkun, @"D:\AuroraModels");
 Require(transkunPlan.TargetPath.EndsWith(@"AudioTools\transkun-env", StringComparison.OrdinalIgnoreCase), "TransKun must use an isolated model environment.");
+var seed = new ModelDefinition("seed-vc", "Seed-VC 44.1k", "singing", "Seed-VC", "app_svc_local.py", "GitHub Release + Hugging Face", "github-release-git", "https://github.com/Plachtaa/seed-vc.git", true);
+var seedHealthRoot = Path.Combine(Path.GetTempPath(), "aurora-seed-health-" + Guid.NewGuid().ToString("N"));
+var seedRoot = Path.Combine(seedHealthRoot, "Seed-VC");
+foreach (var directory in new[]
+{
+    Path.Combine(seedRoot, ".venv", "Scripts"),
+    Path.Combine(seedRoot, "checkpoints", "manual")
+}) Directory.CreateDirectory(directory);
+foreach (var file in new[]
+{
+    Path.Combine(seedRoot, "app_svc_local.py"),
+    Path.Combine(seedRoot, ".venv", "Scripts", "python.exe"),
+    Path.Combine(seedRoot, "checkpoints", "manual", "DiT_seed_v2_uvit_whisper_base_f0_44k_bigvgan_pruned_ft_ema_v2.pth"),
+    Path.Combine(seedRoot, "checkpoints", "manual", "config_dit_mel_seed_uvit_whisper_base_f0_44k.yml")
+}) File.WriteAllText(file, "fixture");
+var missingSeedDependencies = ModelHealthPolicy.MissingRequirements(seed, seedHealthRoot);
+Require(missingSeedDependencies.Any(item => item.Contains("BigVGAN", StringComparison.Ordinal))
+    && missingSeedDependencies.Any(item => item.Contains("Whisper", StringComparison.Ordinal))
+    && missingSeedDependencies.Any(item => item.Contains("CAMPPlus", StringComparison.Ordinal))
+    && missingSeedDependencies.Any(item => item.Contains("RMVPE", StringComparison.Ordinal)), "Seed-VC must not be reported ready when an auxiliary model cache is absent.");
+foreach (var cache in new[]
+{
+    (Path.Combine(seedRoot, "checkpoints"), "models--funasr--campplus", new[] { "campplus_cn_common.bin" }),
+    (Path.Combine(seedRoot, "checkpoints"), "models--lj1995--VoiceConversionWebUI", new[] { "rmvpe.pt" }),
+    (Path.Combine(seedRoot, "checkpoints", "hf_cache"), "models--nvidia--bigvgan_v2_44khz_128band_512x", new[] { "bigvgan_generator.pt", "config.json" }),
+    (Path.Combine(seedRoot, "checkpoints", "hf_cache"), "models--openai--whisper-small", new[] { "model.safetensors", "config.json", "preprocessor_config.json" })
+})
+{
+    const string revision = "verified-snapshot";
+    var repositoryCache = Path.Combine(cache.Item1, cache.Item2);
+    Directory.CreateDirectory(Path.Combine(repositoryCache, "refs"));
+    Directory.CreateDirectory(Path.Combine(repositoryCache, "snapshots", revision));
+    File.WriteAllText(Path.Combine(repositoryCache, "refs", "main"), revision);
+    foreach (var file in cache.Item3) File.WriteAllText(Path.Combine(repositoryCache, "snapshots", revision, file), "fixture");
+}
+Require(ModelHealthPolicy.IsReady(seed, seedHealthRoot), "Seed-VC must become ready only after every offline auxiliary model snapshot is complete.");
 
 var catalogSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Services", "ModelCatalogService.cs"));
 Require(catalogSource.Contains("new(\"minimax-music3\"", StringComparison.Ordinal), "Model Management must expose MiniMax-Music3.");
@@ -158,6 +193,40 @@ Require(SettingsPathValidator.TryValidate(@"C:\", @"C:\Output", @"C:\Projects", 
     && SettingsPathValidator.TryValidate(@"C:\LocalAI", @"C:\Output", @"C:\Projects", out _), "Settings paths must reject a drive root while accepting scoped absolute folders.");
 var missingRuntimeModel = new ModelDefinition("qwen3-tts-06b-base", "Qwen", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "model.safetensors", "test", "huggingface");
 Require(ModelHealthPolicy.IsReady(missingRuntimeModel, Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))) == false, "A model without its required runtime and marker must not be reported as ready.");
+var healthRoot = Path.Combine(Path.GetTempPath(), "aurora-health-" + Guid.NewGuid().ToString("N"));
+var aceRoot = Path.Combine(healthRoot, "ACE-Step-1.5");
+var aceModel = new ModelDefinition("ace-step", "ACE-Step", "music", "ACE-Step-1.5", @"acestep\acestep_v15_pipeline.py", "test", "github-release-git", "test", true);
+var aceFiles = new[]
+{
+    Path.Combine(aceRoot, "acestep", "acestep_v15_pipeline.py"),
+    Path.Combine(aceRoot, "python_embeded", "python.exe"),
+    Path.Combine(aceRoot, "checkpoints", "acestep-v15-turbo", "model.safetensors"),
+    Path.Combine(aceRoot, "checkpoints", "acestep-v15-xl-turbo", "model-00001-of-00004.safetensors"),
+    Path.Combine(aceRoot, "checkpoints", "acestep-5Hz-lm-1.7B", "model.safetensors"),
+    Path.Combine(aceRoot, "checkpoints", "Qwen3-Embedding-0.6B", "model.safetensors"),
+    Path.Combine(aceRoot, "checkpoints", "vae", "diffusion_pytorch_model.safetensors")
+};
+foreach (var path in aceFiles.Take(2)) { Directory.CreateDirectory(Path.GetDirectoryName(path)!); File.WriteAllBytes(path, [1]); }
+foreach (var path in aceFiles.Skip(2)) Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+Require(!ModelHealthPolicy.IsReady(aceModel, healthRoot), "ACE-Step folders without real checkpoint files must never be reported as ready.");
+foreach (var path in aceFiles.Skip(2)) File.WriteAllBytes(path, [1]);
+Require(ModelHealthPolicy.IsReady(aceModel, healthRoot), "ACE-Step must become ready when every official runtime checkpoint is present.");
+var transkunRoot = Path.Combine(healthRoot, "AudioTools", "transkun-env");
+var transkunHealthModel = new ModelDefinition("transkun", "TransKun", "transcription", @"AudioTools\transkun-env", @"Scripts\transkun.exe", "test", "uv-package", "transkun", true);
+var transkunExe = Path.Combine(transkunRoot, "Scripts", "transkun.exe");
+Directory.CreateDirectory(Path.GetDirectoryName(transkunExe)!); File.WriteAllBytes(transkunExe, [1]);
+Require(!ModelHealthPolicy.IsReady(transkunHealthModel, healthRoot), "TransKun without pkg_resources must be reported as broken instead of ready.");
+var pkgResources = Path.Combine(transkunRoot, "Lib", "site-packages", "pkg_resources", "__init__.py");
+Directory.CreateDirectory(Path.GetDirectoryName(pkgResources)!); File.WriteAllBytes(pkgResources, [1]);
+var torchAudioLibrary = Path.Combine(transkunRoot, "Lib", "site-packages", "torchaudio", "lib", "libtorchaudio.pyd");
+Directory.CreateDirectory(Path.GetDirectoryName(torchAudioLibrary)!); File.WriteAllBytes(torchAudioLibrary, [1]);
+var torchVersion = Path.Combine(transkunRoot, "Lib", "site-packages", "torch-2.13.0.dist-info");
+var torchAudioVersion = Path.Combine(transkunRoot, "Lib", "site-packages", "torchaudio-2.11.0+cu128.dist-info");
+Directory.CreateDirectory(torchVersion); Directory.CreateDirectory(torchAudioVersion);
+Require(!ModelHealthPolicy.IsReady(transkunHealthModel, healthRoot), "TransKun with mismatched torch and torchaudio versions must be reported as broken.");
+var matchingTorchVersion = Path.Combine(transkunRoot, "Lib", "site-packages", "torch-2.11.0+cu128.dist-info");
+Directory.Move(torchVersion, matchingTorchVersion);
+Require(ModelHealthPolicy.IsReady(transkunHealthModel, healthRoot), "TransKun must become ready after setuptools and a matching torch audio runtime are present.");
 Require(mainPageSource.Contains("PrimaryAction = localization.Translate(\"更新\")", StringComparison.Ordinal), "A detected model update must replace the generic card action with Update.");
 Require(mainPageSource.Contains("new OperationResult(false, result.Message, \"available\")", StringComparison.Ordinal), "A failed batch update must remain available for retry.");
 Require(modelUpdateSource.Contains("RunningProcessGuard.FindInRoot", StringComparison.Ordinal), "Model updates must detect a running component before replacing its files.");
@@ -189,6 +258,70 @@ Require(mainPageSource.Contains("(\"separation\", \"two-stem\", _) => \"roformer
 Require(mainPageSource.Contains("(\"separation\", \"multi-stem\", \"fast\") => \"demucs\"", StringComparison.Ordinal), "Fast multi-stem separation must retain Demucs.");
 Require(catalogSource.Contains("new(\"roformer-vocals\"", StringComparison.Ordinal), "Model Management must expose the dedicated two-stem BS-RoFormer model.");
 Require(!catalogSource.Contains("\"python-tool\"", StringComparison.Ordinal) && !catalogSource.Contains("\"direct\"", StringComparison.Ordinal), "All catalog components must use an automatic update or repair adapter.");
+var backendSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Services", "BackendService.cs"));
+Require(backendSource.Contains("[\"HF_HUB_OFFLINE\"] = \"1\"", StringComparison.Ordinal), "ACE-Step must start offline so the workbench can never trigger a hidden multi-gigabyte download.");
+Require(backendSource.Contains("process.HasExited", StringComparison.Ordinal) && backendSource.Contains("ReadLogTail", StringComparison.Ordinal), "Workbench startup must stop promptly when its child process exits and surface the diagnostic log tail.");
+Require(!backendSource.Contains("_ => \"medium\"", StringComparison.Ordinal), "Unknown subtitle components must fail explicitly instead of silently routing to Whisper medium.");
+Require(modelUpdateSource.Contains("setuptools", StringComparison.Ordinal), "TransKun installation must include pkg_resources through setuptools.");
+Require(backendSource.Contains("DetectTorchDeviceAsync", StringComparison.Ordinal)
+    && backendSource.Contains("transkunInfo.ArgumentList.Add(device)", StringComparison.Ordinal), "TransKun must detect CUDA availability at runtime and fall back to CPU instead of blindly requesting CUDA.");
+var transkunPackageInstall = modelUpdateSource.IndexOf("正在部署 {model.Name}", StringComparison.Ordinal);
+var transkunCudaInstall = modelUpdateSource.IndexOf("正在下载并配置 TransKun CUDA 运行环境", StringComparison.Ordinal);
+Require(transkunPackageInstall >= 0 && transkunCudaInstall > transkunPackageInstall, "TransKun must install its package first and apply the matching CUDA torch/torchaudio pair last.");
+Require(modelUpdateSource.Contains("正在下载 ACE-Step 基础权重", StringComparison.Ordinal) && modelUpdateSource.Contains("acestep-v15-xl-turbo", StringComparison.Ordinal), "ACE-Step installation must download both the official base components and XL checkpoint.");
+Require(catalogSource.Contains("\"faster-whisper\"", StringComparison.Ordinal) && catalogSource.Contains("\"subtitle-edit\"", StringComparison.Ordinal)
+    && Regex.IsMatch(catalogSource, "new\\(\\\"faster-whisper\\\"[^\\n]+true, false\\)")
+    && Regex.IsMatch(catalogSource, "new\\(\\\"subtitle-edit\\\"[^\\n]+false, false\\)"), "Runtime-only Faster-Whisper and external Subtitle Edit must stay in Model Management but never enter the runnable workflow picker.");
+Require(catalogSource.Contains(@"Models\faster-whisper-large-v3-turbo", StringComparison.Ordinal), "Whisper models must use the directory names recognized by Faster-Whisper XXL.");
+Require(backendSource.Contains("--model_dir", StringComparison.Ordinal)
+    && backendSource.Contains("--compute_type", StringComparison.Ordinal)
+    && backendSource.Contains("float32", StringComparison.Ordinal)
+    && backendSource.Contains("[\"HF_HUB_OFFLINE\"] = \"1\"", StringComparison.Ordinal), "Whisper must load the explicit local model directory in offline GPU-compatible mode.");
+Require(backendSource.Contains("EnsureWhisperModelLayout", StringComparison.Ordinal), "Whisper must migrate the legacy Aurora model folder without requiring a redownload.");
+Require(backendSource.Contains("WhisperOutputIsFresh", StringComparison.Ordinal), "Whisper exit code zero must not count as success unless fresh subtitle outputs exist.");
+Require(backendSource.Contains("subtitles-cpu", StringComparison.Ordinal), "Whisper must retry on CPU when compatible GPU inference still fails.");
+Require(modelUpdateSource.Contains("ResolveExistingModelRoot", StringComparison.Ordinal) && modelUpdateSource.Contains("MigrateLegacyWhisperRoot", StringComparison.Ordinal),
+    "Whisper update checks must recognize legacy folders and migrate them before updating instead of downloading a duplicate model.");
+foreach (var dependency in new[] { "funasr/campplus", "campplus_cn_common.bin", "lj1995/VoiceConversionWebUI", "rmvpe.pt", "nvidia/bigvgan_v2_44khz_128band_512x", "openai/whisper-small" })
+    Require(modelUpdateSource.Contains(dependency, StringComparison.Ordinal), $"Seed-VC installation must explicitly download auxiliary dependency {dependency}.");
+Require(modelUpdateSource.Contains("--cache-dir", StringComparison.Ordinal), "Seed-VC auxiliary dependencies must be written to the cache layout used by its upstream loaders.");
+Require(backendSource.Contains("ModelHealthPolicy.MissingRequirements", StringComparison.Ordinal)
+    && backendSource.Contains("[\"TRANSFORMERS_OFFLINE\"] = \"1\"", StringComparison.Ordinal), "Seed-VC startup must validate every local dependency and enforce offline loading.");
+Require(modelUpdateSource.Contains("Distinct(StringComparer.OrdinalIgnoreCase)", StringComparison.Ordinal), "Refreshing PATH must remain idempotent instead of duplicating every entry after each model action.");
+Require(mainPageXaml.Contains("x:Name=\"UtilityScrollViewer\"", StringComparison.Ordinal), "The utility workspace must scroll instead of clipping controls at supported window sizes.");
+Require(mainPageXaml.Contains("AutomationProperties.Name=\"处理引擎选择\"", StringComparison.Ordinal)
+    && mainPageXaml.Contains("AutomationProperties.Name=\"创作引擎选择\"", StringComparison.Ordinal), "Model selectors must expose stable screen-reader names.");
+Require(mainPageXaml.Contains("x:Name=\"RunUtilityButton\"", StringComparison.Ordinal) && mainPageXaml.Contains("IsEnabled=\"False\"", StringComparison.Ordinal), "Utility processing must start disabled until valid source material and a ready engine are selected.");
+Require(mainPageSource.Contains("UpdateUtilityRunState", StringComparison.Ordinal), "Utility intake and model selection must continuously refresh whether processing can start.");
+Require(mainPageSource.Contains("SetStatus(localization.Get(\"ready\"))", StringComparison.Ordinal), "A no-update result must restore the persistent footer to a stable ready state.");
+Require(mainPageSource.Contains("await Workbench.EnsureCoreWebView2Async", StringComparison.Ordinal), "The embedded workbench must initialize WebView2 before assigning its source.");
+var makeWorkbenchLoadable = mainPageSource.IndexOf("Workbench.Visibility = Visibility.Visible;", StringComparison.Ordinal);
+var initializeWorkbench = mainPageSource.IndexOf("await Workbench.EnsureCoreWebView2Async", StringComparison.Ordinal);
+Require(makeWorkbenchLoadable >= 0 && initializeWorkbench >= 0 && makeWorkbenchLoadable < initializeWorkbench,
+    "The WebView2 control must be visible/loadable before EnsureCoreWebView2Async so installed builds cannot wait forever on a collapsed control.");
+Require(mainPageSource.Contains("WaitAsync(TimeSpan.FromSeconds(30)", StringComparison.Ordinal), "WebView2 initialization and navigation must have a bounded timeout.");
+Require(mainPageSource.Contains("workbenchStartupCancellation?.Cancel()", StringComparison.Ordinal)
+    && mainPageSource.Contains("backend.StopWorkbench", StringComparison.Ordinal),
+    "Canceling or leaving a starting workbench must cancel UI initialization and stop only its creative engine.");
+Require(mainPageSource.Contains("using Microsoft.Windows.Storage.Pickers;", StringComparison.Ordinal)
+    && !mainPageSource.Contains("using Windows.Storage.Pickers;", StringComparison.Ordinal), "All file and folder actions must use the current Windows App SDK picker API.");
+Require(mainPageSource.Contains("new FileOpenPicker(App.MainWindow.AppWindow.Id)", StringComparison.Ordinal)
+    && Regex.Matches(mainPageSource, "new FolderPicker\\(App\\.MainWindow\\.AppWindow\\.Id\\)").Count == 2, "Every picker must be owned by the Aurora AppWindow without legacy HWND initialization.");
+foreach (var automationId in new[] { "MaintenanceScanButton", "MaintenanceDiagnosticsButton", "OpenLogsButton", "SaveSettingsButton", "OpenOutputButton", "ReleaseEngineButton" })
+    Require(mainPageXaml.Contains($"x:Name=\"{automationId}\"", StringComparison.Ordinal), $"Primary action {automationId} must expose a stable UI Automation id.");
+var localizationSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Services", "LocalizationService.cs"));
+Require(mainPageSource.Contains("RefreshCurrentPageHeading();", StringComparison.Ordinal), "Changing language must immediately refresh the current page title and subtitle.");
+Require(localizationSource.Contains("设置已保存。", StringComparison.Ordinal)
+    && mainPageSource.Contains("localization.Translate(\"设置已保存。\")", StringComparison.Ordinal), "The settings-saved status must use the newly selected language immediately.");
+Require(mainPageSource.Contains("combo.Items.OfType<ComboBoxItem>()", StringComparison.Ordinal), "Collapsed ComboBox items must be localized even before their popup is opened.");
+foreach (var phrase in new[] { "浅色", "深色", "跟随系统" })
+    Require(localizationSource.Contains($"[\"{phrase}\"]", StringComparison.Ordinal), $"Theme option {phrase} must have translations.");
+Require(mainPageSource.Contains("LocalizeTree(target);", StringComparison.Ordinal), "A page that was collapsed during startup must be localized when first shown.");
+Require(mainPageSource.Contains("DispatcherQueue.TryEnqueue(() => LocalizeTree(target));", StringComparison.Ordinal), "Localization of a newly shown page must run again after WinUI creates its visual tree.");
+Require(mainPageSource.Contains("element.LayoutUpdated += handler", StringComparison.Ordinal)
+    && mainPageSource.Contains("element.LayoutUpdated -= handler", StringComparison.Ordinal), "A newly shown ScrollViewer must receive one final localization pass after layout and release the one-shot handler.");
+foreach (var phrase in new[] { "浏览…", "仅查看任务与诊断" })
+    Require(localizationSource.Contains($"[\"{phrase}\"]", StringComparison.Ordinal), $"Visible settings and safe-mode phrase {phrase} must have translations.");
 var minimaxTool = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Tools", "minimax_music3_webui.py"));
 Require(minimaxTool.Contains("MiniMax-Music3 Community License", StringComparison.Ordinal), "The MiniMax-Music3 workbench must display the upstream model and license name.");
 
@@ -225,6 +358,9 @@ var notes170 = ReleaseNotesCatalog.CurrentAndRecent("1.7.0", "zh-CN");
 Require(notes170.Count == 5 && notes170[0].Version == "1.7.0" && notes170[^1].Version == "1.5.0", "Version 1.7.0 must show itself and its four previous releases.");
 Require(notes170.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.7.0 release note must have localized content.");
 var notes151 = ReleaseNotesCatalog.CurrentAndRecent("1.5.1", "en-US");
+var notes180 = ReleaseNotesCatalog.CurrentAndRecent("1.8.0", "ja-JP");
+Require(notes180.Count == 5 && notes180[0].Version == "1.8.0" && notes180[^1].Version == "1.5.1", "Version 1.8.0 must show itself and its four previous releases.");
+Require(notes180.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.8.0 release note must have localized content.");
 Require(notes151.Count == 5 && notes151[0].Version == "1.5.1" && notes151[^1].Version == "1.3.0", "Version 1.5.1 must show itself and its four previous releases.");
 Require(notes151.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.5.1 release note must have localized content.");
 var notes150 = ReleaseNotesCatalog.CurrentAndRecent("1.5.0", "en-US");

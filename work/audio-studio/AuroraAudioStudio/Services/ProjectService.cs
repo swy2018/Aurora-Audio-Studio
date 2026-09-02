@@ -30,7 +30,7 @@ public sealed class ProjectService(SettingsService settings, ModelCatalogService
             SourceSha256 = await HashSourceAsync(sourcePath)
         };
         project.ModelVersion = catalog?.GetStates().FirstOrDefault(x => x.Id.Equals(modelId, StringComparison.OrdinalIgnoreCase))?.Version ?? "";
-        project.Parameters["appVersion"] = typeof(ProjectService).Assembly.GetName().Version?.ToString(3) ?? "1.7.0";
+        project.Parameters["appVersion"] = typeof(ProjectService).Assembly.GetName().Version?.ToString(3) ?? "1.8.0";
         var safeName = string.Join("-", name.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries)).Trim();
         if (string.IsNullOrWhiteSpace(safeName)) safeName = "Aurora-Project";
         project.FilePath = Path.Combine(settings.Current.ProjectsRoot, $"{safeName}-{project.Id[..8]}.arr");

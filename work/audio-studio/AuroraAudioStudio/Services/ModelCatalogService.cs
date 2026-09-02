@@ -25,14 +25,14 @@ public sealed class ModelCatalogService(SettingsService settings)
         new("transkun", "TransKun V2 · 钢琴扒谱", "transcription", @"AudioTools\transkun-env", @"Scripts\transkun.exe", "TransKun · PyPI", "uv-package", "transkun", true),
         new("piano", "ByteDance Piano · 经典模型", "transcription", @"AudioTools\piano-models", "note_F1=0.9677_pedal_F1=0.9186.pth", "Zenodo", "fixed-file", "https://zenodo.org/records/4034264/files/CRNN_note_F1%3D0.9677_pedal_F1%3D0.9186.pth?download=1"),
         new("basic-pitch", "Spotify Basic Pitch · 轻量扒谱", "transcription", @"AudioTools\basic-pitch-env", @"Scripts\basic-pitch.exe", "Spotify · PyPI", "uv-package", "basic-pitch"),
-        new("faster-whisper", "Faster-Whisper XXL", "subtitles", @"Faster-Whisper-XXL\Faster-Whisper-XXL", "faster-whisper-xxl.exe", "GitHub Release", "github-release", "https://github.com/Purfview/whisper-standalone-win.git", true),
-        new("whisper-small", "Faster-Whisper Small", "subtitles", @"Faster-Whisper-XXL\Models\small", "model.bin", "SYSTRAN · Hugging Face", "huggingface", "Systran/faster-whisper-small"),
-        new("whisper-large-v3-turbo", "Faster-Whisper Large v3 Turbo", "subtitles", @"Faster-Whisper-XXL\Models\large-v3-turbo", "model.bin", "Mobius Labs · Hugging Face", "huggingface", "mobiuslabsgmbh/faster-whisper-large-v3-turbo"),
-        new("whisper-large-v3", "Faster-Whisper Large v3", "subtitles", @"Faster-Whisper-XXL\Models\large-v3", "model.bin", "SYSTRAN · Hugging Face", "huggingface", "Systran/faster-whisper-large-v3"),
+        new("faster-whisper", "Faster-Whisper XXL", "subtitles", @"Faster-Whisper-XXL\Faster-Whisper-XXL", "faster-whisper-xxl.exe", "GitHub Release", "github-release", "https://github.com/Purfview/whisper-standalone-win.git", true, false),
+        new("whisper-small", "Faster-Whisper Small", "subtitles", @"Faster-Whisper-XXL\Models\faster-whisper-small", "model.bin", "SYSTRAN · Hugging Face", "huggingface", "Systran/faster-whisper-small"),
+        new("whisper-large-v3-turbo", "Faster-Whisper Large v3 Turbo", "subtitles", @"Faster-Whisper-XXL\Models\faster-whisper-large-v3-turbo", "model.bin", "Mobius Labs · Hugging Face", "huggingface", "mobiuslabsgmbh/faster-whisper-large-v3-turbo"),
+        new("whisper-large-v3", "Faster-Whisper Large v3", "subtitles", @"Faster-Whisper-XXL\Models\faster-whisper-large-v3", "model.bin", "SYSTRAN · Hugging Face", "huggingface", "Systran/faster-whisper-large-v3"),
         new("qwen3-asr-06b", "Qwen3-ASR 0.6B · 快速识别", "subtitles", @"AudioTools\qwen3-asr-models\Qwen3-ASR-0.6B-hf", "model.safetensors", "Qwen · Hugging Face", "huggingface", "Qwen/Qwen3-ASR-0.6B-hf", false, false),
         new("qwen3-asr-17b", "Qwen3-ASR 1.7B · 高质量识别", "subtitles", @"AudioTools\qwen3-asr-models\Qwen3-ASR-1.7B-hf", "model.safetensors", "Qwen · Hugging Face", "huggingface", "Qwen/Qwen3-ASR-1.7B-hf", false, false),
         new("qwen3-forced-aligner", "Qwen3 ForcedAligner 0.6B · 精确时间轴", "subtitles", @"AudioTools\qwen3-asr-models\Qwen3-ForcedAligner-0.6B-hf", "model.safetensors", "Qwen · Hugging Face", "huggingface", "Qwen/Qwen3-ForcedAligner-0.6B-hf", false, false),
-        new("subtitle-edit", "Subtitle Edit", "subtitles", "SubtitleEdit", "SubtitleEdit.exe", "GitHub Release", "github-release", "https://github.com/SubtitleEdit/subtitleedit.git", true)
+        new("subtitle-edit", "Subtitle Edit", "subtitles", "SubtitleEdit", "SubtitleEdit.exe", "GitHub Release", "github-release", "https://github.com/SubtitleEdit/subtitleedit.git", false, false)
     ];
 
     public string DefaultEditionDisplay => Pick("默认组件", "預設元件", "Default", "標準");

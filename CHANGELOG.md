@@ -3,6 +3,32 @@
 本文件记录正式发布版本的重要变化。每个版本先提供中文说明，再提供英文说明。
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
+## 1.8.0 — 2026-09-03
+
+### 中文
+
+- 修复正式安装版后端已经就绪、界面却仍停在“正在启动”的问题：WebView2 会先进入可加载状态，再初始化和导航；初始化与页面加载均有 30 秒超时和取消保护。
+- ACE-Step 启动增加进程退出、端口、超时、取消和日志校验，失败会返回可操作原因；取消工作台或切换页面只结束对应创作引擎。
+- 音乐、配音、歌声、分轨、扒谱与字幕六条工作流补齐真实可操作入口；嵌入式工作台启动时显示阶段、取消按钮与错误提示，不再只有空白框架。
+- GPU 优先链路统一校正：Qwen3-TTS、Seed-VC、TransKun、分轨和字幕环境会验证 CUDA 版 PyTorch；字幕优先使用 GPU，只有 GPU 实际失败后才明确回退 CPU。
+- 模型健康检查从“目录存在”提升为权重、运行时和关键依赖的联合验证；ACE-Step、Seed-VC、TransKun、Qwen3-TTS 与 Faster-Whisper 的部署和旧目录迁移更完整。
+- Qwen3-TTS 安装会补齐并验证 SoX；Seed-VC 会下载全部固定依赖；TransKun 调整安装顺序，防止 CUDA PyTorch 被 CPU 依赖覆盖。
+- WebView2 在导航前完成初始化；文件选择器迁移至现代 Windows Picker，工作区支持滚动与窄窗口布局，动态界面切换后会重新应用本地化。
+- 新增稳定的自动化标识、状态播报和操作门禁：素材、模型健康和安全模式不满足条件时不会误启动任务。
+- 同步应用版本、四语内置更新日志、README、官网、About、产品文档与音乐人使用说明；继续沿用现有产品截图。
+
+### English
+
+- Fixed installed builds remaining on Starting after the backend was ready. WebView2 now becomes loadable before initialization and navigation, both guarded by 30-second timeouts and cancellation.
+- ACE-Step startup validates process exit, port readiness, timeout, cancellation, and logs. Canceling or switching pages stops only the corresponding creative engine.
+- Completed actionable entry points for all six workflows: music, voice, singing, separation, MIDI, and subtitles. Embedded workbench startup now exposes stages, cancellation, and errors instead of an empty shell.
+- Standardized GPU-first execution. Qwen3-TTS, Seed-VC, TransKun, separation, and subtitle environments verify CUDA PyTorch; subtitles fall back to CPU only after an explicit GPU failure.
+- Readiness checks now validate weights, runtimes, and critical dependencies together. ACE-Step, Seed-VC, TransKun, Qwen3-TTS, and Faster-Whisper deployment and legacy-folder migration are more complete.
+- Qwen3-TTS installs and validates SoX, Seed-VC downloads every pinned dependency, and TransKun installs CUDA PyTorch last so CPU dependencies cannot overwrite it.
+- WebView2 initializes before navigation, file intake uses modern Windows pickers, workspaces scroll and adapt to narrow windows, and localization reapplies after dynamic layout changes.
+- Added stable automation IDs, live status announcements, and execution gates so missing media, unhealthy models, or Safe Mode cannot accidentally start a task.
+- Synchronized application metadata, four-language in-app notes, README, website, About, product documentation, and the musician guide while retaining the existing product screenshots.
+
 
 ## 1.7.0 — 2026-09-02
 

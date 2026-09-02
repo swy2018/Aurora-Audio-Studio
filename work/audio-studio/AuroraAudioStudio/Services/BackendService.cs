@@ -12,6 +12,7 @@ public sealed class BackendService(SettingsService settings)
     private readonly Dictionary<string, Process> processes = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, string> activeModels = new(StringComparer.OrdinalIgnoreCase);
     private CancellationTokenSource? navigationCancellation;
+    private string? startingKey;
     public event EventHandler<string>? StatusChanged;
 
     private string Root => settings.Current.LocalAiRoot;
@@ -48,6 +49,9 @@ public sealed class BackendService(SettingsService settings)
             ? Path.Combine(MusicRoot, "python_embeded", "python.exe")
             : Path.Combine(MusicRoot, ".venv", "Scripts", "python.exe");
         var script = Path.Combine(MusicRoot, "acestep", "acestep_v15_pipeline.py");
+        var healthModel = new ModelDefinition("ace-step", "ACE-Step 1.5 XL Turbo", "music", "ACE-Step-1.5", @"acestep\acestep_v15_pipeline.py", "GitHub Release + Hugging Face", "github-release-git", "https://github.com/ACE-Step/ACE-Step-1.5.git", true);
+        var missing = ModelHealthPolicy.MissingRequirements(healthModel, Root);
+        if (missing.Count > 0) return new OperationResult(false, "ACE-Step 安装不完整：" + string.Join("、", missing) + "。请在模型管理中执行检查 / 修复。");
         if (!File.Exists(python) || !File.Exists(script)) return Missing("ACE-Step 1.5 XL Turbo");
         if (!HasXlLoadHeadroom(out var ram, out var commit))
             return new OperationResult(false, $"ACE-Step needs more memory headroom. Available RAM: {ram:F1} GB, commit headroom: {commit:F1} GB.");
@@ -55,10 +59,15 @@ public sealed class BackendService(SettingsService settings)
         if (!IsRunning("music") || !activeModels.TryGetValue("music", out var current) || !current.Equals("ace-step", StringComparison.OrdinalIgnoreCase))
         {
             Stop("music");
-            processes["music"] = StartHidden("music", python, $"\"{script}\" --port 7860 --server-name 127.0.0.1 --language {(language.StartsWith("en") ? "en" : "zh")} --config_path acestep-v15-xl-turbo --lm_model_path acestep-5Hz-lm-1.7B --offload_to_cpu true --init_service true", MusicRoot);
+            processes["music"] = StartHidden("music", python, $"\"{script}\" --port 7860 --server-name 127.0.0.1 --language {(language.StartsWith("en") ? "en" : "zh")} --config_path acestep-v15-xl-turbo --lm_model_path acestep-5Hz-lm-1.7B --offload_to_cpu true --init_service true", MusicRoot,
+                new Dictionary<string, string>
+                {
+                    ["HF_HUB_OFFLINE"] = "1",
+                    ["ACESTEP_CHECKPOINTS_DIR"] = Path.Combine(MusicRoot, "checkpoints")
+                });
             activeModels["music"] = "ace-step";
         }
-        return await WaitForUrlAsync("http://127.0.0.1:7860", "Starting ACE-Step 1.5 XL Turbo");
+        return await WaitForUrlAsync("music", "http://127.0.0.1:7860", "Starting ACE-Step 1.5 XL Turbo");
     }
 
     private async Task<OperationResult> StartMiniMaxMusic3Async(string language)
@@ -79,7 +88,7 @@ public sealed class BackendService(SettingsService settings)
                 new Dictionary<string, string> { ["GRADIO_TEMP_DIR"] = output, ["PYTHONUTF8"] = "1", ["HF_HUB_OFFLINE"] = "1" });
             activeModels["music"] = "minimax-music3";
         }
-        return await WaitForUrlAsync("http://127.0.0.1:7860", "正在启动 MiniMax-Music3");
+        return await WaitForUrlAsync("music", "http://127.0.0.1:7860", "正在启动 MiniMax-Music3");
     }
 
     private async Task<OperationResult> StartTtsAsync(string modelId)
@@ -111,7 +120,7 @@ public sealed class BackendService(SettingsService settings)
                 });
             activeModels["voice"] = modelId;
         }
-        return await WaitForUrlAsync("http://127.0.0.1:7861", "正在启动 Qwen3-TTS 1.7B");
+        return await WaitForUrlAsync("voice", "http://127.0.0.1:7861", "正在启动 Qwen3-TTS 1.7B");
     }
 
     private async Task<OperationResult> StartF5TtsAsync()
@@ -127,7 +136,7 @@ public sealed class BackendService(SettingsService settings)
                 new Dictionary<string, string> { ["GRADIO_TEMP_DIR"] = OutputFolder("AI配音"), ["PYTHONUTF8"] = "1" });
             activeModels["voice"] = "f5-tts";
         }
-        return await WaitForUrlAsync("http://127.0.0.1:7861", "正在启动 F5-TTS");
+        return await WaitForUrlAsync("voice", "http://127.0.0.1:7861", "正在启动 F5-TTS");
     }
 
     private async Task<OperationResult> StartSeedVcAsync()
@@ -136,6 +145,9 @@ public sealed class BackendService(SettingsService settings)
         var script = Path.Combine(SeedRoot, "app_svc_local.py");
         var checkpoint = Path.Combine(SeedRoot, "checkpoints", "manual", "DiT_seed_v2_uvit_whisper_base_f0_44k_bigvgan_pruned_ft_ema_v2.pth");
         var config = Path.Combine(SeedRoot, "checkpoints", "manual", "config_dit_mel_seed_uvit_whisper_base_f0_44k.yml");
+        var healthModel = new ModelDefinition("seed-vc", "Seed-VC 44.1k", "singing", "Seed-VC", "app_svc_local.py", "GitHub Release + Hugging Face", "github-release-git", "https://github.com/Plachtaa/seed-vc.git", true);
+        var missing = ModelHealthPolicy.MissingRequirements(healthModel, Root);
+        if (missing.Count > 0) return new OperationResult(false, "Seed-VC 安装不完整：" + string.Join("、", missing) + "。请在模型管理中执行检查 / 修复。");
         if (!File.Exists(python) || !File.Exists(script) || !File.Exists(checkpoint) || !File.Exists(config)) return Missing("Seed-VC 44.1k");
         Stop("music");
         Stop("voice");
@@ -150,12 +162,15 @@ public sealed class BackendService(SettingsService settings)
                 ["GRADIO_TEMP_DIR"] = output,
                 ["AI_OUTPUT_DIR"] = output,
                 ["HF_HUB_DISABLE_XET"] = "1",
+                ["HF_HUB_OFFLINE"] = "1",
+                ["TRANSFORMERS_OFFLINE"] = "1",
+                ["HF_HUB_DISABLE_TELEMETRY"] = "1",
                 ["NUMBA_CACHE_DIR"] = Path.Combine(Root, "AudioTools", "numba-cache"),
                 ["PYTHONUTF8"] = "1"
             };
             processes["singing"] = StartHidden("singing", python, $"\"{script}\" --checkpoint \"{checkpoint}\" --config \"{config}\" --fp16 True", SeedRoot, environment);
         }
-        return await WaitForUrlAsync("http://127.0.0.1:7862", "Starting Seed-VC 44.1k");
+        return await WaitForUrlAsync("singing", "http://127.0.0.1:7862", "Starting Seed-VC 44.1k");
     }
 
     public async Task<OperationResult> RunUtilityAsync(string feature, string inputPath, string modelId, string language, IProgress<TaskExecutionProgress>? progress = null, CancellationToken cancellationToken = default)
@@ -230,11 +245,14 @@ public sealed class BackendService(SettingsService settings)
             if (!File.Exists(transkun)) return Missing("TransKun V2");
             var transkunOutput = OutputFolder("AI扒谱");
             var transkunMidi = Path.Combine(transkunOutput, $"{Path.GetFileNameWithoutExtension(source)}-{DateTime.Now:yyyyMMdd-HHmmss}.mid");
+            var transkunPython = Path.Combine(Root, "AudioTools", "transkun-env", "Scripts", "python.exe");
+            var device = await DetectTorchDeviceAsync(transkunPython, cancellationToken);
+            progress?.Report(new(.02, device == "cuda" ? "TransKun 将使用 GPU" : "未检测到可用的 CUDA PyTorch，TransKun 将使用 CPU"));
             var transkunInfo = Hidden(transkun, transkunOutput);
             transkunInfo.ArgumentList.Add(source);
             transkunInfo.ArgumentList.Add(transkunMidi);
             transkunInfo.ArgumentList.Add("--device");
-            transkunInfo.ArgumentList.Add("cuda");
+            transkunInfo.ArgumentList.Add(device);
             transkunInfo.Environment["PYTHONUTF8"] = "1";
             return await RunCapturedAsync("utility", transkunInfo, "transkun", transkunOutput, progress, cancellationToken);
         }
@@ -285,23 +303,73 @@ public sealed class BackendService(SettingsService settings)
         var exe = Path.Combine(FfmpegRoot, "faster-whisper-xxl.exe");
         if (!File.Exists(exe)) return Missing("Faster-Whisper XXL");
         var output = OutputFolder("AI字幕");
-        var info = Hidden(exe, output);
-        info.ArgumentList.Add(source);
-        info.ArgumentList.Add("-pp"); info.ArgumentList.Add("-o"); info.ArgumentList.Add(output);
-        info.ArgumentList.Add("--batch_recursive"); info.ArgumentList.Add("--check_files"); info.ArgumentList.Add("--standard");
-        info.ArgumentList.Add("-f"); info.ArgumentList.Add("json"); info.ArgumentList.Add("srt");
-        var model = modelId switch
+        var modelName = modelId switch
         {
-            "whisper-small" => Path.Combine(Root, "Faster-Whisper-XXL", "Models", "small"),
-            "whisper-large-v3-turbo" => Path.Combine(Root, "Faster-Whisper-XXL", "Models", "large-v3-turbo"),
-            "whisper-large-v3" => Path.Combine(Root, "Faster-Whisper-XXL", "Models", "large-v3"),
-            _ => "medium"
+            "whisper-small" => "small",
+            "whisper-large-v3-turbo" => "large-v3-turbo",
+            "whisper-large-v3" => "large-v3",
+            _ => null
         };
-        if (Path.IsPathRooted(model) && !File.Exists(Path.Combine(model, "model.bin"))) return Missing(modelId);
-        info.ArgumentList.Add("-m"); info.ArgumentList.Add(model);
-        if (language.StartsWith("zh")) { info.ArgumentList.Add("-l"); info.ArgumentList.Add("zh"); }
-        else if (language.StartsWith("ja")) { info.ArgumentList.Add("-l"); info.ArgumentList.Add("ja"); }
-        return await RunCapturedAsync("utility", info, "subtitles", output, progress, cancellationToken);
+        if (modelName is null) return new OperationResult(false, $"不支持的字幕模型：{modelId}。请在视频 AI 字幕中选择可运行的 Whisper 模型。");
+        var modelsRoot = Path.Combine(Root, "Faster-Whisper-XXL", "Models");
+        var layout = EnsureWhisperModelLayout(modelsRoot, modelName);
+        if (!layout.Success) return layout;
+
+        ProcessStartInfo BuildInfo(string device, string computeType)
+        {
+            var info = Hidden(exe, output);
+            info.ArgumentList.Add(source);
+            info.ArgumentList.Add("-pp"); info.ArgumentList.Add("-o"); info.ArgumentList.Add(output);
+            info.ArgumentList.Add("--standard");
+            info.ArgumentList.Add("-f"); info.ArgumentList.Add("json"); info.ArgumentList.Add("srt");
+            info.ArgumentList.Add("--model_dir"); info.ArgumentList.Add(modelsRoot);
+            info.ArgumentList.Add("-m"); info.ArgumentList.Add(modelName);
+            info.ArgumentList.Add("--device"); info.ArgumentList.Add(device);
+            info.ArgumentList.Add("--compute_type"); info.ArgumentList.Add(computeType);
+            if (language.StartsWith("zh")) { info.ArgumentList.Add("-l"); info.ArgumentList.Add("zh"); }
+            else if (language.StartsWith("ja")) { info.ArgumentList.Add("-l"); info.ArgumentList.Add("ja"); }
+            info.Environment["HF_HUB_OFFLINE"] = "1";
+            info.Environment["PYTHONUTF8"] = "1";
+            return info;
+        }
+
+        var started = DateTime.UtcNow;
+        var gpu = await RunCapturedAsync("utility", BuildInfo("cuda", "float32"), "subtitles-gpu", output, progress, cancellationToken);
+        if (gpu.Success && WhisperOutputIsFresh(output, source, started)) return gpu;
+        cancellationToken.ThrowIfCancellationRequested();
+        progress?.Report(new(.04, "GPU 字幕引擎未生成有效结果，正在自动切换到 CPU"));
+        started = DateTime.UtcNow;
+        var cpu = await RunCapturedAsync("utility", BuildInfo("cpu", "int8"), "subtitles-cpu", output, progress, cancellationToken);
+        if (cpu.Success && WhisperOutputIsFresh(output, source, started)) return new OperationResult(true, "字幕已通过 CPU 回退完成。", output);
+        if (!cpu.Success) return cpu;
+        return new OperationResult(false, "字幕引擎已退出，但没有生成新的 SRT 与 JSON。请查看 Aurora 日志。", output);
+    }
+
+    private static OperationResult EnsureWhisperModelLayout(string modelsRoot, string modelName)
+    {
+        var canonical = Path.Combine(modelsRoot, "faster-whisper-" + modelName);
+        if (File.Exists(Path.Combine(canonical, "model.bin"))) return new OperationResult(true, "Whisper 模型目录已就绪。", canonical);
+        var legacy = Path.Combine(modelsRoot, modelName);
+        if (!File.Exists(Path.Combine(legacy, "model.bin"))) return Missing("Faster-Whisper " + modelName);
+        try
+        {
+            Directory.Move(legacy, canonical);
+            return new OperationResult(true, "Whisper 旧模型目录已兼容迁移。", canonical);
+        }
+        catch (Exception ex)
+        {
+            return new OperationResult(false, $"Whisper 模型目录需要迁移，但操作失败：{ex.Message}。请关闭占用模型文件的程序后重试。");
+        }
+    }
+
+    private static bool WhisperOutputIsFresh(string output, string source, DateTime started)
+    {
+        var name = Path.GetFileNameWithoutExtension(source);
+        return new[] { ".srt", ".json" }.All(extension =>
+        {
+            var file = Path.Combine(output, name + extension);
+            return File.Exists(file) && File.GetLastWriteTimeUtc(file) >= started.AddSeconds(-2);
+        });
     }
 
     private async Task PrepareAudioAsync(string source, string destination)
@@ -318,6 +386,30 @@ public sealed class BackendService(SettingsService settings)
         info.ArgumentList.Add("-ar"); info.ArgumentList.Add("44100"); info.ArgumentList.Add("-ac"); info.ArgumentList.Add("2"); info.ArgumentList.Add(destination);
         var result = await RunProcessAsync(info);
         if (result.ExitCode != 0) throw new InvalidOperationException(result.Error);
+    }
+
+    private static async Task<string> DetectTorchDeviceAsync(string python, CancellationToken cancellationToken)
+    {
+        if (!File.Exists(python)) return "cpu";
+        var info = Hidden(python, Path.GetDirectoryName(python)!);
+        info.ArgumentList.Add("-c");
+        info.ArgumentList.Add("import torch; print('cuda' if torch.cuda.is_available() else 'cpu')");
+        using var process = new Process { StartInfo = info };
+        try
+        {
+            process.Start();
+            using var cancellation = cancellationToken.Register(() =>
+            {
+                try { if (!process.HasExited) process.Kill(true); } catch { }
+            });
+            var output = process.StandardOutput.ReadToEndAsync();
+            var error = process.StandardError.ReadToEndAsync();
+            await process.WaitForExitAsync(cancellationToken);
+            await error;
+            return process.ExitCode == 0 && (await output).Trim().Equals("cuda", StringComparison.OrdinalIgnoreCase) ? "cuda" : "cpu";
+        }
+        catch (OperationCanceledException) { throw; }
+        catch { return "cpu"; }
     }
 
     private async Task<OperationResult> RunCapturedAsync(string key, ProcessStartInfo info, string logPrefix, string output, IProgress<TaskExecutionProgress>? progress = null, CancellationToken cancellationToken = default)
@@ -417,6 +509,26 @@ public sealed class BackendService(SettingsService settings)
         Process.Start(new ProcessStartInfo("explorer.exe", $"\"{path}\"") { UseShellExecute = true });
     }
 
+    public void CancelWorkbenchStartup()
+    {
+        navigationCancellation?.Cancel();
+        var key = startingKey;
+        if (!string.IsNullOrWhiteSpace(key)) Stop(key);
+        StatusChanged?.Invoke(this, "创作引擎启动已取消。");
+    }
+
+    public void StopWorkbench(string feature)
+    {
+        var key = feature switch
+        {
+            "music" => "music",
+            "voice" => "voice",
+            "singing" => "singing",
+            _ => null
+        };
+        if (key is not null) Stop(key);
+    }
+
     public void StopAll()
     {
         navigationCancellation?.Cancel();
@@ -434,25 +546,58 @@ public sealed class BackendService(SettingsService settings)
 
     private bool IsRunning(string key) => processes.TryGetValue(key, out var process) && !process.HasExited;
 
-    private async Task<OperationResult> WaitForUrlAsync(string url, string message)
+    private async Task<OperationResult> WaitForUrlAsync(string key, string url, string message)
     {
         navigationCancellation?.Cancel();
         navigationCancellation = new CancellationTokenSource();
         var token = navigationCancellation.Token;
+        startingKey = key;
         StatusChanged?.Invoke(this, "loading:" + message);
         using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
-        for (var i = 0; i < 900 && !token.IsCancellationRequested; i++)
+        try
         {
-            try
+            for (var i = 0; i < 300 && !token.IsCancellationRequested; i++)
             {
-                using var response = await client.GetAsync(url, token);
-                if (response.StatusCode is HttpStatusCode.OK or HttpStatusCode.Redirect)
-                    return new OperationResult(true, "Connected to the local model.", Url: url);
+                if (!processes.TryGetValue(key, out var process) || process.HasExited)
+                {
+                    var exitCode = process is null ? "unknown" : process.ExitCode.ToString();
+                    var detail = ReadLogTail(key);
+                    return new OperationResult(false, $"本地引擎启动失败（退出码 {exitCode}）。{detail} 请查看 Aurora 日志或在模型管理中执行检查 / 修复。");
+                }
+                try
+                {
+                    using var response = await client.GetAsync(url, token);
+                    if (response.StatusCode is HttpStatusCode.OK or HttpStatusCode.Redirect)
+                        return new OperationResult(true, "Connected to the local model.", Url: url);
+                }
+                catch when (!token.IsCancellationRequested) { }
+                await Task.Delay(1000, token);
             }
-            catch when (!token.IsCancellationRequested) { }
-            await Task.Delay(1000, token).ContinueWith(_ => { }, TaskScheduler.Default);
+            return token.IsCancellationRequested
+                ? new OperationResult(false, "创作引擎启动已取消。")
+                : new OperationResult(false, "模型启动等待超过 5 分钟。请查看 Aurora 日志或在模型管理中执行检查 / 修复。");
         }
-        return new OperationResult(false, "Model startup timed out. Check Aurora logs.");
+        catch (OperationCanceledException)
+        {
+            return new OperationResult(false, "创作引擎启动已取消。");
+        }
+        finally
+        {
+            if (startingKey?.Equals(key, StringComparison.OrdinalIgnoreCase) == true) startingKey = null;
+        }
+    }
+
+    private string ReadLogTail(string key)
+    {
+        var path = Path.Combine(Logs, key + ".log");
+        if (!File.Exists(path)) return "未生成启动日志。";
+        try
+        {
+            var tail = string.Join(" | ", File.ReadLines(path).Where(line => !string.IsNullOrWhiteSpace(line)).TakeLast(6));
+            if (tail.Length > 900) tail = tail[^900..];
+            return string.IsNullOrWhiteSpace(tail) ? "启动日志为空。" : "最近日志：" + tail;
+        }
+        catch { return "无法读取启动日志。"; }
     }
 
     private Process StartHidden(string key, string fileName, string arguments, string workingDirectory, IReadOnlyDictionary<string, string>? environment = null)

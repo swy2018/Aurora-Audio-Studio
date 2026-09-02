@@ -86,9 +86,9 @@
                                         <TextBlock Text="第一次使用？直接选择功能" FontSize="17" FontWeight="SemiBold"/>
                                         <TextBlock Text="不需要新建项目。进入任一功能后，Aurora 会根据当前任务提示所需的素材、模型和输出位置。" Foreground="{ThemeResource AuroraMutedBrush}" TextWrapping="Wrap"/>
                                     </StackPanel>
-                                    <Button Grid.Column="1" Content="创作音乐" Tag="music" Click="TemplateButton_Click" VerticalAlignment="Center"/>
-                                    <Button Grid.Column="2" Content="制作配音" Tag="voice" Click="TemplateButton_Click" VerticalAlignment="Center"/>
-                                    <Button Grid.Column="3" Content="生成字幕" Tag="subtitles" Click="TemplateButton_Click" VerticalAlignment="Center" Style="{StaticResource AccentButtonStyle}"/>
+                                    <Button x:Name="HomeMusicQuickButton" Grid.Column="1" Content="创作音乐" Tag="music" Click="TemplateButton_Click" AutomationProperties.Name="创作音乐" VerticalAlignment="Center"/>
+                                    <Button x:Name="HomeVoiceQuickButton" Grid.Column="2" Content="制作配音" Tag="voice" Click="TemplateButton_Click" AutomationProperties.Name="制作配音" VerticalAlignment="Center"/>
+                                    <Button x:Name="HomeSubtitlesQuickButton" Grid.Column="3" Content="生成字幕" Tag="subtitles" Click="TemplateButton_Click" AutomationProperties.Name="生成字幕" VerticalAlignment="Center" Style="{StaticResource AccentButtonStyle}"/>
                                 </Grid>
                             </Border>
                             <Grid Grid.Row="3" ColumnSpacing="28"><Grid.ColumnDefinitions><ColumnDefinition Width="3*"/><ColumnDefinition Width="2*"/></Grid.ColumnDefinitions>
@@ -119,7 +119,7 @@
                         <Grid Margin="24">
                             <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
                             <StackPanel Orientation="Horizontal" Spacing="10">
-                                <ComboBox x:Name="ModelPicker" Width="280" SelectedIndex="0">
+                                <ComboBox x:Name="ModelPicker" Width="280" SelectedIndex="0" AutomationProperties.Name="创作引擎选择">
                                     <ComboBoxItem Content="ACE-Step 1.5 XL Turbo" Tag="ace-step"/>
                                 </ComboBox>
                                 <Button x:Name="InstallWorkbenchModelButton" Content="自动安装模型" Click="InstallWorkbenchModelButton_Click" Style="{StaticResource AccentButtonStyle}" Visibility="Collapsed" />
@@ -131,8 +131,13 @@
                                     <TextBlock x:Name="EmptyTitle" Text="开启你的下一次创作" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" />
                                     <TextBlock x:Name="EmptyBody" Text="选择创作引擎，即刻在 Aurora 中开始。所有处理均在本机完成。" TextWrapping="Wrap" TextAlignment="Center" Foreground="{ThemeResource AuroraMutedBrush}" />
                                 </StackPanel>
-                                <ProgressRing x:Name="WorkbenchProgress" Width="42" Height="42" IsActive="False" Visibility="Collapsed" AutomationProperties.Name="正在启动本地创作引擎" AutomationProperties.LiveSetting="Polite" />
+                                <StackPanel x:Name="WorkbenchStartingPanel" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                                    <ProgressRing x:Name="WorkbenchProgress" Width="42" Height="42" IsActive="False" AutomationProperties.Name="正在启动本地创作引擎" AutomationProperties.LiveSetting="Polite" />
+                                    <TextBlock Text="正在启动本地引擎，首次加载可能需要几分钟…" Foreground="{ThemeResource AuroraMutedBrush}" TextAlignment="Center"/>
+                                    <Button x:Name="CancelWorkbenchButton" Content="取消启动" Click="CancelWorkbenchButton_Click" HorizontalAlignment="Center"/>
+                                </StackPanel>
                                 <WebView2 x:Name="Workbench" Visibility="Collapsed" AutomationProperties.Name="本地 AI 创作工作台" />
+                                <InfoBar x:Name="WorkbenchInfo" IsOpen="False" IsClosable="True" VerticalAlignment="Bottom" Margin="12"/>
                             </Grid>
                         </Grid>
                         <Border Grid.Column="1" Margin="0,1,1,1" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="0,14,14,0" Padding="22">
@@ -153,13 +158,15 @@
                         </Border>
                     </Grid>
 
-                    <Grid x:Name="UtilityView" Padding="30,26" Visibility="Collapsed" AllowDrop="True" DragOver="UtilityView_DragOver" Drop="UtilityView_Drop">
+                    <ScrollViewer x:Name="UtilityScrollViewer" Visibility="Collapsed" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" AllowDrop="True" DragOver="UtilityView_DragOver" Drop="UtilityView_Drop" SizeChanged="UtilityView_SizeChanged">
+                    <Grid x:Name="UtilityView" Padding="30,26" RowSpacing="14">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3*" MinWidth="520"/>
-                            <ColumnDefinition Width="2*" MinWidth="340"/>
+                            <ColumnDefinition x:Name="UtilityMainColumn" Width="3*"/>
+                            <ColumnDefinition x:Name="UtilitySideColumn" Width="2*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Margin="0,0,14,0" Background="{ThemeResource AuroraSurfaceBrush}" BorderBrush="{ThemeResource AuroraStrokeBrush}" BorderThickness="1" CornerRadius="14">
+                        <Border x:Name="UtilityMainPanel" Margin="0,0,14,0" Background="{ThemeResource AuroraSurfaceBrush}" BorderBrush="{ThemeResource AuroraStrokeBrush}" BorderThickness="1" CornerRadius="14">
                             <Grid Padding="30">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -173,9 +180,10 @@
                                     <TextBlock x:Name="UtilityDescription" Text="选择素材与处理引擎，Aurora 会在本机完成任务。" TextWrapping="Wrap" MaxWidth="680" HorizontalAlignment="Left" Foreground="{ThemeResource AuroraMutedBrush}"/>
                                 </StackPanel>
 
-                                <Grid Grid.Row="1" Margin="0,28,0,0" ColumnSpacing="18">
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="3*"/><ColumnDefinition Width="2*"/></Grid.ColumnDefinitions>
-                                    <StackPanel Spacing="10">
+                                <Grid x:Name="UtilityInputLayout" Grid.Row="1" Margin="0,28,0,0" ColumnSpacing="18" RowSpacing="12">
+                                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions><ColumnDefinition x:Name="UtilitySourceColumn" Width="3*"/><ColumnDefinition x:Name="UtilityPreviewColumn" Width="2*"/></Grid.ColumnDefinitions>
+                                    <StackPanel x:Name="UtilitySourcePanel" Spacing="10">
                                         <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                             <TextBlock Text="源文件与批处理" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"><Button Content="添加素材" Click="BrowseButton_Click"/><Button Content="清空" Click="ClearSourcesButton_Click"/></StackPanel>
@@ -188,21 +196,21 @@
                                         <TextBlock x:Name="UtilityInputHint" Text="可多选或直接拖入素材，任务会按顺序使用 GPU。" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
                                         <TextBox x:Name="InputPathBox" Visibility="Collapsed" IsReadOnly="True"/>
                                     </StackPanel>
-                                    <Border Grid.Column="1" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="10" Padding="10">
+                                    <Border x:Name="UtilityPreviewPanel" Grid.Column="1" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="10" Padding="10">
                                         <Grid><MediaPlayerElement x:Name="MediaPreview" AreTransportControlsEnabled="True" AutoPlay="False" MinHeight="132"/><StackPanel x:Name="PreviewEmpty" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6"><FontIcon Glyph="&#xE8B1;" FontSize="24" Foreground="{ThemeResource AuroraAccentBrush}"/><TextBlock Text="选择素材后可在此预览" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid>
                                     </Border>
                                 </Grid>
 
                                 <StackPanel Grid.Row="2" Margin="0,24,0,0" Spacing="10">
                                     <TextBlock Text="处理引擎" FontSize="15" FontWeight="SemiBold"/>
-                                    <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="190"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions>
-                                        <ComboBox x:Name="UtilityModelPicker" HorizontalAlignment="Stretch" SelectedIndex="0" />
+                                    <Grid x:Name="UtilityEngineLayout" ColumnSpacing="10" RowSpacing="10"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions><Grid.ColumnDefinitions><ColumnDefinition x:Name="UtilityModelColumn"/><ColumnDefinition x:Name="UtilityTrackColumn" Width="190"/><ColumnDefinition x:Name="UtilityPresetColumn" Width="190"/></Grid.ColumnDefinitions>
+                                        <ComboBox x:Name="UtilityModelPicker" HorizontalAlignment="Stretch" SelectedIndex="0" SelectionChanged="UtilityModelPicker_SelectionChanged" AutomationProperties.Name="处理引擎选择" />
                                         <ComboBox x:Name="UtilityTrackModePicker" Grid.Column="1" Header="分轨模式" SelectedIndex="0" Visibility="Collapsed" SelectionChanged="UtilityTrackModePicker_SelectionChanged"><ComboBoxItem Content="二轨：人声 + 伴奏" Tag="two-stem"/><ComboBoxItem Content="多轨：完整分轨" Tag="multi-stem"/></ComboBox>
                                         <ComboBox x:Name="UtilityPresetPicker" Grid.Column="2" Header="处理预设" SelectedIndex="1" SelectionChanged="UtilityPresetPicker_SelectionChanged"><ComboBoxItem Content="快速草稿" Tag="fast"/><ComboBoxItem Content="推荐质量" Tag="recommended"/><ComboBoxItem Content="高质量" Tag="quality"/></ComboBox>
                                     </Grid>
                                     <TextBlock x:Name="UtilityOutputHint" Text="处理结果会自动保存到 Aurora 成品目录。" TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
                                     <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,8,0,0">
-                                        <Button x:Name="RunUtilityButton" Content="开始处理" Click="RunUtilityButton_Click" Style="{StaticResource AccentButtonStyle}"/>
+                                        <Button x:Name="RunUtilityButton" Content="开始处理" Click="RunUtilityButton_Click" Style="{StaticResource AccentButtonStyle}" IsEnabled="False"/>
                                         <Button Content="打开成品目录" Click="OpenOutputButton_Click"/>
                                     </StackPanel>
                                     <ProgressBar x:Name="UtilityProgress" Minimum="0" Maximum="100" Value="0" Visibility="Collapsed"/>
@@ -222,7 +230,7 @@
                             </Grid>
                         </Border>
 
-                        <Border Grid.Column="1" Margin="0,0,0,0" Background="{ThemeResource AuroraPaneBrush}" BorderBrush="{ThemeResource AuroraStrokeBrush}" BorderThickness="1" CornerRadius="14">
+                        <Border x:Name="UtilitySidePanel" Grid.Column="1" Margin="0" Background="{ThemeResource AuroraPaneBrush}" BorderBrush="{ThemeResource AuroraStrokeBrush}" BorderThickness="1" CornerRadius="14">
                             <Grid Padding="26">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -266,6 +274,7 @@
                             </Grid>
                         </Border>
                     </Grid>
+                    </ScrollViewer>
 
                     <Grid x:Name="ModelsView" Padding="30,26" Visibility="Collapsed">
                         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
@@ -276,7 +285,7 @@
                                 <TextBlock x:Name="ModelSummaryText" Text="正在读取本地模型…" Foreground="{ThemeResource AuroraMutedBrush}"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                <ComboBox x:Name="ModelFilterPicker" Width="150" SelectedIndex="0" SelectionChanged="ModelFilterPicker_SelectionChanged">
+                                <ComboBox x:Name="ModelFilterPicker" Width="150" SelectedIndex="0" SelectionChanged="ModelFilterPicker_SelectionChanged" AutomationProperties.Name="模型筛选">
                                     <ComboBoxItem Content="全部模型" Tag="all"/><ComboBoxItem Content="已安装" Tag="installed"/><ComboBoxItem Content="默认组件" Tag="default"/><ComboBoxItem Content="可选模型" Tag="optional"/>
                                 </ComboBox>
                                 <Button x:Name="CheckAllModelsButton" Content="检查全部更新" Click="CheckAllModelsButton_Click" Style="{StaticResource AccentButtonStyle}"/>
@@ -377,14 +386,21 @@
                         <StackPanel x:Name="ResultsEmpty" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="9"><FontIcon Glyph="&#xE8B7;" FontSize="34" Foreground="{ThemeResource AuroraAccentBrush}"/><TextBlock Text="还没有成品" FontSize="18" FontWeight="SemiBold"/><TextBlock Text="完成任务后，结果会自动汇总到这里。" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel>
                     </Grid>
 
-                    <Grid x:Name="MaintenanceView" Padding="30,26" Visibility="Collapsed">
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="3*"/><ColumnDefinition Width="2*"/></Grid.ColumnDefinitions>
-                        <Grid Margin="0,0,16,0"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,16"><Button Content="重新扫描" Click="RunHealthScanButton_Click" Style="{StaticResource AccentButtonStyle}"/><Button Content="导出诊断包" Click="DiagnosticsButton_Click"/><Button Content="打开日志" Click="OpenLogsButton_Click"/></StackPanel>
-                            <ListView x:Name="HealthList" Grid.Row="1" SelectionMode="None"><ListView.ItemTemplate><DataTemplate><Grid Padding="14,12" ColumnSpacing="14"><Grid.ColumnDefinitions><ColumnDefinition Width="180"/><ColumnDefinition Width="110"/><ColumnDefinition/></Grid.ColumnDefinitions><TextBlock Text="{Binding Name}" FontWeight="SemiBold"/><TextBlock Grid.Column="1" Text="{Binding State}"/><TextBlock Grid.Column="2" Text="{Binding Detail}" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/></Grid></DataTemplate></ListView.ItemTemplate></ListView>
+                    <ScrollViewer x:Name="MaintenanceView" Visibility="Collapsed" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" SizeChanged="MaintenanceView_SizeChanged">
+                    <Grid x:Name="MaintenanceLayout" Padding="30,26" RowSpacing="14">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions><ColumnDefinition x:Name="MaintenanceMainColumn" Width="3*"/><ColumnDefinition x:Name="MaintenanceSideColumn" Width="2*"/></Grid.ColumnDefinitions>
+                        <Grid x:Name="MaintenanceMainPanel" Margin="0,0,16,0"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,16">
+                                <Button x:Name="MaintenanceScanButton" Content="重新扫描" Click="RunHealthScanButton_Click" Style="{StaticResource AccentButtonStyle}"/>
+                                <Button x:Name="MaintenanceDiagnosticsButton" Content="导出诊断包" Click="DiagnosticsButton_Click"/>
+                                <Button x:Name="OpenLogsButton" Content="打开日志" Click="OpenLogsButton_Click"/>
+                            </StackPanel>
+                            <ListView x:Name="HealthList" Grid.Row="1" SelectionMode="None"><ListView.ItemTemplate><DataTemplate><Grid Padding="14,12" ColumnSpacing="14" AutomationProperties.Name="{Binding Name}" AutomationProperties.HelpText="{Binding Detail}"><Grid.ColumnDefinitions><ColumnDefinition Width="180"/><ColumnDefinition Width="110"/><ColumnDefinition/></Grid.ColumnDefinitions><TextBlock Text="{Binding Name}" FontWeight="SemiBold"/><TextBlock Grid.Column="1" Text="{Binding State}"/><TextBlock Grid.Column="2" Text="{Binding Detail}" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/></Grid></DataTemplate></ListView.ItemTemplate></ListView>
                         </Grid>
-                        <Border Grid.Column="1" Padding="24" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="14"><StackPanel Spacing="18"><TextBlock Text="运行环境" FontSize="20" FontWeight="SemiBold"/><TextBlock x:Name="GpuSummaryText" TextWrapping="Wrap"/><Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}"/><ToggleSwitch x:Name="SafeModeToggle" Header="安全模式" OffContent="允许启动全部已安装引擎" OnContent="仅查看任务与诊断" Toggled="SafeModeToggle_Toggled"/><ToggleSwitch x:Name="AutoReleaseToggle" Header="任务完成后释放显存" IsOn="True" Toggled="AutoReleaseToggle_Toggled"/><TextBlock Text="安全模式不会删除或更改模型，只会阻止第三方引擎启动，适合排查启动问题。" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Border>
+                        <Border x:Name="MaintenanceSidePanel" Grid.Column="1" Padding="24" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="14"><StackPanel Spacing="18"><TextBlock Text="运行环境" FontSize="20" FontWeight="SemiBold"/><TextBlock x:Name="GpuSummaryText" TextWrapping="Wrap"/><Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}"/><ToggleSwitch x:Name="SafeModeToggle" Header="安全模式" OffContent="允许启动通过检查的引擎" OnContent="仅查看任务与诊断" Toggled="SafeModeToggle_Toggled"/><ToggleSwitch x:Name="AutoReleaseToggle" Header="任务完成后释放显存" IsOn="True" Toggled="AutoReleaseToggle_Toggled"/><TextBlock Text="安全模式不会删除或更改模型，只会阻止第三方引擎启动，适合排查启动问题。" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Border>
                     </Grid>
+                    </ScrollViewer>
 
                     <ScrollViewer x:Name="SettingsView" Visibility="Collapsed"><StackPanel Padding="30,26" MaxWidth="820" HorizontalAlignment="Stretch" Spacing="20">
                         <TextBlock Text="外观与语言" FontSize="20" FontWeight="SemiBold"/>
@@ -394,19 +410,19 @@
                         <ComboBox x:Name="ThemePicker" Header="主题" Width="320" HorizontalAlignment="Left">
                             <ComboBoxItem Content="浅色" Tag="light"/><ComboBoxItem Content="深色" Tag="dark"/><ComboBoxItem Content="跟随系统" Tag="system"/>
                         </ComboBox>
-                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="ModelRootBox" Header="模型目录"/><Button Grid.Column="1" Content="浏览…" Tag="models" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
-                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="OutputRootBox" Header="成品目录"/><Button Grid.Column="1" Content="浏览…" Tag="output" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
-                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="ProjectsRootBox" Header="处理记录目录"/><Button Grid.Column="1" Content="浏览…" Tag="projects" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
+                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="ModelRootBox" Header="模型目录"/><Button x:Name="BrowseModelRootButton" Grid.Column="1" Content="浏览…" Tag="models" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
+                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="OutputRootBox" Header="成品目录"/><Button x:Name="BrowseOutputRootButton" Grid.Column="1" Content="浏览…" Tag="output" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
+                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="ProjectsRootBox" Header="处理记录目录"/><Button x:Name="BrowseProjectsRootButton" Grid.Column="1" Content="浏览…" Tag="projects" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
                         <ToggleSwitch x:Name="AppAutoUpdateToggle" Header="每天首次启动时检查应用更新"/>
                         <ToggleSwitch x:Name="ModelAutoUpdateToggle" Header="启动时检查模型更新"/>
                         <ToggleSwitch x:Name="ConfirmLargeToggle" Header="下载大型模型前始终确认"/>
                         <ToggleSwitch x:Name="AutoReleaseSettingsToggle" Header="任务完成后自动释放显存"/>
-                        <Button Content="保存设置" Click="SaveSettingsButton_Click" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Left"/>
+                        <Button x:Name="SaveSettingsButton" Content="保存设置" Click="SaveSettingsButton_Click" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Left"/>
                     </StackPanel></ScrollViewer>
 
                     <ScrollViewer x:Name="AboutView" Visibility="Collapsed"><StackPanel Padding="30,30" MaxWidth="760" HorizontalAlignment="Left" Spacing="18">
                         <TextBlock Text="Aurora Audio Studio" FontSize="30" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="AboutVersionText" Text="1.7.0 · 本地 AI 音频创作工作台" FontSize="16" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                        <TextBlock x:Name="AboutVersionText" Text="1.8.0 · 本地 AI 音频创作工作台" FontSize="16" Foreground="{ThemeResource AuroraMutedBrush}"/>
                         <TextBlock Text="苏晚颜 · Aurora Studio" FontSize="18" FontWeight="SemiBold" Margin="0,12,0,0"/>
                         <TextBlock Text="为音乐、声音与影像创作者打造的一站式本地工作台。灵感、素材与成品，始终由你掌控。" TextWrapping="Wrap"/>
                         <Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}" Margin="0,10"/>
@@ -414,11 +430,11 @@
                         <TextBlock x:Name="AboutReleaseSummary" TextWrapping="Wrap"/>
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Button x:Name="AppUpdateButton" Content="检查更新" Click="CheckAppUpdateButton_Click" Style="{StaticResource AccentButtonStyle}"/>
-                            <Button Click="ReleaseNotesButton_Click">
+                            <Button x:Name="AboutReleaseNotesButton" Click="ReleaseNotesButton_Click" AutomationProperties.Name="查看更新日志">
                                 <StackPanel Orientation="Horizontal" Spacing="7"><FontIcon Glyph="&#xE8A5;" FontSize="15"/><TextBlock Text="更新日志"/></StackPanel>
                             </Button>
-                            <Button Content="导出诊断" Click="DiagnosticsButton_Click"/>
-                            <Button Click="FeedbackButton_Click">
+                            <Button x:Name="AboutDiagnosticsButton" Content="导出诊断" Click="DiagnosticsButton_Click"/>
+                            <Button x:Name="FeedbackButton" Click="FeedbackButton_Click" AutomationProperties.Name="反馈问题或建议">
                                 <StackPanel Orientation="Horizontal" Spacing="7"><FontIcon Glyph="&#xE939;" FontSize="15"/><TextBlock Text="反馈问题 / 建议"/></StackPanel>
                             </Button>
                         </StackPanel>
@@ -431,8 +447,8 @@
                     <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                     <TextBlock x:Name="FooterStatus" Text="就绪" Foreground="{ThemeResource AuroraMutedBrush}" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                        <Button Content="我的成品" Click="OpenOutputButton_Click"/>
-                        <Button Content="结束当前引擎" Click="ReleaseButton_Click"/>
+                        <Button x:Name="OpenOutputButton" Content="我的成品" Click="OpenOutputButton_Click"/>
+                        <Button x:Name="ReleaseEngineButton" Content="结束当前引擎" Click="ReleaseButton_Click"/>
                     </StackPanel>
                 </Grid>
             </Grid>

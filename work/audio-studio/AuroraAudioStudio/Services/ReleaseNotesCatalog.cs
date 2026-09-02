@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 8, 0), "2026-09-03", [
+            "• 修复正式安装版后端已就绪却仍停在正在启动的问题；WebView2 初始化和导航均有 30 秒超时、取消和对应引擎清理。六条工作流补齐真实输入、参数、执行、进度、取消与结果入口。\n• GPU 可用时优先 CUDA；字幕只在 GPU 实际失败后回退 CPU。模型健康检查会同时验证权重、运行时和关键依赖。\n• Qwen3-TTS 补齐 SoX，Seed-VC 下载全部固定依赖，TransKun 防止 CUDA PyTorch 被 CPU 包覆盖。\n• 文件选择、窄窗口滚动、动态本地化、状态播报与执行门禁得到加强。",
+            "• 六條工作流程補齊真實輸入、參數、執行、進度、取消與結果入口；ACE-Step 啟動會檢查程序、連接埠、逾時和記錄，失敗時不再留下空白框架。\n• GPU 可用時優先 CUDA；字幕只在 GPU 實際失敗後退回 CPU。模型健康檢查會同時驗證權重、執行環境和關鍵相依套件。\n• Qwen3-TTS 補齊 SoX，Seed-VC 下載全部固定相依套件，TransKun 防止 CUDA PyTorch 被 CPU 套件覆蓋。\n• WebView2、檔案選擇、窄視窗捲動、動態本地化、狀態播報與執行門檻得到加強。",
+            "• Fixed installed builds remaining on Starting after the backend was ready. WebView2 initialization and navigation have 30-second timeouts, cancellation, and scoped engine cleanup. All six workflows expose real inputs, parameters, execution, progress, cancellation, and results.\n• CUDA is preferred whenever a GPU is available; subtitles fall back to CPU only after an explicit GPU failure. Readiness checks validate weights, runtimes, and critical dependencies together.\n• Qwen3-TTS includes SoX, Seed-VC downloads every pinned dependency, and TransKun prevents CPU packages from overwriting CUDA PyTorch.\n• File picking, narrow-window scrolling, dynamic localization, live status, and execution gates are more robust.",
+            "• 6つのワークフローに実際の入力、設定、実行、進捗、キャンセル、結果操作を追加しました。ACE-Step はプロセス、ポート、タイムアウト、ログを確認し、失敗時に空の画面を残しません。\n• GPU 利用時は CUDA を優先し、字幕は GPU の実行失敗後にのみ CPU へ切り替えます。モデル確認では重み、実行環境、主要依存関係をまとめて検証します。\n• Qwen3-TTS に SoX を追加し、Seed-VC の固定依存関係をすべて取得し、TransKun の CUDA PyTorch が CPU パッケージで上書きされないようにしました。\n• WebView2、ファイル選択、狭い画面のスクロール、動的翻訳、状態通知、実行条件を強化しました。"]),
         new(new(1, 7, 0), "2026-09-02", [
             "• 修复已取消的排队任务仍可能启动，以及取消单个任务误停其他引擎的问题；重试会保留原预设，批处理异常后界面也能正确恢复。\n• 模型安装不再依赖 Qwen 环境提供下载器；新增独立 Hugging Face 自举、ACE-Step / Seed-VC 完整运行环境部署、四路并发更新检查、真实运行时完整性判断和可读安装详情。\n• 设置路径先校验再保存，素材按功能过滤；健康扫描与诊断导出不再阻塞界面，处理记录保存真实模型版本与实际成品文件。\n• 第二次启动会唤醒现有窗口，并恢复上次窗口大小与最大化状态。",
             "• 修正已取消的排隊任務仍可能啟動，以及取消單一任務誤停其他引擎的問題；重試會保留原預設，批次處理異常後介面也能正確恢復。\n• 模型安裝不再依賴 Qwen 環境提供下載器；新增獨立 Hugging Face 啟動環境、ACE-Step / Seed-VC 完整執行環境部署、四路並行更新檢查、真實執行環境完整性判斷與可讀安裝詳情。\n• 設定路徑先驗證再儲存，素材依功能篩選；健康掃描與診斷匯出不再阻塞介面，處理記錄儲存真實模型版本與實際成品檔案。\n• 第二次啟動會喚醒現有視窗，並還原上次視窗大小與最大化狀態。",

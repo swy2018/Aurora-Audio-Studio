@@ -17,7 +17,7 @@ public sealed class MaintenanceService(SettingsService settings, ModelCatalogSer
         checks.Add(new(Text("healthTaskRecovery", "任务恢复"), Text("healthEnabled", "已启用"), Text("healthTaskRecoveryDetail", "异常退出后保留任务、处理记录与诊断记录"), "\uE777"));
         if (projects is not null)
             checks.Add(new(Text("healthRecords", "处理记录"), Text(projects.RecoveryCount == 0 ? "healthGood" : "healthRecover", projects.RecoveryCount == 0 ? "良好" : "需要恢复"), projects.RecoveryCount == 0 ? Text("healthRecordsGood", "未发现损坏或不兼容的处理记录") : localization?.Format("healthRecordsRecover", projects.RecoveryCount) ?? $"{projects.RecoveryCount} 个记录已保留恢复副本", "\uE7C3"));
-        checks.Add(new(Text("healthSafeMode", "安全模式"), Text(settings.Current.SafeMode ? "healthEnabled" : "healthDisabled", settings.Current.SafeMode ? "已启用" : "未启用"), Text(settings.Current.SafeMode ? "healthSafeOn" : "healthSafeOff", settings.Current.SafeMode ? "第三方创作引擎不会自动启动" : "所有已安装引擎均可启动"), "\uE72E"));
+        checks.Add(new(Text("healthSafeMode", "安全模式"), Text(settings.Current.SafeMode ? "healthEnabled" : "healthDisabled", settings.Current.SafeMode ? "已启用" : "未启用"), Text(settings.Current.SafeMode ? "healthSafeOn" : "healthSafeOff", settings.Current.SafeMode ? "第三方创作引擎不会自动启动" : "仅通过完整性检查的引擎可以启动"), "\uE72E"));
         return checks;
     }
 
