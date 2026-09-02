@@ -297,6 +297,11 @@ Require(mainPageSource.Contains("SetStatus(localization.Get(\"ready\"))", String
 Require(mainPageSource.Contains("await Workbench.EnsureCoreWebView2Async", StringComparison.Ordinal), "The embedded workbench must initialize WebView2 before assigning its source.");
 var makeWorkbenchLoadable = mainPageSource.IndexOf("Workbench.Visibility = Visibility.Visible;", StringComparison.Ordinal);
 var initializeWorkbench = mainPageSource.IndexOf("await Workbench.EnsureCoreWebView2Async", StringComparison.Ordinal);
+Require(mainPageSource.Contains("CoreWebView2Environment.CreateWithOptionsAsync", StringComparison.Ordinal)
+    && mainPageSource.Contains("Path.Combine(settings.AppDataRoot, \"WebView2\")", StringComparison.Ordinal)
+    && !mainPageSource.Contains("CoreWebView2Environment.CreateAsync().AsTask()", StringComparison.Ordinal),
+    "Installed builds must put the WebView2 user data folder under writable LocalAppData instead of beside the executable in Program Files.");
+
 Require(makeWorkbenchLoadable >= 0 && initializeWorkbench >= 0 && makeWorkbenchLoadable < initializeWorkbench,
     "The WebView2 control must be visible/loadable before EnsureCoreWebView2Async so installed builds cannot wait forever on a collapsed control.");
 Require(mainPageSource.Contains("WaitAsync(TimeSpan.FromSeconds(30)", StringComparison.Ordinal), "WebView2 initialization and navigation must have a bounded timeout.");

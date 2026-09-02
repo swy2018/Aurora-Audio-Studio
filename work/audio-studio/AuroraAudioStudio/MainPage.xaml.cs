@@ -214,7 +214,10 @@ public sealed partial class MainPage : Page
 
         if (Workbench.CoreWebView2 is null)
         {
-            var environment = await CoreWebView2Environment.CreateAsync().AsTask()
+            var userDataFolder = Path.Combine(settings.AppDataRoot, "WebView2");
+            Directory.CreateDirectory(userDataFolder);
+            var environment = await CoreWebView2Environment.CreateWithOptionsAsync(
+                    string.Empty, userDataFolder, new CoreWebView2EnvironmentOptions()).AsTask()
                 .WaitAsync(TimeSpan.FromSeconds(30), cancellationToken);
             await Workbench.EnsureCoreWebView2Async(environment).AsTask()
                 .WaitAsync(TimeSpan.FromSeconds(30), cancellationToken);
