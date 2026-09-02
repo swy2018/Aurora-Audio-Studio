@@ -50,8 +50,9 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
-        if (!singleInstance.IsPrimary) { Exit(); return; }
+        if (!singleInstance.IsPrimary) { singleInstance.SignalPrimary(); Exit(); return; }
         MainWindow = new MainWindow();
         MainWindow.Activate();
+        singleInstance.Listen(() => MainWindow.DispatcherQueue.TryEnqueue(MainWindow.BringToFront));
     }
 }

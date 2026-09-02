@@ -140,7 +140,8 @@ public sealed record ModelInstallProgress(
     string Stage,
     long BytesReceived = 0,
     long? TotalBytes = null,
-    double BytesPerSecond = 0)
+    double BytesPerSecond = 0,
+    string? LogLine = null)
 {
     public string Detail
     {
@@ -163,6 +164,8 @@ public sealed record ModelInstallProgress(
         return $"{size:0.#} {units[unit]}";
     }
 }
+
+public sealed record ModelCheckProgress(int Completed, int Total, string ModelName);
 
 public sealed class MediaSourceItem
 {

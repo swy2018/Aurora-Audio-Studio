@@ -43,8 +43,7 @@ public sealed class ModelCatalogService(SettingsService settings)
 
     public bool IsInstalled(ModelDefinition model)
     {
-        var root = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
-        return File.Exists(Path.Combine(root, model.Marker));
+        return ModelHealthPolicy.IsReady(model, settings.Current.LocalAiRoot);
     }
 
     private ModelState ToState(ModelDefinition model)
@@ -55,7 +54,7 @@ public sealed class ModelCatalogService(SettingsService settings)
         return new ModelState(model.Id, model.Name, model.Feature, installed,
             installed ? Pick("可用", "可用", "Ready", "利用可能") : Pick("未安装", "未安裝", "Not installed", "未インストール"),
             model.Source, path, version,
-            installed ? Pick("完整性检查通过", "完整性檢查通過", "Integrity check passed", "整合性チェック済み")
+            installed ? Pick("运行环境与模型完整性检查通过", "執行環境與模型完整性檢查通過", "Runtime and model integrity checks passed", "実行環境とモデルの整合性チェック済み")
                 : model.IsDefault ? Pick("默认配置 · 需要安装或修复", "預設配置 · 需要安裝或修復", "Default component · install or repair required", "標準コンポーネント · インストールまたは修復が必要")
                 : Pick("可选模型 · 仅在确认后下载", "選用模型 · 僅在確認後下載", "Optional model · downloads only after confirmation", "オプションモデル · 確認後にのみダウンロード"),
             RecommendedVram(model), FeatureDisplay(model.Feature), Purpose(model.Id), Languages(model.Id), ModelInstallPlanner.EstimatedDownload(model.Id), License(model.Id),

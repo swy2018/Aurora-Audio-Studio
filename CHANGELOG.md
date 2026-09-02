@@ -4,6 +4,28 @@
 
 This file documents notable changes in stable releases. Chinese release notes are listed first, followed by English.
 
+## 1.7.0 — 2026-09-02
+
+### 中文
+
+- 修复已取消的排队任务仍可能启动、取消单个任务误停其他引擎、重试丢失原预设，以及批处理异常后按钮无法恢复的问题。
+- 模型安装改用独立 Hugging Face 下载环境，不再依赖 Qwen3-TTS；ACE-Step 和 Seed-VC 可从干净机器完成代码、Python 环境、依赖与官方权重部署。
+- 模型更新检查改为最多四路并发，支持进度、取消和 Git 超时；模型状态会同时检查权重与后端必需运行环境。
+- 安装浮层新增可换行阶段、最近活动与详情日志；TransKun 下载与空间估算包含 CUDA PyTorch，大型模型保留明确确认。
+- 修复设置部分写入、任意文件导入和健康扫描卡界面；处理记录保存实际模型版本与实际成品文件。
+- 第二次启动会唤醒现有窗口，并保存窗口大小与最大化状态；任务卡片和设置路径区域可适应较窄窗口。
+- 同步应用版本、四语内置更新日志、README、官网、About、产品文档与音乐人使用说明；界面主体未重做，继续使用现有截图。
+
+### English
+
+- Fixed canceled queued tasks still starting, single-task cancellation stopping unrelated engines, retry losing its preset, and batch controls remaining stuck after errors.
+- Model installation now uses an independent Hugging Face environment instead of relying on Qwen3-TTS. ACE-Step and Seed-VC can deploy code, Python, dependencies, and official weights from a clean machine.
+- Model checks use up to four concurrent workers with progress, cancellation, and Git timeouts. Readiness now verifies both weights and backend runtime requirements.
+- The installation surface adds wrapped stages, recent activity, and detailed logs. TransKun estimates now include CUDA PyTorch, and large deployments keep an explicit confirmation.
+- Fixed partial settings commits, unrestricted file intake, and UI-blocking health checks. Processing records now capture the actual model version and output files.
+- A second launch restores the existing window; size and maximized state persist, while task cards and setting paths adapt better to narrow windows.
+- Synchronized application metadata, four-language in-app notes, README, website, About, product documentation, and the musician guide. Existing screenshots remain because the core visual design is unchanged.
+
 ## 1.6.1 — 2026-09-02
 
 ### 中文

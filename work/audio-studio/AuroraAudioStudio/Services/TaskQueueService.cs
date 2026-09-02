@@ -10,6 +10,7 @@ public sealed class TaskQueueService
     private readonly Dictionary<string, CancellationTokenSource> cancellations = [];
     private TaskCompletionSource pauseSignal = CompletedSignal();
     private readonly JsonSerializerOptions json = new() { WriteIndented = true };
+    private DateTimeOffset lastProgressSave = DateTimeOffset.MinValue;
     public List<AuroraTaskRecord> Items { get; private set; } = [];
     public event EventHandler? Changed;
     public bool IsPaused { get; private set; }
@@ -48,6 +49,8 @@ public sealed class TaskQueueService
         cancellations[task.Id] = cancellation;
         try
         {
+            if (task.Status == AuroraTaskStates.Canceled)
+                return new OperationResult(false, "任务已取消。", task.LogPath);
             task.Status = AuroraTaskStates.Waiting; task.Stage = IsPaused ? "队列已暂停" : "等待本地引擎"; SaveChanged();
             await WaitUntilResumedAsync(cancellation.Token);
             await gate.WaitAsync(cancellation.Token);
@@ -90,7 +93,12 @@ public sealed class TaskQueueService
         IsPaused = true;
         pauseSignal = new(TaskCreationOptions.RunContinuationsAsynchronously);
         foreach (var task in Items.Where(x => x.Status == AuroraTaskStates.Waiting)) task.Stage = "队列已暂停";
-        SaveChanged();
+        Changed?.Invoke(this, EventArgs.Empty);
+        if (DateTimeOffset.UtcNow - lastProgressSave >= TimeSpan.FromMilliseconds(250))
+        {
+            lastProgressSave = DateTimeOffset.UtcNow;
+            TrimAndSave();
+        }
     }
 
     public void Resume()
@@ -128,7 +136,7 @@ public sealed class TaskQueueService
         var task = Items.FirstOrDefault(x => x.Id == id);
         if (task is not null && task.Status == AuroraTaskStates.Waiting)
         {
-            task.Status = AuroraTaskStates.Canceled; task.Stage = "Canceled"; task.CompletedAt = DateTimeOffset.Now; SaveChanged();
+            task.Status = AuroraTaskStates.Canceled; task.Stage = "已安全取消"; task.Message = "任务已取消。"; task.CompletedAt = DateTimeOffset.Now; SaveChanged();
         }
     }
 

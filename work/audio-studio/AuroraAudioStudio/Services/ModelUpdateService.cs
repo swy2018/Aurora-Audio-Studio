@@ -13,11 +13,13 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
 {
     private const string ManifestUrl = "https://raw.githubusercontent.com/swy2018/Aurora-Audio-Studio/main/model-manifest.json";
     private readonly HttpClient client = CreateClient();
+    private readonly HttpClient metadataClient = CreateMetadataClient();
     public string? FindRunningProcess(ModelDefinition model)
         => RunningProcessGuard.FindInRoot(Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot));
 
-    public async Task<OperationResult> CheckAsync(ModelDefinition model)
+    public async Task<OperationResult> CheckAsync(ModelDefinition model, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var root = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
         if (!catalog.IsInstalled(model)) return new(false, "尚未安装");
         if (model.UpdateKind.Equals("fixed-file", StringComparison.OrdinalIgnoreCase))
@@ -25,32 +27,32 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         if (model.UpdateKind.Equals("roformer-registry", StringComparison.OrdinalIgnoreCase))
             return new(true, "已安装；模型校验由 BS-RoFormer 官方注册表管理", "current");
         if (model.UpdateKind.Equals("github-release", StringComparison.OrdinalIgnoreCase))
-            return await CheckGitHubReleaseAsync(model, root);
+            return await CheckGitHubReleaseAsync(model, root, cancellationToken);
         if (model.UpdateKind.Equals("github-release-git", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(model.Repository))
-            return await CheckGitHubRepositoryReleaseAsync(model, root);
+            return await CheckGitHubRepositoryReleaseAsync(model, root, cancellationToken);
         if ((model.UpdateKind.Equals("huggingface", StringComparison.OrdinalIgnoreCase) || model.UpdateKind.Equals("minimax-music3", StringComparison.OrdinalIgnoreCase)) && !string.IsNullOrWhiteSpace(model.Repository))
         {
-            var remoteVersion = await GetHuggingFaceVersionAsync(model.Repository);
+            var remoteVersion = await GetHuggingFaceVersionAsync(model.Repository, cancellationToken);
             if (remoteVersion is null) return new(false, "暂时无法连接 Hugging Face");
             var localRevision = ReadModelRevision(root);
             var current = localRevision.Equals(remoteVersion.Revision, StringComparison.OrdinalIgnoreCase);
             return new(true, current ? $"已是最新日期版 {remoteVersion.DateVersion}" : $"发现日期版 {remoteVersion.DateVersion}",
                 current ? "current" : "available");
         }
-        var entry = await FindManifestEntryAsync(model.Id);
+        var entry = await FindManifestEntryAsync(model.Id, cancellationToken);
         if (entry is not null)
         {
             var localVersion = ReadInstalledVersion(model.Id);
             return new(true, localVersion == entry.Version ? "已是最新版本" : $"发现新版本 {entry.Version}", localVersion == entry.Version ? "current" : "available");
         }
         if (model.UpdateKind.Equals("uv-package", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(model.Repository))
-            return await CheckPyPiPackageAsync(model, root);
+            return await CheckPyPiPackageAsync(model, root, cancellationToken);
         if (model.UpdateKind.StartsWith("git", StringComparison.OrdinalIgnoreCase) && Directory.Exists(Path.Combine(root, ".git")))
         {
-            var fetch = await RunGitAsync(root, "fetch --quiet origin");
+            var fetch = await RunGitAsync(root, "fetch --quiet origin", cancellationToken);
             if (!fetch.Success) return fetch;
-            var local = await RunGitAsync(root, "rev-parse HEAD");
-            var remote = await RunGitAsync(root, "rev-parse @{u}");
+            var local = await RunGitAsync(root, "rev-parse HEAD", cancellationToken);
+            var remote = await RunGitAsync(root, "rev-parse @{u}", cancellationToken);
             if (!local.Success || !remote.Success) return new(false, "暂时无法比较版本");
             return new(true, local.Path == remote.Path ? "已是最新版本" : "发现新版本", local.Path == remote.Path ? "current" : "available");
         }
@@ -79,12 +81,12 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         if (model.UpdateKind.Equals("github-release", StringComparison.OrdinalIgnoreCase))
             return await InstallGitHubReleaseAsync(model, root, progress, cancellationToken);
         if (model.UpdateKind.Equals("github-release-git", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(model.Repository))
-            return await InstallGitHubRepositoryReleaseAsync(model, root, cancellationToken);
-        var entry = await FindManifestEntryAsync(model.Id);
+            return await InstallGitHubRepositoryReleaseAsync(model, root, progress, cancellationToken);
+        var entry = await FindManifestEntryAsync(model.Id, cancellationToken);
         if (entry is not null) return await InstallManifestEntryAsync(model, entry, root, progress, cancellationToken);
         if (!catalog.IsInstalled(model)) return new(false, "此引擎需要通过 Aurora 安装程序添加运行环境。 ");
         if (model.UpdateKind.StartsWith("git", StringComparison.OrdinalIgnoreCase) && Directory.Exists(Path.Combine(root, ".git")))
-            return await RunGitAsync(root, "pull --ff-only");
+            return await RunGitAsync(root, "pull --ff-only", cancellationToken);
         return new(false, "当前没有可安装的新版本。");
     }
 
@@ -141,9 +143,9 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
     private sealed record GitHubReleaseAsset(string Version, string Name, string Url, long Size, string? Digest, string PackageKind);
     private sealed record GitHubRepositoryRelease(string Owner, string Repository, string Tag, string Branch, string Commit, string DateVersion);
 
-    private async Task<OperationResult> CheckGitHubRepositoryReleaseAsync(ModelDefinition model, string root)
+    private async Task<OperationResult> CheckGitHubRepositoryReleaseAsync(ModelDefinition model, string root, CancellationToken cancellationToken)
     {
-        var release = await GetGitHubRepositoryReleaseAsync(model.Repository!);
+        var release = await GetGitHubRepositoryReleaseAsync(model.Repository!, cancellationToken);
         if (release is null) return new(false, "暂时无法读取 GitHub 上游版本");
         var local = await RunGitAsync(root, "rev-parse HEAD");
         if (!local.Success || string.IsNullOrWhiteSpace(local.Path)) return new(false, $"暂时无法读取已安装的 {model.Name} 版本");
@@ -155,45 +157,113 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         try
         {
             var compareUrl = $"https://api.github.com/repos/{release.Owner}/{release.Repository}/compare/{local.Path}...{Uri.EscapeDataString(release.Tag)}";
-            using var document = JsonDocument.Parse(await client.GetStringAsync(compareUrl));
+            using var document = JsonDocument.Parse(await metadataClient.GetStringAsync(compareUrl, cancellationToken));
             var status = document.RootElement.GetProperty("status").GetString();
             var available = status is "ahead" or "diverged";
             return new(true, available ? $"发现正式版 {release.Tag}" : $"已是最新正式版 {release.Tag}", available ? "available" : "current");
         }
+        catch (OperationCanceledException) { throw; }
         catch { return new(false, $"暂时无法比较 {model.Name} 正式版"); }
     }
 
-    private async Task<OperationResult> InstallGitHubRepositoryReleaseAsync(ModelDefinition model, string root, CancellationToken cancellationToken)
+    private async Task<OperationResult> InstallGitHubRepositoryReleaseAsync(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
-        var release = await GetGitHubRepositoryReleaseAsync(model.Repository!);
+        var release = await GetGitHubRepositoryReleaseAsync(model.Repository!, cancellationToken);
         if (release is null) return new(false, "暂时无法读取 GitHub 上游版本");
-        var dirty = await RunGitAsync(root, "status --porcelain --untracked-files=no");
-        if (!dirty.Success) return dirty;
-        if (!string.IsNullOrWhiteSpace(dirty.Path)) return new(false, $"{model.Name} 存在本地代码修改，为避免覆盖，已停止更新。", "available");
-        cancellationToken.ThrowIfCancellationRequested();
-        if (string.IsNullOrWhiteSpace(release.Tag))
+        if (Directory.Exists(Path.Combine(root, ".git")))
         {
-            var fetchDate = await RunGitAsync(root, $"fetch --quiet --force {model.Repository} refs/heads/{release.Branch}");
-            if (!fetchDate.Success) return fetchDate;
-            cancellationToken.ThrowIfCancellationRequested();
-            var checkoutDate = await RunGitAsync(root, $"checkout --detach {release.Commit}");
-            if (!checkoutDate.Success) return checkoutDate;
-            File.WriteAllText(Path.Combine(root, ".aurora-revision"), release.Commit);
-            File.WriteAllText(Path.Combine(root, ".aurora-version"), release.DateVersion);
-            WriteInstalledVersion(model.Id, release.DateVersion);
-            return new(true, $"{model.Name} 已更新至日期版 {release.DateVersion}", "current");
+            var dirty = await RunGitAsync(root, "status --porcelain --untracked-files=no", cancellationToken);
+            if (!dirty.Success) return dirty;
+            if (!string.IsNullOrWhiteSpace(dirty.Path)) return new(false, $"{model.Name} 存在本地代码修改，为避免覆盖，已停止更新。", "available");
         }
-        var fetch = await RunGitAsync(root, $"fetch --quiet --force {model.Repository} refs/tags/{release.Tag}:refs/tags/{release.Tag}");
-        if (!fetch.Success) return fetch;
-        cancellationToken.ThrowIfCancellationRequested();
-        var checkout = await RunGitAsync(root, $"checkout --detach refs/tags/{release.Tag}");
+
+        progress?.Report(new(null, $"正在准备 {model.Name} 官方代码"));
+        ModelInstallTransaction.Prepare(root);
+        var staging = ModelInstallTransaction.StagingPath(root);
+        var clone = await RunGitAsync(Path.GetDirectoryName(staging)!, $"clone --quiet --no-checkout \"{model.Repository}\" \"{staging}\"", cancellationToken, TimeSpan.FromMinutes(10));
+        if (!clone.Success) return clone;
+        OperationResult checkout;
+        if (!string.IsNullOrWhiteSpace(release.Tag))
+        {
+            var fetch = await RunGitAsync(staging, $"fetch --quiet --force origin refs/tags/{release.Tag}:refs/tags/{release.Tag}", cancellationToken, TimeSpan.FromMinutes(5));
+            if (!fetch.Success) return fetch;
+            checkout = await RunGitAsync(staging, $"checkout --detach refs/tags/{release.Tag}", cancellationToken, TimeSpan.FromMinutes(5));
+        }
+        else
+        {
+            var fetch = await RunGitAsync(staging, $"fetch --quiet --force origin refs/heads/{release.Branch}", cancellationToken, TimeSpan.FromMinutes(5));
+            if (!fetch.Success) return fetch;
+            checkout = await RunGitAsync(staging, $"checkout --detach {release.Commit}", cancellationToken, TimeSpan.FromMinutes(5));
+        }
         if (!checkout.Success) return checkout;
-        File.WriteAllText(Path.Combine(root, ".aurora-version"), release.Tag);
-        WriteInstalledVersion(model.Id, release.Tag);
-        return new(true, $"{model.Name} 已更新至正式版 {release.Tag}", "current");
+
+        var provision = await ProvisionGitRepositoryAsync(model, staging, progress, cancellationToken);
+        if (!provision.Success) return provision;
+        cancellationToken.ThrowIfCancellationRequested();
+        var version = string.IsNullOrWhiteSpace(release.Tag) ? release.DateVersion : release.Tag;
+        File.WriteAllText(Path.Combine(staging, ".aurora-revision"), string.IsNullOrWhiteSpace(release.Commit) ? release.Tag : release.Commit);
+        File.WriteAllText(Path.Combine(staging, ".aurora-version"), version);
+        ModelInstallTransaction.Commit(root);
+        WriteInstalledVersion(model.Id, version);
+        return new(true, $"{model.Name} 已安装并配置至 {(string.IsNullOrWhiteSpace(release.Tag) ? "日期版" : "正式版")} {version}", "current");
     }
 
-    private async Task<GitHubRepositoryRelease?> GetGitHubRepositoryReleaseAsync(string repositoryUrl)
+    private async Task<OperationResult> ProvisionGitRepositoryAsync(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    {
+        var uv = await EnsureUvExecutableAsync(progress, cancellationToken);
+        if (uv is null) return new(false, "无法安装或找到模型部署组件 uv。");
+        if (model.Id.Equals("ace-step", StringComparison.OrdinalIgnoreCase))
+        {
+            progress?.Report(new(null, "正在配置 ACE-Step 隔离运行环境"));
+            var sync = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var value in new[] { "sync", "--project", root }) sync.ArgumentList.Add(value);
+            var syncResult = await RunProcessAsync(sync, cancellationToken, progress);
+            if (syncResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(syncResult.Error) ? "ACE-Step 运行环境配置失败。" : syncResult.Error);
+            var downloader = Path.Combine(root, ".venv", "Scripts", "acestep-download.exe");
+            if (!File.Exists(downloader)) return new(false, "ACE-Step 官方模型下载器未生成，正式目录未被修改。");
+            var download = new ProcessStartInfo(downloader) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var value in new[] { "--model", "acestep-v15-xl-turbo" }) download.ArgumentList.Add(value);
+            progress?.Report(new(null, "正在下载 ACE-Step 1.5 XL Turbo 官方权重"));
+            var downloadResult = await RunProcessAsync(download, cancellationToken, progress);
+            if (downloadResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(downloadResult.Error) ? "ACE-Step 官方权重下载失败。" : downloadResult.Error);
+            return File.Exists(Path.Combine(root, model.Marker)) && File.Exists(Path.Combine(root, ".venv", "Scripts", "python.exe"))
+                ? new(true, "ACE-Step 已配置", "current") : new(false, "ACE-Step 运行环境完整性检查失败。");
+        }
+
+        if (model.Id.Equals("seed-vc", StringComparison.OrdinalIgnoreCase))
+        {
+            progress?.Report(new(null, "正在配置 Seed-VC Python 3.10 隔离环境"));
+            var python = Path.Combine(root, ".venv", "Scripts", "python.exe");
+            var create = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var value in new[] { "venv", "--python", "3.10", Path.Combine(root, ".venv") }) create.ArgumentList.Add(value);
+            var createResult = await RunProcessAsync(create, cancellationToken, progress);
+            if (createResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(createResult.Error) ? "Seed-VC 隔离环境创建失败。" : createResult.Error);
+            var install = new ProcessStartInfo(uv) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var value in new[] { "pip", "install", "--python", python, "-r", Path.Combine(root, "requirements.txt") }) install.ArgumentList.Add(value);
+            var installResult = await RunProcessAsync(install, cancellationToken, progress);
+            if (installResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(installResult.Error) ? "Seed-VC 依赖安装失败。" : installResult.Error);
+            var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "torch", "torchaudio", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
+            var torchResult = await RunProcessAsync(torch, cancellationToken, progress);
+            if (torchResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(torchResult.Error) ? "Seed-VC CUDA 环境配置失败。" : torchResult.Error);
+            var bootstrap = await EnsureHuggingFaceBootstrapAsync(progress, cancellationToken);
+            if (!bootstrap.Success || string.IsNullOrWhiteSpace(bootstrap.Path)) return bootstrap;
+            var manual = Path.Combine(root, "checkpoints", "manual");
+            Directory.CreateDirectory(manual);
+            var weights = new ProcessStartInfo(bootstrap.Path) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var value in new[] { "download", "Plachta/Seed-VC", "--local-dir", manual, "--include", "DiT_seed_v2_uvit_whisper_base_f0_44k_bigvgan_pruned_ft_ema_v2.pth", "config_dit_mel_seed_uvit_whisper_base_f0_44k.yml" }) weights.ArgumentList.Add(value);
+            progress?.Report(new(null, "正在下载 Seed-VC 官方权重与配置"));
+            var weightResult = await RunProcessAsync(weights, cancellationToken, progress);
+            if (weightResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(weightResult.Error) ? "Seed-VC 官方权重下载失败。" : weightResult.Error);
+            return File.Exists(Path.Combine(root, model.Marker)) && File.Exists(python)
+                && File.Exists(Path.Combine(manual, "DiT_seed_v2_uvit_whisper_base_f0_44k_bigvgan_pruned_ft_ema_v2.pth"))
+                && File.Exists(Path.Combine(manual, "config_dit_mel_seed_uvit_whisper_base_f0_44k.yml"))
+                ? new(true, "Seed-VC 已配置", "current") : new(false, "Seed-VC 运行环境完整性检查失败。");
+        }
+        return File.Exists(Path.Combine(root, model.Marker)) ? new(true, "组件已配置", "current") : new(false, "组件完整性检查失败。");
+    }
+
+    private async Task<GitHubRepositoryRelease?> GetGitHubRepositoryReleaseAsync(string repositoryUrl, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -203,13 +273,13 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             var owner = segments[0];
             var repository = segments[1].EndsWith(".git", StringComparison.OrdinalIgnoreCase) ? segments[1][..^4] : segments[1];
             var apiRoot = $"https://api.github.com/repos/{owner}/{repository}";
-            using var response = await client.GetAsync(apiRoot + "/releases/latest");
+            using var response = await metadataClient.GetAsync(apiRoot + "/releases/latest", cancellationToken);
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                using var repositoryDocument = JsonDocument.Parse(await client.GetStringAsync(apiRoot));
+                using var repositoryDocument = JsonDocument.Parse(await metadataClient.GetStringAsync(apiRoot, cancellationToken));
                 var branch = repositoryDocument.RootElement.GetProperty("default_branch").GetString();
                 if (string.IsNullOrWhiteSpace(branch)) return null;
-                using var commitDocument = JsonDocument.Parse(await client.GetStringAsync(apiRoot + "/commits/" + Uri.EscapeDataString(branch)));
+                using var commitDocument = JsonDocument.Parse(await metadataClient.GetStringAsync(apiRoot + "/commits/" + Uri.EscapeDataString(branch), cancellationToken));
                 var commit = commitDocument.RootElement.GetProperty("sha").GetString();
                 var dateText = commitDocument.RootElement.GetProperty("commit").GetProperty("committer").GetProperty("date").GetString();
                 if (string.IsNullOrWhiteSpace(commit) || !DateTimeOffset.TryParse(dateText, out var date)) return null;
@@ -220,12 +290,13 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             var tag = document.RootElement.GetProperty("tag_name").GetString();
             return string.IsNullOrWhiteSpace(tag) ? null : new(owner, repository, tag, "", "", "");
         }
+        catch (OperationCanceledException) { throw; }
         catch { return null; }
     }
 
-    private async Task<OperationResult> CheckGitHubReleaseAsync(ModelDefinition model, string root)
+    private async Task<OperationResult> CheckGitHubReleaseAsync(ModelDefinition model, string root, CancellationToken cancellationToken)
     {
-        var release = await GetGitHubReleaseAssetAsync(model);
+        var release = await GetGitHubReleaseAssetAsync(model, cancellationToken);
         if (release is null) return new(false, "暂时无法读取 GitHub Release");
         var local = InstalledFileVersion(Path.Combine(root, model.Marker));
         var same = VersionsEqual(local, release.Version);
@@ -234,7 +305,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
 
     private async Task<OperationResult> InstallGitHubReleaseAsync(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
-        var release = await GetGitHubReleaseAssetAsync(model);
+        var release = await GetGitHubReleaseAssetAsync(model, cancellationToken);
         if (release is null) return new(false, "暂时无法读取 GitHub Release");
         var folder = Path.Combine(settings.UpdatesRoot, "Models", model.Id, release.Version);
         Directory.CreateDirectory(folder);
@@ -296,14 +367,14 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         return new(true, $"{model.Name} 已更新至 {release.Version}", "current");
     }
 
-    private async Task<GitHubReleaseAsset?> GetGitHubReleaseAssetAsync(ModelDefinition model)
+    private async Task<GitHubReleaseAsset?> GetGitHubReleaseAssetAsync(ModelDefinition model, CancellationToken cancellationToken = default)
     {
         try
         {
             var endpoint = model.Id.Equals("subtitle-edit", StringComparison.OrdinalIgnoreCase)
                 ? "https://api.github.com/repos/SubtitleEdit/subtitleedit/releases/latest"
                 : "https://api.github.com/repos/Purfview/whisper-standalone-win/releases/tags/Faster-Whisper-XXL";
-            using var document = JsonDocument.Parse(await client.GetStringAsync(endpoint));
+            using var document = JsonDocument.Parse(await metadataClient.GetStringAsync(endpoint, cancellationToken));
             var assets = document.RootElement.GetProperty("assets").EnumerateArray().ToArray();
             JsonElement asset;
             string version;
@@ -437,7 +508,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         return new(true, $"{model.Name} 已下载并部署完成", "current");
     }
 
-    private async Task<OperationResult> CheckPyPiPackageAsync(ModelDefinition model, string root)
+    private async Task<OperationResult> CheckPyPiPackageAsync(ModelDefinition model, string root, CancellationToken cancellationToken)
     {
         var python = Path.Combine(root, "Scripts", "python.exe");
         if (!File.Exists(python)) return new(false, "隔离运行环境不完整", "manual");
@@ -450,12 +521,13 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         if (local.ExitCode != 0 || string.IsNullOrWhiteSpace(local.Output)) return new(false, "无法读取已安装版本", "manual");
         try
         {
-            using var document = JsonDocument.Parse(await client.GetStringAsync($"https://pypi.org/pypi/{Uri.EscapeDataString(package)}/json"));
+            using var document = JsonDocument.Parse(await metadataClient.GetStringAsync($"https://pypi.org/pypi/{Uri.EscapeDataString(package)}/json", cancellationToken));
             var latest = document.RootElement.GetProperty("info").GetProperty("version").GetString() ?? "";
             var current = local.Output.Trim().Split('\n', StringSplitOptions.RemoveEmptyEntries).LastOrDefault()?.Trim() ?? "";
             var same = current.Equals(latest, StringComparison.OrdinalIgnoreCase);
             return new(true, same ? $"已是最新版本 {current}" : $"发现新版本 {latest}", same ? "current" : "available");
         }
+        catch (OperationCanceledException) { throw; }
         catch { return new(false, "暂时无法连接 PyPI"); }
     }
 
@@ -507,7 +579,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         var dependencyResult = await RunProcessAsync(dependencies, cancellationToken, progress);
         if (dependencyResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(dependencyResult.Error) ? "MiniMax-Music3 依赖配置失败。" : dependencyResult.Error);
 
-        var version = await GetHuggingFaceVersionAsync(model.Repository!);
+        var version = await GetHuggingFaceVersionAsync(model.Repository!, cancellationToken);
         if (version is null) return new(false, "暂时无法读取 MiniMax-Music3 官方版本。");
         var hf = Path.Combine(environmentRoot, "Scripts", "hf.exe");
         if (!File.Exists(hf)) return new(false, "MiniMax-Music3 下载组件未正确安装。");
@@ -548,10 +620,33 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         return null;
     }
 
-    public async Task<IReadOnlyDictionary<string, OperationResult>> CheckAllAsync()
+    private async Task<string?> EnsureUvExecutableAsync(IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
-        var result = new Dictionary<string, OperationResult>();
-        foreach (var model in catalog.Definitions) result[model.Id] = await CheckAsync(model);
+        var uv = ResolveUvExecutable();
+        if (uv is not null) return uv;
+        progress?.Report(new(null, "正在安装模型部署组件 uv"));
+        var install = new ProcessStartInfo("winget.exe") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "install", "--id", "astral-sh.uv", "-e", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity" }) install.ArgumentList.Add(value);
+        var result = await RunProcessAsync(install, cancellationToken, progress);
+        return result.ExitCode == 0 ? ResolveUvExecutable() : null;
+    }
+
+    public async Task<IReadOnlyDictionary<string, OperationResult>> CheckAllAsync(IProgress<ModelCheckProgress>? progress = null, CancellationToken cancellationToken = default)
+    {
+        var result = new System.Collections.Concurrent.ConcurrentDictionary<string, OperationResult>(StringComparer.OrdinalIgnoreCase);
+        using var gate = new SemaphoreSlim(4, 4);
+        var completed = 0;
+        var tasks = catalog.Definitions.Select(async model =>
+        {
+            await gate.WaitAsync(cancellationToken);
+            try { result[model.Id] = await CheckAsync(model, cancellationToken); }
+            finally
+            {
+                gate.Release();
+                progress?.Report(new ModelCheckProgress(Interlocked.Increment(ref completed), catalog.Definitions.Count, model.Name));
+            }
+        });
+        await Task.WhenAll(tasks);
         return result;
     }
 
@@ -587,37 +682,39 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         return new(true, $"{model.Name} 已更新至 {entry.Version}");
     }
 
-    private async Task<ModelUpdateEntry?> FindManifestEntryAsync(string id)
+    private async Task<ModelUpdateEntry?> FindManifestEntryAsync(string id, CancellationToken cancellationToken = default)
     {
         try
         {
-            var json = await client.GetStringAsync(ManifestUrl);
+            var json = await metadataClient.GetStringAsync(ManifestUrl, cancellationToken);
             var manifest = JsonSerializer.Deserialize<ModelUpdateManifest>(json);
             return manifest?.Models.FirstOrDefault(x => x.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
         }
+        catch (OperationCanceledException) { throw; }
         catch { return null; }
     }
 
     private sealed record HuggingFaceVersion(string Revision, string DateVersion);
 
-    private async Task<HuggingFaceVersion?> GetHuggingFaceVersionAsync(string repository)
+    private async Task<HuggingFaceVersion?> GetHuggingFaceVersionAsync(string repository, CancellationToken cancellationToken = default)
     {
         try
         {
-            var json = await client.GetStringAsync("https://huggingface.co/api/models/" + repository);
+            var json = await metadataClient.GetStringAsync("https://huggingface.co/api/models/" + repository, cancellationToken);
             using var document = JsonDocument.Parse(json);
             var revision = document.RootElement.TryGetProperty("sha", out var sha) ? sha.GetString() : null;
             var modified = document.RootElement.TryGetProperty("lastModified", out var lastModified) ? lastModified.GetString() : null;
             if (string.IsNullOrWhiteSpace(revision) || !DateTimeOffset.TryParse(modified, out var date)) return null;
             return new(revision, date.UtcDateTime.ToString("yyyy.MM.dd"));
         }
+        catch (OperationCanceledException) { throw; }
         catch { return null; }
     }
 
     private async Task<OperationResult> UpdateHuggingFaceAsync(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
         progress?.Report(new(null, "正在读取模型版本"));
-        var version = await GetHuggingFaceVersionAsync(model.Repository!);
+        var version = await GetHuggingFaceVersionAsync(model.Repository!, cancellationToken);
         if (version is null) return new(false, "暂时无法连接 Hugging Face");
         return await DownloadHuggingFaceRevisionAsync(model, root, version.Revision, progress, cancellationToken, version.DateVersion);
     }
@@ -643,8 +740,14 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
 
     private async Task<OperationResult> DownloadHuggingFaceRevisionAsync(ModelDefinition model, string root, string revision, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken, string? dateVersion = null)
     {
-        var launcher = Path.Combine(settings.Current.LocalAiRoot, "Qwen3-TTS", "Python312", "Scripts", "hf.exe");
-        if (!File.Exists(launcher)) return new(false, "Qwen3-TTS 更新组件缺失，请运行安装程序修复。");
+        if (model.Id.StartsWith("qwen3-tts-", StringComparison.OrdinalIgnoreCase))
+        {
+            var runtime = await EnsureQwenTtsRuntimeAsync(progress, cancellationToken);
+            if (!runtime.Success) return runtime;
+        }
+        var bootstrap = await EnsureHuggingFaceBootstrapAsync(progress, cancellationToken);
+        if (!bootstrap.Success || string.IsNullOrWhiteSpace(bootstrap.Path)) return bootstrap;
+        var launcher = bootstrap.Path;
         var info = new ProcessStartInfo(launcher) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
         info.ArgumentList.Add("download"); info.ArgumentList.Add(model.Repository!);
         info.ArgumentList.Add("--revision"); info.ArgumentList.Add(revision);
@@ -668,6 +771,52 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         File.Delete(Path.Combine(staging, ".aurora-installing"));
         ModelInstallTransaction.Commit(root);
         return new(true, $"{model.Name} 已安装并校验", "current");
+    }
+
+    private async Task<OperationResult> EnsureHuggingFaceBootstrapAsync(IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    {
+        var uv = await EnsureUvExecutableAsync(progress, cancellationToken);
+        if (uv is null) return new(false, "无法安装或找到模型部署组件 uv。");
+        var root = Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "aurora-download-env");
+        var python = Path.Combine(root, "Scripts", "python.exe");
+        var environment = await EnsureUvEnvironmentAsync(uv, root, python, progress, cancellationToken);
+        if (!environment.Success) return environment;
+        var launcher = Path.Combine(root, "Scripts", "hf.exe");
+        if (!File.Exists(launcher))
+        {
+            progress?.Report(new(null, "正在配置独立模型下载组件"));
+            var install = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "huggingface_hub[hf_xet]" }) install.ArgumentList.Add(value);
+            var result = await RunProcessAsync(install, cancellationToken, progress);
+            if (result.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(result.Error) ? "独立模型下载组件配置失败。" : result.Error);
+        }
+        return File.Exists(launcher) ? new(true, "模型下载组件已就绪", launcher) : new(false, "模型下载组件未正确生成。");
+    }
+
+    private async Task<OperationResult> EnsureQwenTtsRuntimeAsync(IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    {
+        var root = Path.Combine(settings.Current.LocalAiRoot, "Qwen3-TTS", "Python312");
+        var launcher = Path.Combine(root, "Scripts", "qwen-tts-demo.exe");
+        if (File.Exists(launcher)) return new(true, "Qwen3-TTS 运行环境已就绪", "current");
+        var uv = await EnsureUvExecutableAsync(progress, cancellationToken);
+        if (uv is null) return new(false, "无法安装或找到模型部署组件 uv，无法创建 Qwen3-TTS 运行环境。");
+        var python = Path.Combine(root, "Scripts", "python.exe");
+        Directory.CreateDirectory(Path.GetDirectoryName(root)!);
+        var create = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "venv", "--python", "3.12", root }) create.ArgumentList.Add(value);
+        progress?.Report(new(null, "正在创建 Qwen3-TTS Python 3.12 隔离环境"));
+        var createResult = await RunProcessAsync(create, cancellationToken, progress);
+        if (createResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(createResult.Error) ? "Qwen3-TTS 隔离环境创建失败。" : createResult.Error);
+        var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "torch", "torchaudio", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
+        var torchResult = await RunProcessAsync(torch, cancellationToken, progress);
+        if (torchResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(torchResult.Error) ? "Qwen3-TTS CUDA 环境配置失败。" : torchResult.Error);
+        var install = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "qwen-tts", "huggingface_hub[hf_xet]" }) install.ArgumentList.Add(value);
+        var installResult = await RunProcessAsync(install, cancellationToken, progress);
+        return installResult.ExitCode == 0 && File.Exists(launcher)
+            ? new(true, "Qwen3-TTS 运行环境已就绪", "current")
+            : new(false, string.IsNullOrWhiteSpace(installResult.Error) ? "Qwen3-TTS 运行环境配置失败。" : installResult.Error);
     }
 
     private static string ReadModelRevision(string root)
@@ -695,17 +844,22 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         File.WriteAllText(Path.Combine(folder, id + ".version"), version);
     }
 
-    private static async Task<OperationResult> RunGitAsync(string root, string arguments)
+    private static async Task<OperationResult> RunGitAsync(string root, string arguments, CancellationToken cancellationToken = default, TimeSpan? timeout = null)
     {
         try
         {
+            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            deadline.CancelAfter(timeout ?? TimeSpan.FromMinutes(2));
             var info = new ProcessStartInfo("git", arguments) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
             using var process = Process.Start(info) ?? throw new InvalidOperationException("Git could not start.");
             var outputTask = process.StandardOutput.ReadToEndAsync(); var errorTask = process.StandardError.ReadToEndAsync();
-            await process.WaitForExitAsync();
+            using var registration = deadline.Token.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
+            await process.WaitForExitAsync(deadline.Token);
             var output = (await outputTask).Trim(); var error = (await errorTask).Trim();
             return process.ExitCode == 0 ? new(true, string.IsNullOrWhiteSpace(output) ? "更新完成" : output, output) : new(false, string.IsNullOrWhiteSpace(error) ? "更新失败" : error);
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }
+        catch (OperationCanceledException) { return new(false, "Git 操作超时，已安全停止。"); }
         catch (Exception ex) { return new(false, ex.Message); }
     }
 
@@ -766,7 +920,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         void RecordLine(List<string> destination, string value)
         {
             lock (sync) destination.Add(value);
-            if (!IsProgressNoise(value)) progress?.Report(new(null, LogLine(value)));
+            if (!IsProgressNoise(value)) progress?.Report(new(null, "", 0, null, 0, LogLine(value)));
         }
         process.OutputDataReceived += (_, args) => { if (!string.IsNullOrWhiteSpace(args.Data)) RecordLine(output, args.Data); };
         process.ErrorDataReceived += (_, args) => { if (!string.IsNullOrWhiteSpace(args.Data)) RecordLine(errors, args.Data); };
@@ -788,7 +942,14 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
     private static HttpClient CreateClient()
     {
         var value = new HttpClient { Timeout = TimeSpan.FromHours(8) };
-        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.6.1"));
+        value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.7.0"));
+        return value;
+    }
+
+    private static HttpClient CreateMetadataClient()
+    {
+        var value = CreateClient();
+        value.Timeout = TimeSpan.FromSeconds(30);
         return value;
     }
 }

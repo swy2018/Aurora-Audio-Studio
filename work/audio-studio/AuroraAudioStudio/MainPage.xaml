@@ -357,12 +357,15 @@
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"><Button x:Name="PauseQueueButton" Content="暂停队列" Click="PauseQueueButton_Click"/><Button Content="打开成品目录" Click="OpenOutputButton_Click"/></StackPanel>
                         </Grid>
                         <ListView x:Name="TasksList" Grid.Row="1" SelectionMode="None"><ListView.ItemTemplate><DataTemplate>
-                            <Grid Padding="14,12" ColumnSpacing="16"><Grid.ColumnDefinitions><ColumnDefinition Width="240"/><ColumnDefinition Width="92"/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                <StackPanel><TextBlock Text="{Binding InputDisplay}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/><TextBlock><Run Text="{Binding CreatedDisplay}"/><Run Text="  "/><Run Text="{Binding DurationDisplay}"/></TextBlock></StackPanel>
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="{Binding DisplayStatus}"/><TextBlock Text="{Binding DisplayProgress}" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel>
-                                <StackPanel Grid.Column="2" VerticalAlignment="Center"><TextBlock Text="{Binding DisplayStage}"/><ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressPercent}" Margin="0,7,0,5" AutomationProperties.Name="{Binding DisplayStage}" AutomationProperties.LiveSetting="Polite"/><TextBlock Text="{Binding DisplayMessage}" TextTrimming="CharacterEllipsis" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel>
-                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8"><Button Content="打开" Tag="{Binding Id}" Click="OpenTaskButton_Click"/><Button Content="重试" Tag="{Binding Id}" Click="RetryTaskButton_Click"/><Button Content="取消" Tag="{Binding Id}" Click="CancelTaskButton_Click"/></StackPanel>
-                            </Grid>
+                            <StackPanel Padding="14,12" Spacing="9">
+                                <Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock Text="{Binding InputDisplay}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/><TextBlock><Run Text="{Binding CreatedDisplay}"/><Run Text="  "/><Run Text="{Binding DurationDisplay}"/><Run Text="  ·  "/><Run Text="{Binding DisplayStatus}"/><Run Text="  "/><Run Text="{Binding DisplayProgress}"/></TextBlock></StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"><Button Content="打开" Tag="{Binding Id}" Click="OpenTaskButton_Click"/><Button Content="重试" Tag="{Binding Id}" Click="RetryTaskButton_Click" IsEnabled="{Binding CanRetry}"/><Button Content="取消" Tag="{Binding Id}" Click="CancelTaskButton_Click" IsEnabled="{Binding CanCancel}"/></StackPanel>
+                                </Grid>
+                                <TextBlock Text="{Binding DisplayStage}" TextWrapping="Wrap"/>
+                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressPercent}" AutomationProperties.Name="{Binding DisplayStage}" AutomationProperties.LiveSetting="Polite"/>
+                                <TextBlock Text="{Binding DisplayMessage}" TextWrapping="Wrap" MaxLines="2" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                            </StackPanel>
                         </DataTemplate></ListView.ItemTemplate></ListView>
                         <StackPanel x:Name="TasksEmpty" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10"><FontIcon Glyph="&#xE9D5;" FontSize="34" Foreground="{ThemeResource AuroraAccentBrush}"/><TextBlock Text="还没有任务记录" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/><TextBlock Text="从首页选择一个创作任务，Aurora 会在这里保留进度与结果。" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel>
                     </Grid>
@@ -383,7 +386,7 @@
                         <Border Grid.Column="1" Padding="24" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="14"><StackPanel Spacing="18"><TextBlock Text="运行环境" FontSize="20" FontWeight="SemiBold"/><TextBlock x:Name="GpuSummaryText" TextWrapping="Wrap"/><Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}"/><ToggleSwitch x:Name="SafeModeToggle" Header="安全模式" OffContent="允许启动全部已安装引擎" OnContent="仅查看任务与诊断" Toggled="SafeModeToggle_Toggled"/><ToggleSwitch x:Name="AutoReleaseToggle" Header="任务完成后释放显存" IsOn="True" Toggled="AutoReleaseToggle_Toggled"/><TextBlock Text="安全模式不会删除或更改模型，只会阻止第三方引擎启动，适合排查启动问题。" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Border>
                     </Grid>
 
-                    <ScrollViewer x:Name="SettingsView" Visibility="Collapsed"><StackPanel Padding="30,26" MaxWidth="820" HorizontalAlignment="Left" Spacing="20">
+                    <ScrollViewer x:Name="SettingsView" Visibility="Collapsed"><StackPanel Padding="30,26" MaxWidth="820" HorizontalAlignment="Stretch" Spacing="20">
                         <TextBlock Text="外观与语言" FontSize="20" FontWeight="SemiBold"/>
                         <ComboBox x:Name="LanguagePicker" Header="界面语言" Width="320" HorizontalAlignment="Left">
                             <ComboBoxItem Content="跟随系统" Tag="auto"/><ComboBoxItem Content="简体中文" Tag="zh-CN"/><ComboBoxItem Content="繁體中文" Tag="zh-TW"/><ComboBoxItem Content="English" Tag="en-US"/><ComboBoxItem Content="日本語" Tag="ja-JP"/>
@@ -391,9 +394,9 @@
                         <ComboBox x:Name="ThemePicker" Header="主题" Width="320" HorizontalAlignment="Left">
                             <ComboBoxItem Content="浅色" Tag="light"/><ComboBoxItem Content="深色" Tag="dark"/><ComboBoxItem Content="跟随系统" Tag="system"/>
                         </ComboBox>
-                        <TextBox x:Name="ModelRootBox" Header="模型目录" Width="620" HorizontalAlignment="Left"/>
-                        <TextBox x:Name="OutputRootBox" Header="成品目录" Width="620" HorizontalAlignment="Left"/>
-                        <TextBox x:Name="ProjectsRootBox" Header="处理记录目录" Width="620" HorizontalAlignment="Left"/>
+                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="ModelRootBox" Header="模型目录"/><Button Grid.Column="1" Content="浏览…" Tag="models" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
+                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="OutputRootBox" Header="成品目录"/><Button Grid.Column="1" Content="浏览…" Tag="output" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
+                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="ProjectsRootBox" Header="处理记录目录"/><Button Grid.Column="1" Content="浏览…" Tag="projects" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
                         <ToggleSwitch x:Name="AppAutoUpdateToggle" Header="每天首次启动时检查应用更新"/>
                         <ToggleSwitch x:Name="ModelAutoUpdateToggle" Header="启动时检查模型更新"/>
                         <ToggleSwitch x:Name="ConfirmLargeToggle" Header="下载大型模型前始终确认"/>
@@ -403,7 +406,7 @@
 
                     <ScrollViewer x:Name="AboutView" Visibility="Collapsed"><StackPanel Padding="30,30" MaxWidth="760" HorizontalAlignment="Left" Spacing="18">
                         <TextBlock Text="Aurora Audio Studio" FontSize="30" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="AboutVersionText" Text="1.6.1 · 本地 AI 音频创作工作台" FontSize="16" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                        <TextBlock x:Name="AboutVersionText" Text="1.7.0 · 本地 AI 音频创作工作台" FontSize="16" Foreground="{ThemeResource AuroraMutedBrush}"/>
                         <TextBlock Text="苏晚颜 · Aurora Studio" FontSize="18" FontWeight="SemiBold" Margin="0,12,0,0"/>
                         <TextBlock Text="为音乐、声音与影像创作者打造的一站式本地工作台。灵感、素材与成品，始终由你掌控。" TextWrapping="Wrap"/>
                         <Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}" Margin="0,10"/>
@@ -435,22 +438,26 @@
             </Grid>
         </NavigationView>
         <Border x:Name="GlobalUpdatePanel" Visibility="Collapsed" Canvas.ZIndex="100"
-                Width="460" Margin="0,18,24,0" Padding="16,14"
+                MaxWidth="620" MinWidth="320" Margin="24,18,24,0" Padding="16,14"
                 HorizontalAlignment="Right" VerticalAlignment="Top"
                 CornerRadius="12" BorderThickness="1"
                 Background="{ThemeResource AuroraSurfaceBrush}" BorderBrush="{ThemeResource AuroraStrokeBrush}">
             <Grid RowSpacing="10">
-                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal" Spacing="9">
                         <FontIcon Glyph="&#xE895;" FontSize="16" Foreground="{ThemeResource AuroraAccentBrush}"/>
-                        <TextBlock x:Name="UpdateStageText" Text="正在准备更新…" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="UpdateStageText" Text="正在准备更新…" FontWeight="SemiBold" TextWrapping="Wrap"/>
                     </StackPanel>
                     <TextBlock x:Name="UpdatePercentText" Grid.Column="1" Text="0%" Foreground="{ThemeResource AuroraMutedBrush}"/>
                     <Button x:Name="CancelGlobalOperationButton" Grid.Column="2" Content="取消" Visibility="Collapsed" Click="CancelGlobalOperationButton_Click" Padding="10,3"/>
                 </Grid>
                 <ProgressBar x:Name="UpdateProgress" Grid.Row="1" Minimum="0" Maximum="100" Height="5" AutomationProperties.Name="下载与安装进度" AutomationProperties.LiveSetting="Polite"/>
+                <TextBlock x:Name="UpdateActivityText" Grid.Row="2" Text="正在准备" TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                <Expander Grid.Row="3" Header="安装详情">
+                    <ScrollViewer MaxHeight="180"><TextBlock x:Name="UpdateLogText" TextWrapping="Wrap" FontFamily="Consolas" FontSize="11" IsTextSelectionEnabled="True"/></ScrollViewer>
+                </Expander>
             </Grid>
         </Border>
     </Grid>

@@ -8,6 +8,11 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        new(new(1, 7, 0), "2026-09-02", [
+            "• 修复已取消的排队任务仍可能启动，以及取消单个任务误停其他引擎的问题；重试会保留原预设，批处理异常后界面也能正确恢复。\n• 模型安装不再依赖 Qwen 环境提供下载器；新增独立 Hugging Face 自举、ACE-Step / Seed-VC 完整运行环境部署、四路并发更新检查、真实运行时完整性判断和可读安装详情。\n• 设置路径先校验再保存，素材按功能过滤；健康扫描与诊断导出不再阻塞界面，处理记录保存真实模型版本与实际成品文件。\n• 第二次启动会唤醒现有窗口，并恢复上次窗口大小与最大化状态。",
+            "• 修正已取消的排隊任務仍可能啟動，以及取消單一任務誤停其他引擎的問題；重試會保留原預設，批次處理異常後介面也能正確恢復。\n• 模型安裝不再依賴 Qwen 環境提供下載器；新增獨立 Hugging Face 啟動環境、ACE-Step / Seed-VC 完整執行環境部署、四路並行更新檢查、真實執行環境完整性判斷與可讀安裝詳情。\n• 設定路徑先驗證再儲存，素材依功能篩選；健康掃描與診斷匯出不再阻塞介面，處理記錄儲存真實模型版本與實際成品檔案。\n• 第二次啟動會喚醒現有視窗，並還原上次視窗大小與最大化狀態。",
+            "• Fixed canceled queued tasks still starting and single-task cancellation stopping unrelated engines. Retry preserves the original preset, and batch UI recovers after failures.\n• Model downloads no longer depend on the Qwen environment. Added an independent Hugging Face bootstrap, complete ACE-Step and Seed-VC deployment, four-way bounded update checks, runtime-aware health checks, and readable installation details.\n• Settings paths validate before commit and media is filtered per workflow. Health scans and diagnostics no longer block the UI, while records capture the actual model version and output files.\n• A second launch now restores the existing window, and window size and maximized state persist between sessions.",
+            "• キャンセル済みの待機タスクが起動する問題と、単一タスクのキャンセルが別のエンジンを停止する問題を修正しました。再試行では元のプリセットを保持し、バッチ失敗後も画面状態を復元します。\n• モデル取得を Qwen 環境から独立させ、Hugging Face 専用環境、ACE-Step / Seed-VC の完全導入、4 並列の更新確認、実行環境を含む整合性確認、読みやすい導入詳細を追加しました。\n• 保存前の設定パス検証と機能別の素材形式制限を追加し、ヘルスチェックと診断出力を非同期化しました。履歴には実際のモデル版と成果物を保存します。\n• 二重起動時は既存ウィンドウを前面に戻し、ウィンドウサイズと最大化状態も保持します。"]),
         new(new(1, 6, 1), "2026-09-02", [
             "• 模型安装改为单任务串行执行；已有安装进行时再次点击其他模型，会明确提示等待，不再启动第二个部署进程写入同一环境。\n• 安装进度会标明当前模型；大型 PyTorch CUDA 下载会保留等待提示，取消操作始终绑定正在运行的安装。\n• 增加安装并发保护与进度归属回归检查；1.6.0 的六类分组和可靠版本检测继续保留。",
             "• 模型安裝改為單一任務依序執行；已有安裝進行時再次點擊其他模型，會清楚提示等待，不再啟動第二個部署程序寫入同一環境。\n• 安裝進度會標明目前模型；大型 PyTorch CUDA 下載會保留等待提示，取消操作始終綁定正在執行的安裝。\n• 新增安裝並行保護與進度歸屬回歸檢查；1.6.0 的六類分組和可靠版本偵測繼續保留。",

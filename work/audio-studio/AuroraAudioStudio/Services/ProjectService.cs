@@ -4,7 +4,7 @@ using AuroraAudioStudio.Models;
 
 namespace AuroraAudioStudio.Services;
 
-public sealed class ProjectService(SettingsService settings)
+public sealed class ProjectService(SettingsService settings, ModelCatalogService? catalog = null)
 {
     private readonly JsonSerializerOptions json = new() { WriteIndented = true };
     private readonly HashSet<string> recoveryPaths = new(StringComparer.OrdinalIgnoreCase);
@@ -29,6 +29,8 @@ public sealed class ProjectService(SettingsService settings)
             ModelId = modelId,
             SourceSha256 = await HashSourceAsync(sourcePath)
         };
+        project.ModelVersion = catalog?.GetStates().FirstOrDefault(x => x.Id.Equals(modelId, StringComparison.OrdinalIgnoreCase))?.Version ?? "";
+        project.Parameters["appVersion"] = typeof(ProjectService).Assembly.GetName().Version?.ToString(3) ?? "1.7.0";
         var safeName = string.Join("-", name.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries)).Trim();
         if (string.IsNullOrWhiteSpace(safeName)) safeName = "Aurora-Project";
         project.FilePath = Path.Combine(settings.Current.ProjectsRoot, $"{safeName}-{project.Id[..8]}.arr");
@@ -73,9 +75,27 @@ public sealed class ProjectService(SettingsService settings)
         var project = Find(projectId);
         if (project is null) return;
         project.UpdatedAt = DateTimeOffset.Now;
-        if (!string.IsNullOrWhiteSpace(task.OutputPath))
-            project.Artifacts.Add(new AuroraArtifact { Path = task.OutputPath, SourceTaskId = task.Id, Kind = task.Feature });
+        foreach (var path in ResolveArtifacts(task))
+            if (!project.Artifacts.Any(x => x.Path.Equals(path, StringComparison.OrdinalIgnoreCase)))
+                project.Artifacts.Add(new AuroraArtifact { Path = path, SourceTaskId = task.Id, Kind = task.Feature, CreatedAt = task.CompletedAt ?? DateTimeOffset.Now });
         await SaveAsync(project);
+    }
+
+    private static IReadOnlyList<string> ResolveArtifacts(AuroraTaskRecord task)
+    {
+        if (string.IsNullOrWhiteSpace(task.OutputPath)) return [];
+        if (File.Exists(task.OutputPath)) return [task.OutputPath];
+        if (!Directory.Exists(task.OutputPath)) return [];
+        var earliest = (task.StartedAt ?? task.CreatedAt).UtcDateTime.AddSeconds(-2);
+        try
+        {
+            return Directory.EnumerateFiles(task.OutputPath, "*", SearchOption.AllDirectories)
+                .Where(path => File.GetLastWriteTimeUtc(path) >= earliest)
+                .OrderByDescending(File.GetLastWriteTimeUtc)
+                .Take(200)
+                .ToList();
+        }
+        catch { return []; }
     }
 
     public async Task SaveAsync(AuroraProject project)

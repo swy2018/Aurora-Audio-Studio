@@ -21,16 +21,23 @@ public sealed class MaintenanceService(SettingsService settings, ModelCatalogSer
         return checks;
     }
 
-    public string GpuSummary()
+    public async Task<string> GpuSummaryAsync(CancellationToken cancellationToken = default)
     {
         try
         {
             var info = new ProcessStartInfo("nvidia-smi", "--query-gpu=name,memory.total,driver_version --format=csv,noheader") { UseShellExecute = false, RedirectStandardOutput = true, CreateNoWindow = true };
             using var process = Process.Start(info);
             if (process is null) return "未检测到 NVIDIA GPU 信息";
-            var text = process.StandardOutput.ReadToEnd(); process.WaitForExit(3000);
+            var output = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            deadline.CancelAfter(TimeSpan.FromSeconds(3));
+            using var registration = deadline.Token.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
+            await process.WaitForExitAsync(deadline.Token);
+            var text = await output;
             return string.IsNullOrWhiteSpace(text) ? "未检测到 NVIDIA GPU 信息" : text.Trim();
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }
+        catch (OperationCanceledException) { return "GPU 信息读取超时"; }
         catch { return "GPU 信息不可用"; }
     }
 

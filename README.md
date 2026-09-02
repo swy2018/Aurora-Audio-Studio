@@ -5,8 +5,8 @@
   <p>面向 Windows 的本地 AI 音频创作工作台</p>
   <p>
     <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img alt="官方网站" src="docs/assets/readme-button-website.svg"></a>
-    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.6.1" src="docs/assets/readme-button-download-161.svg"></a>
-    <a href="CHANGELOG.md"><img alt="更新日志" src="docs/assets/readme-button-changelog-161.svg"></a>
+    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.7.0" src="docs/assets/readme-button-download-170.svg"></a>
+    <a href="CHANGELOG.md"><img alt="更新日志" src="docs/assets/readme-button-changelog-170.svg"></a>
     <a href="#english"><img alt="English" src="docs/assets/readme-button-english.svg"></a>
   </p>
 </div>
@@ -15,18 +15,19 @@
 
 Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离、MIDI 扒谱和视频字幕集中到同一个本地入口。六个功能互相独立，可直接开始当前任务，不再需要手动管理多个启动器、端口和结果目录。
 
-## 1.6.1 带来了什么
+## 1.7.0 带来了什么
 
-### 模型安装不再互相打架
+### 从任务队列到模型部署的可靠性升级
 
-- 同一时间只执行一个模型安装，避免重复点击让多个部署任务同时写入同一环境。
-- 再次点击其他模型时会明确提示等待当前安装完成，不会覆盖正在运行任务的取消句柄。
-- 安装进度始终标明当前模型名称；大型 PyTorch CUDA 组件下载会保留耐心等待提示，取消操作只作用于当前安装。
+- 已取消的排队任务不会再启动；取消单个任务不会误停其他引擎，重试会保留原处理预设。
+- Hugging Face 下载器改为独立环境；ACE-Step 与 Seed-VC 可由 Aurora 完整部署代码、Python、依赖和官方权重。
+- 更新检查支持四路并发、进度、取消与超时，模型可用状态会同时验证权重和实际运行环境。
+- 安装浮层保留清晰阶段并显示最近活动与详细日志，TransKun 的空间估算已包含 CUDA PyTorch。
 
-### 保留 1.6.0 的完整模型管理
+### 更稳的日常使用
 
-- 六类功能分组、正式 Release 优先和无正式版时的日期版检测继续保留。
-- HeartMuLa、IndexTTS 2.5、SoulX-Singer SVC、Qwen3-ASR 与 Qwen3-ForcedAligner 仍为用户主动安装的可选入口。
+- 设置路径先完整校验再保存，素材会按当前功能过滤；健康扫描和诊断导出不再卡住界面。
+- 处理记录保存真实模型版本和实际成品文件，第二次启动会唤醒现有窗口并恢复上次窗口状态。
 
 ## 工作流
 
@@ -53,7 +54,7 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 ### 标准安装
 
 1. 打开 [Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest)。
-2. 下载 `Aurora-Audio-Studio-1.6.1-Setup-x64.exe` 和同名 `.sha256` 文件。
+2. 下载 `Aurora-Audio-Studio-1.7.0-Setup-x64.exe` 和同名 `.sha256` 文件。
 3. 运行安装程序，阅读并接受 GNU GPL v3.0，选择安装位置和桌面快捷方式。
 4. 首次打开 Aurora，直接选择需要的功能；需要时再确认模型、处理记录和成品目录。
 
@@ -82,7 +83,7 @@ Aurora 桌面端使用 .NET 10、WinUI 3 和 Windows App SDK 构建，官网使�
 ```powershell
 dotnet restore .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj --runtime win-x64
 dotnet build .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -p:Platform=x64
-dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.6.1
+dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.7.0
 ```
 
 运行回归检查：
@@ -113,12 +114,13 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 Aurora Audio Studio is a local AI audio production workspace for Windows. Its six independent features provide direct entry points for music generation, voice cloning, singing conversion, stem separation, MIDI transcription, and video subtitles.
 
-### What version 1.6.1 adds
+### What version 1.7.0 adds
 
-- Aurora now runs only one model installation at a time, preventing repeated clicks from writing to the same environment concurrently.
-- Starting another model installation while one is active returns a clear wait message instead of replacing the active cancellation handle.
-- Progress identifies the active model. Large PyTorch CUDA downloads retain a clear wait message, and Cancel remains bound to that installation only.
-- The six workflow groups, stable-Release-first checks, date-version fallback, and optional model entries from 1.6.0 remain available.
+- Canceled queued tasks no longer start, single-task cancellation no longer stops unrelated engines, and retry preserves the original preset.
+- Hugging Face downloads use an independent bootstrap. Aurora can fully deploy ACE-Step and Seed-VC from a clean machine.
+- Update checks use bounded concurrency, progress, cancellation, and timeouts; readiness verifies both weights and required runtimes.
+- Installation details remain readable, settings validate atomically, media is filtered per workflow, and health scans stay off the UI thread.
+- Processing records capture actual model versions and output files. A second launch brings the existing window forward and restores its saved state.
 
 ### Local by design
 
@@ -127,7 +129,7 @@ Aurora does not operate a cloud generation service. Media and generated output r
 ### Install
 
 1. Open the latest [Release](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest).
-2. Download `Aurora-Audio-Studio-1.6.1-Setup-x64.exe` and its `.sha256` file.
+2. Download `Aurora-Audio-Studio-1.7.0-Setup-x64.exe` and its `.sha256` file.
 3. Run Setup, review GNU GPL v3.0, and choose the destination and shortcut options.
 4. Choose a feature on first launch; confirm model, processing-record, and output folders only when needed.
 

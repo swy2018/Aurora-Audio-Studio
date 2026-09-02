@@ -87,12 +87,12 @@ Require(mainPageXaml.Contains("AutomationProperties.Name=\"本地 AI 创作工�
 var repositoryRoot = Path.GetFullPath(Path.Combine(audioStudioRoot, "..", ".."));
 var workflow = File.ReadAllText(Path.Combine(repositoryRoot, ".github", "workflows", "build.yml"));
 Require(workflow.Contains("AuroraAudioStudio.UpdateFlowTests", StringComparison.Ordinal), "CI must run the regression program before packaging.");
-Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains("<Version>1.6.1</Version>", StringComparison.Ordinal), "The application project must publish version 1.6.1.");
-Require(installerScript.Contains("MyAppVersion \"1.6.1\"", StringComparison.Ordinal), "The installer fallback version must match 1.6.1.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains("Aurora-Audio-Studio-1.6.1-Setup-x64.exe", StringComparison.Ordinal), "README download instructions must match 1.6.1.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains("Download 1.6.1", StringComparison.Ordinal), "The website download action must match 1.6.1.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-download-161.svg")).Contains(">1.6.1</text>", StringComparison.Ordinal), "The README download badge must render version 1.6.1.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-changelog-161.svg")).Contains(">1.6.1</text>", StringComparison.Ordinal), "The README changelog badge must render version 1.6.1.");
+Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains("<Version>1.7.0</Version>", StringComparison.Ordinal), "The application project must publish version 1.7.0.");
+Require(installerScript.Contains("MyAppVersion \"1.7.0\"", StringComparison.Ordinal), "The installer fallback version must match 1.7.0.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains("Aurora-Audio-Studio-1.7.0-Setup-x64.exe", StringComparison.Ordinal), "README download instructions must match 1.7.0.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains("Download 1.7.0", StringComparison.Ordinal), "The website download action must match 1.7.0.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-download-170.svg")).Contains(">1.7.0</text>", StringComparison.Ordinal), "The README download badge must render version 1.7.0.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-changelog-170.svg")).Contains(">1.7.0</text>", StringComparison.Ordinal), "The README changelog badge must render version 1.7.0.");
 
 var qwen = new ModelDefinition("qwen3-tts-06b-base", "Qwen3-TTS 0.6B", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "model.safetensors", "Qwen", "huggingface", "Qwen/Qwen3-TTS-12Hz-0.6B-Base");
 var plan = ModelInstallPlanner.Create(qwen, @"D:\AuroraModels");
@@ -119,6 +119,8 @@ foreach (var candidate in new[] { "heartmula-3b", "indextts-2-5", "soulx-singer-
     Require(catalogSource.Contains($"new(\"{candidate}\"", StringComparison.Ordinal), $"Model Management must expose optional candidate {candidate}.");
 var mainPageSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "MainPage.xaml.cs"));
 var modelUpdateSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Services", "ModelUpdateService.cs"));
+var taskQueueSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Services", "TaskQueueService.cs"));
+var settingsSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Services", "SettingsService.cs"));
 Require(mainPageXaml.Contains("x:Name=\"UpdateAllModelsButton\"", StringComparison.Ordinal), "Model Management must expose an Update all button after checking updates.");
 Require(mainPageXaml.Contains("x:Name=\"InstallWorkbenchModelButton\"", StringComparison.Ordinal), "The workbench must expose a dedicated install button for the selected missing model.");
 Require(mainPageSource.Contains("ModelPicker.SelectionChanged += ModelPicker_SelectionChanged", StringComparison.Ordinal), "The workbench model picker must refresh its actions after page initialization.");
@@ -136,6 +138,26 @@ Require(mainPageSource.Contains("$\"{model.Name} · {value.Detail}\"", StringCom
 Require(modelUpdateSource.Contains("PyTorch 组件较大，请耐心等待", StringComparison.Ordinal), "Large CUDA dependency installs must explain that an indeterminate wait can still be active.");
 Require(modelUpdateSource.Contains("IsProgressNoise", StringComparison.Ordinal)
     && modelUpdateSource.Contains("Using Python", StringComparison.Ordinal), "uv environment headers must not replace the active installation stage in the progress UI.");
+Require(taskQueueSource.Contains("if (task.Status == AuroraTaskStates.Canceled)", StringComparison.Ordinal), "A queued task canceled before execution must never be reset to waiting and run later.");
+var cancelHandler = Regex.Match(mainPageSource, @"private void CancelTaskButton_Click[\s\S]*?\n    }").Value;
+Require(!cancelHandler.Contains("backend.StopAll()", StringComparison.Ordinal), "Canceling one task must not stop an unrelated workbench or another queued task.");
+Require(mainPageSource.Contains("entry.Task.Feature, entry.Task.InputPath, entry.Task.ModelId", StringComparison.Ordinal), "Queued work must execute its immutable task feature and model even after navigation changes.");
+Require(mainPageXaml.Contains("IsEnabled=\"{Binding CanCancel}\"", StringComparison.Ordinal)
+    && mainPageXaml.Contains("IsEnabled=\"{Binding CanRetry}\"", StringComparison.Ordinal), "Task actions must reflect whether each task can be canceled or retried.");
+Require(modelUpdateSource.Contains("EnsureHuggingFaceBootstrapAsync", StringComparison.Ordinal), "Hugging Face downloads must bootstrap independently instead of depending on an installed Qwen runtime.");
+Require(catalogSource.Contains("ModelHealthPolicy", StringComparison.Ordinal), "Model readiness must verify the runtime files required by the backend, not only one marker file.");
+Require(settingsSource.Contains("TrySave", StringComparison.Ordinal) && settingsSource.Contains("SettingsPathValidator", StringComparison.Ordinal), "Settings must validate all storage paths before replacing the active configuration.");
+Require(modelUpdateSource.Contains("SemaphoreSlim(4", StringComparison.Ordinal)
+    && modelUpdateSource.Contains("ModelCheckProgress", StringComparison.Ordinal)
+    && modelUpdateSource.Contains("CancellationToken cancellationToken", StringComparison.Ordinal), "Check all must use bounded concurrency, progress, and cancellation.");
+Require(mainPageXaml.Contains("x:Name=\"UpdateLogText\"", StringComparison.Ordinal)
+    && mainPageXaml.Contains("TextWrapping=\"Wrap\"", StringComparison.Ordinal), "Long model installation activity must remain readable and expose recent details.");
+Require(MediaInputPolicy.IsSupported("subtitles", "clip.mp4") && MediaInputPolicy.IsSupported("separation", "song.flac"), "Media intake must accept supported feature-specific formats.");
+Require(MediaInputPolicy.IsSupported("transcription", "clip.exe") == false, "Media intake must reject unsupported executable files.");
+Require(SettingsPathValidator.TryValidate(@"C:\", @"C:\Output", @"C:\Projects", out _) == false
+    && SettingsPathValidator.TryValidate(@"C:\LocalAI", @"C:\Output", @"C:\Projects", out _), "Settings paths must reject a drive root while accepting scoped absolute folders.");
+var missingRuntimeModel = new ModelDefinition("qwen3-tts-06b-base", "Qwen", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "model.safetensors", "test", "huggingface");
+Require(ModelHealthPolicy.IsReady(missingRuntimeModel, Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))) == false, "A model without its required runtime and marker must not be reported as ready.");
 Require(mainPageSource.Contains("PrimaryAction = localization.Translate(\"更新\")", StringComparison.Ordinal), "A detected model update must replace the generic card action with Update.");
 Require(mainPageSource.Contains("new OperationResult(false, result.Message, \"available\")", StringComparison.Ordinal), "A failed batch update must remain available for retry.");
 Require(modelUpdateSource.Contains("RunningProcessGuard.FindInRoot", StringComparison.Ordinal), "Model updates must detect a running component before replacing its files.");
@@ -199,6 +221,9 @@ Require(notes160.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.6.0 rele
 var notes161 = ReleaseNotesCatalog.CurrentAndRecent("1.6.1", "zh-TW");
 Require(notes161.Count == 5 && notes161[0].Version == "1.6.1" && notes161[^1].Version == "1.4.1", "Version 1.6.1 must show itself and its four previous releases.");
 Require(notes161.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.6.1 release note must have localized content.");
+var notes170 = ReleaseNotesCatalog.CurrentAndRecent("1.7.0", "zh-CN");
+Require(notes170.Count == 5 && notes170[0].Version == "1.7.0" && notes170[^1].Version == "1.5.0", "Version 1.7.0 must show itself and its four previous releases.");
+Require(notes170.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.7.0 release note must have localized content.");
 var notes151 = ReleaseNotesCatalog.CurrentAndRecent("1.5.1", "en-US");
 Require(notes151.Count == 5 && notes151[0].Version == "1.5.1" && notes151[^1].Version == "1.3.0", "Version 1.5.1 must show itself and its four previous releases.");
 Require(notes151.All(x => !string.IsNullOrWhiteSpace(x.Body)), "Every 1.5.1 release note must have localized content.");

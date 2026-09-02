@@ -2,7 +2,7 @@ using AuroraAudioStudio.Models;
 
 namespace AuroraAudioStudio.Services;
 
-public sealed record ModelInstallPlan(string TargetPath, string EstimatedDownload, string RecommendedFreeSpace, string AvailableSpace, bool HasEnoughSpace);
+public sealed record ModelInstallPlan(string TargetPath, string EstimatedDownload, string RecommendedFreeSpace, string AvailableSpace, bool HasEnoughSpace, bool IsLarge);
 
 public static class ModelInstallPlanner
 {
@@ -13,9 +13,9 @@ public static class ModelInstallPlanner
         try
         {
             var drive = new DriveInfo(Path.GetPathRoot(target)!);
-            return new(target, EstimatedDownload(model.Id), RecommendedFreeSpace(model.Id), FormatBytes(drive.AvailableFreeSpace), drive.AvailableFreeSpace >= required);
+            return new(target, EstimatedDownload(model.Id), RecommendedFreeSpace(model.Id), FormatBytes(drive.AvailableFreeSpace), drive.AvailableFreeSpace >= required, required >= 4L * 1024 * 1024 * 1024);
         }
-        catch { return new(target, EstimatedDownload(model.Id), RecommendedFreeSpace(model.Id), "未知", true); }
+        catch { return new(target, EstimatedDownload(model.Id), RecommendedFreeSpace(model.Id), "未知", true, required >= 4L * 1024 * 1024 * 1024); }
     }
 
     public static string EstimatedDownload(string id) => id switch
@@ -32,7 +32,7 @@ public static class ModelInstallPlanner
         "qwen3-asr-06b" => "≈ 1.6 GB",
         "qwen3-asr-17b" => "≈ 4.1 GB",
         "qwen3-forced-aligner" => "≈ 1.9 GB",
-        "transkun" => "< 1 GB",
+        "transkun" => "≈ 4.5 GB（含 CUDA PyTorch）",
         "roformer" or "yourmt3" => "< 100 MB",
         "roformer-vocals" => "≈ 600 MB",
         "piano" => "≈ 165 MB",
@@ -58,7 +58,7 @@ public static class ModelInstallPlanner
         "qwen3-asr-06b" => "≈ 4 GB",
         "qwen3-asr-17b" => "≈ 9 GB",
         "qwen3-forced-aligner" => "≈ 4 GB",
-        "transkun" => "≈ 2 GB",
+        "transkun" => "≈ 10 GB",
         "roformer" or "yourmt3" => "≈ 1 GB",
         "roformer-vocals" => "≈ 1.5 GB",
         "piano" => "≈ 500 MB",
@@ -84,7 +84,7 @@ public static class ModelInstallPlanner
         "qwen3-asr-06b" => 4L * 1024 * 1024 * 1024,
         "qwen3-asr-17b" => 9L * 1024 * 1024 * 1024,
         "qwen3-forced-aligner" => 4L * 1024 * 1024 * 1024,
-        "transkun" => 2L * 1024 * 1024 * 1024,
+        "transkun" => 10L * 1024 * 1024 * 1024,
         "roformer" or "yourmt3" => 1L * 1024 * 1024 * 1024,
         "roformer-vocals" => 1536L * 1024 * 1024,
         "piano" => 512L * 1024 * 1024,

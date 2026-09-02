@@ -33,15 +33,32 @@ public sealed class SettingsService
         Directory.CreateDirectory(Current.ProjectsRoot);
     }
 
+    public bool TrySave(AppSettings settings, out string error)
+    {
+        if (!SettingsPathValidator.TryValidate(settings.LocalAiRoot, settings.OutputRoot, settings.ProjectsRoot, out error)) return false;
+        try
+        {
+            Directory.CreateDirectory(AppDataRoot);
+            Directory.CreateDirectory(settings.LocalAiRoot);
+            Directory.CreateDirectory(settings.OutputRoot);
+            Directory.CreateDirectory(settings.ProjectsRoot);
+            var temp = SettingsPath + ".tmp";
+            File.WriteAllText(temp, JsonSerializer.Serialize(settings, options));
+            File.Move(temp, SettingsPath, true);
+            Current = settings;
+            error = "";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            error = "无法保存设置：" + ex.Message;
+            return false;
+        }
+    }
+
     public void Save(AppSettings settings)
     {
-        Current = settings;
-        Directory.CreateDirectory(AppDataRoot);
-        Directory.CreateDirectory(Current.OutputRoot);
-        Directory.CreateDirectory(Current.ProjectsRoot);
-        var temp = SettingsPath + ".tmp";
-        File.WriteAllText(temp, JsonSerializer.Serialize(Current, options));
-        File.Move(temp, SettingsPath, true);
+        if (!TrySave(settings, out var error)) throw new IOException(error);
     }
 
     public string EffectiveLanguage()
