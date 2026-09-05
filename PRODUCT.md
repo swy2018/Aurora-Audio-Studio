@@ -20,7 +20,7 @@ Aurora Audio Studio provides one local desktop workspace for launching, installi
 
 ## Positioning
 
-Aurora unifies independently installed local audio models behind one bilingual desktop shell while keeping model execution, files, and outputs on the user's machine.
+Aurora unifies independently installed local audio models behind a four-language desktop shell while keeping model execution, files, and outputs on the user's machine.
 
 ## Operating Context
 
@@ -28,6 +28,7 @@ Aurora unifies independently installed local audio models behind one bilingual d
 - Uses a configurable `LocalAI` root for models and tools.
 - Organizes results into a configurable `AI工作流` output root.
 - Supports system-adaptive Simplified Chinese, Traditional Chinese, English, and Japanese UI.
+- Language selection applies and saves immediately, independently of unsaved storage settings. Japanese uses bundled Noto Sans JP and an adapted type scale.
 - Does not start with Windows.
 - Models download only after an explicit install action.
 
@@ -36,14 +37,14 @@ Aurora unifies independently installed local audio models behind one bilingual d
 - Music generation with ACE-Step 1.5 XL Turbo, plus optional on-demand MiniMax-Music3 with an isolated low-VRAM CUDA runtime.
 - AI voice creation with the default Qwen3-TTS 1.7B suite, plus optional Qwen3-TTS 0.6B and F5-TTS engines.
 - Singing voice cloning with Seed-VC at 44.1 kHz.
-- Six-stem separation with BS-RoFormer-SW, plus optional general-purpose Demucs 4 separation.
+- Two-stem vocals/instrumental separation with Vocals Revive V3e, six-stem separation with BS-RoFormer-SW, and optional Demucs 4 separation.
 - Default piano MIDI transcription with TransKun V2, plus YourMT3+, legacy ByteDance Piano, and lightweight Spotify Basic Pitch options.
 - Video subtitles with Subtitle Edit and Faster-Whisper, plus optional Small, Large v3 Turbo, and Large v3 CTranslate2 model packs.
 - Batch media intake with drag and drop, built-in preview, quality presets, live task progress, persistent logs, pending-queue pause, and a unified Results library.
 - Model selection, resumable on-demand deployment with disk checks and cancellation, model manager, output-folder selection, verified app updates, per-model update checks, VRAM release, diagnostics export, and four-language switching.
 - Closing Aurora stops the backends it launched.
 - A redesign must preserve every existing workflow, control, and product behavior unless the user explicitly approves a functional change.
-- The approved A workbench and dark rounded A-wave icon remain the visual baseline for version 1.8.1.
+- The approved A workbench and dark rounded A-wave icon remain the visual baseline; published screenshots are retained as historical previews.
 - The existing model suite remains the default. Optional engines never install automatically and do not create maintenance warnings when absent.
 - The installer defaults to Program Files, performs guarded in-place upgrades under the same AppId, and preserves user-owned data and the selected install location.
 - Interactive uninstall offers an explicit personal-configuration cleanup choice without touching models, processing records, source media, or outputs.

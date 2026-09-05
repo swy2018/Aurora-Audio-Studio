@@ -1,0 +1,302 @@
+{
+  "version": "1.9.0",
+  "models": [
+    {
+      "id": "ace-step",
+      "name": "ACE-Step 1.5 XL Turbo",
+      "nameEn": "ACE-Step 1.5 XL Turbo",
+      "feature": "music",
+      "recommended": true,
+      "mode": "embedded-workbench",
+      "source": "https://github.com/ACE-Step/ACE-Step-1.5.git",
+      "license": "Apache-2.0",
+      "download": "≈ 32–36 GB"
+    },
+    {
+      "id": "minimax-music3",
+      "name": "MiniMax-Music3",
+      "nameEn": "MiniMax-Music3",
+      "feature": "music",
+      "recommended": false,
+      "mode": "embedded-workbench",
+      "source": "MiniMaxAI/MiniMax-Music3",
+      "license": "MiniMax-Music3 Community License",
+      "download": "≈ 27 GB"
+    },
+    {
+      "id": "heartmula-3b",
+      "name": "HeartMuLa 3B · Happy New Year",
+      "nameEn": "HeartMuLa 3B · Happy New Year",
+      "feature": "music",
+      "recommended": false,
+      "mode": "download-only",
+      "source": "HeartMuLa/HeartMuLa-oss-3B-happy-new-year",
+      "license": "Apache-2.0",
+      "download": "≈ 15.8 GB"
+    },
+    {
+      "id": "qwen3-tts-base",
+      "name": "Qwen3-TTS 1.7B · 声音克隆",
+      "nameEn": "Qwen3-TTS 1.7B · Voice cloning",
+      "feature": "voice",
+      "recommended": true,
+      "mode": "embedded-workbench",
+      "source": "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+      "license": "Apache-2.0",
+      "download": "≈ 4 GB"
+    },
+    {
+      "id": "qwen3-tts-custom",
+      "name": "Qwen3-TTS 1.7B · 专业音色",
+      "nameEn": "Qwen3-TTS 1.7B · Preset voices",
+      "feature": "voice",
+      "recommended": true,
+      "mode": "embedded-workbench",
+      "source": "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
+      "license": "Apache-2.0",
+      "download": "≈ 4 GB"
+    },
+    {
+      "id": "qwen3-tts-design",
+      "name": "Qwen3-TTS 1.7B · 音色设计",
+      "nameEn": "Qwen3-TTS 1.7B · Voice design",
+      "feature": "voice",
+      "recommended": true,
+      "mode": "embedded-workbench",
+      "source": "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+      "license": "Apache-2.0",
+      "download": "≈ 4 GB"
+    },
+    {
+      "id": "qwen3-tts-06b-base",
+      "name": "Qwen3-TTS 0.6B · 轻量声音克隆",
+      "nameEn": "Qwen3-TTS 0.6B · Lightweight cloning",
+      "feature": "voice",
+      "recommended": false,
+      "mode": "embedded-workbench",
+      "source": "Qwen/Qwen3-TTS-12Hz-0.6B-Base",
+      "license": "Apache-2.0",
+      "download": "≈ 1.5 GB"
+    },
+    {
+      "id": "qwen3-tts-06b-custom",
+      "name": "Qwen3-TTS 0.6B · 轻量专业音色",
+      "nameEn": "Qwen3-TTS 0.6B · Lightweight preset voices",
+      "feature": "voice",
+      "recommended": false,
+      "mode": "embedded-workbench",
+      "source": "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice",
+      "license": "Apache-2.0",
+      "download": "≈ 1.5 GB"
+    },
+    {
+      "id": "f5-tts",
+      "name": "F5-TTS · 多语言声音克隆",
+      "nameEn": "F5-TTS · Multilingual cloning",
+      "feature": "voice",
+      "recommended": false,
+      "mode": "embedded-workbench",
+      "source": "f5-tts",
+      "license": "MIT code / CC-BY-NC-4.0 weights (noncommercial)",
+      "download": "≈ 4–7 GB"
+    },
+    {
+      "id": "indextts-2-5",
+      "name": "IndexTTS-2.5 · 可控配音",
+      "nameEn": "IndexTTS-2.5 · Controllable voice",
+      "feature": "voice",
+      "recommended": false,
+      "mode": "download-only",
+      "source": "IndexTeam/IndexTTS-2.5",
+      "license": "Bilibili Model License",
+      "download": "≈ 5.5 GB"
+    },
+    {
+      "id": "seed-vc",
+      "name": "Seed-VC 44.1k",
+      "nameEn": "Seed-VC 44.1k",
+      "feature": "singing",
+      "recommended": true,
+      "mode": "embedded-workbench",
+      "source": "https://github.com/Plachtaa/seed-vc.git",
+      "license": "Review upstream license",
+      "download": "≈ 8–10 GB"
+    },
+    {
+      "id": "soulx-singer-svc",
+      "name": "SoulX-Singer-SVC · 零样本歌声转换",
+      "nameEn": "SoulX-Singer-SVC · Zero-shot singing conversion",
+      "feature": "singing",
+      "recommended": false,
+      "mode": "download-only",
+      "source": "Soul-AILab/SoulX-Singer",
+      "license": "Apache-2.0",
+      "download": "≈ 2.8 GB"
+    },
+    {
+      "id": "roformer",
+      "name": "BS-RoFormer-SW · 多轨高质量",
+      "nameEn": "BS-RoFormer-SW · High-quality multistem",
+      "feature": "separation",
+      "recommended": true,
+      "mode": "native-task",
+      "source": "bs-roformer-infer",
+      "license": "Review upstream license",
+      "download": "≈ 4–7 GB"
+    },
+    {
+      "id": "roformer-vocals",
+      "name": "BS-RoFormer Vocals Revive V3e · 二轨",
+      "nameEn": "BS-RoFormer Vocals Revive V3e · Two stems",
+      "feature": "separation",
+      "recommended": true,
+      "mode": "native-task",
+      "source": "roformer-model-bs-roformer-vocals-revive-v3e-by-unwa",
+      "license": "Review upstream license",
+      "download": "≈ 0.6–7 GB"
+    },
+    {
+      "id": "demucs",
+      "name": "Demucs 4 · 通用四轨分离",
+      "nameEn": "Demucs 4 · General four-stem separation",
+      "feature": "separation",
+      "recommended": false,
+      "mode": "native-task",
+      "source": "demucs",
+      "license": "MIT",
+      "download": "≈ 4–7 GB"
+    },
+    {
+      "id": "yourmt3",
+      "name": "YourMT3+ Multi-Instrument",
+      "nameEn": "YourMT3+ Multi-Instrument",
+      "feature": "transcription",
+      "recommended": false,
+      "mode": "native-task",
+      "source": "mt3-infer",
+      "license": "Review upstream license",
+      "download": "≈ 4–7 GB"
+    },
+    {
+      "id": "transkun",
+      "name": "TransKun V2 · 钢琴扒谱",
+      "nameEn": "TransKun V2 · Piano transcription",
+      "feature": "transcription",
+      "recommended": true,
+      "mode": "native-task",
+      "source": "transkun",
+      "license": "MIT",
+      "download": "≈ 4.5 GB"
+    },
+    {
+      "id": "piano",
+      "name": "ByteDance Piano · 经典模型",
+      "nameEn": "ByteDance Piano · Classic model",
+      "feature": "transcription",
+      "recommended": false,
+      "mode": "native-task",
+      "source": "https://zenodo.org/records/4034264/files/CRNN_note_F1%3D0.9677_pedal_F1%3D0.9186.pth?download=1",
+      "license": "Review upstream license",
+      "download": "≈ 165 MB"
+    },
+    {
+      "id": "basic-pitch",
+      "name": "Spotify Basic Pitch · 轻量扒谱",
+      "nameEn": "Spotify Basic Pitch · Lightweight transcription",
+      "feature": "transcription",
+      "recommended": false,
+      "mode": "native-task",
+      "source": "basic-pitch",
+      "license": "Apache-2.0",
+      "download": "≈ 1 GB"
+    },
+    {
+      "id": "faster-whisper",
+      "name": "Faster-Whisper XXL",
+      "nameEn": "Faster-Whisper XXL",
+      "feature": "subtitles",
+      "recommended": true,
+      "mode": "shared-runtime",
+      "source": "https://github.com/Purfview/whisper-standalone-win.git",
+      "license": "MIT",
+      "download": "≈ 1.4 GB"
+    },
+    {
+      "id": "whisper-small",
+      "name": "Faster-Whisper Small",
+      "nameEn": "Faster-Whisper Small",
+      "feature": "subtitles",
+      "recommended": false,
+      "mode": "native-task",
+      "source": "Systran/faster-whisper-small",
+      "license": "MIT",
+      "download": "≈ 470 MB"
+    },
+    {
+      "id": "whisper-large-v3-turbo",
+      "name": "Faster-Whisper Large v3 Turbo",
+      "nameEn": "Faster-Whisper Large v3 Turbo",
+      "feature": "subtitles",
+      "recommended": false,
+      "mode": "native-task",
+      "source": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "license": "MIT",
+      "download": "≈ 1.6 GB"
+    },
+    {
+      "id": "whisper-large-v3",
+      "name": "Faster-Whisper Large v3",
+      "nameEn": "Faster-Whisper Large v3",
+      "feature": "subtitles",
+      "recommended": false,
+      "mode": "native-task",
+      "source": "Systran/faster-whisper-large-v3",
+      "license": "MIT",
+      "download": "≈ 3.1 GB"
+    },
+    {
+      "id": "qwen3-asr-06b",
+      "name": "Qwen3-ASR 0.6B · 快速识别",
+      "nameEn": "Qwen3-ASR 0.6B · Fast recognition",
+      "feature": "subtitles",
+      "recommended": false,
+      "mode": "download-only",
+      "source": "Qwen/Qwen3-ASR-0.6B-hf",
+      "license": "Apache-2.0",
+      "download": "≈ 1.6 GB"
+    },
+    {
+      "id": "qwen3-asr-17b",
+      "name": "Qwen3-ASR 1.7B · 高质量识别",
+      "nameEn": "Qwen3-ASR 1.7B · High-quality recognition",
+      "feature": "subtitles",
+      "recommended": false,
+      "mode": "download-only",
+      "source": "Qwen/Qwen3-ASR-1.7B-hf",
+      "license": "Apache-2.0",
+      "download": "≈ 4.1 GB"
+    },
+    {
+      "id": "qwen3-forced-aligner",
+      "name": "Qwen3 ForcedAligner 0.6B · 精确时间轴",
+      "nameEn": "Qwen3 ForcedAligner 0.6B · 精确时间轴",
+      "feature": "subtitles",
+      "recommended": false,
+      "mode": "download-only",
+      "source": "Qwen/Qwen3-ForcedAligner-0.6B-hf",
+      "license": "Apache-2.0",
+      "download": "≈ 1.9 GB"
+    },
+    {
+      "id": "subtitle-edit",
+      "name": "Subtitle Edit",
+      "nameEn": "Subtitle Edit",
+      "feature": "subtitles",
+      "recommended": false,
+      "mode": "external-editor",
+      "source": "https://github.com/SubtitleEdit/subtitleedit.git",
+      "license": "GPL-3.0",
+      "download": "≈ 110 MB"
+    }
+  ]
+}

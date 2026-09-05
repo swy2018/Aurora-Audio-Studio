@@ -137,6 +137,12 @@ The palette is a quiet local-studio spectrum: warm mint paper and clean white su
 
 ## Typography
 
+### Native desktop localization (1.9.0)
+
+The web marketing scale below does not apply to native production controls. Desktop body and labels use 14 DIPs, section headings 20, and page titles 28 (24 for Japanese). Japanese uses bundled Noto Sans JP at normal body weight and semibold headings, 22-DIP explanatory leading, and a 232-DIP sidebar. Simplified Chinese uses Microsoft YaHei UI; Traditional Chinese uses Microsoft JhengHei UI; English uses Segoe UI. Code and paths retain Consolas. Preserve Windows text scaling.
+
+Settings are left aligned. Language selection is immediately applied and persisted; the explanatory hint sits directly below the selector. Storage settings retain a separate Save action. A language switch must not reset the active workbench's inputs. Embedded Japanese UI uses the same bundled family with 24/20/17-pixel heading roles and 1.65–1.75 body leading.
+
 **Display Font:** Segoe UI Variable Display (with Segoe UI and Microsoft YaHei UI fallbacks)
 **Body Font:** Segoe UI Variable Text (with Segoe UI, Microsoft YaHei UI, and Yu Gothic UI fallbacks)
 **Label/Mono Font:** Consolas for local paths only

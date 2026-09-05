@@ -2,14 +2,16 @@
 <Page x:Class="AuroraAudioStudio.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="using:AuroraAudioStudio"
     Background="{ThemeResource AuroraBackgroundBrush}">
     <Page.Resources>
+        <ui:LocalizedValueConverter x:Key="LocalizedValue"/>
         <CollectionViewSource x:Name="ModelGroupsSource" IsSourceGrouped="True" ItemsPath="Items"/>
     </Page.Resources>
     <Grid>
         <NavigationView x:Name="Shell" IsBackButtonVisible="Collapsed" IsSettingsVisible="False" AutomationProperties.Name="Aurora 主导航"
             PaneDisplayMode="Left" OpenPaneLength="248" CompactPaneLength="52"
-            SelectionChanged="Shell_SelectionChanged">
+            SelectionChanged="Shell_SelectionChanged" SizeChanged="Shell_SizeChanged">
             <NavigationView.PaneHeader>
                 <StackPanel Orientation="Horizontal" Spacing="12" Margin="4,8,0,16">
                     <Image Source="Assets/Square44x44Logo.scale-200.png" Width="34" Height="34" Stretch="Uniform" />
@@ -42,13 +44,13 @@
 
             <Grid>
                 <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-                <Grid x:Name="PageHeader" Padding="30,22,30,18" Background="{ThemeResource AuroraSurfaceBrush}">
+                <Grid x:Name="PageHeader" Padding="30,22,30,18" SizeChanged="PageHeader_SizeChanged" Background="{ThemeResource AuroraSurfaceBrush}">
                     <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                     <StackPanel Spacing="4">
-                        <TextBlock x:Name="PageTitle" Text="音乐创作" FontSize="28" FontWeight="SemiBold" Foreground="{ThemeResource AuroraTextBrush}" AutomationProperties.LiveSetting="Polite" />
-                        <TextBlock x:Name="PageSubtitle" Text="从灵感到成品，一站完成生成、编辑与导出。" Foreground="{ThemeResource AuroraMutedBrush}" />
+                        <TextBlock x:Name="PageTitle" Text="音乐创作" TextWrapping="Wrap" FontSize="28" FontWeight="SemiBold" Foreground="{ThemeResource AuroraTextBrush}" AutomationProperties.LiveSetting="Polite" />
+                        <TextBlock x:Name="PageSubtitle" Text="从灵感到成品，一站完成生成、编辑与导出。" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}" />
                     </StackPanel>
-                    <Border Grid.Column="1" Padding="10,6" CornerRadius="8" Background="#E4F3ED" VerticalAlignment="Center">
+                    <Border x:Name="LocalModeBadge" Grid.Column="1" Padding="10,6" CornerRadius="8" Background="#E4F3ED" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <Ellipse Width="7" Height="7" Fill="#267D63" VerticalAlignment="Center"/>
                             <TextBlock x:Name="ModeLabel" Text="本地创作" Foreground="#205F4D" FontWeight="SemiBold" />
@@ -63,8 +65,8 @@
                             <Border Padding="30" CornerRadius="14" Background="{ThemeResource AuroraAccentBrush}">
                                 <Grid ColumnSpacing="28"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <StackPanel Spacing="10" MaxWidth="700" HorizontalAlignment="Left">
-                                        <TextBlock x:Name="HomeWelcomeTitle" Text="今天想创作什么？" FontSize="30" FontWeight="SemiBold" Foreground="White"/>
-                                        <TextBlock x:Name="HomeWelcomeBody" Text="六个功能互相独立，不需要先新建项目。选择功能后，再按提示添加素材、模型和输出位置。" TextWrapping="Wrap" Foreground="#E7FFF6" FontSize="15"/>
+                                        <TextBlock x:Name="HomeWelcomeTitle" ui:LocalizedText.Key="今天想创作什么？" FontSize="30" FontWeight="SemiBold" Foreground="White"/>
+                                        <TextBlock x:Name="HomeWelcomeBody" ui:LocalizedText.Key="六个功能互相独立，不需要先新建项目。选择功能后，再按提示添加素材、模型和输出位置。" TextWrapping="Wrap" Foreground="#E7FFF6" FontSize="15"/>
                                     </StackPanel>
                                     <FontIcon Grid.Column="1" Glyph="&#xE8D6;" FontSize="48" Foreground="#D6F8EA" VerticalAlignment="Center"/>
                                 </Grid>
@@ -72,87 +74,89 @@
                             <Grid Grid.Row="1" ColumnSpacing="12" RowSpacing="12">
                                 <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-                                <Button x:Name="MusicTemplateButton" Grid.Column="0" Tag="music" Click="TemplateButton_Click" AccessKey="M" AutomationProperties.Name="创作音乐" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="18,14"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Glyph="&#xE8D6;" FontSize="20" VerticalAlignment="Center" Foreground="{ThemeResource AuroraAccentBrush}"/><StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2"><TextBlock Text="创作音乐" FontWeight="SemiBold"/><TextBlock Text="文字到完整歌曲" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid></Button>
-                                <Button x:Name="VoiceTemplateButton" Grid.Column="1" Tag="voice" Click="TemplateButton_Click" AccessKey="V" AutomationProperties.Name="制作配音" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="18,14"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Glyph="&#xE720;" FontSize="20" VerticalAlignment="Center" Foreground="{ThemeResource AuroraAccentBrush}"/><StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2"><TextBlock Text="制作配音" FontWeight="SemiBold"/><TextBlock Text="设计与克隆音色" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid></Button>
-                                <Button x:Name="SingingTemplateButton" Grid.Column="2" Tag="singing" Click="TemplateButton_Click" AccessKey="G" AutomationProperties.Name="克隆歌声" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="18,14"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Glyph="&#xE189;" FontSize="20" VerticalAlignment="Center" Foreground="{ThemeResource AuroraAccentBrush}"/><StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2"><TextBlock Text="克隆歌声" FontWeight="SemiBold"/><TextBlock Text="转换与克隆演唱音色" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid></Button>
-                                <Button x:Name="SeparationTemplateButton" Grid.Row="1" Grid.Column="0" Tag="separation" Click="TemplateButton_Click" AccessKey="S" AutomationProperties.Name="拆分混音" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="18,14"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Glyph="&#xE9E9;" FontSize="20" VerticalAlignment="Center" Foreground="{ThemeResource AuroraAccentBrush}"/><StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2"><TextBlock Text="拆分混音" FontWeight="SemiBold"/><TextBlock Text="人声与乐器分轨" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid></Button>
-                                <Button x:Name="TranscriptionTemplateButton" Grid.Row="1" Grid.Column="1" Tag="transcription" Click="TemplateButton_Click" AccessKey="T" AutomationProperties.Name="音频转 MIDI" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="18,14"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Glyph="&#xE70F;" FontSize="20" VerticalAlignment="Center" Foreground="{ThemeResource AuroraAccentBrush}"/><StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2"><TextBlock Text="音频转 MIDI" FontWeight="SemiBold"/><TextBlock Text="识别演奏与旋律" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid></Button>
-                                <Button x:Name="SubtitlesTemplateButton" Grid.Row="1" Grid.Column="2" Tag="subtitles" Click="TemplateButton_Click" AccessKey="C" AutomationProperties.Name="生成字幕" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="18,14"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Glyph="&#xE8BA;" FontSize="20" VerticalAlignment="Center" Foreground="{ThemeResource AuroraAccentBrush}"/><StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2"><TextBlock Text="生成字幕" FontWeight="SemiBold"/><TextBlock Text="视频语音到时间轴" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid></Button>
+                                <Button x:Name="MusicTemplateButton" Grid.Column="0" Tag="music" Click="TemplateButton_Click" AccessKey="M" ui:LocalizedText.NameKey="创作音乐" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="18,14"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Glyph="&#xE8D6;" FontSize="20" VerticalAlignment="Center" Foreground="{ThemeResource AuroraAccentBrush}"/><StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2"><TextBlock ui:LocalizedText.Key="创作音乐" FontWeight="SemiBold"/><TextBlock ui:LocalizedText.Key="文字到完整歌曲" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid></Button>
+                                <Button x:Name="VoiceTemplateButton" Grid.Column="1" Tag="voice" Click="TemplateButton_Click" AccessKey="V" ui:LocalizedText.NameKey="制作配音" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="18,14"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Glyph="&#xE720;" FontSize="20" VerticalAlignment="Center" Foreground="{ThemeResource AuroraAccentBrush}"/><StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2"><TextBlock ui:LocalizedText.Key="制作配音" FontWeight="SemiBold"/><TextBlock ui:LocalizedText.Key="设计与克隆音色" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid></Button>
+                                <Button x:Name="SingingTemplateButton" Grid.Column="2" Tag="singing" Click="TemplateButton_Click" AccessKey="G" ui:LocalizedText.NameKey="克隆歌声" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="18,14"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Glyph="&#xE189;" FontSize="20" VerticalAlignment="Center" Foreground="{ThemeResource AuroraAccentBrush}"/><StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2"><TextBlock ui:LocalizedText.Key="克隆歌声" FontWeight="SemiBold"/><TextBlock ui:LocalizedText.Key="转换与克隆演唱音色" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid></Button>
+                                <Button x:Name="SeparationTemplateButton" Grid.Row="1" Grid.Column="0" Tag="separation" Click="TemplateButton_Click" AccessKey="S" ui:LocalizedText.NameKey="拆分混音" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="18,14"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Glyph="&#xE9E9;" FontSize="20" VerticalAlignment="Center" Foreground="{ThemeResource AuroraAccentBrush}"/><StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2"><TextBlock ui:LocalizedText.Key="拆分混音" FontWeight="SemiBold"/><TextBlock ui:LocalizedText.Key="人声与乐器分轨" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid></Button>
+                                <Button x:Name="TranscriptionTemplateButton" Grid.Row="1" Grid.Column="1" Tag="transcription" Click="TemplateButton_Click" AccessKey="T" ui:LocalizedText.NameKey="音频转 MIDI" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="18,14"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Glyph="&#xE70F;" FontSize="20" VerticalAlignment="Center" Foreground="{ThemeResource AuroraAccentBrush}"/><StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2"><TextBlock ui:LocalizedText.Key="音频转 MIDI" FontWeight="SemiBold"/><TextBlock ui:LocalizedText.Key="识别演奏与旋律" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid></Button>
+                                <Button x:Name="SubtitlesTemplateButton" Grid.Row="1" Grid.Column="2" Tag="subtitles" Click="TemplateButton_Click" AccessKey="C" ui:LocalizedText.NameKey="生成字幕" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="18,14"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Glyph="&#xE8BA;" FontSize="20" VerticalAlignment="Center" Foreground="{ThemeResource AuroraAccentBrush}"/><StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2"><TextBlock ui:LocalizedText.Key="生成字幕" FontWeight="SemiBold"/><TextBlock ui:LocalizedText.Key="视频语音到时间轴" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid></Button>
                             </Grid>
                             <Border Grid.Row="2" Padding="20" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="14">
                                 <Grid ColumnSpacing="18">
                                     <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <StackPanel Spacing="4" VerticalAlignment="Center">
-                                        <TextBlock Text="第一次使用？直接选择功能" FontSize="17" FontWeight="SemiBold"/>
-                                        <TextBlock Text="不需要新建项目。进入任一功能后，Aurora 会根据当前任务提示所需的素材、模型和输出位置。" Foreground="{ThemeResource AuroraMutedBrush}" TextWrapping="Wrap"/>
+                                        <TextBlock ui:LocalizedText.Key="第一次使用？直接选择功能" FontSize="17" FontWeight="SemiBold"/>
+                                        <TextBlock ui:LocalizedText.Key="不需要新建项目。进入任一功能后，Aurora 会根据当前任务提示所需的素材、模型和输出位置。" Foreground="{ThemeResource AuroraMutedBrush}" TextWrapping="Wrap"/>
                                     </StackPanel>
-                                    <Button x:Name="HomeMusicQuickButton" Grid.Column="1" Content="创作音乐" Tag="music" Click="TemplateButton_Click" AutomationProperties.Name="创作音乐" VerticalAlignment="Center"/>
-                                    <Button x:Name="HomeVoiceQuickButton" Grid.Column="2" Content="制作配音" Tag="voice" Click="TemplateButton_Click" AutomationProperties.Name="制作配音" VerticalAlignment="Center"/>
-                                    <Button x:Name="HomeSubtitlesQuickButton" Grid.Column="3" Content="生成字幕" Tag="subtitles" Click="TemplateButton_Click" AutomationProperties.Name="生成字幕" VerticalAlignment="Center" Style="{StaticResource AccentButtonStyle}"/>
+                                    <Button x:Name="HomeMusicQuickButton" Grid.Column="1" ui:LocalizedText.Key="创作音乐" Tag="music" Click="TemplateButton_Click" ui:LocalizedText.NameKey="创作音乐" VerticalAlignment="Center"/>
+                                    <Button x:Name="HomeVoiceQuickButton" Grid.Column="2" ui:LocalizedText.Key="制作配音" Tag="voice" Click="TemplateButton_Click" ui:LocalizedText.NameKey="制作配音" VerticalAlignment="Center"/>
+                                    <Button x:Name="HomeSubtitlesQuickButton" Grid.Column="3" ui:LocalizedText.Key="生成字幕" Tag="subtitles" Click="TemplateButton_Click" ui:LocalizedText.NameKey="生成字幕" VerticalAlignment="Center" Style="{StaticResource AccentButtonStyle}"/>
                                 </Grid>
                             </Border>
                             <Grid Grid.Row="3" ColumnSpacing="28"><Grid.ColumnDefinitions><ColumnDefinition Width="3*"/><ColumnDefinition Width="2*"/></Grid.ColumnDefinitions>
                                 <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-                                    <TextBlock Text="最近处理记录" FontSize="20" FontWeight="SemiBold" Margin="2,0,0,12"/>
+                                    <TextBlock ui:LocalizedText.Key="最近处理记录" FontSize="20" FontWeight="SemiBold" Margin="2,0,0,12"/>
                                     <ListView x:Name="RecentProjectsList" Grid.Row="1" SelectionMode="None">
                                         <ListView.ItemTemplate><DataTemplate><Grid Padding="14,12" ColumnSpacing="14"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="150"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                             <StackPanel><TextBlock Text="{Binding Name}" FontWeight="SemiBold"/><TextBlock Text="{Binding SourcePath}" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}" FontSize="12"/></StackPanel>
-                                            <StackPanel Grid.Column="1"><TextBlock Text="{Binding FeatureDisplay}"/><TextBlock Text="{Binding UpdatedDisplay}" Foreground="{ThemeResource AuroraMutedBrush}" FontSize="12"/></StackPanel>
-                                            <Button Grid.Column="2" Content="再次处理" Tag="{Binding Id}" Click="OpenProjectButton_Click"/>
+                                            <StackPanel Grid.Column="1"><TextBlock Text="{Binding FeatureDisplay, Converter={StaticResource LocalizedValue}}"/><TextBlock Text="{Binding UpdatedDisplay}" Foreground="{ThemeResource AuroraMutedBrush}" FontSize="12"/></StackPanel>
+                                            <Button Grid.Column="2" ui:LocalizedText.Key="再次处理" Tag="{Binding Id}" Click="OpenProjectButton_Click"/>
                                         </Grid></DataTemplate></ListView.ItemTemplate>
                                     </ListView>
-                                    <StackPanel x:Name="ProjectsEmpty" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"><FontIcon Glyph="&#xE8B7;" FontSize="28"/><TextBlock Text="完成分轨、扒谱或字幕任务后，处理记录会出现在这里。" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel>
+                                    <StackPanel x:Name="ProjectsEmpty" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"><FontIcon Glyph="&#xE8B7;" FontSize="28"/><TextBlock ui:LocalizedText.Key="完成分轨、扒谱或字幕任务后，处理记录会出现在这里。" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel>
                                 </Grid>
                                 <Border Grid.Column="1" Padding="22" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="14">
-                                    <StackPanel Spacing="14"><TextBlock Text="正在进行" FontSize="20" FontWeight="SemiBold"/><TextBlock x:Name="QueueSummaryText" Text="当前没有排队任务" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                                    <StackPanel Spacing="14"><TextBlock ui:LocalizedText.Key="正在进行" FontSize="20" FontWeight="SemiBold"/><TextBlock x:Name="QueueSummaryText" Text="当前没有排队任务" Foreground="{ThemeResource AuroraMutedBrush}"/>
                                         <ListView x:Name="HomeTasksList" SelectionMode="None" MaxHeight="280"><ListView.ItemTemplate><DataTemplate><StackPanel Padding="4,8"><TextBlock Text="{Binding Title}" FontWeight="SemiBold"/><TextBlock Text="{Binding DisplayStage}" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></DataTemplate></ListView.ItemTemplate></ListView>
-                                        <Button Content="查看全部任务" Tag="tasks" Click="TemplateButton_Click" HorizontalAlignment="Left"/>
+                                        <Button ui:LocalizedText.Key="查看全部任务" Tag="tasks" Click="TemplateButton_Click" HorizontalAlignment="Left"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>
                         </Grid>
                     </ScrollViewer>
 
-                    <Grid x:Name="StudioView" Padding="30,26">
-                        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="310"/></Grid.ColumnDefinitions>
+                    <Grid x:Name="StudioView" Padding="24,20" SizeChanged="StudioView_SizeChanged">
+                        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition x:Name="StudioSideColumn" Width="280"/></Grid.ColumnDefinitions>
                         <Border Grid.ColumnSpan="2" Background="{ThemeResource AuroraSurfaceBrush}" BorderBrush="{ThemeResource AuroraStrokeBrush}" BorderThickness="1" CornerRadius="14" />
-                        <Grid Margin="24">
+                        <Grid Margin="20">
                             <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <ComboBox x:Name="ModelPicker" Width="280" SelectedIndex="0" AutomationProperties.Name="创作引擎选择">
+                            <StackPanel x:Name="StudioActions" Orientation="Horizontal" Spacing="10">
+                                <ComboBox x:Name="ModelPicker" MinWidth="0" Width="280" HorizontalAlignment="Stretch" SelectedIndex="0" ui:LocalizedText.NameKey="创作引擎选择">
                                     <ComboBoxItem Content="ACE-Step 1.5 XL Turbo" Tag="ace-step"/>
                                 </ComboBox>
                                 <Button x:Name="InstallWorkbenchModelButton" Content="自动安装模型" Click="InstallWorkbenchModelButton_Click" Style="{StaticResource AccentButtonStyle}" Visibility="Collapsed" />
                                 <Button x:Name="OpenWorkbenchButton" Content="进入工作台" Click="OpenWorkbenchButton_Click" Style="{StaticResource AccentButtonStyle}" />
                             </StackPanel>
                             <Grid Grid.Row="1" Margin="0,20,22,0">
-                                <StackPanel x:Name="StudioEmpty" HorizontalAlignment="Center" VerticalAlignment="Center" Width="460" Spacing="14">
-                                    <FontIcon Glyph="&#xE8D6;" FontSize="44" Foreground="{ThemeResource AuroraAccentBrush}" />
-                                    <TextBlock x:Name="EmptyTitle" Text="开启你的下一次创作" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                <ScrollViewer x:Name="StudioEmpty" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Center" MaxWidth="460" Spacing="14" Padding="0,12">
+                                    <FontIcon x:Name="StudioIllustration" Glyph="&#xE8D6;" FontSize="44" Foreground="{ThemeResource AuroraAccentBrush}" />
+                                    <TextBlock x:Name="EmptyTitle" Text="开启你的下一次创作" FontSize="22" FontWeight="SemiBold" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" />
                                     <TextBlock x:Name="EmptyBody" Text="选择创作引擎，即刻在 Aurora 中开始。所有处理均在本机完成。" TextWrapping="Wrap" TextAlignment="Center" Foreground="{ThemeResource AuroraMutedBrush}" />
                                 </StackPanel>
+                                </ScrollViewer>
                                 <StackPanel x:Name="WorkbenchStartingPanel" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
                                     <ProgressRing x:Name="WorkbenchProgress" Width="42" Height="42" IsActive="False" AutomationProperties.Name="正在启动本地创作引擎" AutomationProperties.LiveSetting="Polite" />
-                                    <TextBlock Text="正在启动本地引擎，首次加载可能需要几分钟…" Foreground="{ThemeResource AuroraMutedBrush}" TextAlignment="Center"/>
-                                    <Button x:Name="CancelWorkbenchButton" Content="取消启动" Click="CancelWorkbenchButton_Click" HorizontalAlignment="Center"/>
+                                    <TextBlock ui:LocalizedText.Key="正在启动本地引擎，首次加载可能需要几分钟…" Foreground="{ThemeResource AuroraMutedBrush}" TextWrapping="Wrap" TextAlignment="Center"/>
+                                    <Button x:Name="CancelWorkbenchButton" ui:LocalizedText.Key="取消启动" Click="CancelWorkbenchButton_Click" HorizontalAlignment="Center"/>
                                 </StackPanel>
                                 <WebView2 x:Name="Workbench" Visibility="Collapsed" AutomationProperties.Name="本地 AI 创作工作台" />
                                 <InfoBar x:Name="WorkbenchInfo" IsOpen="False" IsClosable="True" VerticalAlignment="Bottom" Margin="12"/>
                             </Grid>
                         </Grid>
-                        <Border Grid.Column="1" Margin="0,1,1,1" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="0,14,14,0" Padding="22">
+                        <Border x:Name="StudioSidePanel" Grid.Column="1" Margin="0,1,1,1" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="0,14,14,0" Padding="22">
                             <StackPanel Spacing="18">
-                                <TextBlock Text="创作引擎" FontSize="16" FontWeight="SemiBold" />
+                                <TextBlock ui:LocalizedText.Key="创作引擎" FontSize="16" FontWeight="SemiBold" />
                                 <StackPanel Spacing="8">
                                     <TextBlock x:Name="CurrentModelName" Text="ACE-Step 1.5 XL Turbo" FontWeight="SemiBold"/>
                                     <TextBlock x:Name="CurrentModelState" Text="正在准备…" Foreground="{ThemeResource AuroraMutedBrush}"/>
                                 </StackPanel>
                                 <Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}"/>
-                                <TextBlock Text="保存位置" FontSize="16" FontWeight="SemiBold" />
+                                <TextBlock ui:LocalizedText.Key="保存位置" FontSize="16" FontWeight="SemiBold" />
                                 <TextBlock x:Name="OutputPathText" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}" />
-                                <Button Content="查看我的成品" Click="OpenOutputButton_Click" HorizontalAlignment="Stretch"/>
+                                <Button ui:LocalizedText.Key="查看我的成品" Click="OpenOutputButton_Click" HorizontalAlignment="Stretch"/>
                                 <Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}"/>
-                                <TextBlock Text="运行状态" FontSize="16" FontWeight="SemiBold" />
+                                <TextBlock ui:LocalizedText.Key="运行状态" FontSize="16" FontWeight="SemiBold" />
                                 <TextBlock x:Name="TaskStatusText" Text="就绪" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
                             </StackPanel>
                         </Border>
@@ -185,8 +189,8 @@
                                     <Grid.ColumnDefinitions><ColumnDefinition x:Name="UtilitySourceColumn" Width="3*"/><ColumnDefinition x:Name="UtilityPreviewColumn" Width="2*"/></Grid.ColumnDefinitions>
                                     <StackPanel x:Name="UtilitySourcePanel" Spacing="10">
                                         <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                            <TextBlock Text="源文件与批处理" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"><Button Content="添加素材" Click="BrowseButton_Click"/><Button Content="清空" Click="ClearSourcesButton_Click"/></StackPanel>
+                                            <TextBlock ui:LocalizedText.Key="源文件与批处理" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"><Button ui:LocalizedText.Key="添加素材" Click="BrowseButton_Click"/><Button ui:LocalizedText.Key="清空" Click="ClearSourcesButton_Click"/></StackPanel>
                                         </Grid>
                                         <Border BorderBrush="{ThemeResource AuroraStrokeBrush}" BorderThickness="1" CornerRadius="10" MinHeight="112">
                                             <ListView x:Name="UtilitySourcesList" SelectionMode="Single" SelectionChanged="UtilitySourcesList_SelectionChanged" MaxHeight="148">
@@ -197,21 +201,24 @@
                                         <TextBox x:Name="InputPathBox" Visibility="Collapsed" IsReadOnly="True"/>
                                     </StackPanel>
                                     <Border x:Name="UtilityPreviewPanel" Grid.Column="1" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="10" Padding="10">
-                                        <Grid><MediaPlayerElement x:Name="MediaPreview" AreTransportControlsEnabled="True" AutoPlay="False" MinHeight="132"/><StackPanel x:Name="PreviewEmpty" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6"><FontIcon Glyph="&#xE8B1;" FontSize="24" Foreground="{ThemeResource AuroraAccentBrush}"/><TextBlock Text="选择素材后可在此预览" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid>
+                                        <Grid><MediaPlayerElement x:Name="MediaPreview" AreTransportControlsEnabled="True" AutoPlay="False" MinHeight="132"/><StackPanel x:Name="PreviewEmpty" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6"><FontIcon Glyph="&#xE8B1;" FontSize="24" Foreground="{ThemeResource AuroraAccentBrush}"/><TextBlock ui:LocalizedText.Key="选择素材后可在此预览" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Grid>
                                     </Border>
                                 </Grid>
 
                                 <StackPanel Grid.Row="2" Margin="0,24,0,0" Spacing="10">
-                                    <TextBlock Text="处理引擎" FontSize="15" FontWeight="SemiBold"/>
+                                    <TextBlock ui:LocalizedText.Key="处理引擎" FontSize="15" FontWeight="SemiBold"/>
                                     <Grid x:Name="UtilityEngineLayout" ColumnSpacing="10" RowSpacing="10"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions><Grid.ColumnDefinitions><ColumnDefinition x:Name="UtilityModelColumn"/><ColumnDefinition x:Name="UtilityTrackColumn" Width="190"/><ColumnDefinition x:Name="UtilityPresetColumn" Width="190"/></Grid.ColumnDefinitions>
-                                        <ComboBox x:Name="UtilityModelPicker" HorizontalAlignment="Stretch" SelectedIndex="0" SelectionChanged="UtilityModelPicker_SelectionChanged" AutomationProperties.Name="处理引擎选择" />
-                                        <ComboBox x:Name="UtilityTrackModePicker" Grid.Column="1" Header="分轨模式" SelectedIndex="0" Visibility="Collapsed" SelectionChanged="UtilityTrackModePicker_SelectionChanged"><ComboBoxItem Content="二轨：人声 + 伴奏" Tag="two-stem"/><ComboBoxItem Content="多轨：完整分轨" Tag="multi-stem"/></ComboBox>
-                                        <ComboBox x:Name="UtilityPresetPicker" Grid.Column="2" Header="处理预设" SelectedIndex="1" SelectionChanged="UtilityPresetPicker_SelectionChanged"><ComboBoxItem Content="快速草稿" Tag="fast"/><ComboBoxItem Content="推荐质量" Tag="recommended"/><ComboBoxItem Content="高质量" Tag="quality"/></ComboBox>
+                                        <ComboBox x:Name="UtilityModelPicker" HorizontalAlignment="Stretch" SelectedIndex="0" SelectionChanged="UtilityModelPicker_SelectionChanged" ui:LocalizedText.NameKey="处理引擎选择" />
+                                        <ComboBox x:Name="UtilityTrackModePicker" Grid.Column="1" ui:LocalizedText.HeaderKey="分轨模式" SelectedIndex="0" Visibility="Collapsed" SelectionChanged="UtilityTrackModePicker_SelectionChanged"><ComboBoxItem ui:LocalizedText.Key="二轨：人声 + 伴奏" Tag="two-stem"/><ComboBoxItem ui:LocalizedText.Key="多轨：完整分轨" Tag="multi-stem"/></ComboBox>
+                                        <ComboBox x:Name="UtilityPresetPicker" Grid.Column="2" ui:LocalizedText.HeaderKey="处理预设" SelectedIndex="1" SelectionChanged="UtilityPresetPicker_SelectionChanged"><ComboBoxItem ui:LocalizedText.Key="快速草稿" Tag="fast"/><ComboBoxItem ui:LocalizedText.Key="推荐质量" Tag="recommended"/><ComboBoxItem ui:LocalizedText.Key="高质量" Tag="quality"/></ComboBox>
                                     </Grid>
                                     <TextBlock x:Name="UtilityOutputHint" Text="处理结果会自动保存到 Aurora 成品目录。" TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                                    <ComboBox x:Name="SourceLanguagePicker" ui:LocalizedText.HeaderKey="素材语言" SelectedIndex="0" Visibility="Collapsed" HorizontalAlignment="Stretch" ui:LocalizedText.NameKey="素材语言">
+                                        <ComboBoxItem ui:LocalizedText.Key="自动识别" Tag="auto"/><ComboBoxItem ui:LocalizedText.Key="中文" Tag="zh"/><ComboBoxItem Content="English" Tag="en"/><ComboBoxItem ui:LocalizedText.Key="日本語" Tag="ja"/><ComboBoxItem Content="한국어" Tag="ko"/><ComboBoxItem Content="Français" Tag="fr"/><ComboBoxItem Content="Deutsch" Tag="de"/><ComboBoxItem Content="Español" Tag="es"/>
+                                    </ComboBox>
                                     <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,8,0,0">
                                         <Button x:Name="RunUtilityButton" Content="开始处理" Click="RunUtilityButton_Click" Style="{StaticResource AccentButtonStyle}" IsEnabled="False"/>
-                                        <Button Content="打开成品目录" Click="OpenOutputButton_Click"/>
+                                        <Button ui:LocalizedText.Key="打开成品目录" Click="OpenOutputButton_Click"/>
                                     </StackPanel>
                                     <ProgressBar x:Name="UtilityProgress" Minimum="0" Maximum="100" Value="0" Visibility="Collapsed"/>
                                     <InfoBar x:Name="UtilityInfo" IsOpen="False" IsClosable="True" Margin="0,6,0,0" />
@@ -222,8 +229,8 @@
                                         <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
                                         <FontIcon x:Name="UtilityFeatureIcon" Glyph="&#xE9E9;" FontSize="26" Foreground="{ThemeResource AuroraAccentBrush}" VerticalAlignment="Top"/>
                                         <StackPanel Grid.Column="1" Spacing="5">
-                                            <TextBlock Text="在 Aurora 中完成" FontWeight="SemiBold"/>
-                                            <TextBlock Text="素材、处理过程与结果路径都留在同一个工作区；关闭应用时，Aurora 会安全结束由它启动的任务。" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                                            <TextBlock ui:LocalizedText.Key="在 Aurora 中完成" FontWeight="SemiBold"/>
+                                            <TextBlock ui:LocalizedText.Key="素材、处理过程与结果路径都留在同一个工作区；关闭应用时，Aurora 会安全结束由它启动的任务。" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -242,27 +249,27 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <StackPanel Spacing="5">
-                                        <TextBlock Text="任务动态" FontSize="18" FontWeight="SemiBold"/>
-                                        <TextBlock Text="当前会话的状态与处理记录" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                                        <TextBlock ui:LocalizedText.Key="任务动态" FontSize="18" FontWeight="SemiBold"/>
+                                        <TextBlock ui:LocalizedText.Key="当前会话的状态与处理记录" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
                                     </StackPanel>
-                                    <Button Grid.Column="1" Content="清空记录" Click="ClearUtilityLogButton_Click" VerticalAlignment="Center"/>
+                                    <Button Grid.Column="1" ui:LocalizedText.Key="清空记录" Click="ClearUtilityLogButton_Click" VerticalAlignment="Center"/>
                                 </Grid>
 
                                 <Border Grid.Row="1" Margin="0,22,0,0" Padding="16" Background="{ThemeResource AuroraSurfaceBrush}" CornerRadius="12">
                                     <StackPanel Spacing="7">
-                                        <TextBlock Text="当前状态" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                                        <TextBlock ui:LocalizedText.Key="当前状态" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
                                         <TextBlock x:Name="UtilityStatusText" Text="等待添加素材" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
 
                                 <StackPanel Grid.Row="2" Margin="0,22,0,0" Spacing="5">
-                                    <TextBlock Text="输出位置" FontWeight="SemiBold"/>
+                                    <TextBlock ui:LocalizedText.Key="输出位置" FontWeight="SemiBold"/>
                                     <TextBlock x:Name="UtilityOutputPathText" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
                                 </StackPanel>
 
                                 <Grid Grid.Row="3" Margin="0,24,0,0">
                                     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-                                    <TextBlock Text="活动记录" FontWeight="SemiBold"/>
+                                    <TextBlock ui:LocalizedText.Key="活动记录" FontWeight="SemiBold"/>
                                     <ListView x:Name="UtilityLogList" Grid.Row="1" Margin="0,10,0,0" SelectionMode="None">
                                         <ListView.ItemTemplate>
                                             <DataTemplate>
@@ -278,19 +285,20 @@
 
                     <Grid x:Name="ModelsView" Padding="30,26" Visibility="Collapsed">
                         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-                        <Grid Margin="0,0,0,18" ColumnSpacing="16">
+                        <Grid Margin="0,0,0,18" ColumnSpacing="16" SizeChanged="ModelHeader_SizeChanged">
+                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                             <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                            <StackPanel Spacing="5">
-                                <TextBlock Text="创作引擎与模型" FontSize="20" FontWeight="SemiBold"/>
-                                <TextBlock x:Name="ModelSummaryText" Text="正在读取本地模型…" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                            <StackPanel x:Name="ModelHeaderTitle" Spacing="5">
+                                <TextBlock ui:LocalizedText.Key="创作引擎与模型" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="ModelSummaryText" Text="正在读取本地模型…" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                <ComboBox x:Name="ModelFilterPicker" Width="150" SelectedIndex="0" SelectionChanged="ModelFilterPicker_SelectionChanged" AutomationProperties.Name="模型筛选">
-                                    <ComboBoxItem Content="全部模型" Tag="all"/><ComboBoxItem Content="已安装" Tag="installed"/><ComboBoxItem Content="默认组件" Tag="default"/><ComboBoxItem Content="可选模型" Tag="optional"/>
+                            <StackPanel x:Name="ModelHeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                <ComboBox x:Name="ModelFilterPicker" Width="150" SelectedIndex="0" SelectionChanged="ModelFilterPicker_SelectionChanged" ui:LocalizedText.NameKey="模型筛选">
+                                    <ComboBoxItem ui:LocalizedText.Key="全部模型" Tag="all"/><ComboBoxItem ui:LocalizedText.Key="已安装" Tag="installed"/><ComboBoxItem ui:LocalizedText.Key="默认组件" Tag="default"/><ComboBoxItem ui:LocalizedText.Key="可选模型" Tag="optional"/>
                                 </ComboBox>
-                                <Button x:Name="CheckAllModelsButton" Content="检查全部更新" Click="CheckAllModelsButton_Click" Style="{StaticResource AccentButtonStyle}"/>
+                                <Button x:Name="CheckAllModelsButton" ui:LocalizedText.Key="检查全部更新" Click="CheckAllModelsButton_Click" Style="{StaticResource AccentButtonStyle}"/>
                                 <Button x:Name="UpdateAllModelsButton" Content="更新全部" Click="UpdateAllModelsButton_Click" Visibility="Collapsed"/>
-                                <Button Content="查看本地文件" Click="OpenModelsButton_Click"/>
+                                <Button ui:LocalizedText.Key="查看本地文件" Click="OpenModelsButton_Click"/>
                             </StackPanel>
                         </Grid>
                         <ListView x:Name="ModelsList" Grid.Row="1" SelectionMode="None">
@@ -319,21 +327,20 @@
                                     <Grid Padding="20,18" ColumnSpacing="24" AutomationProperties.Name="{Binding Name}" AutomationProperties.HelpText="{Binding Health}">
                                         <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                         <StackPanel Spacing="10">
-                                            <Grid ColumnSpacing="12">
-                                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                            <StackPanel Spacing="8">
                                                 <StackPanel Spacing="3">
                                                     <TextBlock Text="{Binding Name}" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                                     <TextBlock Text="{Binding Purpose}" FontSize="13" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
                                                 </StackPanel>
-                                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
+                                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
                                                     <Border Padding="8,4" CornerRadius="6" Background="{ThemeResource AuroraPaneBrush}">
                                                         <TextBlock Text="{Binding EditionDisplay}" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
                                                     </Border>
                                                     <Border Padding="8,4" CornerRadius="6" Background="{ThemeResource AuroraPaneBrush}">
-                                                        <TextBlock Text="{Binding Status}" FontSize="12" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{Binding Status}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                                     </Border>
                                                 </StackPanel>
-                                            </Grid>
+                                            </StackPanel>
                                             <TextBlock TextWrapping="Wrap">
                                                 <Run Text="{Binding FeatureDisplay}" FontWeight="SemiBold"/><Run Text="  ·  "/><Run Text="{Binding Languages}"/>
                                             </TextBlock>
@@ -349,7 +356,7 @@
                                             <Button Content="{Binding PrimaryAction}" Tag="{Binding Id}" Click="ModelUpdateButton_Click" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="{Binding PrimaryAction}"/>
                                             <Grid ColumnSpacing="8">
                                                 <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
-                                                <Button Content="{Binding RollbackAction}" Tag="{Binding Id}" Click="ModelRollbackButton_Click" IsEnabled="{Binding Installed}" HorizontalAlignment="Stretch"/>
+                                                <Button Content="{Binding RollbackAction}" Tag="{Binding Id}" Click="ModelRollbackButton_Click" IsEnabled="{Binding CanRollback}" HorizontalAlignment="Stretch"/>
                                                 <Button Grid.Column="1" Content="{Binding UninstallAction}" Tag="{Binding Id}" Click="ModelUninstallButton_Click" IsEnabled="{Binding Installed}" HorizontalAlignment="Stretch"/>
                                             </Grid>
                                         </StackPanel>
@@ -362,28 +369,34 @@
                     <Grid x:Name="TasksView" Padding="30,26" Visibility="Collapsed">
                         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
                         <Grid Margin="0,0,0,16"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                            <StackPanel><TextBlock Text="所有本地任务" FontSize="20" FontWeight="SemiBold"/><TextBlock Text="队列会按顺序使用 GPU；重启 Aurora 后仍可查看、重试或打开结果。" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"><Button x:Name="PauseQueueButton" Content="暂停队列" Click="PauseQueueButton_Click"/><Button Content="打开成品目录" Click="OpenOutputButton_Click"/></StackPanel>
+                            <StackPanel><TextBlock ui:LocalizedText.Key="所有本地任务" FontSize="20" FontWeight="SemiBold"/><TextBlock ui:LocalizedText.Key="队列会按顺序使用 GPU；重启 Aurora 后仍可查看、重试或打开结果。" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"><Button x:Name="PauseQueueButton" Content="暂停队列" Click="PauseQueueButton_Click"/><Button ui:LocalizedText.Key="打开成品目录" Click="OpenOutputButton_Click"/></StackPanel>
                         </Grid>
                         <ListView x:Name="TasksList" Grid.Row="1" SelectionMode="None"><ListView.ItemTemplate><DataTemplate>
                             <StackPanel Padding="14,12" Spacing="9">
                                 <Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <StackPanel><TextBlock Text="{Binding InputDisplay}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/><TextBlock><Run Text="{Binding CreatedDisplay}"/><Run Text="  "/><Run Text="{Binding DurationDisplay}"/><Run Text="  ·  "/><Run Text="{Binding DisplayStatus}"/><Run Text="  "/><Run Text="{Binding DisplayProgress}"/></TextBlock></StackPanel>
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"><Button Content="打开" Tag="{Binding Id}" Click="OpenTaskButton_Click"/><Button Content="重试" Tag="{Binding Id}" Click="RetryTaskButton_Click" IsEnabled="{Binding CanRetry}"/><Button Content="取消" Tag="{Binding Id}" Click="CancelTaskButton_Click" IsEnabled="{Binding CanCancel}"/></StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"><Button ui:LocalizedText.Key="打开" Tag="{Binding Id}" Click="OpenTaskButton_Click"/><Button ui:LocalizedText.Key="日志" Tag="{Binding Id}" Click="TaskLogButton_Click"/><Button ui:LocalizedText.Key="重试" Tag="{Binding Id}" Click="RetryTaskButton_Click" IsEnabled="{Binding CanRetry}"/><Button ui:LocalizedText.Key="取消" Tag="{Binding Id}" Click="CancelTaskButton_Click" IsEnabled="{Binding CanCancel}"/></StackPanel>
                                 </Grid>
                                 <TextBlock Text="{Binding DisplayStage}" TextWrapping="Wrap"/>
                                 <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressPercent}" AutomationProperties.Name="{Binding DisplayStage}" AutomationProperties.LiveSetting="Polite"/>
                                 <TextBlock Text="{Binding DisplayMessage}" TextWrapping="Wrap" MaxLines="2" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
                             </StackPanel>
                         </DataTemplate></ListView.ItemTemplate></ListView>
-                        <StackPanel x:Name="TasksEmpty" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10"><FontIcon Glyph="&#xE9D5;" FontSize="34" Foreground="{ThemeResource AuroraAccentBrush}"/><TextBlock Text="还没有任务记录" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/><TextBlock Text="从首页选择一个创作任务，Aurora 会在这里保留进度与结果。" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel>
+                        <StackPanel x:Name="TasksEmpty" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10"><FontIcon Glyph="&#xE9D5;" FontSize="34" Foreground="{ThemeResource AuroraAccentBrush}"/><TextBlock ui:LocalizedText.Key="还没有任务记录" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/><TextBlock ui:LocalizedText.Key="从首页选择一个创作任务，Aurora 会在这里保留进度与结果。" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel>
                     </Grid>
 
                     <Grid x:Name="ResultsView" Padding="30,26" Visibility="Collapsed">
                         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-                        <Grid Margin="0,0,0,16"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="成品库" FontSize="20" FontWeight="SemiBold"/><TextBlock Text="按时间查看 Aurora 生成的音轨、MIDI、字幕与其他成品。" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel><Button Grid.Column="1" Content="打开成品目录" Click="OpenOutputButton_Click"/></Grid>
-                        <ListView x:Name="ResultsList" Grid.Row="1" SelectionMode="None"><ListView.ItemTemplate><DataTemplate><Grid Padding="16,13" ColumnSpacing="18"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="120"/><ColumnDefinition Width="170"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="{Binding Name}" FontWeight="SemiBold"/><TextBlock Text="{Binding ProjectName}" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel><TextBlock Grid.Column="1" Text="{Binding KindDisplay}" VerticalAlignment="Center"/><TextBlock Grid.Column="2" Text="{Binding CreatedDisplay}" VerticalAlignment="Center" Foreground="{ThemeResource AuroraMutedBrush}"/><Button Grid.Column="3" Content="打开位置" Tag="{Binding Path}" Click="OpenArtifactButton_Click"/></Grid></DataTemplate></ListView.ItemTemplate></ListView>
-                        <StackPanel x:Name="ResultsEmpty" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="9"><FontIcon Glyph="&#xE8B7;" FontSize="34" Foreground="{ThemeResource AuroraAccentBrush}"/><TextBlock Text="还没有成品" FontSize="18" FontWeight="SemiBold"/><TextBlock Text="完成任务后，结果会自动汇总到这里。" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel>
+                        <Grid Margin="0,0,0,16"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel><TextBlock ui:LocalizedText.Key="成品库" FontSize="20" FontWeight="SemiBold"/><TextBlock ui:LocalizedText.Key="按时间查看 Aurora 生成的音轨、MIDI、字幕与其他成品。" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel><Button Grid.Column="1" ui:LocalizedText.Key="打开成品目录" Click="OpenOutputButton_Click"/></Grid>
+                        <ListView x:Name="ResultsList" Grid.Row="1" SelectionMode="None"><ListView.ItemTemplate><DataTemplate>
+                            <StackPanel Padding="14,12" Spacing="8">
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock TextWrapping="Wrap"><Run Text="{Binding ProjectName}"/><Run Text=" · "/><Run Text="{Binding KindDisplay, Converter={StaticResource LocalizedValue}}"/><Run Text=" · "/><Run Text="{Binding CreatedDisplay}"/></TextBlock>
+                                <StackPanel Orientation="Horizontal" Spacing="8"><Button ui:LocalizedText.Key="预览" Tag="{Binding Path}" Click="PreviewArtifactButton_Click"/><Button ui:LocalizedText.Key="导出" Tag="{Binding Path}" Click="ExportArtifactButton_Click"/><Button ui:LocalizedText.Key="复制路径" Tag="{Binding Path}" Click="CopyArtifactPathButton_Click"/><Button ui:LocalizedText.Key="打开位置" Tag="{Binding Path}" Click="OpenArtifactButton_Click"/></StackPanel>
+                            </StackPanel>
+                        </DataTemplate></ListView.ItemTemplate></ListView>
+                        <StackPanel x:Name="ResultsEmpty" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="9"><FontIcon Glyph="&#xE8B7;" FontSize="34" Foreground="{ThemeResource AuroraAccentBrush}"/><TextBlock ui:LocalizedText.Key="还没有成品" FontSize="18" FontWeight="SemiBold"/><TextBlock ui:LocalizedText.Key="完成任务后，结果会自动汇总到这里。" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel>
                     </Grid>
 
                     <ScrollViewer x:Name="MaintenanceView" Visibility="Collapsed" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" SizeChanged="MaintenanceView_SizeChanged">
@@ -392,50 +405,51 @@
                         <Grid.ColumnDefinitions><ColumnDefinition x:Name="MaintenanceMainColumn" Width="3*"/><ColumnDefinition x:Name="MaintenanceSideColumn" Width="2*"/></Grid.ColumnDefinitions>
                         <Grid x:Name="MaintenanceMainPanel" Margin="0,0,16,0"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
                             <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,16">
-                                <Button x:Name="MaintenanceScanButton" Content="重新扫描" Click="RunHealthScanButton_Click" Style="{StaticResource AccentButtonStyle}"/>
-                                <Button x:Name="MaintenanceDiagnosticsButton" Content="导出诊断包" Click="DiagnosticsButton_Click"/>
-                                <Button x:Name="OpenLogsButton" Content="打开日志" Click="OpenLogsButton_Click"/>
+                                <Button x:Name="MaintenanceScanButton" ui:LocalizedText.Key="重新扫描" Click="RunHealthScanButton_Click" Style="{StaticResource AccentButtonStyle}"/>
+                                <Button x:Name="MaintenanceDiagnosticsButton" ui:LocalizedText.Key="导出诊断包" Click="DiagnosticsButton_Click"/>
+                                <Button x:Name="OpenLogsButton" ui:LocalizedText.Key="打开日志" Click="OpenLogsButton_Click"/>
                             </StackPanel>
                             <ListView x:Name="HealthList" Grid.Row="1" SelectionMode="None"><ListView.ItemTemplate><DataTemplate><Grid Padding="14,12" ColumnSpacing="14" AutomationProperties.Name="{Binding Name}" AutomationProperties.HelpText="{Binding Detail}"><Grid.ColumnDefinitions><ColumnDefinition Width="180"/><ColumnDefinition Width="110"/><ColumnDefinition/></Grid.ColumnDefinitions><TextBlock Text="{Binding Name}" FontWeight="SemiBold"/><TextBlock Grid.Column="1" Text="{Binding State}"/><TextBlock Grid.Column="2" Text="{Binding Detail}" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/></Grid></DataTemplate></ListView.ItemTemplate></ListView>
                         </Grid>
-                        <Border x:Name="MaintenanceSidePanel" Grid.Column="1" Padding="24" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="14"><StackPanel Spacing="18"><TextBlock Text="运行环境" FontSize="20" FontWeight="SemiBold"/><TextBlock x:Name="GpuSummaryText" TextWrapping="Wrap"/><Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}"/><ToggleSwitch x:Name="SafeModeToggle" Header="安全模式" OffContent="允许启动通过检查的引擎" OnContent="仅查看任务与诊断" Toggled="SafeModeToggle_Toggled"/><ToggleSwitch x:Name="AutoReleaseToggle" Header="任务完成后释放显存" IsOn="True" Toggled="AutoReleaseToggle_Toggled"/><TextBlock Text="安全模式不会删除或更改模型，只会阻止第三方引擎启动，适合排查启动问题。" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Border>
+                        <Border x:Name="MaintenanceSidePanel" Grid.Column="1" Padding="24" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="14"><StackPanel Spacing="18"><TextBlock ui:LocalizedText.Key="运行环境" FontSize="20" FontWeight="SemiBold"/><TextBlock x:Name="GpuSummaryText" TextWrapping="Wrap"/><Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}"/><ToggleSwitch x:Name="SafeModeToggle" ui:LocalizedText.HeaderKey="安全模式" ui:LocalizedText.OffKey="允许启动通过检查的引擎" ui:LocalizedText.OnKey="仅查看任务与诊断" Toggled="SafeModeToggle_Toggled"/><ToggleSwitch x:Name="AutoReleaseToggle" ui:LocalizedText.HeaderKey="任务完成后释放显存" IsOn="True" Toggled="AutoReleaseToggle_Toggled"/><TextBlock ui:LocalizedText.Key="安全模式不会删除或更改模型，只会阻止第三方引擎启动，适合排查启动问题。" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Border>
                     </Grid>
                     </ScrollViewer>
 
-                    <ScrollViewer x:Name="SettingsView" Visibility="Collapsed"><StackPanel Padding="30,26" MaxWidth="820" HorizontalAlignment="Stretch" Spacing="20">
-                        <TextBlock Text="外观与语言" FontSize="20" FontWeight="SemiBold"/>
-                        <ComboBox x:Name="LanguagePicker" Header="界面语言" Width="320" HorizontalAlignment="Left">
-                            <ComboBoxItem Content="跟随系统" Tag="auto"/><ComboBoxItem Content="简体中文" Tag="zh-CN"/><ComboBoxItem Content="繁體中文" Tag="zh-TW"/><ComboBoxItem Content="English" Tag="en-US"/><ComboBoxItem Content="日本語" Tag="ja-JP"/>
+                    <ScrollViewer x:Name="SettingsView" Visibility="Collapsed"><StackPanel Padding="30,26" MaxWidth="760" HorizontalAlignment="Left" Spacing="20">
+                        <TextBlock ui:LocalizedText.Key="外观与语言" FontSize="20" FontWeight="SemiBold"/>
+                        <ComboBox x:Name="LanguagePicker" ui:LocalizedText.HeaderKey="界面语言" Width="320" HorizontalAlignment="Left" SelectionChanged="LanguagePicker_SelectionChanged">
+                            <ComboBoxItem ui:LocalizedText.Key="跟随系统" Tag="auto"/><ComboBoxItem ui:LocalizedText.Key="简体中文" Tag="zh-CN"/><ComboBoxItem ui:LocalizedText.Key="繁體中文" Tag="zh-TW"/><ComboBoxItem Content="English" Tag="en-US"/><ComboBoxItem ui:LocalizedText.Key="日本語" Tag="ja-JP"/>
                         </ComboBox>
-                        <ComboBox x:Name="ThemePicker" Header="主题" Width="320" HorizontalAlignment="Left">
-                            <ComboBoxItem Content="浅色" Tag="light"/><ComboBoxItem Content="深色" Tag="dark"/><ComboBoxItem Content="跟随系统" Tag="system"/>
+                        <TextBlock ui:LocalizedText.Key="languageImmediateHint" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}" Margin="0,-12,0,0"/>
+                        <ComboBox x:Name="ThemePicker" ui:LocalizedText.HeaderKey="主题" Width="320" HorizontalAlignment="Left">
+                            <ComboBoxItem ui:LocalizedText.Key="浅色" Tag="light"/><ComboBoxItem ui:LocalizedText.Key="深色" Tag="dark"/><ComboBoxItem ui:LocalizedText.Key="跟随系统" Tag="system"/>
                         </ComboBox>
-                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="ModelRootBox" Header="模型目录"/><Button x:Name="BrowseModelRootButton" Grid.Column="1" Content="浏览…" Tag="models" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
-                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="OutputRootBox" Header="成品目录"/><Button x:Name="BrowseOutputRootButton" Grid.Column="1" Content="浏览…" Tag="output" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
-                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="ProjectsRootBox" Header="处理记录目录"/><Button x:Name="BrowseProjectsRootButton" Grid.Column="1" Content="浏览…" Tag="projects" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
-                        <ToggleSwitch x:Name="AppAutoUpdateToggle" Header="每天首次启动时检查应用更新"/>
-                        <ToggleSwitch x:Name="ModelAutoUpdateToggle" Header="启动时检查模型更新"/>
-                        <ToggleSwitch x:Name="ConfirmLargeToggle" Header="下载大型模型前始终确认"/>
-                        <ToggleSwitch x:Name="AutoReleaseSettingsToggle" Header="任务完成后自动释放显存"/>
-                        <Button x:Name="SaveSettingsButton" Content="保存设置" Click="SaveSettingsButton_Click" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Left"/>
+                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="ModelRootBox" ui:LocalizedText.HeaderKey="模型目录"/><Button x:Name="BrowseModelRootButton" Grid.Column="1" ui:LocalizedText.Key="浏览…" Tag="models" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
+                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="OutputRootBox" ui:LocalizedText.HeaderKey="成品目录"/><Button x:Name="BrowseOutputRootButton" Grid.Column="1" ui:LocalizedText.Key="浏览…" Tag="output" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
+                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="ProjectsRootBox" ui:LocalizedText.HeaderKey="处理记录目录"/><Button x:Name="BrowseProjectsRootButton" Grid.Column="1" ui:LocalizedText.Key="浏览…" Tag="projects" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
+                        <ToggleSwitch x:Name="AppAutoUpdateToggle" ui:LocalizedText.HeaderKey="每天首次启动时检查应用更新"/>
+                        <ToggleSwitch x:Name="ModelAutoUpdateToggle" ui:LocalizedText.HeaderKey="启动时检查模型更新"/>
+                        <ToggleSwitch x:Name="ConfirmLargeToggle" ui:LocalizedText.HeaderKey="下载大型模型前始终确认"/>
+                        <ToggleSwitch x:Name="AutoReleaseSettingsToggle" ui:LocalizedText.HeaderKey="任务完成后自动释放显存"/>
+                        <Button x:Name="SaveSettingsButton" ui:LocalizedText.Key="保存设置" Click="SaveSettingsButton_Click" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Left"/>
                     </StackPanel></ScrollViewer>
 
                     <ScrollViewer x:Name="AboutView" Visibility="Collapsed"><StackPanel Padding="30,30" MaxWidth="760" HorizontalAlignment="Left" Spacing="18">
                         <TextBlock Text="Aurora Audio Studio" FontSize="30" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="AboutVersionText" Text="1.8.1 · 本地 AI 音频创作工作台" FontSize="16" Foreground="{ThemeResource AuroraMutedBrush}"/>
-                        <TextBlock Text="苏晚颜 · Aurora Studio" FontSize="18" FontWeight="SemiBold" Margin="0,12,0,0"/>
-                        <TextBlock Text="为音乐、声音与影像创作者打造的一站式本地工作台。灵感、素材与成品，始终由你掌控。" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="AboutVersionText" TextWrapping="Wrap" FontSize="16" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                        <TextBlock ui:LocalizedText.Key="苏晚颜 · Aurora Studio" FontSize="18" FontWeight="SemiBold" Margin="0,12,0,0"/>
+                        <TextBlock ui:LocalizedText.Key="为音乐、声音与影像创作者打造的一站式本地工作台。灵感、素材与成品，始终由你掌控。" TextWrapping="Wrap"/>
                         <Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}" Margin="0,10"/>
-                        <TextBlock Text="更新日志" FontSize="20" FontWeight="SemiBold"/>
+                        <TextBlock ui:LocalizedText.Key="更新日志" FontSize="20" FontWeight="SemiBold"/>
                         <TextBlock x:Name="AboutReleaseSummary" TextWrapping="Wrap"/>
                         <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Button x:Name="AppUpdateButton" Content="检查更新" Click="CheckAppUpdateButton_Click" Style="{StaticResource AccentButtonStyle}"/>
-                            <Button x:Name="AboutReleaseNotesButton" Click="ReleaseNotesButton_Click" AutomationProperties.Name="查看更新日志">
-                                <StackPanel Orientation="Horizontal" Spacing="7"><FontIcon Glyph="&#xE8A5;" FontSize="15"/><TextBlock Text="更新日志"/></StackPanel>
+                            <Button x:Name="AppUpdateButton" ui:LocalizedText.Key="检查更新" Click="CheckAppUpdateButton_Click" Style="{StaticResource AccentButtonStyle}"/>
+                            <Button x:Name="AboutReleaseNotesButton" Click="ReleaseNotesButton_Click" ui:LocalizedText.NameKey="查看更新日志">
+                                <StackPanel Orientation="Horizontal" Spacing="7"><FontIcon Glyph="&#xE8A5;" FontSize="15"/><TextBlock ui:LocalizedText.Key="更新日志"/></StackPanel>
                             </Button>
-                            <Button x:Name="AboutDiagnosticsButton" Content="导出诊断" Click="DiagnosticsButton_Click"/>
-                            <Button x:Name="FeedbackButton" Click="FeedbackButton_Click" AutomationProperties.Name="反馈问题或建议">
-                                <StackPanel Orientation="Horizontal" Spacing="7"><FontIcon Glyph="&#xE939;" FontSize="15"/><TextBlock Text="反馈问题 / 建议"/></StackPanel>
+                            <Button x:Name="AboutDiagnosticsButton" ui:LocalizedText.Key="导出诊断" Click="DiagnosticsButton_Click"/>
+                            <Button x:Name="FeedbackButton" Click="FeedbackButton_Click" ui:LocalizedText.NameKey="反馈问题或建议">
+                                <StackPanel Orientation="Horizontal" Spacing="7"><FontIcon Glyph="&#xE939;" FontSize="15"/><TextBlock ui:LocalizedText.Key="反馈问题 / 建议"/></StackPanel>
                             </Button>
                         </StackPanel>
                         <InfoBar x:Name="UpdateInfo" IsOpen="False" IsClosable="True"/>
@@ -445,10 +459,12 @@
 
                 <Grid Grid.Row="2" Padding="22,10" Background="{ThemeResource AuroraSurfaceBrush}" BorderBrush="{ThemeResource AuroraStrokeBrush}" BorderThickness="0,1,0,0">
                     <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <TextBlock x:Name="FooterStatus" Text="就绪" Foreground="{ThemeResource AuroraMutedBrush}" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
+                    <TextBlock x:Name="FooterStatus" Text="就绪" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource AuroraMutedBrush}" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                        <Button x:Name="OpenOutputButton" Content="我的成品" Click="OpenOutputButton_Click"/>
-                        <Button x:Name="ReleaseEngineButton" Content="结束当前引擎" Click="ReleaseButton_Click"/>
+                        <Button x:Name="StickyRunButton" ui:LocalizedText.Key="开始处理" Click="RunUtilityButton_Click" Visibility="Collapsed" IsEnabled="False"/>
+                        <Button x:Name="CancelBatchButton" ui:LocalizedText.Key="取消本批任务" Click="CancelBatchButton_Click" Visibility="Collapsed"/>
+                        <Button x:Name="OpenOutputButton" ui:LocalizedText.Key="我的成品" Click="OpenOutputButton_Click"/>
+                        <Button x:Name="ReleaseEngineButton" ui:LocalizedText.Key="结束当前引擎" Click="ReleaseButton_Click"/>
                     </StackPanel>
                 </Grid>
             </Grid>
@@ -467,11 +483,11 @@
                         <TextBlock x:Name="UpdateStageText" Text="正在准备更新…" FontWeight="SemiBold" TextWrapping="Wrap"/>
                     </StackPanel>
                     <TextBlock x:Name="UpdatePercentText" Grid.Column="1" Text="0%" Foreground="{ThemeResource AuroraMutedBrush}"/>
-                    <Button x:Name="CancelGlobalOperationButton" Grid.Column="2" Content="取消" Visibility="Collapsed" Click="CancelGlobalOperationButton_Click" Padding="10,3"/>
+                    <Button x:Name="CancelGlobalOperationButton" Grid.Column="2" ui:LocalizedText.Key="取消" Visibility="Collapsed" Click="CancelGlobalOperationButton_Click" Padding="10,3"/>
                 </Grid>
                 <ProgressBar x:Name="UpdateProgress" Grid.Row="1" Minimum="0" Maximum="100" Height="5" AutomationProperties.Name="下载与安装进度" AutomationProperties.LiveSetting="Polite"/>
                 <TextBlock x:Name="UpdateActivityText" Grid.Row="2" Text="正在准备" TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
-                <Expander Grid.Row="3" Header="安装详情">
+                <Expander Grid.Row="3" ui:LocalizedText.HeaderKey="安装详情">
                     <ScrollViewer MaxHeight="180"><TextBlock x:Name="UpdateLogText" TextWrapping="Wrap" FontFamily="Consolas" FontSize="11" IsTextSelectionEnabled="True"/></ScrollViewer>
                 </Expander>
             </Grid>

@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\..\..\docs\release.json" LogicalName="Aurora.Release.json" />
     <Compile Include="..\AuroraAudioStudio\Models\AppModels.cs" Link="AppModels.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\ModelInstallPlanner.cs" Link="ModelInstallPlanner.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\UpdateFlowGuard.cs" Link="UpdateFlowGuard.cs" />
@@ -17,5 +18,6 @@
     <Compile Include="..\AuroraAudioStudio\Services\MediaInputPolicy.cs" Link="MediaInputPolicy.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\SettingsPathValidator.cs" Link="SettingsPathValidator.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\ModelHealthPolicy.cs" Link="ModelHealthPolicy.cs" />
+    <Compile Include="..\AuroraAudioStudio\Services\RuntimeEnvironment.cs" Link="RuntimeEnvironment.cs" />
   </ItemGroup>
 </Project>

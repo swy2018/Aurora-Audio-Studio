@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#f4faf7">
   <meta name="description" content="Aurora Audio Studio 是面向 Windows 的本地 AI 音频创作工作台，统一音乐、声音、分轨、MIDI 与字幕工作流。">
-  <meta property="og:title" content="Aurora Audio Studio 1.8.1">
+  <meta property="og:title" content="Aurora Audio Studio 1.9.0">
   <meta property="og:description" content="六个独立音频功能直接开始，模型、任务与成品留在本地。">
   <meta property="og:image" content="https://swy2018.github.io/Aurora-Audio-Studio/assets/aurora-workbench-music.png?v=125-sharp">
   <title>Aurora Audio Studio | 本地音频创作工作台</title>
@@ -15,20 +15,20 @@
   <script type="module" src="app.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#content">跳到主要内容</a>
+  <a class="skip-link" href="#content" data-text-zh="跳到主要内容" data-text-en="Skip to content">跳到主要内容</a>
   <header class="site-header">
-    <nav class="nav shell" aria-label="主导航">
-      <a class="brand" href="#top" aria-label="Aurora Audio Studio 首页">
+    <nav class="nav shell" aria-label="主导航" data-label-zh="主导航" data-label-en="Main navigation">
+      <a class="brand" href="#top" aria-label="Aurora Audio Studio 首页" data-label-zh="Aurora Audio Studio 首页" data-label-en="Aurora Audio Studio home">
         <img src="assets/aurora-icon.png" width="42" height="42" alt="">
         <span><strong>Aurora</strong><small>Audio Studio</small></span>
       </a>
-      <button class="menu-button" type="button" aria-expanded="false" aria-controls="navLinks">菜单</button>
+      <button class="menu-button" type="button" aria-expanded="false" aria-controls="navLinks" data-text-zh="菜单" data-text-en="Menu">菜单</button>
       <div class="nav-links" id="navLinks">
         <a href="#workspace"><span class="zh">工作台</span><span class="en">Workspace</span></a>
         <a href="#workflow"><span class="zh">专业流程</span><span class="en">Workflow</span></a>
         <a href="#local"><span class="zh">本地优先</span><span class="en">Local first</span></a>
         <a href="https://github.com/swy2018/Aurora-Audio-Studio">GitHub</a>
-        <button class="language-button" type="button" aria-label="切换语言">EN</button>
+        <button class="language-button" type="button" aria-label="切换语言" data-label-zh="切换到英语" data-label-en="Switch to Chinese">EN</button>
       </div>
     </nav>
   </header>
@@ -36,54 +36,56 @@
   <main id="content">
     <section class="hero shell" id="top">
       <div class="hero-copy reveal">
-        <p class="release"><span class="zh">Aurora Audio Studio 1.8.1</span><span class="en">Aurora Audio Studio 1.8.1</span></p>
+        <p class="release"><span class="zh">Aurora Audio Studio 1.9.0</span><span class="en">Aurora Audio Studio 1.9.0</span></p>
         <h1><span class="zh">让声音创作，<br>回到创作本身。</span><span class="en">Keep audio creation<br>focused on the work.</span></h1>
         <p class="hero-lead"><span class="zh">音乐生成、声音克隆、歌声转换、AI 分轨、MIDI 扒谱与视频字幕，集中在一套本地 Windows 工作台里。</span><span class="en">Music, voice cloning, singing conversion, stem separation, MIDI transcription, and subtitles in one local Windows workspace.</span></p>
         <div class="hero-actions">
-          <a class="button primary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><span class="zh">下载 1.8.1</span><span class="en">Download 1.8.1</span></a>
+          <a class="button primary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><span class="zh">下载 1.9.0</span><span class="en">Download 1.9.0</span></a>
           <a class="button secondary" href="https://github.com/swy2018/Aurora-Audio-Studio"><span class="zh">查看源代码</span><span class="en">View source</span></a>
         </div>
       </div>
       <figure class="hero-product reveal">
-        <button class="image-button" type="button" data-lightbox="assets/aurora-workbench-music.png?v=125-sharp" aria-label="全屏查看 Aurora 音乐创作工作台">
-          <img src="assets/aurora-workbench-music.png?v=125-sharp" width="3840" height="2088" alt="Aurora Audio Studio 1.8.1 音乐创作工作台完整界面" fetchpriority="high">
+        <button class="image-button" type="button" data-lightbox="assets/aurora-workbench-music.png?v=125-sharp" aria-label="全屏查看 Aurora 音乐创作工作台" data-label-zh="全屏查看音乐工作台截图" data-label-en="Expand music workspace screenshot">
+          <img src="assets/aurora-workbench-music.png?v=125-sharp" width="3840" height="2088" alt="Aurora 音乐工作台（历史界面截图）" data-alt-zh="Aurora 音乐工作台（历史界面截图）" data-alt-en="Aurora music workspace (earlier interface screenshot)" fetchpriority="high">
         </button>
-        <figcaption><span class="zh">真实工作台界面。点击图片可按原始尺寸查看。</span><span class="en">The real workspace. Open the image for a full-resolution view.</span></figcaption>
+        <figcaption><span class="zh">沿用历史实机截图，功能以当前版本说明为准。点击查看原图。</span><span class="en">Earlier app screenshots retained for reference. See current capabilities below. Click to expand.</span></figcaption>
       </figure>
     </section>
 
-    <section class="proof shell" aria-label="产品特点">
+    <section class="proof shell" aria-label="产品特点" data-label-zh="产品特点" data-label-en="Product features">
       <div><strong><span class="zh">本机完成</span><span class="en">Runs locally</span></strong><span><span class="zh">素材与成品不经过 Aurora 云端</span><span class="en">Media stays away from an Aurora cloud</span></span></div>
-      <div><strong><span class="zh">任务可恢复</span><span class="en">Recoverable tasks</span></strong><span><span class="zh">队列、日志与结果持续保存</span><span class="en">Queue, logs, and results persist</span></span></div>
-      <div><strong><span class="zh">模型按需部署</span><span class="en">Models on demand</span></strong><span><span class="zh">空间确认、进度、取消与续传</span><span class="en">Disk checks, progress, cancel, and resume</span></span></div>
+      <div><strong><span class="zh">任务可重试</span><span class="en">Retry interrupted tasks</span></strong><span><span class="zh">保留素材、参数与日志；重新执行推理</span><span class="en">Keep inputs, settings, and logs; restart inference</span></span></div>
+      <div><strong><span class="zh">模型按需部署</span><span class="en">Models on demand</span></strong><span><span class="zh">同一模型修订的下载支持继续</span><span class="en">Resume downloads of the same model revision</span></span></div>
     </section>
 
     <section class="workspace-section shell" id="workspace">
       <div class="section-heading reveal">
         <p class="eyebrow"><span class="zh">同一个工作空间</span><span class="en">One workspace</span></p>
-        <h2><span class="zh">不是模型启动器，<br>是一套完整的创作环境。</span><span class="en">More than a model launcher.<br>A complete production environment.</span></h2>
+        <h2><span class="zh">六种声音任务，<br>清楚的输入与输出。</span><span class="en">Six audio workflows.<br>Clear inputs and outputs.</span></h2>
         <p><span class="zh">六个功能互相独立，直接进入当前工作台；任务、模型与成品状态保持清晰。界面截图使用原始分辨率展示，不做透视拉伸和裁切。</span><span class="en">Six independent features open directly into their workspaces, with task, model, and output state kept clear. Every product image keeps its original aspect ratio without perspective distortion or cropping.</span></p>
       </div>
 
       <div class="workspace-browser reveal">
-        <div class="workspace-tabs" role="tablist" aria-label="工作台预览">
-          <button type="button" role="tab" aria-selected="true" data-shot="assets/aurora-workbench-music.png?v=125-sharp" data-zh="输入创作描述，选择模型与时长，在嵌入式工作台里完成音乐生成。" data-en="Describe the piece, choose a model and duration, then create inside the embedded music workspace."><span class="zh">音乐创作</span><span class="en">Music</span></button>
-          <button type="button" role="tab" aria-selected="false" data-shot="assets/aurora-workbench-voice.png?v=125-sharp" data-zh="在独立入口管理配音、音色设计与声音克隆。" data-en="Manage speech, voice design, and cloning through its independent entry point."><span class="zh">声音与歌声</span><span class="en">Voice</span></button>
-          <button type="button" role="tab" aria-selected="false" data-shot="assets/aurora-workbench-subtitle.png?v=125-sharp" data-zh="批量加入视频素材，预览内容并生成可继续校对的时间轴字幕。" data-en="Add video in batches, preview the source, and create timed subtitles ready for review."><span class="zh">视频字幕</span><span class="en">Subtitles</span></button>
+        <div class="workspace-tabs" role="tablist" aria-label="工作台预览" data-label-zh="工作台预览" data-label-en="Workspace previews">
+          <button id="tab-music" type="button" role="tab" aria-selected="true" aria-controls="workspace-panel" tabindex="0" data-shot="assets/aurora-workbench-music.png?v=125-sharp" data-zh="输入创作描述，选择模型与时长，在嵌入式工作台里完成音乐生成。" data-en="Describe the piece, choose a model and duration, then create inside the embedded music workspace."><span class="zh">音乐创作</span><span class="en">Music</span></button>
+          <button id="tab-voice" type="button" role="tab" aria-selected="false" aria-controls="workspace-panel" tabindex="-1" data-shot="assets/aurora-workbench-voice.png?v=125-sharp" data-zh="在独立入口管理配音、音色设计与声音克隆。" data-en="Manage speech, voice design, and cloning through its independent entry point."><span class="zh">声音与歌声</span><span class="en">Voice</span></button>
+          <button id="tab-subtitles" type="button" role="tab" aria-selected="false" aria-controls="workspace-panel" tabindex="-1" data-shot="assets/aurora-workbench-subtitle.png?v=125-sharp" data-zh="批量加入视频素材，预览内容并生成可继续校对的时间轴字幕。" data-en="Add video in batches, preview the source, and create timed subtitles ready for review."><span class="zh">视频字幕</span><span class="en">Subtitles</span></button>
         </div>
+        <div id="workspace-panel" role="tabpanel" aria-labelledby="tab-music">
         <p class="workspace-description"><span class="zh">输入创作描述，选择模型与时长，在嵌入式工作台里完成音乐生成。</span><span class="en">Describe the piece, choose a model and duration, then create inside the embedded music workspace.</span></p>
-        <button class="image-button workspace-image" type="button" data-lightbox="assets/aurora-workbench-music.png?v=125-sharp" aria-label="全屏查看当前工作台">
-          <img src="assets/aurora-workbench-music.png?v=125-sharp" width="3840" height="2088" alt="Aurora 1.8.1 音乐创作工作台" loading="lazy">
+        <button class="image-button workspace-image" type="button" data-lightbox="assets/aurora-workbench-music.png?v=125-sharp" aria-label="全屏查看当前工作台" data-label-zh="全屏查看当前工作台" data-label-en="Expand selected workspace screenshot">
+          <img src="assets/aurora-workbench-music.png?v=125-sharp" width="3840" height="2088" alt="Aurora 音乐工作台（历史界面截图）" loading="lazy">
         </button>
+        </div>
       </div>
     </section>
 
     <section class="workflow-section" id="workflow">
       <div class="shell workflow-grid">
         <div class="workflow-intro reveal">
-          <p class="eyebrow"><span class="zh">1.8.1 安装版热修复</span><span class="en">Installed-build hotfix in 1.8.1</span></p>
-          <h2><span class="zh">真正显示工作台，<br>不再只有“已连接”。</span><span class="en">The workspace now renders.<br>Not just a Connected label.</span></h2>
-          <p><span class="zh">WebView2 用户数据改存到可写的本地应用数据目录，修复 Program Files 安装版的中央空白；1.8.0 的六条完整操作链路继续保留。</span><span class="en">WebView2 data now uses writable LocalAppData, fixing blank Program Files workspaces while retaining all six actionable workflows from 1.8.0.</span></p>
+          <p class="eyebrow"><span class="zh">从第一次输入开始</span><span class="en">From your first input</span></p>
+          <h2><span class="zh">先做一段短样本，<br>再开始完整创作。</span><span class="en">Start with a short sample.<br>Then create the full piece.</span></h2>
+          <p><span class="zh">选择功能，确认模型与存储位置，先生成 5–10 秒样本。文件齐全不等于通过推理验收；模型中心会在真实任务成功后记录验证时间与设备。</span><span class="en">Choose a workflow, confirm the model and storage, and try a 5–10 second sample. Files on disk do not prove inference works: Model Center records a successful task and its device.</span></p>
         </div>
         <ol class="workflow-list reveal">
           <li><div><strong><span class="zh">拖入或批量选择素材</span><span class="en">Drop or batch-select media</span></strong><p><span class="zh">音频和视频在提交前即可预览，并保留大小与格式信息。</span><span class="en">Preview audio and video before submitting, with format and size visible.</span></p></div></li>
@@ -94,13 +96,24 @@
       </div>
     </section>
 
+    <section class="capabilities shell" id="capabilities">
+      <h2><span class="zh">模型接入状态，一目了然。</span><span class="en">Know what each model can do.</span></h2>
+      <p><span class="zh">工作台接入、模型下载和本机实测是三件不同的事。下表直接来自客户端模型目录；</span><span class="en">An integrated interface, a downloadable model, and a tested setup are different things. This table comes from the client catalog; </span><a href="validation-1.9.0.md"><span class="zh">查看本版验收范围</span><span class="en">read this release's acceptance scope</span></a>。</p>
+      <details><summary><span class="zh">查看全部模型与许可</span><span class="en">View all models and licenses</span></summary>
+        <div class="capability-scroll" tabindex="0" role="region" data-label-zh="模型能力表，可横向滚动" data-label-en="Model capability table, horizontally scrollable" aria-label="模型能力表，可横向滚动">
+          <table><thead><tr><th scope="col"><span class="zh">模型</span><span class="en">Model</span></th><th scope="col"><span class="zh">功能</span><span class="en">Workflow</span></th><th scope="col"><span class="zh">操作入口</span><span class="en">Interface</span></th><th scope="col"><span class="zh">许可</span><span class="en">License</span></th></tr></thead><tbody id="model-capabilities"></tbody></table>
+        </div>
+        <p id="capability-status"><a href="capabilities.json"><span class="zh">模型能力数据</span><span class="en">Model capability data</span></a></p>
+      </details>
+    </section>
+
     <section class="local-section shell" id="local">
       <div class="local-copy reveal">
         <p class="eyebrow"><span class="zh">本地优先</span><span class="en">Local first</span></p>
         <h2><span class="zh">你的模型、<br>素材与成果，<br>由你决定放在哪里。</span><span class="en">Your models, media, and results<br>stay where you choose.</span></h2>
       </div>
       <div class="local-details reveal">
-        <article><strong><span class="zh">模型部署更透明</span><span class="en">Transparent model deployment</span></strong><p><span class="zh">安装前显示目标目录、预计下载量、建议空间与当前可用空间。下载过程可取消并继续。</span><span class="en">Review the target, download estimate, recommended space, and available space before a resumable installation.</span></p></article>
+        <article><strong><span class="zh">模型部署更透明</span><span class="en">Transparent model deployment</span></strong><p><span class="zh">安装前显示目标目录、估算下载量与建议空间；实际体积取决于依赖和共享缓存。同一模型修订可继续下载，切换修订会隔离旧下载。通过候选检查后再切换环境。</span><span class="en">Review estimated downloads and disk requirements; actual sizes depend on dependencies and shared caches. Downloads resume for the same revision. Changed revisions stay isolated, and candidates are checked before activation.</span></p></article>
         <article><strong><span class="zh">处理记录清晰可查</span><span class="en">Processing history stays traceable</span></strong><p><span class="zh">.arr 是分轨、扒谱和字幕任务的轻量记录，不是统一工程文件；它关联源文件路径、模型、参数与输出，旧 .aurora 记录继续兼容。</span><span class="en">.arr is a lightweight record for separation, transcription, and subtitle tasks—not a unified project file. It links source paths, models, parameters, and outputs while legacy .aurora records remain compatible.</span></p></article>
         <article><strong><span class="zh">更新保持标准体验</span><span class="en">Standard Windows updates</span></strong><p><span class="zh">应用从 GitHub 获取经过 SHA-256 校验的安装包，并交给标准 Windows 安装界面覆盖升级。</span><span class="en">Aurora verifies GitHub installers with SHA-256 and hands updates to the standard Windows setup flow.</span></p></article>
       </div>
@@ -122,9 +135,9 @@
     <section class="download-section shell" id="download">
       <div class="download-inner reveal">
         <h2><span class="zh">把工作流留在一处。</span><span class="en">Keep the workflow in one place.</span></h2>
-        <p><span class="zh">Aurora Audio Studio 1.8.1 修复安装版中央工作区空白，并保留六条完整本地音频工作流。</span><span class="en">Aurora Audio Studio 1.8.1 restores installed creative workspaces and keeps all six complete local audio workflows.</span></p>
+        <p><span class="zh">Aurora Audio Studio 1.9.0：更稳妥的模型部署、完整的任务参数与更直接的成果操作。</span><span class="en">Aurora Audio Studio 1.9.0: safer model deployment, persistent task settings, and practical result actions.</span></p>
         <div class="hero-actions">
-          <a class="button primary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><span class="zh">下载 1.8.1 安装版</span><span class="en">Download 1.8.1</span></a>
+          <a class="button primary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><span class="zh">下载 1.9.0 安装版</span><span class="en">Download 1.9.0</span></a>
           <a class="button secondary" href="https://github.com/swy2018/Aurora-Audio-Studio/releases"><span class="zh">查看更新日志</span><span class="en">Release notes</span></a>
         </div>
       </div>
@@ -137,8 +150,8 @@
     <p>Copyright © 2026 Aurora Contributors.</p>
   </footer>
 
-  <dialog class="lightbox" aria-label="产品截图预览">
-    <button type="button" class="lightbox-close" aria-label="关闭">关闭</button>
+  <dialog class="lightbox" aria-label="产品截图预览" data-label-zh="产品截图预览" data-label-en="Product screenshot preview">
+    <button type="button" class="lightbox-close" aria-label="关闭" data-label-zh="关闭" data-label-en="Close" data-text-zh="关闭" data-text-en="Close">关闭</button>
     <img src="assets/aurora-workbench-music.png?v=125-sharp" alt="Aurora Audio Studio 产品截图">
   </dialog>
 </body>

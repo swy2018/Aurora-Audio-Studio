@@ -9,10 +9,12 @@ namespace AuroraAudioStudio.Services;
 
 public sealed class BackendService(SettingsService settings)
 {
-    private readonly Dictionary<string, Process> processes = new(StringComparer.OrdinalIgnoreCase);
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, Process> processes = new(StringComparer.OrdinalIgnoreCase);
+    private readonly SemaphoreSlim workbenchGate = new(1, 1);
     private readonly Dictionary<string, string> activeModels = new(StringComparer.OrdinalIgnoreCase);
     private CancellationTokenSource? navigationCancellation;
     private string? startingKey;
+    private string launchModel = "";
     public event EventHandler<string>? StatusChanged;
 
     private string Root => settings.Current.LocalAiRoot;
@@ -21,11 +23,21 @@ public sealed class BackendService(SettingsService settings)
     private string TtsRoot => Path.Combine(Root, "Qwen3-TTS");
     private string SeedRoot => Path.Combine(Root, "Seed-VC");
     private string FfmpegRoot => Path.Combine(Root, "Faster-Whisper-XXL", "Faster-Whisper-XXL");
+    public bool HasActiveOperations => processes.Keys.Any(IsRunning);
 
-    public async Task<OperationResult> StartWorkbenchAsync(string feature, string model, string language)
+    public async Task<OperationResult> StartWorkbenchAsync(string feature, string model, string language, CancellationToken cancellationToken = default)
     {
+        if (settings.Current.SafeMode) return new(false, "安全模式已启用，无法启动引擎。");
+        var catalog = new ModelCatalogService(settings);
+        if (catalog.Find(model) is not { IsRunnable: true } definition || definition.Feature != feature) return new(false, "此模型尚未接入当前工作台。");
+        await workbenchGate.WaitAsync(cancellationToken);
+        using var startup = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        navigationCancellation = startup;
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (settings.Current.SafeMode) return new(false, "安全模式已启用，无法启动引擎。");
+            launchModel = model;
             return feature switch
             {
                 "music" when model.Equals("minimax-music3", StringComparison.OrdinalIgnoreCase) => await StartMiniMaxMusic3Async(language),
@@ -36,10 +48,16 @@ public sealed class BackendService(SettingsService settings)
                 _ => new OperationResult(false, "The selected model does not expose an embedded workbench yet.")
             };
         }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
             WriteLog("backend-error.log", ex.ToString());
             return new OperationResult(false, ex.Message);
+        }
+        finally
+        {
+            if (ReferenceEquals(navigationCancellation, startup)) navigationCancellation = null;
+            workbenchGate.Release();
         }
     }
 
@@ -47,7 +65,7 @@ public sealed class BackendService(SettingsService settings)
     {
         var python = File.Exists(Path.Combine(MusicRoot, "python_embeded", "python.exe"))
             ? Path.Combine(MusicRoot, "python_embeded", "python.exe")
-            : Path.Combine(MusicRoot, ".venv", "Scripts", "python.exe");
+            : Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(MusicRoot, ".venv")), "Scripts", "python.exe");
         var script = Path.Combine(MusicRoot, "acestep", "acestep_v15_pipeline.py");
         var healthModel = new ModelDefinition("ace-step", "ACE-Step 1.5 XL Turbo", "music", "ACE-Step-1.5", @"acestep\acestep_v15_pipeline.py", "GitHub Release + Hugging Face", "github-release-git", "https://github.com/ACE-Step/ACE-Step-1.5.git", true);
         var missing = ModelHealthPolicy.MissingRequirements(healthModel, Root);
@@ -59,11 +77,13 @@ public sealed class BackendService(SettingsService settings)
         if (!IsRunning("music") || !activeModels.TryGetValue("music", out var current) || !current.Equals("ace-step", StringComparison.OrdinalIgnoreCase))
         {
             Stop("music");
-            processes["music"] = StartHidden("music", python, $"\"{script}\" --port 7860 --server-name 127.0.0.1 --language {(language.StartsWith("en") ? "en" : "zh")} --config_path acestep-v15-xl-turbo --lm_model_path acestep-5Hz-lm-1.7B --offload_to_cpu true --init_service true", MusicRoot,
+            processes["music"] = StartHidden("music", python, $"\"{script}\" --port 7860 --server-name 127.0.0.1 --language {(language.StartsWith("ja") ? "ja" : language.StartsWith("en") ? "en" : "zh")} --config_path acestep-v15-xl-turbo --lm_model_path acestep-5Hz-lm-1.7B --backend pt --offload_to_cpu true --offload_dit_to_cpu true --init_service true", MusicRoot,
                 new Dictionary<string, string>
                 {
                     ["HF_HUB_OFFLINE"] = "1",
-                    ["ACESTEP_CHECKPOINTS_DIR"] = Path.Combine(MusicRoot, "checkpoints")
+                    ["ACESTEP_CHECKPOINTS_DIR"] = Path.Combine(MusicRoot, "checkpoints"),
+                    ["GRADIO_TEMP_DIR"] = OutputFolder("AI音乐"),
+                    ["PYTHONUTF8"] = "1"
                 });
             activeModels["music"] = "ace-step";
         }
@@ -73,7 +93,7 @@ public sealed class BackendService(SettingsService settings)
     private async Task<OperationResult> StartMiniMaxMusic3Async(string language)
     {
         var modelRoot = Path.Combine(Root, "MiniMax-Music3");
-        var environmentRoot = Path.Combine(Root, "AudioTools", "minimax-music3-env");
+        var environmentRoot = RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "minimax-music3-env"));
         var python = Path.Combine(environmentRoot, "Scripts", "python.exe");
         var script = Path.Combine(AppContext.BaseDirectory, "Tools", "minimax_music3_webui.py");
         if (!File.Exists(python) || !File.Exists(Path.Combine(modelRoot, "modular_model_index.json")) || !File.Exists(script)) return Missing("MiniMax-Music3");
@@ -93,7 +113,8 @@ public sealed class BackendService(SettingsService settings)
 
     private async Task<OperationResult> StartTtsAsync(string modelId)
     {
-        var launcher = Path.Combine(TtsRoot, "Python312", "Scripts", "qwen-tts-demo.exe");
+        var ttsRuntime = RuntimeEnvironment.Resolve(Path.Combine(TtsRoot, "Python312"));
+        var launcher = Path.Combine(ttsRuntime, "Scripts", "qwen-tts-demo.exe");
         var modelFolder = modelId switch
         {
             "qwen3-tts-base" => "Qwen3-TTS-12Hz-1.7B-Base",
@@ -110,13 +131,14 @@ public sealed class BackendService(SettingsService settings)
         {
             Stop("voice");
             var output = OutputFolder("AI配音");
-            processes["voice"] = StartHidden("voice", launcher, $"\"{checkpoint}\" --device cuda:0 --dtype bfloat16 --no-flash-attn --ip 127.0.0.1 --port 7861 --no-share --concurrency 1", TtsRoot,
+            var device = await DetectTorchDeviceAsync(RuntimeEnvironment.PythonPath(ttsRuntime), navigationCancellation?.Token ?? CancellationToken.None);
+            processes["voice"] = StartHidden("voice", launcher, $"\"{checkpoint}\" --device {device} --dtype {(device == "cuda" ? "bfloat16" : "float32")} --no-flash-attn --ip 127.0.0.1 --port 7861 --no-share --concurrency 1", TtsRoot,
                 new Dictionary<string, string>
                 {
                     ["HF_HUB_OFFLINE"] = "1",
                     ["GRADIO_TEMP_DIR"] = output,
                     ["PYTHONUTF8"] = "1",
-                    ["PATH"] = Path.Combine(TtsRoot, "Python312", "Scripts") + ";" + Environment.GetEnvironmentVariable("PATH")
+                    ["PATH"] = Path.Combine(ttsRuntime, "Scripts") + ";" + Environment.GetEnvironmentVariable("PATH")
                 });
             activeModels["voice"] = modelId;
         }
@@ -125,7 +147,7 @@ public sealed class BackendService(SettingsService settings)
 
     private async Task<OperationResult> StartF5TtsAsync()
     {
-        var root = Path.Combine(Root, "AudioTools", "f5-tts-env");
+        var root = RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "f5-tts-env"));
         var launcher = Path.Combine(root, "Scripts", "f5-tts_infer-gradio.exe");
         if (!File.Exists(launcher)) return Missing("F5-TTS");
         Stop("singing");
@@ -141,8 +163,8 @@ public sealed class BackendService(SettingsService settings)
 
     private async Task<OperationResult> StartSeedVcAsync()
     {
-        var python = Path.Combine(SeedRoot, ".venv", "Scripts", "python.exe");
-        var script = Path.Combine(SeedRoot, "app_svc_local.py");
+        var python = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(SeedRoot, ".venv")), "Scripts", "python.exe");
+        var script = File.Exists(Path.Combine(SeedRoot, "app_svc.py")) ? Path.Combine(SeedRoot, "app_svc.py") : Path.Combine(SeedRoot, "app_svc_local.py");
         var checkpoint = Path.Combine(SeedRoot, "checkpoints", "manual", "DiT_seed_v2_uvit_whisper_base_f0_44k_bigvgan_pruned_ft_ema_v2.pth");
         var config = Path.Combine(SeedRoot, "checkpoints", "manual", "config_dit_mel_seed_uvit_whisper_base_f0_44k.yml");
         var healthModel = new ModelDefinition("seed-vc", "Seed-VC 44.1k", "singing", "Seed-VC", "app_svc_local.py", "GitHub Release + Hugging Face", "github-release-git", "https://github.com/Plachtaa/seed-vc.git", true);
@@ -156,11 +178,12 @@ public sealed class BackendService(SettingsService settings)
             var output = OutputFolder("AI歌声克隆");
             var environment = new Dictionary<string, string>
             {
-                ["PATH"] = FfmpegRoot + ";" + Environment.GetEnvironmentVariable("PATH"),
+                ["PATH"] = Path.GetDirectoryName(AudioRuntime.FindFfmpeg(Root)) + ";" + Environment.GetEnvironmentVariable("PATH"),
                 ["GRADIO_SERVER_NAME"] = "127.0.0.1",
                 ["GRADIO_SERVER_PORT"] = "7862",
                 ["GRADIO_TEMP_DIR"] = output,
                 ["AI_OUTPUT_DIR"] = output,
+                ["HF_HUB_CACHE"] = Path.Combine(SeedRoot, "checkpoints", "hf_cache"),
                 ["HF_HUB_DISABLE_XET"] = "1",
                 ["HF_HUB_OFFLINE"] = "1",
                 ["TRANSFORMERS_OFFLINE"] = "1",
@@ -175,6 +198,12 @@ public sealed class BackendService(SettingsService settings)
 
     public async Task<OperationResult> RunUtilityAsync(string feature, string inputPath, string modelId, string language, IProgress<TaskExecutionProgress>? progress = null, CancellationToken cancellationToken = default)
     {
+        if (settings.Current.SafeMode) return new(false, "安全模式已启用，无法执行或重试任务。");
+        if (!File.Exists(inputPath)) return new(false, "素材文件不存在，请重新选择素材。");
+        var catalog = new ModelCatalogService(settings);
+        if (catalog.Find(modelId) is not { IsRunnable: true } definition || definition.Feature != feature) return new(false, "此模型尚未接入当前功能。");
+        if (!catalog.IsInstalled(definition)) return new(false, "引擎所需文件不完整，请在模型中心执行检查 / 修复。");
+        cancellationToken.ThrowIfCancellationRequested();
         if (IsRunning("utility")) return new OperationResult(false, "Another local task is already running.");
         return feature switch
         {
@@ -189,26 +218,30 @@ public sealed class BackendService(SettingsService settings)
     {
         if (modelId.Equals("demucs", StringComparison.OrdinalIgnoreCase))
         {
-            var demucs = Path.Combine(Root, "AudioTools", "demucs-env", "Scripts", "demucs.exe");
+            var demucs = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "demucs-env")), "Scripts", "demucs.exe");
             if (!File.Exists(demucs)) return Missing("Demucs 4");
-            var demucsOutput = OutputFolder("AI分轨");
+            var demucsOutput = ArtifactValidator.CreateRunDirectory(settings.Current.OutputRoot, "AI分轨", source);
             var demucsInfo = Hidden(demucs, demucsOutput);
+            var demucsDevice = await DetectTorchDeviceAsync(Path.Combine(Path.GetDirectoryName(demucs)!, "python.exe"), cancellationToken);
+            demucsInfo.ArgumentList.Add("--device"); demucsInfo.ArgumentList.Add(demucsDevice);
             demucsInfo.ArgumentList.Add("-o"); demucsInfo.ArgumentList.Add(demucsOutput); demucsInfo.ArgumentList.Add(source);
             demucsInfo.Environment["PYTHONUTF8"] = "1";
-            return await RunCapturedAsync("utility", demucsInfo, "demucs", demucsOutput, progress, cancellationToken);
+            return (await RunCapturedAsync("utility", demucsInfo, "demucs", demucsOutput, progress, cancellationToken)) with { Device = demucsDevice };
         }
-        var exe = Path.Combine(Root, "AudioTools", "roformer-env", "Scripts", "bs-roformer-infer.exe");
+        var exe = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "roformer-env")), "Scripts", "bs-roformer-infer.exe");
         var models = Path.Combine(Root, "AudioTools", "roformer-models");
         if (!File.Exists(exe) || !Directory.Exists(models)) return Missing("BS-RoFormer-SW");
-        var output = OutputFolder("AI分轨");
+        var output = ArtifactValidator.CreateRunDirectory(settings.Current.OutputRoot, "AI分轨", source);
         var tempFolder = Path.Combine(Path.GetTempPath(), "Aurora-RoFormer-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempFolder);
         var prepared = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(source) + ".wav");
         try
         {
             progress?.Report(new(.05, "正在准备音频素材"));
-            await PrepareAudioAsync(source, prepared);
+            await PrepareAudioAsync(source, prepared, cancellationToken);
             var info = Hidden(exe, output);
+            var device = await DetectTorchDeviceAsync(Path.Combine(Path.GetDirectoryName(exe)!, "python.exe"), cancellationToken);
+            info.ArgumentList.Add("--device"); info.ArgumentList.Add(device);
             info.ArgumentList.Add("--input_folder"); info.ArgumentList.Add(tempFolder);
             info.ArgumentList.Add("--store_dir"); info.ArgumentList.Add(output);
             info.ArgumentList.Add("--models_dir"); info.ArgumentList.Add(models);
@@ -217,8 +250,8 @@ public sealed class BackendService(SettingsService settings)
                 info.ArgumentList.Add("--model");
                 info.ArgumentList.Add("roformer-model-bs-roformer-vocals-revive-v3e-by-unwa");
             }
-            info.Environment["PATH"] = FfmpegRoot + ";" + Environment.GetEnvironmentVariable("PATH");
-            return await RunCapturedAsync("utility", info, "separator", output, progress, cancellationToken);
+            info.Environment["PATH"] = Path.GetDirectoryName(AudioRuntime.FindFfmpeg(Root)) + ";" + Environment.GetEnvironmentVariable("PATH");
+            return (await RunCapturedAsync("utility", info, "separator", output, progress, cancellationToken)) with { Device = device };
         }
         finally
         {
@@ -231,9 +264,9 @@ public sealed class BackendService(SettingsService settings)
     {
         if (modelId.Equals("basic-pitch", StringComparison.OrdinalIgnoreCase))
         {
-            var basicPitch = Path.Combine(Root, "AudioTools", "basic-pitch-env", "Scripts", "basic-pitch.exe");
+            var basicPitch = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "basic-pitch-env")), "Scripts", "basic-pitch.exe");
             if (!File.Exists(basicPitch)) return Missing("Spotify Basic Pitch");
-            var basicPitchOutput = OutputFolder("AI扒谱");
+            var basicPitchOutput = ArtifactValidator.CreateRunDirectory(settings.Current.OutputRoot, "AI扒谱", source);
             var basicPitchInfo = Hidden(basicPitch, basicPitchOutput);
             basicPitchInfo.ArgumentList.Add(basicPitchOutput); basicPitchInfo.ArgumentList.Add(source);
             basicPitchInfo.Environment["PYTHONUTF8"] = "1";
@@ -241,11 +274,12 @@ public sealed class BackendService(SettingsService settings)
         }
         if (modelId.Equals("transkun", StringComparison.OrdinalIgnoreCase))
         {
-            var transkun = Path.Combine(Root, "AudioTools", "transkun-env", "Scripts", "transkun.exe");
+            var transkunRoot = RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "transkun-env"));
+            var transkun = Path.Combine(transkunRoot, "Scripts", "transkun.exe");
             if (!File.Exists(transkun)) return Missing("TransKun V2");
-            var transkunOutput = OutputFolder("AI扒谱");
+            var transkunOutput = ArtifactValidator.CreateRunDirectory(settings.Current.OutputRoot, "AI扒谱", source);
             var transkunMidi = Path.Combine(transkunOutput, $"{Path.GetFileNameWithoutExtension(source)}-{DateTime.Now:yyyyMMdd-HHmmss}.mid");
-            var transkunPython = Path.Combine(Root, "AudioTools", "transkun-env", "Scripts", "python.exe");
+            var transkunPython = Path.Combine(transkunRoot, "Scripts", "python.exe");
             var device = await DetectTorchDeviceAsync(transkunPython, cancellationToken);
             progress?.Report(new(.02, device == "cuda" ? "TransKun 将使用 GPU" : "未检测到可用的 CUDA PyTorch，TransKun 将使用 CPU"));
             var transkunInfo = Hidden(transkun, transkunOutput);
@@ -254,24 +288,24 @@ public sealed class BackendService(SettingsService settings)
             transkunInfo.ArgumentList.Add("--device");
             transkunInfo.ArgumentList.Add(device);
             transkunInfo.Environment["PYTHONUTF8"] = "1";
-            return await RunCapturedAsync("utility", transkunInfo, "transkun", transkunOutput, progress, cancellationToken);
+            return (await RunCapturedAsync("utility", transkunInfo, "transkun", transkunOutput, progress, cancellationToken)) with { Device = device };
         }
         var piano = modelId.Equals("piano", StringComparison.OrdinalIgnoreCase);
-        var output = OutputFolder("AI扒谱");
+        var output = ArtifactValidator.CreateRunDirectory(settings.Current.OutputRoot, "AI扒谱", source);
         var midi = Path.Combine(output, $"{Path.GetFileNameWithoutExtension(source)}-{DateTime.Now:yyyyMMdd-HHmmss}.mid");
         ProcessStartInfo info;
         string? prepared = null;
         string? tempFolder = null;
         if (piano)
         {
-            var python = Path.Combine(Root, "AudioTools", "piano-env", "Scripts", "python.exe");
+            var python = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "piano-env")), "Scripts", "python.exe");
             var checkpoint = Path.Combine(Root, "AudioTools", "piano-models", "note_F1=0.9677_pedal_F1=0.9186.pth");
             if (!File.Exists(python) || !File.Exists(checkpoint)) return Missing("ByteDance Piano");
             tempFolder = Path.Combine(Path.GetTempPath(), "Aurora-Piano-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(tempFolder);
             prepared = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(source) + ".wav");
             progress?.Report(new(.05, "正在准备钢琴音频"));
-            await PrepareAudioAsync(source, prepared);
+            await PrepareAudioAsync(source, prepared, cancellationToken);
             info = Hidden(python, output);
             info.ArgumentList.Add("-c");
             info.ArgumentList.Add("from piano_transcription_inference import PianoTranscription,sample_rate; import soundfile as sf,numpy as np,math,sys; from scipy.signal import resample_poly; audio,sr=sf.read(sys.argv[1],dtype='float32'); audio=audio.mean(axis=1) if audio.ndim>1 else audio; g=math.gcd(sr,sample_rate); audio=resample_poly(audio,sample_rate//g,sr//g).astype(np.float32) if sr!=sample_rate else audio; PianoTranscription(device='cuda',checkpoint_path=sys.argv[3]).transcribe(audio,sys.argv[2])");
@@ -280,7 +314,7 @@ public sealed class BackendService(SettingsService settings)
         }
         else
         {
-            var exe = Path.Combine(Root, "AudioTools", "mt3-env", "Scripts", "mt3-infer.exe");
+            var exe = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "mt3-env")), "Scripts", "mt3-infer.exe");
             if (!File.Exists(exe)) return Missing("YourMT3+");
             info = Hidden(exe, output);
             info.ArgumentList.Add("transcribe"); info.ArgumentList.Add(source);
@@ -302,7 +336,7 @@ public sealed class BackendService(SettingsService settings)
     {
         var exe = Path.Combine(FfmpegRoot, "faster-whisper-xxl.exe");
         if (!File.Exists(exe)) return Missing("Faster-Whisper XXL");
-        var output = OutputFolder("AI字幕");
+        var output = ArtifactValidator.CreateRunDirectory(settings.Current.OutputRoot, "AI字幕", source);
         var modelName = modelId switch
         {
             "whisper-small" => "small",
@@ -326,8 +360,10 @@ public sealed class BackendService(SettingsService settings)
             info.ArgumentList.Add("-m"); info.ArgumentList.Add(modelName);
             info.ArgumentList.Add("--device"); info.ArgumentList.Add(device);
             info.ArgumentList.Add("--compute_type"); info.ArgumentList.Add(computeType);
-            if (language.StartsWith("zh")) { info.ArgumentList.Add("-l"); info.ArgumentList.Add("zh"); }
-            else if (language.StartsWith("ja")) { info.ArgumentList.Add("-l"); info.ArgumentList.Add("ja"); }
+            if (!string.IsNullOrWhiteSpace(language) && !language.Equals("auto", StringComparison.OrdinalIgnoreCase))
+            {
+                info.ArgumentList.Add("-l"); info.ArgumentList.Add(language.Split('-')[0]);
+            }
             info.Environment["HF_HUB_OFFLINE"] = "1";
             info.Environment["PYTHONUTF8"] = "1";
             return info;
@@ -335,12 +371,12 @@ public sealed class BackendService(SettingsService settings)
 
         var started = DateTime.UtcNow;
         var gpu = await RunCapturedAsync("utility", BuildInfo("cuda", "float32"), "subtitles-gpu", output, progress, cancellationToken);
-        if (gpu.Success && WhisperOutputIsFresh(output, source, started)) return gpu;
+        if (gpu.Success && WhisperOutputIsFresh(output, source, started)) return gpu with { Device = "cuda" };
         cancellationToken.ThrowIfCancellationRequested();
         progress?.Report(new(.04, "GPU 字幕引擎未生成有效结果，正在自动切换到 CPU"));
         started = DateTime.UtcNow;
         var cpu = await RunCapturedAsync("utility", BuildInfo("cpu", "int8"), "subtitles-cpu", output, progress, cancellationToken);
-        if (cpu.Success && WhisperOutputIsFresh(output, source, started)) return new OperationResult(true, "字幕已通过 CPU 回退完成。", output);
+        if (cpu.Success && WhisperOutputIsFresh(output, source, started)) return cpu with { Message = "字幕已通过 CPU 回退完成。", Device = "cpu" };
         if (!cpu.Success) return cpu;
         return new OperationResult(false, "字幕引擎已退出，但没有生成新的 SRT 与 JSON。请查看 Aurora 日志。", output);
     }
@@ -372,19 +408,21 @@ public sealed class BackendService(SettingsService settings)
         });
     }
 
-    private async Task PrepareAudioAsync(string source, string destination)
+    private async Task PrepareAudioAsync(string source, string destination, CancellationToken cancellationToken)
     {
         if (Path.GetExtension(source).Equals(".wav", StringComparison.OrdinalIgnoreCase))
         {
-            File.Copy(source, destination, true);
+            await using var input = File.OpenRead(source);
+            await using var output = File.Create(destination);
+            await input.CopyToAsync(output, cancellationToken);
             return;
         }
-        var ffmpeg = Path.Combine(FfmpegRoot, "ffmpeg.exe");
+        var ffmpeg = AudioRuntime.FindFfmpeg(Root) ?? throw new FileNotFoundException("缺少 FFmpeg 音频组件，请在模型中心执行检查 / 修复。");
         if (!File.Exists(ffmpeg)) throw new FileNotFoundException("FFmpeg was not found.", ffmpeg);
         var info = Hidden(ffmpeg, Path.GetDirectoryName(destination)!);
         info.ArgumentList.Add("-y"); info.ArgumentList.Add("-i"); info.ArgumentList.Add(source);
         info.ArgumentList.Add("-ar"); info.ArgumentList.Add("44100"); info.ArgumentList.Add("-ac"); info.ArgumentList.Add("2"); info.ArgumentList.Add(destination);
-        var result = await RunProcessAsync(info);
+        var result = await RunProcessAsync(info, cancellationToken);
         if (result.ExitCode != 0) throw new InvalidOperationException(result.Error);
     }
 
@@ -417,34 +455,43 @@ public sealed class BackendService(SettingsService settings)
         StatusChanged?.Invoke(this, "running:" + logPrefix);
         var logPath = Path.Combine(Logs, $"{logPrefix}-{DateTime.Now:yyyyMMdd-HHmmss}.log");
         using var process = new Process { StartInfo = info };
+        Directory.CreateDirectory(Logs);
         processes[key] = process;
         try
         {
             progress?.Report(new(.04, "正在启动本地引擎"));
             process.Start();
             using var cancellation = cancellationToken.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
-            var lines = new List<string>();
-            var sync = new object();
-            void Capture(string? line)
+            await using var writer = new StreamWriter(logPath, false);
+            using var logGate = new SemaphoreSlim(1, 1);
+            async Task CaptureAsync(StreamReader reader)
             {
-                if (string.IsNullOrWhiteSpace(line)) return;
-                lock (sync) lines.Add(line);
-                progress?.Report(ParseProgress(line));
+                while (await reader.ReadLineAsync() is { } line)
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    await logGate.WaitAsync();
+                    try { await writer.WriteLineAsync(line); await writer.FlushAsync(); }
+                    finally { logGate.Release(); }
+                    progress?.Report(ParseProgress(line));
+                }
             }
-            process.OutputDataReceived += (_, args) => Capture(args.Data);
-            process.ErrorDataReceived += (_, args) => Capture(args.Data);
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            await process.WaitForExitAsync(cancellationToken);
-            await Task.Delay(80, CancellationToken.None);
-            lock (sync) File.WriteAllLines(logPath, lines);
+            var capture = Task.WhenAll(CaptureAsync(process.StandardOutput), CaptureAsync(process.StandardError));
+            try { await process.WaitForExitAsync(cancellationToken); }
+            finally { await capture; }
             var success = process.ExitCode == 0;
+            IReadOnlyList<string> outputs = [];
+            if (success)
+            {
+                var feature = logPrefix.StartsWith("subtitles") ? "subtitles" : logPrefix is "transkun" or "yourmt3" or "piano" or "basic-pitch" ? "transcription" : "separation";
+                try { outputs = ArtifactValidator.Collect(feature, output); }
+                catch (Exception ex) { return new(false, ex.Message, logPath); }
+            }
             StatusChanged?.Invoke(this, success ? "completed:" + logPrefix : "failed:" + logPrefix);
-            return new OperationResult(success, success ? "Task completed." : $"Task failed with code {process.ExitCode}.", success ? output : logPath);
+            return new OperationResult(success, success ? "Task completed." : $"Task failed with code {process.ExitCode}.", success ? output : logPath, Outputs: outputs);
         }
         finally
         {
-            processes.Remove(key);
+            ((ICollection<KeyValuePair<string, Process>>)processes).Remove(new(key, process));
         }
     }
 
@@ -517,7 +564,9 @@ public sealed class BackendService(SettingsService settings)
         StatusChanged?.Invoke(this, "创作引擎启动已取消。");
     }
 
-    public void StopWorkbench(string feature)
+    public int? WorkbenchProcessId(string feature) => processes.TryGetValue(feature, out var process) && !process.HasExited ? process.Id : null;
+
+    public void StopWorkbench(string feature, int? expectedPid = null)
     {
         var key = feature switch
         {
@@ -526,7 +575,7 @@ public sealed class BackendService(SettingsService settings)
             "singing" => "singing",
             _ => null
         };
-        if (key is not null) Stop(key);
+        if (key is not null && (expectedPid is null || WorkbenchProcessId(key) == expectedPid)) Stop(key);
     }
 
     public void StopAll()
@@ -539,7 +588,7 @@ public sealed class BackendService(SettingsService settings)
     private void Stop(string key)
     {
         activeModels.Remove(key);
-        if (!processes.Remove(key, out var process)) return;
+        if (!processes.TryRemove(key, out var process)) return;
         try { if (!process.HasExited) process.Kill(true); } catch { }
         try { process.Dispose(); } catch { }
     }
@@ -548,15 +597,15 @@ public sealed class BackendService(SettingsService settings)
 
     private async Task<OperationResult> WaitForUrlAsync(string key, string url, string message)
     {
-        navigationCancellation?.Cancel();
-        navigationCancellation = new CancellationTokenSource();
-        var token = navigationCancellation.Token;
+        var token = navigationCancellation?.Token ?? CancellationToken.None;
+        processes.TryGetValue(key, out var launchedProcess);
         startingKey = key;
         StatusChanged?.Invoke(this, "loading:" + message);
         using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
+        var elapsed = Stopwatch.StartNew();
         try
         {
-            for (var i = 0; i < 300 && !token.IsCancellationRequested; i++)
+            while (elapsed.Elapsed < TimeSpan.FromMinutes(5) && !token.IsCancellationRequested)
             {
                 if (!processes.TryGetValue(key, out var process) || process.HasExited)
                 {
@@ -583,6 +632,7 @@ public sealed class BackendService(SettingsService settings)
         }
         finally
         {
+            if (token.IsCancellationRequested && launchedProcess is not null && processes.TryGetValue(key, out var current) && ReferenceEquals(current, launchedProcess)) Stop(key);
             if (startingKey?.Equals(key, StringComparison.OrdinalIgnoreCase) == true) startingKey = null;
         }
     }
@@ -603,7 +653,24 @@ public sealed class BackendService(SettingsService settings)
     private Process StartHidden(string key, string fileName, string arguments, string workingDirectory, IReadOnlyDictionary<string, string>? environment = null)
     {
         Directory.CreateDirectory(Logs);
+        var bridge = Path.Combine(AppContext.BaseDirectory, "Tools", "gradio_result_bridge.py");
+        if (!File.Exists(bridge)) throw new FileNotFoundException("Aurora 工作台结果适配器缺失，请修复应用安装。", bridge);
+        if (Path.GetFileName(fileName).Equals("python.exe", StringComparison.OrdinalIgnoreCase))
+        {
+            var script = Regex.Match(arguments, "^\"(?<path>[^\"]+)\"(?<rest>.*)$");
+            if (!script.Success) throw new InvalidOperationException("工作台启动参数无效。");
+            arguments = $"\"{bridge}\" --script \"{script.Groups["path"].Value}\" --{script.Groups["rest"].Value}";
+        }
+        else
+        {
+            var name = Path.GetFileNameWithoutExtension(fileName);
+            var scripts = Path.GetDirectoryName(fileName)!;
+            var parentPython = Path.Combine(Path.GetDirectoryName(scripts)!, "python.exe");
+            fileName = File.Exists(parentPython) ? parentPython : Path.Combine(scripts, "python.exe");
+            arguments = $"\"{bridge}\" --console-script {name} -- {arguments}";
+        }
         var logPath = Path.Combine(Logs, key + ".log");
+        AppendLog(logPath, $"[{DateTimeOffset.Now:O}] Starting {launchModel}");
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -616,6 +683,12 @@ public sealed class BackendService(SettingsService settings)
         };
         if (environment is not null)
             foreach (var item in environment) process.StartInfo.Environment[item.Key] = item.Value;
+        process.StartInfo.Environment["AURORA_RESULT_RECEIPTS"] = Path.Combine(settings.AppDataRoot, "WorkbenchReceipts");
+        process.StartInfo.Environment["AURORA_OUTPUT_ROOT"] = OutputFolder(key == "music" ? "AI音乐" : key == "voice" ? "AI配音" : "AI歌声克隆");
+        process.StartInfo.Environment["AURORA_FEATURE"] = key;
+        process.StartInfo.Environment["AURORA_MODEL_ID"] = launchModel;
+        process.StartInfo.Environment["GRADIO_ANALYTICS_ENABLED"] = "False";
+        process.StartInfo.Environment["PYTHONUNBUFFERED"] = "1";
         process.OutputDataReceived += (_, e) => { if (e.Data is not null) AppendLog(logPath, e.Data); };
         process.ErrorDataReceived += (_, e) => { if (e.Data is not null) AppendLog(logPath, e.Data); };
         process.Start(); process.BeginOutputReadLine(); process.BeginErrorReadLine();
@@ -629,12 +702,13 @@ public sealed class BackendService(SettingsService settings)
         RedirectStandardOutput = true, RedirectStandardError = true
     };
 
-    private static async Task<(int ExitCode, string Output, string Error)> RunProcessAsync(ProcessStartInfo info)
+    private static async Task<(int ExitCode, string Output, string Error)> RunProcessAsync(ProcessStartInfo info, CancellationToken cancellationToken = default)
     {
         using var process = Process.Start(info) ?? throw new InvalidOperationException("Process could not start.");
+        using var cancellation = cancellationToken.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
         var output = process.StandardOutput.ReadToEndAsync();
         var error = process.StandardError.ReadToEndAsync();
-        await process.WaitForExitAsync();
+        await process.WaitForExitAsync(cancellationToken);
         return (process.ExitCode, await output, await error);
     }
 

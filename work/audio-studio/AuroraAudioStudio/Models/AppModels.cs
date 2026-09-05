@@ -64,7 +64,8 @@ public sealed record ModelState(
     string EditionDisplay,
     string PrimaryAction,
     string RollbackAction,
-    string UninstallAction);
+    string UninstallAction,
+    bool CanRollback = false);
 
 public sealed record ModelGroup(string Name, IReadOnlyList<ModelState> Items);
 
@@ -79,8 +80,10 @@ public static class AuroraTaskStates
     public const string Interrupted = "interrupted";
 }
 
-public sealed class AuroraTaskRecord
+public sealed class AuroraTaskRecord : System.ComponentModel.INotifyPropertyChanged
 {
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+    public void NotifyDisplayChanged() => PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(null));
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public string ProjectId { get; set; } = "";
     public string Title { get; set; } = "";
@@ -97,8 +100,12 @@ public sealed class AuroraTaskRecord
     public string OutputPath { get; set; } = "";
     public string LogPath { get; set; } = "";
     public string Preset { get; set; } = "recommended";
+    public string SourceLanguage { get; set; } = "auto";
+    public string TrackMode { get; set; } = "two-stem";
+    public string Device { get; set; } = "";
+    public List<string> OutputFiles { get; set; } = [];
     public int QueueOrder { get; set; }
-    [JsonIgnore] public bool CanCancel => Status is AuroraTaskStates.Waiting or AuroraTaskStates.Preparing or AuroraTaskStates.Running;
+    [JsonIgnore] public bool CanCancel => Status is AuroraTaskStates.Waiting or AuroraTaskStates.Preparing or AuroraTaskStates.Running or AuroraTaskStates.Interrupted;
     [JsonIgnore] public bool CanRetry => Status is AuroraTaskStates.Failed or AuroraTaskStates.Canceled or AuroraTaskStates.Interrupted;
     [JsonIgnore] public string DisplayStatus { get; set; } = "";
     [JsonIgnore] public string DisplayProgress { get; set; } = "";
@@ -240,7 +247,8 @@ public sealed record AppUpdateInfo(
     string Message,
     bool CheckSucceeded = true);
 
-public sealed record OperationResult(bool Success, string Message, string? Path = null, string? Url = null);
+public sealed record OperationResult(bool Success, string Message, string? Path = null, string? Url = null,
+    IReadOnlyList<string>? Outputs = null, string? Device = null);
 
 public sealed record AppUpdateProgress(double Percentage, string Message, bool IsIndeterminate = false);
 

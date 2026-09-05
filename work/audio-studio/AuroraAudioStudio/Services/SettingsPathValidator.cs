@@ -19,8 +19,13 @@ public static class SettingsPathValidator
 
             try
             {
+                if (!Path.IsPathFullyQualified(value.Trim()))
+                {
+                    error = $"{name}必须是完整的绝对路径。";
+                    return false;
+                }
                 var full = Path.GetFullPath(value.Trim());
-                if (!Path.IsPathFullyQualified(full) || string.Equals(full, Path.GetPathRoot(full), StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(full, Path.GetPathRoot(full), StringComparison.OrdinalIgnoreCase))
                 {
                     error = $"{name}不能直接使用磁盘根目录。";
                     return false;

@@ -1,0 +1,3458 @@
+{
+  "Pushing the Boundaries of Open-Source Music Generation": [
+    "推动开源音乐生成的边界",
+    "推動開源音樂生成的邊界",
+    "Pushing the Boundaries of Open-Source Music Generation",
+    "オープンソース音楽生成の限界を押し広げる"
+  ],
+  "🎛️ ACE-Step V1.5 Playground💡": [
+    "🎛️ ACE-Step V1.5 游乐场💡",
+    "🎛️ ACE-Step V1.5 游樂場💡",
+    "🎛️ ACE-Step V1.5 Playground💡",
+    "🎛️ ACE-Step V1.5 プレイグラウンド💡"
+  ],
+  "English": [
+    "英语",
+    "英語",
+    "English",
+    "英語"
+  ],
+  "📋 Auto-fill Generation Form": [
+    "📋 自动填充生成表单",
+    "📋 自動填充生成表單",
+    "📋 Auto-fill Generation Form",
+    "📋 生成フォームを自動入力"
+  ],
+  "❌ No dataset imported": [
+    "❌ 未导入数据集",
+    "❌ 未導入數據集䊈Ǘ",
+    "❌ No dataset imported",
+    "❌ データセットがインポートされていません"
+  ],
+  "📊 Data Status": [
+    "📊 数据状态",
+    "📊 數據狀態",
+    "📊 Data Status",
+    "📊 データステータス"
+  ],
+  "Choose dataset to explore.": [
+    "选择要浏览的数据集。",
+    "選擇要瀏覽的數據集。Ǘ",
+    "Choose dataset to explore.",
+    "探索するデータセットを選択。"
+  ],
+  "Dataset": [
+    "数据集",
+    "數據集",
+    "Dataset",
+    "データセット"
+  ],
+  "🔍 Get Item": [
+    "🔍 获取项目",
+    "🔍 獲取項目",
+    "🔍 Get Item",
+    "🔍 アイテムを取得"
+  ],
+  "📥 Import Dataset": [
+    "📥 导入数据集",
+    "📥 導入數據集᳸䊉Ǘ",
+    "📥 Import Dataset",
+    "📥 データセットをインポート"
+  ],
+  "📝 Instruction": [
+    "📝 指令",
+    "📝 指令翸",
+    "📝 Instruction",
+    "📝 指示"
+  ],
+  "No instruction available": [
+    "无可用指令",
+    "無可用指令翸",
+    "No instruction available",
+    "利用可能な指示がありません"
+  ],
+  "Complete Item Information": [
+    "完整项目信息",
+    "完整項目信息翸",
+    "Complete Item Information",
+    "完全なアイテム情報"
+  ],
+  "📋 Item Metadata (JSON)": [
+    "📋 项目元数据 (JSON)",
+    "📋 項目元數據 (JSON)",
+    "📋 Item Metadata (JSON)",
+    "📋 アイテムメタデータ (JSON)"
+  ],
+  "Reference Audio": [
+    "参考音频",
+    "參考音頻⽯翸",
+    "Reference Audio",
+    "リファレンスオーディオ"
+  ],
+  "How to find items.": [
+    "如何查找项目。",
+    "如何查找項目。",
+    "How to find items.",
+    "アイテムの検索方法。"
+  ],
+  "Search Type": [
+    "搜索类型",
+    "搜索類型⽯翸",
+    "Search Type",
+    "検索タイプ"
+  ],
+  "Keys: exact match, Index: 0 to dataset size-1.": [
+    "键: 精确匹配, 索引: 0到数据集大小-1。",
+    "鍵: 精確匹配, 索引: 0到數據集大小-1。",
+    "Keys: exact match, Index: 0 to dataset size-1.",
+    "キー: 完全一致、インデックス: 0からデータセットサイズ-1。"
+  ],
+  "Search Value": [
+    "搜索值",
+    "搜索值",
+    "Search Value",
+    "検索値"
+  ],
+  "Enter keys or index (leave empty for random)": [
+    "输入键或索引(留空表示随机)",
+    "輸入鍵或索引(留空表示隨機)Ǘ",
+    "Enter keys or index (leave empty for random)",
+    "キーまたはインデックスを入力(空白の場合はランダム)"
+  ],
+  "Source Audio": [
+    "源音频",
+    "源音頻",
+    "Source Audio",
+    "ソースオーディオ"
+  ],
+  "Target Audio": [
+    "目标音频",
+    "目標音頻⽯翸",
+    "Target Audio",
+    "ターゲットオーディオ"
+  ],
+  "📊 Dataset Explorer": [
+    "📊 数据集浏览器",
+    "📊 數據集瀏覽器䊉Ǘ",
+    "📊 Dataset Explorer",
+    "📊 データセットエクスプローラー"
+  ],
+  "Use Source Audio from Dataset": [
+    "使用数据集中的源音频",
+    "使用數據集中的源音頻Ǘ",
+    "Use Source Audio from Dataset",
+    "データセットのソースオーディオを使用"
+  ],
+  "Check to use the source audio from dataset.": [
+    "勾选以使用数据集中的源音频。",
+    "勾選以使用數據集中的源音頻。Ǘ",
+    "Check to use the source audio from dataset.",
+    "データセットのソースオーディオを使用する場合はチェック。"
+  ],
+  "Enable Normalization": [
+    "启用归一化",
+    "啟用歸一化翸",
+    "Enable Normalization",
+    "ノーマライズを有効にする"
+  ],
+  "Adjusts the final audio volume to a consistent peak level. Prevents clipping (distortion from too-loud audio) and ensures all outputs are at similar loudness. Recommended to keep enabled for consistent results.": [
+    "将音频音量归一化到目标峰值电平，以防止削波或确保一致的响度。",
+    "將音頻音量歸一化到目標峰值電平，以防止削波或確保一致的響度。翹",
+    "Adjusts the final audio volume to a consistent peak level. Prevents clipping (distortion from too-loud audio) and ensures all outputs are at similar loudness. Recommended to keep enabled for consistent results.",
+    "クリッピングを防ぎ、ラウドネスを一定にするために、オーディオ音量をターゲットピークレベルに正規化します。"
+  ],
+  "Latent Rescale": [
+    "Latent 缩放",
+    "Latent 縮放䊋Ǘ",
+    "Latent Rescale",
+    "Latent リスケール"
+  ],
+  "Advanced: Scales the internal audio representation before decoding. Values below 1.0 (e.g. 0.91) can reduce clipping/distortion. 1.0 = no rescale (default). Only adjust if you're hearing audio artifacts despite normalization.": [
+    "VAE 解码前对 DiT latent 施加的缩放因子。默认 1.0（不缩放）。小于 1.0 的值（如 0.91）可减少爆音。",
+    "VAE 解碼前對 DiT latent 施加的縮放因子。默認 1.0（不縮放）。小于 1.0 的值（如 0.91）可減少爆音。",
+    "Advanced: Scales the internal audio representation before decoding. Values below 1.0 (e.g. 0.91) can reduce clipping/distortion. 1.0 = no rescale (default). Only adjust if you're hearing audio artifacts despite normalization.",
+    "VAEデコード前にDiT latentに適用するスケール係数。デフォルト1.0（スケーリングなし）。1.0未満の値（例: 0.91）でクリッピングを軽減できます。"
+  ],
+  "Latent Shift": [
+    "Latent 偏移",
+    "Latent 偏移䊋Ǘ",
+    "Latent Shift",
+    "Latent シフト"
+  ],
+  "Advanced: Shifts the internal audio representation before decoding. Try small negative values (e.g. -0.04) if your outputs have clipping/distortion. 0 = no shift (default). Only adjust if you're hearing audio artifacts.": [
+    "VAE 解码前对 DiT latent 施加的偏移量。默认 0（不偏移）。负值（如 -0.04）可减少爆音。",
+    "VAE 解碼前對 DiT latent 施加的偏移量。默認 0（不偏移）。負值（如 -0.04）可減少爆音。翹",
+    "Advanced: Shifts the internal audio representation before decoding. Try small negative values (e.g. -0.04) if your outputs have clipping/distortion. 0 = no shift (default). Only adjust if you're hearing audio artifacts.",
+    "VAEデコード前にDiT latentに適用するシフト量。デフォルト0（シフトなし）。負の値（例: -0.04）でクリッピングを軽減できます。"
+  ],
+  "Target Peak (dB)": [
+    "目标峰值 (dB)",
+    "目標峰值 (dB)䊋Ǘ",
+    "Target Peak (dB)",
+    "ターゲットピーク (dB)"
+  ],
+  "How loud the normalized audio should be. -1.0 dB = industry standard safe peak (recommended, leaves headroom). -0.1 dB = maximum loudness before clipping. Lower values (e.g. -3.0) = quieter, more headroom for further mixing/mastering.": [
+    "分贝单位的目标峰值电平。-1.0 dB 是标准安全峰值。-0.1 dB 是最大值。",
+    "分貝單位的目標峰值電平。-1.0 dB 是標準安全峰值。-0.1 dB 是最大值。Ѐ",
+    "How loud the normalized audio should be. -1.0 dB = industry standard safe peak (recommended, leaves headroom). -0.1 dB = maximum loudness before clipping. Lower values (e.g. -3.0) = quieter, more headroom for further mixing/mastering.",
+    "デシベル単位のターゲットピークレベル。-1.0 dBが標準的な安全ピークです。-0.1 dBが最大です。"
+  ],
+  "🎵 Add Stem": [
+    "🎵 添加分轨",
+    "🎵 添加分軌",
+    "🎵 Add Stem",
+    "🎵 ステム追加"
+  ],
+  "⚡ Automation & Batch": [
+    "⚡ 自动化与批量",
+    "⚡ 自動化與批量漠䊋Ǘ",
+    "⚡ Automation & Batch",
+    "⚡ 自動化とバッチ"
+  ],
+  "Advanced DiT Parameters": [
+    "DiT 高级参数",
+    "DiT 高級參數穰䊋Ǘ",
+    "Advanced DiT Parameters",
+    "DiT 詳細パラメータ"
+  ],
+  "🎛️ DiT Diffusion": [
+    "🎛️ DiT 扩散参数",
+    "🎛️ DiT 擴散參數蔨䊋Ǘ",
+    "🎛️ DiT Diffusion",
+    "🎛️ DiT 拡散パラメータ"
+  ],
+  "🤖 LM Generation": [
+    "🤖 LM 生成参数",
+    "🤖 LM 生成參數Ǘ",
+    "🤖 LM Generation",
+    "🤖 LM 生成パラメータ"
+  ],
+  "🔊 Audio Output & Post-processing": [
+    "🔊 音频输出与后处理",
+    "🔊 音頻輸出與后處理",
+    "🔊 Audio Output & Post-processing",
+    "🔊 オーディオ出力と後処理"
+  ],
+  "⚙️ Settings": [
+    "⚙️ 设置",
+    "⚙️ 設置翸",
+    "⚙️ Settings",
+    "⚙️ 設定"
+  ],
+  "🔍 Analyze": [
+    "🔍 分析",
+    "🔍 分析翸",
+    "🔍 Analyze",
+    "🔍 分析"
+  ],
+  "FLAC = lossless, large files. MP3 = small files, slight quality loss. WAV 32-bit = studio quality, largest files. Opus/AAC = efficient lossy compression. Choose FLAC or WAV for production, MP3 for sharing.": [
+    "保存文件的音频格式。",
+    "保存文件的音頻格式。Ǘ",
+    "FLAC = lossless, large files. MP3 = small files, slight quality loss. WAV 32-bit = studio quality, largest files. Opus/AAC = efficient lossy compression. Choose FLAC or WAV for production, MP3 for sharing.",
+    "保存ファイルのオーディオフォーマット。"
+  ],
+  "Audio Format": [
+    "音频格式",
+    "音頻格式⽯翸",
+    "Audio Format",
+    "オーディオフォーマット"
+  ],
+  "🎵 Audio Uploads": [
+    "🎵 音频上传",
+    "🎵 音頻上傳",
+    "🎵 Audio Uploads",
+    "🎵 オーディオアップロード"
+  ],
+  "Auto": [
+    "自动",
+    "自動",
+    "Auto",
+    "自動"
+  ],
+  "Automatically generates timestamped lyrics (LRC format) for each generated audio. Useful for karaoke-style display or syncing lyrics to music. Adds processing time per sample.": [
+    "自动为所有生成的音频生成LRC歌词时间戳。",
+    "自動為所有生成的音頻生成LRC歌詞時間戳。",
+    "Automatically generates timestamped lyrics (LRC format) for each generated audio. Useful for karaoke-style display or syncing lyrics to music. Adds processing time per sample.",
+    "生成されたすべてのオーディオのLRC歌詞タイムスタンプを自動生成。"
+  ],
+  "Auto LRC": [
+    "自动 LRC",
+    "自動 LRC翸",
+    "Auto LRC",
+    "自動 LRC"
+  ],
+  "Automatically calculates a quality score (0–1) for each generated audio using perplexity. Higher = better. Useful for comparing results in a batch to find the best one. Adds a few seconds per sample.": [
+    "自动计算所有生成音频的质量分数。",
+    "自動計算所有生成音頻的質量分數。쉐㝤Ǘ",
+    "Automatically calculates a quality score (0–1) for each generated audio using perplexity. Higher = better. Useful for comparing results in a batch to find the best one. Adds a few seconds per sample.",
+    "生成されたすべてのオーディオの品質スコアを自動計算。"
+  ],
+  "Auto Score": [
+    "自动评分",
+    "自動評分⽯翸",
+    "Auto Score",
+    "自動スコアリング"
+  ],
+  "AutoGen": [
+    "自动生成",
+    "自動生成⽯翸",
+    "AutoGen",
+    "自動生成"
+  ],
+  "How many variations to generate at once. Higher = more options to choose from, but uses more VRAM and takes longer. Generate 2–4 to compare and pick the best result.": [
+    "要生成的音频数量(最多8个)。",
+    "要生成的音頻數量(最多8個)。",
+    "How many variations to generate at once. Higher = more options to choose from, but uses more VRAM and takes longer. Generate 2–4 to compare and pick the best result.",
+    "生成するオーディオの数(最大8)。"
+  ],
+  "Batch Size": [
+    "批大小",
+    "批大小",
+    "Batch Size",
+    "バッチサイズ"
+  ],
+  "BPM Auto": [
+    "BPM 自动",
+    "BPM 自動翸",
+    "BPM Auto",
+    "BPM 自動"
+  ],
+  "Tempo of the song. Slow ballad: 60–80. Pop/Rock: 100–130. Dance/EDM: 120–140. Fast punk/metal: 160–200. Leave empty or check 'Auto' to let the model choose based on your caption.": [
+    "留空表示 N/A。",
+    "留空表示 N/A。䊌Ǘ",
+    "Tempo of the song. Slow ballad: 60–80. Pop/Rock: 100–130. Dance/EDM: 120–140. Fast punk/metal: 160–200. Leave empty or check 'Auto' to let the model choose based on your caption.",
+    "空白の場合は N/A。"
+  ],
+  "BPM (Beats Per Minute)": [
+    "BPM",
+    "BPM",
+    "BPM (Beats Per Minute)",
+    "BPM"
+  ],
+  "Describe the style, genre, instruments, and mood.": [
+    "描述风格、流派、乐器和情绪。",
+    "描述風格、流派、樂器和情緒。Ǘ",
+    "Describe the style, genre, instruments, and mood.",
+    "スタイル、ジャンル、楽器、ムードを説明。"
+  ],
+  "Music Caption": [
+    "音乐描述",
+    "音樂描述⽯翸",
+    "Music Caption",
+    "音楽キャプション"
+  ],
+  "A peaceful acoustic guitar melody with soft vocals.": [
+    "一段平和的原声吉他旋律,配有柔和的人声.",
+    "一段平和的原聲吉他旋律,配有柔和的人聲.\u0001",
+    "A peaceful acoustic guitar melody with soft vocals.",
+    "柔らかいボーカルを伴う穏やかなアコースティックギターのメロディー."
+  ],
+  "Lets the LM enhance and expand your caption before generation. Your brief description gets rewritten into a more detailed, model-friendly prompt. Useful if you write short captions and want the LM to fill in musical details.": [
+    "生成前使用LM重写描述。",
+    "生成前使用LM重寫描述。̨䊍Ǘ",
+    "Lets the LM enhance and expand your caption before generation. Your brief description gets rewritten into a more detailed, model-friendly prompt. Useful if you write short captions and want the LM to fill in musical details.",
+    "生成前にLMでキャプションを書き換え。"
+  ],
+  "CaptionRewrite": [
+    "描述重写",
+    "描述重寫⽯翸",
+    "CaptionRewrite",
+    "キャプション書き換え"
+  ],
+  "📝 Music Caption": [
+    "📝 音乐描述",
+    "📝 音樂描述",
+    "📝 Music Caption",
+    "📝 音楽キャプション"
+  ],
+  "CFG Interval End": [
+    "CFG 间隔结束",
+    "CFG 間隔結束▰䊍Ǘ",
+    "CFG Interval End",
+    "CFG 間隔終了"
+  ],
+  "CFG Interval Start": [
+    "CFG 间隔开始",
+    "CFG 間隔開始㜐䊍Ǘ",
+    "CFG Interval Start",
+    "CFG 間隔開始"
+  ],
+  "What fraction of DiT denoising steps use LM-generated semantic codes as guidance. Higher (0.7–1.0) = output closely follows the LM's musical plan. Lower (0.1–0.4) = DiT has more creative freedom. 0 = codes ignored entirely. Default 1.0 is a good starting point.": [
+    "控制使用LM生成代码的去噪步骤数量。",
+    "控制使用LM生成代碼的去噪步驟數量。Ǘ",
+    "What fraction of DiT denoising steps use LM-generated semantic codes as guidance. Higher (0.7–1.0) = output closely follows the LM's musical plan. Lower (0.1–0.4) = DiT has more creative freedom. 0 = codes ignored entirely. Default 1.0 is a good starting point.",
+    "LM生成コードを使用するデノイジングステップ数を制御。"
+  ],
+  "LM Codes Strength": [
+    "LM 代码强度",
+    "LM 代碼強度",
+    "LM Codes Strength",
+    "LM コード強度"
+  ],
+  "Shows detailed logs of how the LM's output tokens are being filtered/constrained. Only useful for developers debugging token generation issues. Leave off for normal use.": [
+    "启用约束解码的调试日志(勾选以查看详细日志)。",
+    "啟用約束解碼的調試日志(勾選以查看詳細日志)。",
+    "Shows detailed logs of how the LM's output tokens are being filtered/constrained. Only useful for developers debugging token generation issues. Leave off for normal use.",
+    "制約付きデコーディングのデバッグログを有効化(チェックすると詳細ログを表示)。"
+  ],
+  "Constrained Decoding Debug": [
+    "约束解码调试",
+    "約束解碼調試翸",
+    "Constrained Decoding Debug",
+    "制約付きデコーディングデバッグ"
+  ],
+  "Convert to Codes": [
+    "转换为代码",
+    "轉換為代碼翸",
+    "Convert to Codes",
+    "コードに変換"
+  ],
+  "When enabled, the LM auto-detects the vocal language during chain-of-thought reasoning. Useful when language is ambiguous or set to 'unknown'. Disable if you've explicitly set the vocal language.": [
+    "在CoT中生成语言(思维链)。",
+    "在CoT中生成語言(思維鏈)。",
+    "When enabled, the LM auto-detects the vocal language during chain-of-thought reasoning. Useful when language is ambiguous or set to 'unknown'. Disable if you've explicitly set the vocal language.",
+    "CoTで言語を生成(思考の連鎖)。"
+  ],
+  "CoT Language Detection": [
+    "CoT 语言",
+    "CoT 語言翸",
+    "CoT Language Detection",
+    "CoT 言語"
+  ],
+  "When enabled, the LM 'thinks through' music metadata (BPM, key, structure) before generating. Produces more coherent results but adds ~2–5s per generation. Disable to skip this step and use your manually set metadata directly. Recommended: keep enabled unless you've set all metadata yourself.": [
+    "使用 LM 生成 CoT 元数据(取消勾选则跳过 LM CoT 生成)。",
+    "使用 LM 生成 CoT 元數據(取消勾選則跳過 LM CoT 生成)。招蝑翹",
+    "When enabled, the LM 'thinks through' music metadata (BPM, key, structure) before generating. Produces more coherent results but adds ~2–5s per generation. Disable to skip this step and use your manually set metadata directly. Recommended: keep enabled unless you've set all metadata yourself.",
+    "LMを使用してCoTメタデータを生成(チェックを外すとLM CoT生成をスキップ)。"
+  ],
+  "CoT Metas (Chain-of-Thought Metadata)": [
+    "CoT 元数据",
+    "CoT 元數據",
+    "CoT Metas (Chain-of-Thought Metadata)",
+    "CoT メタデータ"
+  ],
+  "Controls how much of the original melody is preserved during remix. 0 = no melody retention (pure style transfer from your caption). 0.1–0.25 = recommended range with SFT model (restores melody while allowing style changes). 1.0 = maximum melody retention. Higher values keep the tune but may resist style changes — adjust your caption if needed.": [
+    "控制 Remix 模式下的旋律还原程度。推荐：使用 SFT 模型，值设为 0.1–0.25。稍微提升即可还原旋律，但风格迁移可能需要额外的 prompt 调参。（0 = 纯噪声/无翻唱效果，1 = 最接近原始音频）。",
+    "控制 Remix 模式下的旋律還原程度。推薦：使用 SFT 模型，值設為 0.1–0.25。稍微提升即可還原旋律，但風格遷移可能需要額外的 prompt 調參。（0 = 純噪聲/無翻唱效果，1 = 最接近原始音頻）。",
+    "Controls how much of the original melody is preserved during remix. 0 = no melody retention (pure style transfer from your caption). 0.1–0.25 = recommended range with SFT model (restores melody while allowing style changes). 1.0 = maximum melody retention. Higher values keep the tune but may resist style changes — adjust your caption if needed.",
+    "Remixモードでのメロディ復元を制御します。推奨：SFTモデルを使用し、値を0.1〜0.25に設定。わずかに上げるとメロディが復元されますが、スタイル変換には追加のプロンプト調整が必要な場合があります。（0 = 純粋なノイズ/カバーなし、1 = オリジナルに最も近い）。"
+  ],
+  "Cover Strength (Melody Retention)": [
+    "翻唱强度",
+    "翻唱強度⽯翸",
+    "Cover Strength (Melody Retention)",
+    "カバー強度"
+  ],
+  "What fraction of denoising steps reference the source audio structure. Higher = output sounds closer to the original. Lower = more creative reinterpretation. Adjust alongside Cover Strength (Melody Retention) for fine-tuned remix control.": [
+    "控制使用覆盖模式的去噪步骤数量。",
+    "控制使用覆蓋模式的去噪步驟數量。쉐㝤Ǘ",
+    "What fraction of denoising steps reference the source audio structure. Higher = output sounds closer to the original. Lower = more creative reinterpretation. Adjust alongside Cover Strength (Melody Retention) for fine-tuned remix control.",
+    "カバーモードを使用するデノイジングステップ数を制御。"
+  ],
+  "Audio Cover Strength": [
+    "音频覆盖强度",
+    "音頻覆蓋強度翸",
+    "Audio Cover Strength",
+    "オーディオカバー強度"
+  ],
+  "Create Sample": [
+    "创建样本",
+    "創建樣本⽯翸",
+    "Create Sample",
+    "サンプル作成"
+  ],
+  "Advanced: Manually define the denoising schedule as comma-separated values from 1.0→0.0 (e.g. '0.97,0.76,0.615,0.5,0.395,0.28,0.18,0.085,0'). Overrides both Inference Steps and Shift. Leave empty to use automatic scheduling. Only change this if you know what you're doing.": [
+    "从 1.0 到 0.0 的逗号分隔值（例如 '0.97,0.76,0.615,0.5,0.395,0.28,0.18,0.085,0'）。会覆盖推理步数和 shift 设置。",
+    "從 1.0 到 0.0 的逗號分隔值（例如 '0.97,0.76,0.615,0.5,0.395,0.28,0.18,0.085,0'）。會覆蓋推理步數和 shift 設置。",
+    "Advanced: Manually define the denoising schedule as comma-separated values from 1.0→0.0 (e.g. '0.97,0.76,0.615,0.5,0.395,0.28,0.18,0.085,0'). Overrides both Inference Steps and Shift. Leave empty to use automatic scheduling. Only change this if you know what you're doing.",
+    "1.0から0.0へのカンマ区切り値（例：'0.97,0.76,0.615,0.5,0.395,0.28,0.18,0.085,0'）。推論ステップとシフトを上書きします。"
+  ],
+  "Custom Timesteps": [
+    "自定义时间步",
+    "自定義時間步翸",
+    "Custom Timesteps",
+    "カスタムタイムステップ"
+  ],
+  "Duration Auto": [
+    "时长 自动",
+    "時長 自動",
+    "Duration Auto",
+    "長さ 自動"
+  ],
+  "Length of the generated audio in seconds. Longer durations need more VRAM and time. -1 = let the model decide based on lyrics/structure. Check 'Auto' for automatic duration.": [
+    "使用-1表示随机。",
+    "使用-1表示隨機。䊎Ǘ",
+    "Length of the generated audio in seconds. Longer durations need more VRAM and time. -1 = let the model decide based on lyrics/structure. Check 'Auto' for automatic duration.",
+    "ランダムの場合は-1を使用。"
+  ],
+  "Audio Duration (seconds)": [
+    "音频时长 (秒)",
+    "音頻時長 (秒)蓸䊎Ǘ",
+    "Audio Duration (seconds)",
+    "オーディオ長(秒)"
+  ],
+  "🎵 Extract Stem": [
+    "🎵 提取分轨",
+    "🎵 提取分軌",
+    "🎵 Extract Stem",
+    "🎵 ステム抽出"
+  ],
+  "Format": [
+    "格式化",
+    "格式化",
+    "Format",
+    "フォーマット"
+  ],
+  "Enhance Caption": [
+    "增强描述",
+    "增強描述⽯翸",
+    "Enhance Caption",
+    "キャプションを強化"
+  ],
+  "Enhance Lyrics": [
+    "增强歌词",
+    "增強歌詞⽯翸",
+    "Enhance Lyrics",
+    "歌詞を強化"
+  ],
+  "🎵 Generate Music": [
+    "🎵 生成音乐",
+    "🎵 生成音樂",
+    "🎵 Generate Music",
+    "🎵 音楽を生成"
+  ],
+  "Controls how strictly the output follows your caption/prompt. Higher (10–15) = more faithful to prompt but can sound harsh or distorted. Lower (1–5) = more natural/creative but may drift from your description. Default 7.0. Base model only — has no effect on turbo models.": [
+    "更高的值更紧密地遵循文本。",
+    "更高的值更緊密地遵循文本。䊎Ǘ",
+    "Controls how strictly the output follows your caption/prompt. Higher (10–15) = more faithful to prompt but can sound harsh or distorted. Lower (1–5) = more natural/creative but may drift from your description. Default 7.0. Base model only — has no effect on turbo models.",
+    "値が高いほどテキストに忠実に従う。"
+  ],
+  "DiT Guidance Scale (Base model only)": [
+    "DiT 引导比例(仅支持base模型)",
+    "DiT 引導比例(僅支持base模型)",
+    "DiT Guidance Scale (Base model only)",
+    "DiT ガイダンススケール(baseモデルのみサポート)"
+  ],
+  "ODE (Euler): Deterministic and faster — same seed always gives same result. Recommended for most use cases. SDE (Stochastic): Adds randomness during diffusion — can produce more varied/creative results but less predictable. Try SDE if ODE results feel too 'safe'.": [
+    "扩散推理方法。ODE (欧拉) 更快，SDE (随机) 可能产生不同结果。",
+    "擴散推理方法。ODE (歐拉) 更快，SDE (隨機) 可能產生不同結果。蝑翹",
+    "ODE (Euler): Deterministic and faster — same seed always gives same result. Recommended for most use cases. SDE (Stochastic): Adds randomness during diffusion — can produce more varied/creative results but less predictable. Try SDE if ODE results feel too 'safe'.",
+    "拡散推論方法。ODE (オイラー) は高速、SDE (確率的) は異なる結果を生成する可能性があります。"
+  ],
+  "Inference Method": [
+    "推理方法",
+    "推理方法⽯翸",
+    "Inference Method",
+    "推論方法"
+  ],
+  "How many denoising passes the DiT model makes. More steps = higher quality but slower. Turbo models: 4–8 steps (default 8, diminishing returns above 8). SFT models: 30–100 steps (default 50). Base/unknown models default to 32 steps. Doubling steps roughly doubles generation time.": [
+    "Turbo: 最多8, Base: 最多200。",
+    "Turbo: 最多8, Base: 最多200。\u0001",
+    "How many denoising passes the DiT model makes. More steps = higher quality but slower. Turbo models: 4–8 steps (default 8, diminishing returns above 8). SFT models: 30–100 steps (default 50). Base/unknown models default to 32 steps. Doubling steps roughly doubles generation time.",
+    "Turbo: 最大8、Base: 最大200。"
+  ],
+  "DiT Inference Steps": [
+    "DiT 推理步数",
+    "DiT 推理步數⣠䊏Ǘ",
+    "DiT Inference Steps",
+    "DiT 推論ステップ"
+  ],
+  "Instruction is automatically generated based on task type.": [
+    "指令根据任务类型自动生成。",
+    "指令根據任務類型自動生成。䊏Ǘ",
+    "Instruction is automatically generated based on task type.",
+    "指示はタスクタイプに基づいて自動生成されます。"
+  ],
+  "Instruction": [
+    "指令",
+    "指令",
+    "Instruction",
+    "指示"
+  ],
+  "Instrumental": [
+    "纯音乐",
+    "純音樂",
+    "Instrumental",
+    "インストゥルメンタル"
+  ],
+  "Key Auto": [
+    "调 自动",
+    "調 自動⽯翸",
+    "Key Auto",
+    "キー 自動"
+  ],
+  "Musical key of the song (e.g. 'C Major', 'Am', 'F# Minor'). Major keys sound bright/happy, minor keys sound dark/sad. Leave empty or check 'Auto' to let the model choose.": [
+    "A-G, #/♭, 大调/小调。",
+    "A-G, #/♭, 大調/小調。쉐㝤Ǘ",
+    "Musical key of the song (e.g. 'C Major', 'Am', 'F# Minor'). Major keys sound bright/happy, minor keys sound dark/sad. Leave empty or check 'Auto' to let the model choose.",
+    "A-G, #/♭, メジャー/マイナー。"
+  ],
+  "Key": [
+    "调性",
+    "調性",
+    "Key",
+    "キー"
+  ],
+  "e.g. C Major, A Minor, F# Minor": [
+    "留空表示N/A",
+    "留空表示N/A",
+    "e.g. C Major, A Minor, F# Minor",
+    "空白の場合はN/A"
+  ],
+  "How many samples the LM processes at once. Higher = faster batch generation but uses more VRAM. Lower if you get out-of-memory errors during batch generation. Default 8. Reduce to 1–4 on GPUs with <12GB VRAM.": [
+    "每个LM批量块的最大项目数(默认: 8, 受GPU内存限制)。",
+    "每個LM批量塊的最大項目數(默認: 8, 受GPU內存限制)。",
+    "How many samples the LM processes at once. Higher = faster batch generation but uses more VRAM. Lower if you get out-of-memory errors during batch generation. Default 8. Reduce to 1–4 on GPUs with <12GB VRAM.",
+    "LMバッチチャンクあたりの最大アイテム数(デフォルト: 8、GPUメモリによる制限)。"
+  ],
+  "LM Batch Chunk Size": [
+    "LM 批量块大小",
+    "LM 批量塊大小꡸䊏Ǘ",
+    "LM Batch Chunk Size",
+    "LM バッチチャンクサイズ"
+  ],
+  "How strongly the LM follows your prompt vs generating freely. 1.0 = no guidance (LM ignores prompt influence). 1.5–2.0 = moderate guidance, good balance. 2.5–3.0 = strong guidance, very prompt-faithful but can reduce variety. 5.0–7.0 = maximum prompt control, may reduce musical quality or introduce artifacts. Values above 7.0 are experimental. Requires a negative prompt to work (set automatically if empty). Only matters when 5Hz LM is active.": [
+    "5Hz LM CFG (1.0 = 无CFG)。",
+    "5Hz LM CFG (1.0 = 無CFG)。\u0001",
+    "How strongly the LM follows your prompt vs generating freely. 1.0 = no guidance (LM ignores prompt influence). 1.5–2.0 = moderate guidance, good balance. 2.5–3.0 = strong guidance, very prompt-faithful but can reduce variety. 5.0–7.0 = maximum prompt control, may reduce musical quality or introduce artifacts. Values above 7.0 are experimental. Requires a negative prompt to work (set automatically if empty). Only matters when 5Hz LM is active.",
+    "5Hz LM CFG (1.0 = CFGなし)。"
+  ],
+  "LM CFG Scale": [
+    "LM CFG 比例",
+    "LM CFG 比例䊏Ǘ",
+    "LM CFG Scale",
+    "LM CFG スケール"
+  ],
+  "Audio → Codes (utility)": [
+    "音频 → Codes（工具）",
+    "音頻 → Codes（工具）\r",
+    "Audio → Codes (utility)",
+    "音声 → コード（ユーティリティ）"
+  ],
+  "🎼 LM Codes Hints": [
+    "🎼 LM 代码提示",
+    "🎼 LM 代碼提示Ǘ",
+    "🎼 LM Codes Hints",
+    "🎼 LM コードヒント"
+  ],
+  "Paste LM codes hints for text2music generation.": [
+    "粘贴用于text2music生成的LM代码提示。",
+    "粘貼用于text2music生成的LM代碼提示。\u0001",
+    "Paste LM codes hints for text2music generation.",
+    "text2music生成用のLMコードヒントを貼り付け。"
+  ],
+  "LM Codes Hints": [
+    "LM 代码提示",
+    "LM 代碼提示",
+    "LM Codes Hints",
+    "LM コードヒント"
+  ],
+  "<|audio_code_10695|><|audio_code_54246|>.": [
+    "<|audio_code_10695|><|audio_code_54246|>.",
+    "<|audio_code_10695|><|audio_code_54246|>.Ѐ",
+    "<|audio_code_10695|><|audio_code_54246|>.",
+    "<|audio_code_10695|><|audio_code_54246|>."
+  ],
+  "LM Codes Hints (Sample {n})": [
+    "LM 代码提示(样本 {n})",
+    "LM 代碼提示(樣本 {n})",
+    "LM Codes Hints (Sample {n})",
+    "LM コードヒント(サンプル {n})"
+  ],
+  "Codes for sample {n}.": [
+    "样本{n}的代码。",
+    "樣本{n}的代碼。䊐Ǘ",
+    "Codes for sample {n}.",
+    "サンプル{n}のコード。"
+  ],
+  "Tells the LM what to avoid. Only effective when LM CFG Scale > 1.0. The LM steers away from this prompt and toward your actual caption. Leave empty for the default behavior. Example: 'low quality, noise, distorted' to push away from poor outputs.": [
+    "负面提示(当LM CFG比例 > 1.0时使用)。",
+    "負面提示(當LM CFG比例 > 1.0時使用)。",
+    "Tells the LM what to avoid. Only effective when LM CFG Scale > 1.0. The LM steers away from this prompt and toward your actual caption. Leave empty for the default behavior. Example: 'low quality, noise, distorted' to push away from poor outputs.",
+    "ネガティブプロンプト(LM CFGスケール > 1.0の場合に使用)。"
+  ],
+  "LM Negative Prompt": [
+    "LM 负面提示",
+    "LM 負面提示",
+    "LM Negative Prompt",
+    "LM ネガティブプロンプト"
+  ],
+  "Enter negative prompt for CFG (default: NO USER INPUT)": [
+    "输入CFG的负面提示(默认: NO USER INPUT)",
+    "輸入CFG的負面提示(默認: NO USER INPUT)翹",
+    "Enter negative prompt for CFG (default: NO USER INPUT)",
+    "CFGのネガティブプロンプトを入力(デフォルト: NO USER INPUT)"
+  ],
+  "🤖 LM Generation Parameters": [
+    "🤖 LM 生成参数",
+    "🤖 LM 生成參數Ǘ",
+    "🤖 LM Generation Parameters",
+    "🤖 LM 生成パラメータ"
+  ],
+  "Controls creativity vs predictability of the 5Hz LM. Lower (0.0–0.5) = safer, more conventional musical choices. Higher (0.8–1.5) = more creative/surprising but riskier. Very high (1.5+) = chaotic, may produce nonsense. Default 0.85 is a good balance. Start here and adjust based on results.": [
+    "5Hz LM温度(越高越随机)。",
+    "5Hz LM溫度(越高越隨機)。쉐㝤Ǘ",
+    "Controls creativity vs predictability of the 5Hz LM. Lower (0.0–0.5) = safer, more conventional musical choices. Higher (0.8–1.5) = more creative/surprising but riskier. Very high (1.5+) = chaotic, may produce nonsense. Default 0.85 is a good balance. Start here and adjust based on results.",
+    "5Hz LM温度(高いほどランダム)。"
+  ],
+  "LM Temperature": [
+    "LM 温度",
+    "LM 溫度翸",
+    "LM Temperature",
+    "LM 温度"
+  ],
+  "Limits LM choices to the K most likely tokens at each step. Lower (10–30) = more focused/predictable output. Higher (50–100) = more diverse. 0 = disabled (no filtering). Works alongside Top-P — both can be active. Start with 0 (disabled) unless you want to constrain diversity.": [
+    "Top-K (0 = 禁用)。",
+    "Top-K (0 = 禁用)。",
+    "Limits LM choices to the K most likely tokens at each step. Lower (10–30) = more focused/predictable output. Higher (50–100) = more diverse. 0 = disabled (no filtering). Works alongside Top-P — both can be active. Start with 0 (disabled) unless you want to constrain diversity.",
+    "Top-K (0 = 無効)。"
+  ],
+  "LM Top-K": [
+    "LM Top-K",
+    "LM Top-K痸䊐Ǘ",
+    "LM Top-K",
+    "LM Top-K"
+  ],
+  "Keeps only tokens whose cumulative probability reaches P. 0.9 = consider the top 90% most likely tokens (cuts unlikely outliers). Lower (0.5–0.8) = more focused. 1.0 = disabled (consider all tokens). More adaptive than Top-K. Good default: 0.9–0.95.": [
+    "Top-P (1.0 = 禁用)。",
+    "Top-P (1.0 = 禁用)。㝤Ǘ",
+    "Keeps only tokens whose cumulative probability reaches P. 0.9 = consider the top 90% most likely tokens (cuts unlikely outliers). Lower (0.5–0.8) = more focused. 1.0 = disabled (consider all tokens). More adaptive than Top-K. Good default: 0.9–0.95.",
+    "Top-P (1.0 = 無効)。"
+  ],
+  "LM Top-P (Nucleus Sampling)": [
+    "LM Top-P",
+    "LM Top-P蹨䊐Ǘ",
+    "LM Top-P (Nucleus Sampling)",
+    "LM Top-P"
+  ],
+  "Debug A/B toggle. OFF (default): CFG uncond user is bare 'NO USER INPUT' (training-aligned, truly unconditional). ON: uncond keeps caption+lyrics (pre-fix design — uncond still carries conditioning, so CFG mostly amplifies the CoT-metadata direction). Byte-level structure (open assistant turn, separator newlines, empty-reasoning rendering) is identical in both states, so the toggle isolates just this one design variable. Only affects codes-phase CFG. Leave OFF for production.": [
+    "调试用 A/B 开关。关闭(默认): CFG 无条件分支 user 为裸 'NO USER INPUT'(训练对齐，真正的无条件)。开启: 无条件分支保留 caption+lyrics(修复前的设计——无条件仍带着条件，CFG 只能放大 CoT 元数据方向)。两种状态下字节级结构(assistant turn 开放、分隔换行、空 reasoning 渲染)完全一致，开关只隔离这一个设计变量。仅影响 codes 阶段 CFG。",
+    "調試用 A/B 開關。關閉(默認): CFG 無條件分支 user 為裸 'NO USER INPUT'(訓練對齊，真正的無條件)。開啟: 無條件分支保留 caption+lyrics(修復前的設計——無條件仍帶著條件，CFG 只能放大 CoT 元數據方向)。兩種狀態下字節級結構(assistant turn 開放、分隔換行、空 reasoning 渲染)完全一致，開關只隔離這一個設計變量。僅影響 codes 階段 CFG。၄䠐䖉䢸䖋许ࡀ䔻ྐ입",
+    "Debug A/B toggle. OFF (default): CFG uncond user is bare 'NO USER INPUT' (training-aligned, truly unconditional). ON: uncond keeps caption+lyrics (pre-fix design — uncond still carries conditioning, so CFG mostly amplifies the CoT-metadata direction). Byte-level structure (open assistant turn, separator newlines, empty-reasoning rendering) is identical in both states, so the toggle isolates just this one design variable. Only affects codes-phase CFG. Leave OFF for production.",
+    "デバッグ用A/Bトグル。オフ(既定): CFG無条件のuserは裸の'NO USER INPUT'(学習と整合した、真の無条件)。オン: 無条件でcaption+lyricsを保持(修正前の設計——無条件でも条件を含むため、CFGは主にCoTメタデータ方向のみ増幅)。バイトレベルの構造(assistantターン未クローズ、区切り改行、空reasoningのレンダリング)は両状態で同一なので、トグルはこの1つの設計変数のみを分離します。codes段階のCFGにのみ影響。"
+  ],
+  "LM CFG: Legacy Uncond Prompt": [
+    "LM CFG: 使用旧版无条件 Prompt",
+    "LM CFG: 使用舊版無條件 Prompt",
+    "LM CFG: Legacy Uncond Prompt",
+    "LM CFG: 旧無条件プロンプトを使用"
+  ],
+  "📂 Load": [
+    "📂 加载",
+    "📂 加載翸",
+    "📂 Load",
+    "📂 読み込み"
+  ],
+  "Song lyrics with structure.": [
+    "带有结构的歌曲歌词。",
+    "帶有結構的歌曲歌詞。Ǘ",
+    "Song lyrics with structure.",
+    "構造を持つ曲の歌詞。"
+  ],
+  "Lyrics": [
+    "歌词",
+    "歌詞",
+    "Lyrics",
+    "歌詞"
+  ],
+  "[Verse 1]\\nUnder the starry night\\nI feel so alive.": [
+    "[第一段]\\n在星空下\\n我感到如此活跃.",
+    "[第一段]\\n在星空下\\n我感到如此活躍.",
+    "[Verse 1]\\nUnder the starry night\\nI feel so alive.",
+    "[バース1]\\n星空の下で\\nとても生きていると感じる."
+  ],
+  "📝 Lyrics": [
+    "📝 歌词",
+    "📝 歌詞翸",
+    "📝 Lyrics",
+    "📝 歌詞"
+  ],
+  "Custom": [
+    "自定义",
+    "自定義",
+    "Custom",
+    "カスタム"
+  ],
+  "Simple = describe in plain language, AI handles the rest (best for quick ideas). Custom = full manual control over caption, lyrics, BPM, key, etc. Remix = upload audio and restyle it with a new caption/lyrics. Repaint = upload audio and regenerate a specific time range. Extract = isolate a single track (vocals, drums, etc). Lego = replace one track in existing audio. Complete = fill in missing tracks.": [
+    "选择一种生成模式开始创作。",
+    "選擇一種生成模式開始創作。䊑Ǘ",
+    "Simple = describe in plain language, AI handles the rest (best for quick ideas). Custom = full manual control over caption, lyrics, BPM, key, etc. Remix = upload audio and restyle it with a new caption/lyrics. Repaint = upload audio and regenerate a specific time range. Extract = isolate a single track (vocals, drums, etc). Lego = replace one track in existing audio. Complete = fill in missing tracks.",
+    "生成モードを選択して開始します。"
+  ],
+  "Complete: Fill in missing tracks from source audio. If you have a partial mix (e.g. just vocals and guitar), the AI generates the missing parts (drums, bass, etc.) to create a full arrangement.": [
+    "补全源音频中缺失的音轨。",
+    "補全源音頻中缺失的音軌。䩈䊑Ǘ",
+    "Complete: Fill in missing tracks from source audio. If you have a partial mix (e.g. just vocals and guitar), the AI generates the missing parts (drums, bass, etc.) to create a full arrangement.",
+    "ソースオーディオの欠落したトラックを補完。"
+  ],
+  "Custom: Full manual control over caption, lyrics, BPM, key, duration, and all generation parameters. Use this when you know exactly what you want. Switch to Simple if you'd rather describe your idea and let AI fill in the details.": [
+    "完全控制描述、歌词和所有参数。",
+    "完全控制描述、歌詞和所有參數。",
+    "Custom: Full manual control over caption, lyrics, BPM, key, duration, and all generation parameters. Use this when you know exactly what you want. Switch to Simple if you'd rather describe your idea and let AI fill in the details.",
+    "キャプション、歌詞、すべてのパラメータを完全にコントロール。"
+  ],
+  "Extract: Isolate a single track (vocals, drums, bass, etc.) from source audio using AI stem separation. Useful for creating instrumentals, acapellas, or isolating parts for remixing.": [
+    "从源音频中提取特定音轨（人声、鼓等）。",
+    "從源音頻中提取特定音軌（人聲、鼓等）。",
+    "Extract: Isolate a single track (vocals, drums, bass, etc.) from source audio using AI stem separation. Useful for creating instrumentals, acapellas, or isolating parts for remixing.",
+    "ソースオーディオから特定のトラック（ボーカル、ドラムなど）を抽出。"
+  ],
+  "Lego: Replace a specific track (e.g. drums, vocals) in your source audio while keeping everything else. Upload multi-track audio and choose which stem to regenerate with your new caption/lyrics.": [
+    "重新组装音轨：替换源音频中的特定音轨。",
+    "重新組裝音軌：替換源音頻中的特定音軌。",
+    "Lego: Replace a specific track (e.g. drums, vocals) in your source audio while keeping everything else. Upload multi-track audio and choose which stem to regenerate with your new caption/lyrics.",
+    "トラックの再構成：ソースオーディオの特定のトラックを置き換え。"
+  ],
+  "Remix: Upload source audio and restyle it with your own caption and lyrics. The AI uses the original as a structural guide while applying your new style. Adjust Remix Strength to control how closely it follows the original (high = faithful cover, low = loose reinterpretation).": [
+    "上传源音频，用你的描述和歌词创建混音版本。",
+    "上傳源音頻，用你的描述和歌詞創建混音版本。",
+    "Remix: Upload source audio and restyle it with your own caption and lyrics. The AI uses the original as a structural guide while applying your new style. Adjust Remix Strength to control how closely it follows the original (high = faithful cover, low = loose reinterpretation).",
+    "ソースオーディオをアップロードして、キャプションと歌詞でリミックスバージョンを作成。"
+  ],
+  "Repaint: Upload source audio and regenerate only a specific time range (start/end in seconds). Everything outside that range stays untouched. Great for fixing a bad section or replacing a specific part without re-generating the whole track.": [
+    "上传源音频，重绘指定时间范围的内容。",
+    "上傳源音頻，重繪指定時間范圍的內容。Ǘ",
+    "Repaint: Upload source audio and regenerate only a specific time range (start/end in seconds). Everything outside that range stays untouched. Great for fixing a bad section or replacing a specific part without re-generating the whole track.",
+    "ソースオーディオをアップロードして、指定した時間範囲を再描画。"
+  ],
+  "Simple: Describe your music in plain language — AI generates caption, lyrics, BPM, key, and structure for you. Best for quick ideas or if you're not sure what settings to use. Switch to Custom for full manual control.": [
+    "用自然语言描述你想要的音乐，AI 将自动生成描述、歌词和元数据。",
+    "用自然語言描述你想要的音樂，AI 將自動生成描述、歌詞和元數據。쉐㝤Ǘ",
+    "Simple: Describe your music in plain language — AI generates caption, lyrics, BPM, key, and structure for you. Best for quick ideas or if you're not sure what settings to use. Switch to Custom for full manual control.",
+    "自然言語で音楽を説明すると、AIがキャプション、歌詞、メタデータを自動生成します。"
+  ],
+  "Generation Mode *": [
+    "生成模式 *",
+    "生成模式 *翸",
+    "Generation Mode *",
+    "生成モード *"
+  ],
+  "Simple": [
+    "简单",
+    "簡單",
+    "Simple",
+    "シンプル"
+  ],
+  "📐 Generation Settings": [
+    "📐 生成设置",
+    "📐 生成設置",
+    "📐 Generation Settings",
+    "📐 生成設定"
+  ],
+  "🎵 Music Properties": [
+    "🎵 音乐属性",
+    "🎵 音樂屬性",
+    "🎵 Music Properties",
+    "🎵 音楽プロパティ"
+  ],
+  "⚙️ Optional Parameters": [
+    "⚙️ 可选参数",
+    "⚙️ 可選參數",
+    "⚙️ Optional Parameters",
+    "⚙️ オプションパラメータ"
+  ],
+  "When generating multiple samples (batch size > 1), processes all LM thinking in parallel instead of one-by-one. Faster but uses more VRAM. Disable if you get out-of-memory errors with large batches.": [
+    "并行处理批量样本以加速生成。",
+    "并行處理批量樣本以加速生成。Ǘ",
+    "When generating multiple samples (batch size > 1), processes all LM thinking in parallel instead of one-by-one. Faster but uses more VRAM. Disable if you get out-of-memory errors with large batches.",
+    "バッチサンプルを並列処理して高速生成。"
+  ],
+  "ParallelThinking": [
+    "并行思考",
+    "并行思考⽯翸",
+    "ParallelThinking",
+    "並列思考"
+  ],
+  "When enabled, generates a new random seed each time so every generation is unique. Disable this and set a fixed seed to reproduce a specific result.": [
+    "启用以自动生成种子。",
+    "啟用以自動生成種子。Ǘ",
+    "When enabled, generates a new random seed each time so every generation is unique. Disable this and set a fixed seed to reproduce a specific result.",
+    "有効にすると自動的にシードを生成。"
+  ],
+  "Random Seed": [
+    "随机种子",
+    "隨機種子⽯翸",
+    "Random Seed",
+    "ランダムシード"
+  ],
+  "How closely the remix follows the source audio's structure and melody. Higher (0.7–1.0) = very close to original, subtle style changes only. Lower (0.1–0.4) = loose interpretation, major creative liberties. 0.5 is a good starting point — adjust up for faithful covers, down for wild remixes.": [
+    "控制混音对原始音频的还原程度（越高越接近原始音频）。",
+    "控制混音對原始音頻的還原程度（越高越接近原始音頻）。",
+    "How closely the remix follows the source audio's structure and melody. Higher (0.7–1.0) = very close to original, subtle style changes only. Lower (0.1–0.4) = loose interpretation, major creative liberties. 0.5 is a good starting point — adjust up for faithful covers, down for wild remixes.",
+    "リミックスがソースオーディオにどれだけ忠実かを制御（高い = オリジナルに近い）。"
+  ],
+  "Remix Strength": [
+    "混音强度",
+    "混音強度⽯翸",
+    "Remix Strength",
+    "リミックス強度"
+  ],
+  "🎨 Repainting Controls (seconds)": [
+    "🎨 重绘控制(秒)",
+    "🎨 重繪控制(秒)Ǘ",
+    "🎨 Repainting Controls (seconds)",
+    "🎨 再描画コントロール(秒)"
+  ],
+  "Repainting End": [
+    "重绘结束",
+    "重繪結束⽯翸",
+    "Repainting End",
+    "再描画終了"
+  ],
+  "Repainting Start": [
+    "重绘开始",
+    "重繪開始⽯翸",
+    "Repainting Start",
+    "再描画開始"
+  ],
+  "📝 Required Inputs": [
+    "📝 必需输入",
+    "📝 必需輸入",
+    "📝 Required Inputs",
+    "📝 必須入力"
+  ],
+  "🔄 Reset All to Auto": [
+    "🔄 全部重置为自动",
+    "🔄 全部重置為自動Ǘ",
+    "🔄 Reset All to Auto",
+    "🔄 すべて自動にリセット"
+  ],
+  "🎲 Click Me": [
+    "🎲 试试看",
+    "🎲 試試看翸",
+    "🎲 Click Me",
+    "🎲 お試し"
+  ],
+  "Euler: Standard first-order solver (fast, default). Heun: Second-order predictor-corrector that evaluates the model twice per step for higher accuracy — produces cleaner audio especially with 8-step turbo inference, at the cost of ~2x diffusion time.": [
+    "Euler: 标准一阶求解器（快速，默认）。Heun: 二阶预测-校正器，每步评估模型两次以获得更高精度——在8步turbo推理中产生更干净的音频，但扩散时间约为2倍。",
+    "Euler: 標準一階求解器（快速，默認）。Heun: 二階預測-校正器，每步評估模型兩次以獲得更高精度——在8步turbo推理中產生更干凈的音頻，但擴散時間約為2倍。\u0001",
+    "Euler: Standard first-order solver (fast, default). Heun: Second-order predictor-corrector that evaluates the model twice per step for higher accuracy — produces cleaner audio especially with 8-step turbo inference, at the cost of ~2x diffusion time.",
+    "Euler: 標準1次ソルバー（高速、デフォルト）。Heun: 2次予測-修正器 — ステップごとにモデルを2回評価してより高精度に。8ステップturbo推論でよりクリーンなオーディオを生成しますが、拡散時間は約2倍になります。"
+  ],
+  "Sampler Mode": [
+    "采样器模式",
+    "采樣器模式翸",
+    "Sampler Mode",
+    "サンプラーモード"
+  ],
+  "Controls how the quality score maps to 0–1 range. Lower values (e.g. 0.5) = more spread between scores, easier to distinguish good from bad. Higher values = scores cluster together. Default 1.0. Adjust if all your scores look too similar.": [
+    "更低 = 更敏感(默认: 1.0). 调整PMI如何映射到[0,1]。",
+    "更低 = 更敏感(默認: 1.0). 調整PMI如何映射到[0,1]。",
+    "Controls how the quality score maps to 0–1 range. Lower values (e.g. 0.5) = more spread between scores, easier to distinguish good from bad. Higher values = scores cluster together. Default 1.0. Adjust if all your scores look too similar.",
+    "低い = より敏感(デフォルト: 1.0)。PMIが[0,1]にマッピングする方法を調整。"
+  ],
+  "Quality Score Sensitivity": [
+    "质量评分敏感度",
+    "質量評分敏感度",
+    "Quality Score Sensitivity",
+    "品質スコア感度"
+  ],
+  "Fixed number for reproducible results — same seed + same settings = same output. Use comma-separated values (e.g. '42,123,456') to set per-sample seeds in a batch. -1 = random.": [
+    "批量使用逗号分隔的值。",
+    "批量使用逗號分隔的值。",
+    "Fixed number for reproducible results — same seed + same settings = same output. Use comma-separated values (e.g. '42,123,456') to set per-sample seeds in a batch. -1 = random.",
+    "バッチにはカンマ区切りの値を使用。"
+  ],
+  "Seed": [
+    "随机种子",
+    "隨機種子⽯翸",
+    "Seed",
+    "シード"
+  ],
+  "Controls the noise schedule timing. Higher values (3–5) concentrate denoising effort on early steps (better structure). Lower values (1–2) spread effort more evenly (finer details). Default 3.0. Only affects base models — turbo models ignore this.": [
+    "时间步偏移因子，仅对 base 模型生效 (范围 1.0~5.0，默认 3.0)。对 turbo 模型无效。",
+    "時間步偏移因子，僅對 base 模型生效 (范圍 1.0~5.0，默認 3.0)。對 turbo 模型無效。翹",
+    "Controls the noise schedule timing. Higher values (3–5) concentrate denoising effort on early steps (better structure). Lower values (1–2) spread effort more evenly (finer details). Default 3.0. Only affects base models — turbo models ignore this.",
+    "baseモデル用タイムステップシフト係数 (範囲 1.0~5.0、デフォルト 3.0)。turboモデルには無効。"
+  ],
+  "Shift": [
+    "Shift",
+    "Shift翸",
+    "Shift",
+    "Shift"
+  ],
+  "Enter a natural language description of the music you want to generate.": [
+    "输入你想生成的音乐的自然语言描述。",
+    "輸入你想生成的音樂的自然語言描述。㝤Ǘ",
+    "Enter a natural language description of the music you want to generate.",
+    "生成したい音楽の自然言語の説明を入力。"
+  ],
+  "Song Description *": [
+    "歌曲描述 *",
+    "歌曲描述 *翸",
+    "Song Description *",
+    "曲の説明 *"
+  ],
+  "Describe the music you want to create, e.g., 'a soft Bengali love song for a quiet evening'. Leave empty for a random sample.": [
+    "描述你想创作的音乐，例如：'给我生成一首暗黑的戏剧古风，歌词要华丽'。留空则随机生成样本。",
+    "描述你想創作的音樂，例如：'給我生成一首暗黑的戲劇古風，歌詞要華麗'。留空則隨機生成樣本。ቸ\r",
+    "Describe the music you want to create, e.g., 'a soft Bengali love song for a quiet evening'. Leave empty for a random sample.",
+    "作成したい音楽を説明してください。例：'静かな夜のための優しいベンガルのラブソング'。空欄の場合はランダムなサンプルが生成されます。"
+  ],
+  "Select preferred language(s) for lyrics. Use 'unknown' for any language.": [
+    "选择歌词的首选语言。使用 'unknown' 表示任意语言。",
+    "選擇歌詞的首選語言。使用 'unknown' 表示任意語言。翹",
+    "Select preferred language(s) for lyrics. Use 'unknown' for any language.",
+    "歌詞の希望言語を選択。任意の言語の場合は'unknown'を使用。"
+  ],
+  "Vocal Language": [
+    "人声语言",
+    "人聲語言⽯翸",
+    "Vocal Language",
+    "ボーカル言語"
+  ],
+  "🧩 New Stem Area (seconds)": [
+    "🧩 新分轨区域（秒）",
+    "🧩 新分軌區域（秒）",
+    "🧩 New Stem Area (seconds)",
+    "🧩 新ステム範囲（秒）"
+  ],
+  "Stem End": [
+    "分轨结束",
+    "分軌結束⽯翸",
+    "Stem End",
+    "ステム終了"
+  ],
+  "Stem Start": [
+    "分轨开始",
+    "分軌開始⽯翸",
+    "Stem Start",
+    "ステム開始"
+  ],
+  "🎵 Generation": [
+    "🎵 生成",
+    "🎵 生成翸",
+    "🎵 Generation",
+    "🎵 生成"
+  ],
+  "Select the task type for generation.": [
+    "选择生成的任务类型。",
+    "選擇生成的任務類型。Ǘ",
+    "Select the task type for generation.",
+    "生成のタスクタイプを選択。"
+  ],
+  "Task Type *": [
+    "任务类型 *",
+    "任務類型 *翸",
+    "Task Type *",
+    "タスクタイプ *"
+  ],
+  "Think": [
+    "思考",
+    "思考",
+    "Think",
+    "思考"
+  ],
+  "TimeSig Auto": [
+    "拍号 自动",
+    "拍號 自動翸",
+    "TimeSig Auto",
+    "拍子 自動"
+  ],
+  "Beats per measure. 4 = 4/4 (most pop/rock/electronic). 3 = 3/4 (waltz feel). 6 = 6/8 (compound, flowing feel). 2 = 2/4 (march feel). Use 'N/A' or Auto to let the model decide.": [
+    "2/4, 3/4, 4/4。",
+    "2/4, 3/4, 4/4。Ǘ",
+    "Beats per measure. 4 = 4/4 (most pop/rock/electronic). 3 = 3/4 (waltz feel). 6 = 6/8 (compound, flowing feel). 2 = 2/4 (march feel). Use 'N/A' or Auto to let the model decide.",
+    "2/4, 3/4, 4/4。"
+  ],
+  "Time Signature": [
+    "拍号",
+    "拍號",
+    "Time Signature",
+    "拍子記号"
+  ],
+  "Select multiple track classes for complete task.": [
+    "为complete任务选择多个音轨类别。",
+    "為complete任務選擇多個音軌類別。\u0001",
+    "Select multiple track classes for complete task.",
+    "completeタスクの複数のトラッククラスを選択。"
+  ],
+  "Track Names": [
+    "音轨名称",
+    "音軌名稱⽯翸",
+    "Track Names",
+    "トラック名"
+  ],
+  "Select track name for lego/extract tasks.": [
+    "为lego/extract任务选择音轨名称。",
+    "為lego/extract任務選擇音軌名稱。",
+    "Select track name for lego/extract tasks.",
+    "lego/extractタスクのトラック名を選択。"
+  ],
+  "Track Name": [
+    "音轨名称",
+    "音軌名稱⽯翸",
+    "Track Name",
+    "トラック名"
+  ],
+  "Transcribe": [
+    "转录",
+    "轉錄",
+    "Transcribe",
+    "転写"
+  ],
+  "Alternative guidance method that can improve prompt adherence with fewer artifacts than standard CFG. Try enabling if you get distortion at high guidance scales. Experimental — may not always improve results.": [
+    "启用角域引导。",
+    "啟用角域引導。",
+    "Alternative guidance method that can improve prompt adherence with fewer artifacts than standard CFG. Try enabling if you get distortion at high guidance scales. Experimental — may not always improve results.",
+    "角度ドメインガイダンスを有効化。"
+  ],
+  "Use ADG (Angle Domain Guidance)": [
+    "使用 ADG",
+    "使用 ADG翸",
+    "Use ADG (Angle Domain Guidance)",
+    "ADG を使用"
+  ],
+  "Blend current velocity prediction with the previous step via exponential moving average. Smooths the denoising trajectory for cleaner output. 0 = disabled. Values around 0.05–0.2 work well. Start with 0.1 if experimenting.": [
+    "通过指数移动平均平滑去噪轨迹。0 = 禁用。0.05-0.2之间效果较好。",
+    "通過指數移動平均平滑去噪軌跡。0 = 禁用。0.05-0.2之間效果較好。蝑翹",
+    "Blend current velocity prediction with the previous step via exponential moving average. Smooths the denoising trajectory for cleaner output. 0 = disabled. Values around 0.05–0.2 work well. Start with 0.1 if experimenting.",
+    "指数移動平均でデノイズ軌道を平滑化。0 = 無効。0.05-0.2の範囲が効果的。"
+  ],
+  "Velocity EMA Factor": [
+    "速度EMA因子",
+    "速度EMA因子",
+    "Velocity EMA Factor",
+    "速度EMAファクター"
+  ],
+  "Clamp velocity prediction norms relative to input norms at each diffusion step. Prevents outlier predictions that cause audio artifacts. 0 = disabled. Values around 1.5–3.0 reduce artifacts. Start with 2.0 if experimenting.": [
+    "在每个扩散步骤中限制速度预测范数。防止导致音频伪影的异常预测。0 = 禁用。1.5-3.0之间的值可减少伪影。",
+    "在每個擴散步驟中限制速度預測范數。防止導致音頻偽影的異常預測。0 = 禁用。1.5-3.0之間的值可減少偽影。",
+    "Clamp velocity prediction norms relative to input norms at each diffusion step. Prevents outlier predictions that cause audio artifacts. 0 = disabled. Values around 1.5–3.0 reduce artifacts. Start with 2.0 if experimenting.",
+    "各拡散ステップで速度予測ノルムを制限。異常予測によるオーディオアーティファクトを防止。0 = 無効。1.5-3.0の値でアーティファクトを低減。"
+  ],
+  "Velocity Norm Threshold": [
+    "速度范数阈值",
+    "速度范數閾值翸",
+    "Velocity Norm Threshold",
+    "速度ノルム閾値"
+  ],
+  "Language Auto": [
+    "语言 自动",
+    "語言 自動翸",
+    "Language Auto",
+    "言語 自動"
+  ],
+  "Language for generated vocals. Set to match your lyrics language for best results. 'unknown' = let the model decide (good for instrumental or multilingual). 'instrumental' = no vocals.": [
+    "'unknown' = 纯音乐/自动。",
+    "'unknown' = 純音樂/自動。",
+    "Language for generated vocals. Set to match your lyrics language for best results. 'unknown' = let the model decide (good for instrumental or multilingual). 'instrumental' = no vocals.",
+    "'unknown' = インスト/自動。"
+  ],
+  "?": [
+    "?",
+    "?",
+    "?",
+    "?"
+  ],
+  "✕": [
+    "✕",
+    "✕",
+    "✕",
+    "✕"
+  ],
+  "## Advanced Settings\n\n### Key Parameters\n- **Inference Steps**: Turbo=8 (default), Base=up to 200. More steps ≠ always better for turbo\n- **Guidance Scale**: Base model only. Higher = follows prompt more strictly\n- **Shift**: Timestep shift (1.0–5.0). 3.0 recommended for turbo\n- **Seed**: Set a specific seed for reproducible results\n\n### LM Parameters\n- **Temperature** (0.0–2.0): Higher = more creative/random\n- **CFG Scale** (1.0–3.0): Higher = follows prompt more\n- **Top-K / Top-P**: Sampling strategies for diversity\n\n### Think Mode\nEnable **Think** to use 5Hz LM for smarter generation:\n- Generates semantic codes and metadata\n- Requires LM to be initialized\n- **ParallelThinking**: Process batches in parallel (faster)": [
+    "## 高级设置\n\n### 关键参数\n- **推理步数**：Turbo=8（默认），Base=最多 200。对 turbo 来说更多步数不一定更好\n- **引导比例**：仅 Base 模型。越高 = 越严格遵循提示\n- **Shift**：时间步偏移（1.0–5.0）。turbo 推荐 3.0\n- **种子**：设置特定种子以获得可重现的结果\n\n### LM 参数\n- **温度**（0.0–2.0）：越高 = 越有创意/随机\n- **CFG 比例**（1.0–3.0）：越高 = 越遵循提示\n- **Top-K / Top-P**：多样性的采样策略\n\n### Think 模式\n启用 **Think** 使用 5Hz LM 进行更智能的生成：\n- 生成语义代码和元数据\n- 需要初始化 LM\n- **并行思考**：并行处理批次（更快）",
+    "## 高級設置\n\n### 關鍵參數\n- **推理步數**：Turbo=8（默認），Base=最多 200。對 turbo 來說更多步數不一定更好\n- **引導比例**：僅 Base 模型。越高 = 越嚴格遵循提示\n- **Shift**：時間步偏移（1.0–5.0）。turbo 推薦 3.0\n- **種子**：設置特定種子以獲得可重現的結果\n\n### LM 參數\n- **溫度**（0.0–2.0）：越高 = 越有創意/隨機\n- **CFG 比例**（1.0–3.0）：越高 = 越遵循提示\n- **Top-K / Top-P**：多樣性的采樣策略\n\n### Think 模式\n啟用 **Think** 使用 5Hz LM 進行更智能的生成：\n- 生成語義代碼和元數據\n- 需要初始化 LM\n- **并行思考**：并行處理批次（更快）Ď￿翹",
+    "## Advanced Settings\n\n### Key Parameters\n- **Inference Steps**: Turbo=8 (default), Base=up to 200. More steps ≠ always better for turbo\n- **Guidance Scale**: Base model only. Higher = follows prompt more strictly\n- **Shift**: Timestep shift (1.0–5.0). 3.0 recommended for turbo\n- **Seed**: Set a specific seed for reproducible results\n\n### LM Parameters\n- **Temperature** (0.0–2.0): Higher = more creative/random\n- **CFG Scale** (1.0–3.0): Higher = follows prompt more\n- **Top-K / Top-P**: Sampling strategies for diversity\n\n### Think Mode\nEnable **Think** to use 5Hz LM for smarter generation:\n- Generates semantic codes and metadata\n- Requires LM to be initialized\n- **ParallelThinking**: Process batches in parallel (faster)",
+    "## 高度な設定\n\n### 主要パラメータ\n- **推論ステップ**：Turbo=8（デフォルト）、Base=最大200。turboでは多いステップ≠常に良い\n- **ガイダンススケール**：Baseモデルのみ。高い = プロンプトにより忠実\n- **シフト**：タイムステップシフト（1.0–5.0）。turboには3.0推奨\n- **シード**：特定のシードで再現可能な結果\n\n### LMパラメータ\n- **温度**（0.0–2.0）：高い = より創造的/ランダム\n- **CFGスケール**（1.0–3.0）：高い = プロンプトにより忠実\n- **Top-K / Top-P**：多様性のサンプリング戦略\n\n### Thinkモード\n**Think**を有効にして5Hz LMでスマートな生成：\n- セマンティックコードとメタデータを生成\n- LMの初期化が必要\n- **並列思考**：バッチを並列処理（高速）"
+  ],
+  "## Writing Good Captions\n\n### Structure\nA good caption includes:\n- **Genre/Style**: pop, rock, jazz, electronic, classical…\n- **Instruments**: guitar, piano, synth, drums, strings…\n- **Mood**: upbeat, melancholic, energetic, dreamy…\n- **Vocal style**: whispered, powerful, falsetto, rap…\n- **Tempo feel**: fast, slow, moderate, driving…\n\n### Examples\n- *\"Energetic pop-punk with distorted guitars, fast drums, and shouted vocals\"*\n- *\"Smooth jazz trio with walking bass, brushed drums, and mellow piano\"*\n- *\"Ambient electronic with layered synth pads and no vocals\"*\n\n### Tips\n- More detail = better results\n- Use the **Format** button to let AI enhance your caption\n- Check 🎲 for example captions": [
+    "## 编写好的描述\n\n### 结构\n好的描述包括：\n- **流派/风格**：pop、rock、jazz、electronic、classical…\n- **乐器**：guitar、piano、synth、drums、strings…\n- **情绪**：upbeat、melancholic、energetic、dreamy…\n- **人声风格**：whispered、powerful、falsetto、rap…\n- **节奏感**：fast、slow、moderate、driving…\n\n### 示例\n- *\"充满能量的朋克流行，失真吉他，快速鼓点，嘶吼人声\"*\n- *\"流畅的爵士三重奏，行走贝斯，刷子鼓，柔和钢琴\"*\n- *\"氛围电子，层叠的合成器垫和无人声\"*\n\n### 提示\n- 越详细 = 越好的结果\n- 使用**格式化**按钮让 AI 增强你的描述\n- 点击 🎲 查看示例描述",
+    "## 編寫好的描述\n\n### 結構\n好的描述包括：\n- **流派/風格**：pop、rock、jazz、electronic、classical…\n- **樂器**：guitar、piano、synth、drums、strings…\n- **情緒**：upbeat、melancholic、energetic、dreamy…\n- **人聲風格**：whispered、powerful、falsetto、rap…\n- **節奏感**：fast、slow、moderate、driving…\n\n### 示例\n- *\"充滿能量的朋克流行，失真吉他，快速鼓點，嘶吼人聲\"*\n- *\"流暢的爵士三重奏，行走貝斯，刷子鼓，柔和鋼琴\"*\n- *\"氛圍電子，層疊的合成器墊和無人聲\"*\n\n### 提示\n- 越詳細 = 越好的結果\n- 使用**格式化**按鈕讓 AI 增強你的描述\n- 點擊 🎲 查看示例描述",
+    "## Writing Good Captions\n\n### Structure\nA good caption includes:\n- **Genre/Style**: pop, rock, jazz, electronic, classical…\n- **Instruments**: guitar, piano, synth, drums, strings…\n- **Mood**: upbeat, melancholic, energetic, dreamy…\n- **Vocal style**: whispered, powerful, falsetto, rap…\n- **Tempo feel**: fast, slow, moderate, driving…\n\n### Examples\n- *\"Energetic pop-punk with distorted guitars, fast drums, and shouted vocals\"*\n- *\"Smooth jazz trio with walking bass, brushed drums, and mellow piano\"*\n- *\"Ambient electronic with layered synth pads and no vocals\"*\n\n### Tips\n- More detail = better results\n- Use the **Format** button to let AI enhance your caption\n- Check 🎲 for example captions",
+    "## 良いキャプションの書き方\n\n### 構造\n良いキャプションに含めるもの：\n- **ジャンル/スタイル**：pop、rock、jazz、electronic、classical…\n- **楽器**：guitar、piano、synth、drums、strings…\n- **ムード**：upbeat、melancholic、energetic、dreamy…\n- **ボーカルスタイル**：whispered、powerful、falsetto、rap…\n- **テンポ感**：fast、slow、moderate、driving…\n\n### 例\n- *「ディストーションギター、速いドラム、叫ぶボーカルのエネルギッシュなポップパンク」*\n- *「ウォーキングベース、ブラシドラム、メロウなピアノのスムースジャズトリオ」*\n- *「レイヤードシンセパッドとボーカルなしのアンビエントエレクトロニカ」*\n\n### ヒント\n- 詳細 = より良い結果\n- **フォーマット**ボタンでAIにキャプションを強化させる\n- 🎲でキャプション例を確認"
+  ],
+  "## Complete Mode (Base Model Only)\n\n**Best for:** Auto-arranging — filling in missing instruments.\n\n### Steps\n1. Select **Complete** in Generation Mode\n2. Upload **Source Audio** (partial arrangement)\n3. Select multiple **Track Names** to add\n4. Write a **Caption** describing the desired style\n5. Click **Generate Music**": [
+    "## Complete 模式（仅 Base 模型）\n\n**适合：** 自动编排 — 填充缺失的乐器。\n\n### 步骤\n1. 在生成模式中选择 **Complete**\n2. 上传**源音频**（部分编排）\n3. 选择多个要添加的**音轨名称**\n4. 编写描述期望风格的**描述**\n5. 点击**生成音乐**",
+    "## Complete 模式（僅 Base 模型）\n\n**適合：** 自動編排 — 填充缺失的樂器。\n\n### 步驟\n1. 在生成模式中選擇 **Complete**\n2. 上傳**源音頻**（部分編排）\n3. 選擇多個要添加的**音軌名稱**\n4. 編寫描述期望風格的**描述**\n5. 點擊**生成音樂**￿밸㞐Ǘ",
+    "## Complete Mode (Base Model Only)\n\n**Best for:** Auto-arranging — filling in missing instruments.\n\n### Steps\n1. Select **Complete** in Generation Mode\n2. Upload **Source Audio** (partial arrangement)\n3. Select multiple **Track Names** to add\n4. Write a **Caption** describing the desired style\n5. Click **Generate Music**",
+    "## Completeモード（Baseモデルのみ）\n\n**最適：** 自動アレンジ — 欠落している楽器を補完。\n\n### 手順\n1. 生成モードで**Complete**を選択\n2. **ソースオーディオ**をアップロード（部分的なアレンジ）\n3. 追加する複数の**トラック名**を選択\n4. 希望するスタイルを説明する**キャプション**を記述\n5. **音楽を生成**をクリック"
+  ],
+  "## Custom Mode Tutorial\n\n**Best for:** Full creative control over every parameter.\n\n### Steps\n1. Select **Custom** in Generation Mode\n2. Write a detailed **Caption** describing style, genre, instruments, mood\n3. Write **Lyrics** with structure tags: `[Verse]`, `[Chorus]`, `[Bridge]`\n4. (Optional) Upload **Reference Audio** for style guidance\n5. Set **BPM**, **Key**, **Duration** or leave empty for auto\n6. Click **Format** to enhance with LM (optional)\n7. Click **Generate Music**\n\n### Caption Tips\n- Be specific: *\"dreamy shoegaze with reverb-heavy guitars and whispered vocals\"*\n- Include: genre, instruments, mood, tempo feel, vocal style": [
+    "## Custom 模式教程\n\n**适合：** 完全控制每个参数。\n\n### 步骤\n1. 在生成模式中选择 **Custom**\n2. 编写详细的**描述**（风格、流派、乐器、情绪）\n3. 编写带结构标签的**歌词**：`[Verse]`、`[Chorus]`、`[Bridge]`\n4. （可选）上传**参考音频**用于风格引导\n5. 设置 **BPM**、**调性**、**时长**，或留空自动\n6. 点击**格式化**用 LM 增强（可选）\n7. 点击**生成音乐**\n\n### 描述技巧\n- 要具体：*\"梦幻的 shoegaze，带有大量混响的吉他和低语般的人声\"*\n- 包含：流派、乐器、情绪、节奏感、人声风格",
+    "## Custom 模式教程\n\n**適合：** 完全控制每個參數。\n\n### 步驟\n1. 在生成模式中選擇 **Custom**\n2. 編寫詳細的**描述**（風格、流派、樂器、情緒）\n3. 編寫帶結構標簽的**歌詞**：`[Verse]`、`[Chorus]`、`[Bridge]`\n4. （可選）上傳**參考音頻**用于風格引導\n5. 設置 **BPM**、**調性**、**時長**，或留空自動\n6. 點擊**格式化**用 LM 增強（可選）\n7. 點擊**生成音樂**\n\n### 描述技巧\n- 要具體：*\"夢幻的 shoegaze，帶有大量混響的吉他和低語般的人聲\"*\n- 包含：流派、樂器、情緒、節奏感、人聲風格*\n- *\"氛圍電子，層疊的合成器墊和無人聲\"*\n\n### 提示\n- 越詳細 = 越好的結果\n- 使用**格式化**按鈕讓 AI 增強你的描述\n- 點擊 🎲 查看示例描述",
+    "## Custom Mode Tutorial\n\n**Best for:** Full creative control over every parameter.\n\n### Steps\n1. Select **Custom** in Generation Mode\n2. Write a detailed **Caption** describing style, genre, instruments, mood\n3. Write **Lyrics** with structure tags: `[Verse]`, `[Chorus]`, `[Bridge]`\n4. (Optional) Upload **Reference Audio** for style guidance\n5. Set **BPM**, **Key**, **Duration** or leave empty for auto\n6. Click **Format** to enhance with LM (optional)\n7. Click **Generate Music**\n\n### Caption Tips\n- Be specific: *\"dreamy shoegaze with reverb-heavy guitars and whispered vocals\"*\n- Include: genre, instruments, mood, tempo feel, vocal style",
+    "## Customモードチュートリアル\n\n**最適：** すべてのパラメータを完全にコントロール。\n\n### 手順\n1. 生成モードで**Custom**を選択\n2. 詳細な**キャプション**を記述（スタイル、ジャンル、楽器、ムード）\n3. 構造タグ付きの**歌詞**を記述：`[Verse]`、`[Chorus]`、`[Bridge]`\n4. （オプション）スタイルガイダンス用に**リファレンスオーディオ**をアップロード\n5. **BPM**、**キー**、**Duration**を設定、または空で自動\n6. **フォーマット**をクリックしてLMで強化（オプション）\n7. **音楽を生成**をクリック\n\n### キャプションのコツ\n- 具体的に：*「リバーブの効いたギターとささやくようなボーカルのドリーミーなシューゲイザー」*\n- 含めるもの：ジャンル、楽器、ムード、テンポ感、ボーカルスタイル"
+  ],
+  "## Edit (Flow-Edit Overlay)\n\n**Best for:** morphing an existing audio toward new lyrics or a new style while keeping the source's structure.  Smoothly blends source → target via paired velocity-field integration along the diffusion schedule.\n\n### Principle\nFlow-Edit integrates a velocity difference:\n\n```\nz_edit_{t-Δt} = z_edit_t + (V_tar(z_tar_t, c_tar) − V_src(z_src_t, c_src)) · Δt\n```\n\nwhere `c_src` and `c_tar` are paired text/lyric conditions.  Both branches share the same audio context, so V_delta isolates the **text-only** delta and accumulates it into `z_edit` over `[n_min, n_max]` of the schedule.\n\n### Workflow\n1. Pick **Custom** (recommended for new edits) or **Remix** (when you want to keep cover-style scaffolding from a reference audio).\n2. Upload the audio to edit into the **Source Audio** field at the top.\n3. Fill the top-level **Music Caption** / **Lyrics** with the **original** description of the source audio (this will be V_src in the next step).\n4. Tick **Edit** to expand the panel.\n5. Click **Copy current → source** — this snapshots the *original* into the source fields below as V_src.\n6. Now edit the top-level **Music Caption** / **Lyrics** to define the **target** (what you want the morphed result to be) — V_tar.\n7. Leave `n_min=0`, `n_max=1`, `n_avg=1` for the first try.\n8. In **Optional Parameters** set `shift=3.0` (recommended for all variants).\n9. Click **Generate Music**.\n\n> Tip: if you arrived here via **Send to Remix** / **Send to Repaint**, the source fields are already pre-filled from the previous run — skip steps 3 and 5 and go straight to editing the top-level fields as the target.\n\n### Mode behaviour\n- **Custom** (text2music): the backend silently **ignores Think and `LM Codes Hints`** — it always VAE-encodes your `Source Audio` directly so flow-edit's `z_edit` starts on a clean audio latent.  V_delta is purely text-driven.  Most reliable mode for v1.\n- **Remix** (cover / cover-nofsq): backend uses cover's natural LM-codes context, shared by both branches.  Good when you want the morphed result to retain the cover task's reference scaffolding.\n- **Repaint / Extract / Lego**: not supported in v1 — the backend logs a warning and falls back to plain task behaviour (paired-CFG for those task shapes is the follow-up PR).\n\n### Inputs\n- **source caption / lyrics**: describe the *original* audio (V_src).\n- top-level **caption / lyrics**: the *target* you want (V_tar).\n- **n_min / n_max**: diffusion-schedule window where V_delta is integrated.  `0 / 1` = full schedule (recommended).\n- **n_avg**: Monte-Carlo samples per step (1 = fast; higher = more stable, slower).\n\n### Models\nAll six DiT variants are supported.  Turbo / XL-turbo are CFG-distilled, so the backend automatically forces `guidance_scale=1.0` for them.  8 inference steps is enough for turbo; bump to ≥60 for `base / sft / xl_base / xl_sft`.\n\n### Method (deeper)\n1. Encode `flow_edit_source_caption / lyrics` → V_src condition.\n2. Encode top-level `caption / lyrics` → V_tar condition.\n3. Run paired CFG/APG forward at each step in `[n_min, n_max]`.\n4. Integrate `(V_tar − V_src)` into the running `z_edit`.\n5. After `n_max`, Euler-step toward the clean latent on the target branch only.\n\n### Tips\n- `Send to Remix` / `Send to Repaint` already auto-fills source fields from the previous run's prompts so you can iterate quickly.\n- The recommended `shift=3.0` matches ACE-Step 1.0's default flow-edit schedule and is empirically stable across all six variants.\n\n### Reference\n- Kulikov, V. et al. *FlowEdit: Inversion-Free Text-Based Editing Using Pre-Trained Flow Models.* CVPR 2025. [arXiv:2412.08629](https://arxiv.org/abs/2412.08629)\n- [Issue #1156](https://github.com/ace-step/ACE-Step-1.5/issues/1156).": [
+    "## Edit（Flow-Edit 叠加）\n\n**适用场景：** 把现有音频朝新的歌词/风格平滑漂移，同时保留原音频的结构。通过沿扩散 schedule 做配对速度场积分实现。\n\n### 原理\nFlow-Edit 在扩散 schedule 上积分一个速度差：\n\n```\nz_edit_{t-Δt} = z_edit_t + (V_tar(z_tar_t, c_tar) − V_src(z_src_t, c_src)) · Δt\n```\n\n其中 `c_src` 和 `c_tar` 是配对的文本/歌词条件。两个分支共用相同的音频上下文，所以 V_delta 隔离出**纯文本**层面的差异，沿 `[n_min, n_max]` 段累积进 `z_edit`。\n\n### 操作流程\n1. 选择 **Custom**（推荐做新编辑）或 **Remix**（想保留 cover 的参考骨架）模式。\n2. 把待编辑的音频上传到顶部的 **Source Audio** 输入框。\n3. 在顶部的 **Music Caption / Lyrics** 填**原始**描述（描述源音频是什么样的，这是下一步的 V_src）。\n4. 勾选 **Edit** 展开面板。\n5. 点 **Copy current → source** —— 把刚填的**原始**条件快照到下面的 source 字段，作为 V_src。\n6. 现在再把顶层 **Music Caption / Lyrics** 改成**目标**（你想要 morph 后的结果）—— V_tar。\n7. 第一次试用建议保留 `n_min=0`、`n_max=1`、`n_avg=1`。\n8. 在 **Optional Parameters** 里把 `shift` 设为 **3.0**（所有变体都推荐）。\n9. 点 **Generate Music**。\n\n> 提示：如果你是通过 **Send to Remix** / **Send to Repaint** 跳过来的，source 字段已经从上次的运行自动填好——直接跳过第 3、5 步，去顶层改成目标就行。\n\n### 不同模式的行为\n- **Custom**（text2music）：后端**自动忽略 Think 和 LM Codes Hints** —— 始终对你上传的 Source Audio 做 VAE 编码作为 flow-edit 的起点。V_delta 完全由文本驱动。v1 最稳定的模式。\n- **Remix**（cover / cover-nofsq）：后端复用 cover 自然的 LM-codes 上下文，两分支共享。适合想保留 cover 任务参考骨架的场景。\n- **Repaint / Extract / Lego**：v1 不支持 —— 后端会打 warning 并按普通任务跑（这些 task shape 的配对 CFG 推导留给后续 PR）。\n\n### 输入\n- **source caption / lyrics**：描述**原始**音频（V_src）。\n- 顶层 **caption / lyrics**：你想要的**目标**（V_tar）。\n- **n_min / n_max**：V_delta 积分的扩散 schedule 窗口。`0 / 1` = 全 schedule（推荐）。\n- **n_avg**：每步的蒙特卡洛采样数（1 = 快；越高 = 越稳定但越慢）。\n\n### 模型\n6 个 DiT 变体全部支持。Turbo / XL-turbo 是 CFG-distilled 的，后端会自动强制 `guidance_scale=1.0`。Turbo 的 8 推理步够用；`base / sft / xl_base / xl_sft` 建议 ≥60 步。\n\n### 提示\n- `Send to Remix` / `Send to Repaint` 已经会把上次运行的 prompt 自动填到 source 字段，方便快速迭代。\n- 推荐的 `shift=3.0` 与 ACE-Step 1.0 默认 flow-edit schedule 一致，经验上对 6 个变体都稳定。\n\n### 参考\n- Kulikov, V. et al. *FlowEdit: Inversion-Free Text-Based Editing Using Pre-Trained Flow Models.* CVPR 2025. [arXiv:2412.08629](https://arxiv.org/abs/2412.08629)\n- [Issue #1156](https://github.com/ace-step/ACE-Step-1.5/issues/1156)。",
+    "## Edit（Flow-Edit 疊加）\n\n**適用場景：** 把現有音頻朝新的歌詞/風格平滑漂移，同時保留原音頻的結構。通過沿擴散 schedule 做配對速度場積分實現。\n\n### 原理\nFlow-Edit 在擴散 schedule 上積分一個速度差：\n\n```\nz_edit_{t-Δt} = z_edit_t + (V_tar(z_tar_t, c_tar) − V_src(z_src_t, c_src)) · Δt\n```\n\n其中 `c_src` 和 `c_tar` 是配對的文本/歌詞條件。兩個分支共用相同的音頻上下文，所以 V_delta 隔離出**純文本**層面的差異，沿 `[n_min, n_max]` 段累積進 `z_edit`。\n\n### 操作流程\n1. 選擇 **Custom**（推薦做新編輯）或 **Remix**（想保留 cover 的參考骨架）模式。\n2. 把待編輯的音頻上傳到頂部的 **Source Audio** 輸入框。\n3. 在頂部的 **Music Caption / Lyrics** 填**原始**描述（描述源音頻是什么樣的，這是下一步的 V_src）。\n4. 勾選 **Edit** 展開面板。\n5. 點 **Copy current → source** —— 把剛填的**原始**條件快照到下面的 source 字段，作為 V_src。\n6. 現在再把頂層 **Music Caption / Lyrics** 改成**目標**（你想要 morph 后的結果）—— V_tar。\n7. 第一次試用建議保留 `n_min=0`、`n_max=1`、`n_avg=1`。\n8. 在 **Optional Parameters** 里把 `shift` 設為 **3.0**（所有變體都推薦）。\n9. 點 **Generate Music**。\n\n> 提示：如果你是通過 **Send to Remix** / **Send to Repaint** 跳過來的，source 字段已經從上次的運行自動填好——直接跳過第 3、5 步，去頂層改成目標就行。\n\n### 不同模式的行為\n- **Custom**（text2music）：后端**自動忽略 Think 和 LM Codes Hints** —— 始終對你上傳的 Source Audio 做 VAE 編碼作為 flow-edit 的起點。V_delta 完全由文本驅動。v1 最穩定的模式。\n- **Remix**（cover / cover-nofsq）：后端復用 cover 自然的 LM-codes 上下文，兩分支共享。適合想保留 cover 任務參考骨架的場景。\n- **Repaint / Extract / Lego**：v1 不支持 —— 后端會打 warning 并按普通任務跑（這些 task shape 的配對 CFG 推導留給后續 PR）。\n\n### 輸入\n- **source caption / lyrics**：描述**原始**音頻（V_src）。\n- 頂層 **caption / lyrics**：你想要的**目標**（V_tar）。\n- **n_min / n_max**：V_delta 積分的擴散 schedule 窗口。`0 / 1` = 全 schedule（推薦）。\n- **n_avg**：每步的蒙特卡洛采樣數（1 = 快；越高 = 越穩定但越慢）。\n\n### 模型\n6 個 DiT 變體全部支持。Turbo / XL-turbo 是 CFG-distilled 的，后端會自動強制 `guidance_scale=1.0`。Turbo 的 8 推理步夠用；`base / sft / xl_base / xl_sft` 建議 ≥60 步。\n\n### 提示\n- `Send to Remix` / `Send to Repaint` 已經會把上次運行的 prompt 自動填到 source 字段，方便快速迭代。\n- 推薦的 `shift=3.0` 與 ACE-Step 1.0 默認 flow-edit schedule 一致，經驗上對 6 個變體都穩定。\n\n### 參考\n- Kulikov, V. et al. *FlowEdit: Inversion-Free Text-Based Editing Using Pre-Trained Flow Models.* CVPR 2025. [arXiv:2412.08629](https://arxiv.org/abs/2412.08629)\n- [Issue #1156](https://github.com/ace-step/ACE-Step-1.5/issues/1156)。",
+    "## Edit (Flow-Edit Overlay)\n\n**Best for:** morphing an existing audio toward new lyrics or a new style while keeping the source's structure.  Smoothly blends source → target via paired velocity-field integration along the diffusion schedule.\n\n### Principle\nFlow-Edit integrates a velocity difference:\n\n```\nz_edit_{t-Δt} = z_edit_t + (V_tar(z_tar_t, c_tar) − V_src(z_src_t, c_src)) · Δt\n```\n\nwhere `c_src` and `c_tar` are paired text/lyric conditions.  Both branches share the same audio context, so V_delta isolates the **text-only** delta and accumulates it into `z_edit` over `[n_min, n_max]` of the schedule.\n\n### Workflow\n1. Pick **Custom** (recommended for new edits) or **Remix** (when you want to keep cover-style scaffolding from a reference audio).\n2. Upload the audio to edit into the **Source Audio** field at the top.\n3. Fill the top-level **Music Caption** / **Lyrics** with the **original** description of the source audio (this will be V_src in the next step).\n4. Tick **Edit** to expand the panel.\n5. Click **Copy current → source** — this snapshots the *original* into the source fields below as V_src.\n6. Now edit the top-level **Music Caption** / **Lyrics** to define the **target** (what you want the morphed result to be) — V_tar.\n7. Leave `n_min=0`, `n_max=1`, `n_avg=1` for the first try.\n8. In **Optional Parameters** set `shift=3.0` (recommended for all variants).\n9. Click **Generate Music**.\n\n> Tip: if you arrived here via **Send to Remix** / **Send to Repaint**, the source fields are already pre-filled from the previous run — skip steps 3 and 5 and go straight to editing the top-level fields as the target.\n\n### Mode behaviour\n- **Custom** (text2music): the backend silently **ignores Think and `LM Codes Hints`** — it always VAE-encodes your `Source Audio` directly so flow-edit's `z_edit` starts on a clean audio latent.  V_delta is purely text-driven.  Most reliable mode for v1.\n- **Remix** (cover / cover-nofsq): backend uses cover's natural LM-codes context, shared by both branches.  Good when you want the morphed result to retain the cover task's reference scaffolding.\n- **Repaint / Extract / Lego**: not supported in v1 — the backend logs a warning and falls back to plain task behaviour (paired-CFG for those task shapes is the follow-up PR).\n\n### Inputs\n- **source caption / lyrics**: describe the *original* audio (V_src).\n- top-level **caption / lyrics**: the *target* you want (V_tar).\n- **n_min / n_max**: diffusion-schedule window where V_delta is integrated.  `0 / 1` = full schedule (recommended).\n- **n_avg**: Monte-Carlo samples per step (1 = fast; higher = more stable, slower).\n\n### Models\nAll six DiT variants are supported.  Turbo / XL-turbo are CFG-distilled, so the backend automatically forces `guidance_scale=1.0` for them.  8 inference steps is enough for turbo; bump to ≥60 for `base / sft / xl_base / xl_sft`.\n\n### Method (deeper)\n1. Encode `flow_edit_source_caption / lyrics` → V_src condition.\n2. Encode top-level `caption / lyrics` → V_tar condition.\n3. Run paired CFG/APG forward at each step in `[n_min, n_max]`.\n4. Integrate `(V_tar − V_src)` into the running `z_edit`.\n5. After `n_max`, Euler-step toward the clean latent on the target branch only.\n\n### Tips\n- `Send to Remix` / `Send to Repaint` already auto-fills source fields from the previous run's prompts so you can iterate quickly.\n- The recommended `shift=3.0` matches ACE-Step 1.0's default flow-edit schedule and is empirically stable across all six variants.\n\n### Reference\n- Kulikov, V. et al. *FlowEdit: Inversion-Free Text-Based Editing Using Pre-Trained Flow Models.* CVPR 2025. [arXiv:2412.08629](https://arxiv.org/abs/2412.08629)\n- [Issue #1156](https://github.com/ace-step/ACE-Step-1.5/issues/1156).",
+    "## Edit（Flow-Editオーバーレイ）\n\n**用途：** 既存音声を新しい歌詞/スタイルへ滑らかに変形させつつ、元の構造を保つ。拡散scheduleに沿ったペア化速度場積分により実現。\n\n### 原理\nFlow-Editは速度差を積分します：\n\n```\nz_edit_{t-Δt} = z_edit_t + (V_tar(z_tar_t, c_tar) − V_src(z_src_t, c_src)) · Δt\n```\n\n`c_src`と`c_tar`はペアのテキスト/歌詞条件です。両分岐は同じ音声コンテキストを共有するため、V_deltaは**テキストのみ**の差を抽出し、`[n_min, n_max]`で`z_edit`に蓄積します。\n\n### 操作手順\n1. **Custom**（新編集に推奨）または**Remix**（cover の参考骨格を保ちたい場合）モードを選択。\n2. 編集対象音声を上部の **Source Audio** にアップロード。\n3. 上部の **Music Caption / Lyrics** に**元の**説明（source の状態を描写するもの、次のステップで V_src になる）を入力。\n4. **Edit** をチェックしてパネルを展開。\n5. **Copy current → source** ボタンで、上で入力した**元の**条件を下の source 欄にスナップショット（V_src 用）。\n6. 改めて上部の **Music Caption / Lyrics** を**ターゲット**（morph 後に欲しい結果）に書き換える — V_tar。\n7. 初回は `n_min=0`、`n_max=1`、`n_avg=1` のままで OK。\n8. **Optional Parameters** で `shift` を **3.0** に設定（全モデル推奨）。\n9. **Generate Music** をクリック。\n\n> ヒント：**Send to Remix** / **Send to Repaint** から遷移してきた場合、source 欄は前回の実行から自動入力済みなので、ステップ 3 と 5 はスキップして上部をターゲットに編集するだけで OK。\n\n### モード別の挙動\n- **Custom**（text2music）：バックエンドは**Thinkと LM Codes Hintsを自動的に無視**し、アップロードした Source Audio をVAE エンコードしてflow-editの起点とする。V_deltaは純粋にテキスト駆動。v1で最も安定。\n- **Remix**（cover / cover-nofsq）：cover タスク本来のLM-codesコンテキストを両分岐で共有。cover の参考骨格を保ちたい時に。\n- **Repaint / Extract / Lego**：v1では非対応 — バックエンドは警告ログを出して通常タスクとして実行（これらのtask shape向けペアCFGは後続PR）。\n\n### 入力\n- **source caption / lyrics**：**元の**音声を表現（V_src）。\n- 上部の **caption / lyrics**：望む**ターゲット**（V_tar）。\n- **n_min / n_max**：V_deltaを積分する拡散scheduleウィンドウ。`0 / 1` = 全schedule（推奨）。\n- **n_avg**：1ステップあたりのモンテカルロサンプル数（1 = 高速、高い = 安定だが遅い）。\n\n### モデル\n6つのDiTバリアント全てに対応。Turbo / XL-turboはCFG-distilledなのでバックエンドが自動的に`guidance_scale=1.0`に強制。Turboは8推論ステップで十分、`base / sft / xl_base / xl_sft`は≥60ステップ推奨。\n\n### ヒント\n- `Send to Remix` / `Send to Repaint` は前回の実行のプロンプトを source欄に自動入力するため、繰り返し試行しやすい。\n- 推奨の `shift=3.0` はACE-Step 1.0デフォルトのflow-edit scheduleと一致し、経験上6つのバリアント全てで安定。\n\n### 参考\n- Kulikov, V. et al. *FlowEdit: Inversion-Free Text-Based Editing Using Pre-Trained Flow Models.* CVPR 2025. [arXiv:2412.08629](https://arxiv.org/abs/2412.08629)\n- [Issue #1156](https://github.com/ace-step/ACE-Step-1.5/issues/1156)。"
+  ],
+  "## Extract Mode (Base Model Only)\n\n**Best for:** Stem separation — isolating instruments from a mix.\n\n### Steps\n1. Select **Extract** in Generation Mode\n2. Upload **Source Audio**\n3. Select **Track Name** to extract (e.g. vocals, drums, bass)\n4. Click **Extract Stem**\n\n### Available Tracks\nvocals, backing_vocals, drums, bass, guitar, keyboard, percussion, strings, synth, fx, brass, woodwinds": [
+    "## Extract 模式（仅 Base 模型）\n\n**适合：** 音轨分离 — 从混音中分离乐器。\n\n### 步骤\n1. 在生成模式中选择 **Extract**\n2. 上传**源音频**\n3. 选择要提取的**音轨名称**（如 vocals、drums、bass）\n4. 点击**提取分轨**\n\n### 可用音轨\nvocals、backing_vocals、drums、bass、guitar、keyboard、percussion、strings、synth、fx、brass、woodwinds",
+    "## Extract 模式（僅 Base 模型）\n\n**適合：** 音軌分離 — 從混音中分離樂器。\n\n### 步驟\n1. 在生成模式中選擇 **Extract**\n2. 上傳**源音頻**\n3. 選擇要提取的**音軌名稱**（如 vocals、drums、bass）\n4. 點擊**提取分軌**\n\n### 可用音軌\nvocals、backing_vocals、drums、bass、guitar、keyboard、percussion、strings、synth、fx、brass、woodwinds要具體：*\"夢幻的 shoegaze，帶有大量混響的吉他和低語般的人聲\"*\n- 包含：流派、樂器、情緒、節奏感、人聲風格*\n- *\"氛圍電子，層疊的合成器墊和無人聲\"*\n\n### 提示\n- 越詳細 = 越好的結果\n- 使用**格式化**按鈕讓 AI 增強你的描述\n- 點擊 🎲 查看示例描述",
+    "## Extract Mode (Base Model Only)\n\n**Best for:** Stem separation — isolating instruments from a mix.\n\n### Steps\n1. Select **Extract** in Generation Mode\n2. Upload **Source Audio**\n3. Select **Track Name** to extract (e.g. vocals, drums, bass)\n4. Click **Extract Stem**\n\n### Available Tracks\nvocals, backing_vocals, drums, bass, guitar, keyboard, percussion, strings, synth, fx, brass, woodwinds",
+    "## Extractモード（Baseモデルのみ）\n\n**最適：** ステム分離 — ミックスから楽器を分離。\n\n### 手順\n1. 生成モードで**Extract**を選択\n2. **ソースオーディオ**をアップロード\n3. 抽出する**トラック名**を選択（例：vocals、drums、bass）\n4. **ステム抽出**をクリック\n\n### 利用可能なトラック\nvocals、backing_vocals、drums、bass、guitar、keyboard、percussion、strings、synth、fx、brass、woodwinds"
+  ],
+  "## Lego Mode (Base Model Only)\n\n**Best for:** Adding new instrument tracks to existing audio.\n\n### Steps\n1. Select **Lego** in Generation Mode\n2. Upload **Source Audio**\n3. Select **Track Name** to add\n4. Write a **Caption** describing the track\n5. Click **Add Stem**\n\n### Tips\n- Great for layering: add drums to a guitar track, add bass to vocals\n- The caption should describe only the new track's characteristics": [
+    "## Lego 模式（仅 Base 模型）\n\n**适合：** 为现有音频添加新乐器轨道。\n\n### 步骤\n1. 在生成模式中选择 **Lego**\n2. 上传**源音频**\n3. 选择要添加的**音轨名称**\n4. 编写描述该音轨的**描述**\n5. 点击**添加分轨**\n\n### 提示\n- 非常适合叠加：为吉他轨道添加鼓，为人声添加贝斯\n- 描述应只描述新音轨的特征",
+    "## Lego 模式（僅 Base 模型）\n\n**適合：** 為現有音頻添加新樂器軌道。\n\n### 步驟\n1. 在生成模式中選擇 **Lego**\n2. 上傳**源音頻**\n3. 選擇要添加的**音軌名稱**\n4. 編寫描述該音軌的**描述**\n5. 點擊**添加分軌**\n\n### 提示\n- 非常適合疊加：為吉他軌道添加鼓，為人聲添加貝斯\n- 描述應只描述新音軌的特征薀翹",
+    "## Lego Mode (Base Model Only)\n\n**Best for:** Adding new instrument tracks to existing audio.\n\n### Steps\n1. Select **Lego** in Generation Mode\n2. Upload **Source Audio**\n3. Select **Track Name** to add\n4. Write a **Caption** describing the track\n5. Click **Add Stem**\n\n### Tips\n- Great for layering: add drums to a guitar track, add bass to vocals\n- The caption should describe only the new track's characteristics",
+    "## Legoモード（Baseモデルのみ）\n\n**最適：** 既存のオーディオに新しい楽器トラックを追加。\n\n### 手順\n1. 生成モードで**Lego**を選択\n2. **ソースオーディオ**をアップロード\n3. 追加する**トラック名**を選択\n4. トラックを説明する**キャプション**を記述\n5. **ステム追加**をクリック\n\n### ヒント\n- レイヤリングに最適：ギタートラックにドラムを追加、ボーカルにベースを追加\n- キャプションは新しいトラックの特徴のみを説明"
+  ],
+  "## Writing Lyrics\n\n### Structure Tags\nUse section tags to structure your song:\n```\n[Verse 1]\nYour verse lyrics here\n\n[Chorus]\nYour chorus lyrics here\n\n[Verse 2]\nSecond verse here\n\n[Bridge]\nBridge section\n\n[Outro]\nEnding lyrics\n```\n\n### Tips\n- Keep verses 4–8 lines\n- Choruses should be memorable and repetitive\n- Use `[Instrumental]` or `[Interlude]` for non-vocal sections\n- Check **Instrumental** checkbox for pure instrumental music\n- Select **Vocal Language** to match your lyrics language": [
+    "## 编写歌词\n\n### 结构标签\n使用段落标签来组织歌曲：\n```\n[Verse 1]\n在这里写你的主歌歌词\n\n[Chorus]\n在这里写你的副歌歌词\n\n[Verse 2]\n第二段主歌\n\n[Bridge]\n过渡段\n\n[Outro]\n结尾歌词\n```\n\n### 提示\n- 主歌保持 4-8 行\n- 副歌应该朗朗上口且有重复性\n- 使用 `[Instrumental]` 或 `[Interlude]` 表示无人声段落\n- 勾选**纯音乐**复选框生成纯器乐音乐\n- 选择**人声语言**以匹配歌词语言",
+    "## 編寫歌詞\n\n### 結構標簽\n使用段落標簽來組織歌曲：\n```\n[Verse 1]\n在這里寫你的主歌歌詞\n\n[Chorus]\n在這里寫你的副歌歌詞\n\n[Verse 2]\n第二段主歌\n\n[Bridge]\n過渡段\n\n[Outro]\n結尾歌詞\n```\n\n### 提示\n- 主歌保持 4-8 行\n- 副歌應該朗朗上口且有重復性\n- 使用 `[Instrumental]` 或 `[Interlude]` 表示無人聲段落\n- 勾選**純音樂**復選框生成純器樂音樂\n- 選擇**人聲語言**以匹配歌詞語言s要具體：*\"夢幻的 shoegaze，帶有大量混響的吉他和低語般的人聲\"*\n- 包含：流派、樂器、情緒、節奏感、人聲風格*\n- *\"氛圍電子，層疊的合成器墊和無人聲\"*\n\n### 提示\n- 越詳細 = 越好的結果\n- 使用**格式化**按鈕讓 AI 增強你的描述\n- 點擊 🎲 查看示例描述",
+    "## Writing Lyrics\n\n### Structure Tags\nUse section tags to structure your song:\n```\n[Verse 1]\nYour verse lyrics here\n\n[Chorus]\nYour chorus lyrics here\n\n[Verse 2]\nSecond verse here\n\n[Bridge]\nBridge section\n\n[Outro]\nEnding lyrics\n```\n\n### Tips\n- Keep verses 4–8 lines\n- Choruses should be memorable and repetitive\n- Use `[Instrumental]` or `[Interlude]` for non-vocal sections\n- Check **Instrumental** checkbox for pure instrumental music\n- Select **Vocal Language** to match your lyrics language",
+    "## 歌詞の書き方\n\n### 構造タグ\nセクションタグで曲を構成：\n```\n[Verse 1]\nバースの歌詞をここに\n\n[Chorus]\nコーラスの歌詞をここに\n\n[Verse 2]\n2番のバース\n\n[Bridge]\nブリッジセクション\n\n[Outro]\nエンディングの歌詞\n```\n\n### ヒント\n- バースは4–8行\n- コーラスは記憶に残りやすく反復的に\n- ボーカルなしセクションには `[Instrumental]` や `[Interlude]` を使用\n- 純粋なインストゥルメンタルには**インストゥルメンタル**チェックボックス\n- 歌詞の言語に合わせて**ボーカル言語**を選択"
+  ],
+  "## Remix Mode Tutorial\n\n**Best for:** Creating cover versions or style transfers.\n\n### Steps\n1. Select **Remix** in Generation Mode\n2. Upload **Source Audio** (the song to remix)\n3. Write a **Caption** describing the target style\n4. (Optional) Modify **Lyrics**\n5. Adjust **Remix Strength** (0.0–1.0):\n   - Higher = closer to original structure\n   - Lower = more creative freedom\n6. Click **Generate Music**\n\n### Tips\n- Start with strength 0.5 and adjust\n- Use SFT model with Cover Strength 0.1–0.25 for melody retention": [
+    "## Remix 模式教程\n\n**适合：** 创建翻唱版本或风格迁移。\n\n### 步骤\n1. 在生成模式中选择 **Remix**\n2. 上传**源音频**（要 remix 的歌曲）\n3. 编写描述目标风格的**描述**\n4. （可选）修改**歌词**\n5. 调整 **Remix 强度**（0.0–1.0）：\n   - 越高 = 越接近原始结构\n   - 越低 = 更多创意自由\n6. 点击**生成音乐**\n\n### 提示\n- 从强度 0.5 开始调整\n- 使用 SFT 模型，翻唱强度 0.1–0.25 以保留旋律",
+    "## Remix 模式教程\n\n**適合：** 創建翻唱版本或風格遷移。\n\n### 步驟\n1. 在生成模式中選擇 **Remix**\n2. 上傳**源音頻**（要 remix 的歌曲）\n3. 編寫描述目標風格的**描述**\n4. （可選）修改**歌詞**\n5. 調整 **Remix 強度**（0.0–1.0）：\n   - 越高 = 越接近原始結構\n   - 越低 = 更多創意自由\n6. 點擊**生成音樂**\n\n### 提示\n- 從強度 0.5 開始調整\n- 使用 SFT 模型，翻唱強度 0.1–0.25 以保留旋律",
+    "## Remix Mode Tutorial\n\n**Best for:** Creating cover versions or style transfers.\n\n### Steps\n1. Select **Remix** in Generation Mode\n2. Upload **Source Audio** (the song to remix)\n3. Write a **Caption** describing the target style\n4. (Optional) Modify **Lyrics**\n5. Adjust **Remix Strength** (0.0–1.0):\n   - Higher = closer to original structure\n   - Lower = more creative freedom\n6. Click **Generate Music**\n\n### Tips\n- Start with strength 0.5 and adjust\n- Use SFT model with Cover Strength 0.1–0.25 for melody retention",
+    "## Remixモードチュートリアル\n\n**最適：** カバーバージョンやスタイル転送の作成。\n\n### 手順\n1. 生成モードで**Remix**を選択\n2. **ソースオーディオ**をアップロード（リミックスする曲）\n3. ターゲットスタイルを説明する**キャプション**を記述\n4. （オプション）**歌詞**を修正\n5. **Remix強度**（0.0–1.0）を調整：\n   - 高い = 元の構造に近い\n   - 低い = より創造的な自由\n6. **音楽を生成**をクリック\n\n### ヒント\n- 強度0.5から始めて調整\n- メロディ保持にはSFTモデルでカバー強度0.1–0.25を使用"
+  ],
+  "## Repaint Mode Tutorial\n\n**Best for:** Fixing or regenerating specific sections of generated music while keeping the rest intact.\n\n### Steps\n1. Select **Repaint** in Generation Mode\n2. Upload **Source Audio**\n3. Set **Repainting Start** (seconds) and **End** (-1 for end of file)\n4. Write a **Caption** for the repainted section\n5. Choose a **Repaint Mode** and adjust **Repaint Strength** if needed\n6. Click **Generate Music**\n\n### Repaint Mode\nControls how the model treats non-repainted regions:\n\n- **Conservative** (Strength = 0): Maximum source preservation. Source latents are injected at every diffusion step with long boundary crossfades. Best for seamless blending.\n- **Balanced** (default): Source latents are injected for a fraction of steps controlled by the Repaint Strength slider. Good starting point.\n- **Aggressive** (Strength = 1): No source injection at all — pure diffusion. Maximum creative freedom but less boundary consistency.\n\n### Repaint Strength\nOnly active in **Balanced** mode. Drag to control the preserve-vs-regenerate tradeoff:\n- **0** = Conservative behavior (auto-switches mode)\n- **0.5** = Default — inject source during first 50% of steps\n- **1** = Aggressive behavior (auto-switches mode)\n\n### Tips\n- Use \"Send To Repaint\" from Results to quickly load audio\n- Start with Balanced (0.5) and adjust based on results\n- Lower strength for better boundary consistency, higher for more creative output": [
+    "## Repaint 模式教程\n\n**适合：** 修复或重新生成音乐的特定部分，同时保留其余部分不变。\n\n### 步骤\n1. 在生成模式中选择 **Repaint**\n2. 上传**源音频**\n3. 设置**重绘开始**（秒）和**结束**（-1 表示文件末尾）\n4. 编写描述重绘部分内容的**描述**\n5. 选择 **Repaint Mode**，按需调节 **Repaint Strength**\n6. 点击**生成音乐**\n\n### Repaint Mode（重绘模式）\n控制模型如何处理非重绘区域：\n\n- **Conservative**（Strength = 0）：最大程度保留原音频。每步扩散都注入源 latent，并使用较长的边界交叉淡入淡出。适合无缝衔接。\n- **Balanced**（默认）：在 Repaint Strength 控制的一部分扩散步骤中注入源 latent。推荐起始设置。\n- **Aggressive**（Strength = 1）：完全不注入源 latent，纯扩散生成。创作自由度最高，但边界一致性最弱。\n\n### Repaint Strength（重绘强度）\n仅在 **Balanced** 模式下可调。拖动滑杆控制保留与重生成的平衡：\n- **0** = 保守行为（自动切换为 Conservative 模式）\n- **0.5** = 默认 — 前 50% 扩散步骤注入源 latent\n- **1** = 激进行为（自动切换为 Aggressive 模式）\n\n### 提示\n- 从结果中使用「发送到重绘」快速加载音频\n- 建议从 Balanced (0.5) 开始，根据结果调整\n- 降低 Strength 可改善边界衔接，提高 Strength 可获得更多创作空间",
+    "## Repaint 模式教程\n\n**適合：** 修復或重新生成音樂的特定部分，同時保留其余部分不變。\n\n### 步驟\n1. 在生成模式中選擇 **Repaint**\n2. 上傳**源音頻**\n3. 設置**重繪開始**（秒）和**結束**（-1 表示文件末尾）\n4. 編寫描述重繪部分內容的**描述**\n5. 選擇 **Repaint Mode**，按需調節 **Repaint Strength**\n6. 點擊**生成音樂**\n\n### Repaint Mode（重繪模式）\n控制模型如何處理非重繪區域：\n\n- **Conservative**（Strength = 0）：最大程度保留原音頻。每步擴散都注入源 latent，并使用較長的邊界交叉淡入淡出。適合無縫銜接。\n- **Balanced**（默認）：在 Repaint Strength 控制的一部分擴散步驟中注入源 latent。推薦起始設置。\n- **Aggressive**（Strength = 1）：完全不注入源 latent，純擴散生成。創作自由度最高，但邊界一致性最弱。\n\n### Repaint Strength（重繪強度）\n僅在 **Balanced** 模式下可調。拖動滑桿控制保留與重生成的平衡：\n- **0** = 保守行為（自動切換為 Conservative 模式）\n- **0.5** = 默認 — 前 50% 擴散步驟注入源 latent\n- **1** = 激進行為（自動切換為 Aggressive 模式）\n\n### 提示\n- 從結果中使用「發送到重繪」快速加載音頻\n- 建議從 Balanced (0.5) 開始，根據結果調整\n- 降低 Strength 可改善邊界銜接，提高 Strength 可獲得更多創作空間翹",
+    "## Repaint Mode Tutorial\n\n**Best for:** Fixing or regenerating specific sections of generated music while keeping the rest intact.\n\n### Steps\n1. Select **Repaint** in Generation Mode\n2. Upload **Source Audio**\n3. Set **Repainting Start** (seconds) and **End** (-1 for end of file)\n4. Write a **Caption** for the repainted section\n5. Choose a **Repaint Mode** and adjust **Repaint Strength** if needed\n6. Click **Generate Music**\n\n### Repaint Mode\nControls how the model treats non-repainted regions:\n\n- **Conservative** (Strength = 0): Maximum source preservation. Source latents are injected at every diffusion step with long boundary crossfades. Best for seamless blending.\n- **Balanced** (default): Source latents are injected for a fraction of steps controlled by the Repaint Strength slider. Good starting point.\n- **Aggressive** (Strength = 1): No source injection at all — pure diffusion. Maximum creative freedom but less boundary consistency.\n\n### Repaint Strength\nOnly active in **Balanced** mode. Drag to control the preserve-vs-regenerate tradeoff:\n- **0** = Conservative behavior (auto-switches mode)\n- **0.5** = Default — inject source during first 50% of steps\n- **1** = Aggressive behavior (auto-switches mode)\n\n### Tips\n- Use \"Send To Repaint\" from Results to quickly load audio\n- Start with Balanced (0.5) and adjust based on results\n- Lower strength for better boundary consistency, higher for more creative output",
+    "## Repaintモードチュートリアル\n\n**最適：** 生成された音楽の特定セクションを修正・再生成し、残りの部分を維持。\n\n### 手順\n1. 生成モードで**Repaint**を選択\n2. **ソースオーディオ**をアップロード\n3. **再描画開始**（秒）と**終了**（-1でファイル終端）を設定\n4. 再描画セクションの内容を説明する**キャプション**を記述\n5. **Repaint Mode**を選択し、必要に応じて**Repaint Strength**を調整\n6. **音楽を生成**をクリック\n\n### Repaint Mode（リペイントモード）\n非リペイント領域のモデルの扱い方を制御：\n\n- **Conservative**（Strength = 0）：ソースを最大限保持。毎ステップでソースlatentを注入し、長い境界クロスフェードを適用。シームレスな接続に最適。\n- **Balanced**（デフォルト）：Repaint Strengthスライダーで制御される一部の拡散ステップでソースlatentを注入。推奨の出発点。\n- **Aggressive**（Strength = 1）：ソース注入なし。純粋な拡散生成。最大の創造的自由度だが境界の一貫性は最低。\n\n### Repaint Strength（リペイント強度）\n**Balanced**モードでのみ有効。保持と再生成のバランスを制御：\n- **0** = 保守的動作（自動的にConservativeモードへ切替）\n- **0.5** = デフォルト — 最初の50%のステップでソースを注入\n- **1** = 積極的動作（自動的にAggressiveモードへ切替）\n\n### ヒント\n- 結果から「リペイントに送信」を使って素早くオーディオを読み込む\n- まずBalanced (0.5)で試し、結果に応じて調整\n- Strengthを下げると境界の接続性が向上、上げると創造的出力が増加"
+  ],
+  "## Retake (Variation Generation)\n\n**Best for:** producing controlled, smooth variations of a seeded baseline without changing prompts.\n\n### Principle\nRetake mixes a fresh independent noise draw into the seeded initial noise via a variance-preserving sin/cos blend:\n\n```\nmixed = cos(v · π/2) · base_noise + sin(v · π/2) · retake_noise\n```\n\nBecause `cos² + sin² = 1`, the total noise variance is preserved exactly.  `v=0` is a no-op (reproduces the baseline); `v=1` swaps the noise entirely.\n\n### Inputs\n- **variance** (0–1): blend factor.\n  - `0` = baseline (identical to no retake)\n  - `0.05–0.15` = subtle variation, same melody/structure with minor differences\n  - `0.3–0.5` = moderate drift\n  - `0.5+` = strong drift, may diverge significantly\n- **seed** (integer, optional): independent reproducibility seed for the retake noise.  Empty = random per call.\n\n### ⚠️ Consistency requirement\nRetake variation is **only meaningful** if every other condition matches the baseline run.  In particular:\n\n- The main **seed** must be the same — leave the random-seed checkbox off and reuse the seed from the baseline batch.\n- **Think** must be **off**, OR the LM-generated codes from the baseline must be reused.  With Think on the LM regenerates audio codes from scratch each call, so the input to the diffusion model is different — Retake's noise blend gets layered on top of an already-different starting point and the result mixes \"LM variation\" with \"noise variation\".\n- All other knobs (caption, lyrics, BPM, key, duration, guidance_scale, shift, sampler, DCW, etc.) should match the baseline.\n\n### Workflow for retaking a Think-mode result\n1. On the result you like, expand the **📊 Score & LRC & LM Codes** accordion.\n2. Copy the **LM Codes** text out of that result.\n3. Paste it into the **LM Codes Hints** textbox.\n4. **Uncheck Think** — the diffusion model will now use the pasted LM codes verbatim.\n5. Lock the main seed to the baseline's seed, enable **Retake**, set `retake_seed`, adjust `variance`.\n\n### Reference\nSee [issue #1155](https://github.com/ace-step/ACE-Step-1.5/issues/1155).": [
+    "## Retake（变体生成）\n\n**适用场景：** 在不改变提示的情况下，对已固定 seed 的 baseline 做受控的、平滑的变体。\n\n### 原理\nRetake 通过 variance-preserving 的 sin/cos 混合，把一组独立的新噪声叠加到固定 seed 噪声上：\n\n```\nmixed = cos(v · π/2) · base_noise + sin(v · π/2) · retake_noise\n```\n\n由于 `cos² + sin² = 1`，总噪声方差精确保持不变。`v=0` 完全等价于不开 Retake；`v=1` 把噪声整组替换。\n\n### 输入\n- **variance**（0–1）：混合系数。\n  - `0` = baseline（与不开 Retake 完全一致）\n  - `0.05–0.15` = 微变，旋律/结构基本不变，细节略有差异\n  - `0.3–0.5` = 中等漂移\n  - `0.5+` = 强漂移，可能跑得比较远\n- **seed**（整数，可选）：retake 噪声的独立种子。留空 = 每次随机。\n\n### ⚠️ 一致性要求\nRetake 只有在**其它所有条件都跟 baseline 一致**时才有意义。具体：\n\n- 主 **seed** 必须一致——关掉 random-seed 复选框，沿用 baseline 那一批的 seed。\n- **Think 必须关闭**，或者复用 baseline 的 LM codes。Think 开启时 LM 每次都重新生成 audio codes，扩散模型的输入起点就变了——Retake 的噪声混合叠加在已经不同的起点上，结果是「LM 漂移 + 噪声漂移」混在一起。\n- 其它所有参数（caption、lyrics、BPM、key、duration、guidance_scale、shift、sampler、DCW 等）都应跟 baseline 对齐。\n\n### 在 Think 模式结果上做 Retake 的工作流\n1. 在你想做变体的那个结果上，展开 **📊 Score & LRC & LM Codes** 折叠面板。\n2. 复制其中的 **LM Codes** 文本。\n3. 粘贴到生成区顶部的 **LM Codes Hints** 输入框。\n4. **取消勾选 Think** —— 现在扩散模型会直接使用粘贴的 LM codes，不再重新生成。\n5. 锁定主 seed 为 baseline 的 seed，勾选 **Retake**，给 `retake_seed` 一个固定整数，调 `variance`。\n\n### 参考\n详见 [issue #1155](https://github.com/ace-step/ACE-Step-1.5/issues/1155)。",
+    "## Retake（變體生成）\n\n**適用場景：** 在不改變提示的情況下，對已固定 seed 的 baseline 做受控的、平滑的變體。\n\n### 原理\nRetake 通過 variance-preserving 的 sin/cos 混合，把一組獨立的新噪聲疊加到固定 seed 噪聲上：\n\n```\nmixed = cos(v · π/2) · base_noise + sin(v · π/2) · retake_noise\n```\n\n由于 `cos² + sin² = 1`，總噪聲方差精確保持不變。`v=0` 完全等價于不開 Retake；`v=1` 把噪聲整組替換。\n\n### 輸入\n- **variance**（0–1）：混合系數。\n  - `0` = baseline（與不開 Retake 完全一致）\n  - `0.05–0.15` = 微變，旋律/結構基本不變，細節略有差異\n  - `0.3–0.5` = 中等漂移\n  - `0.5+` = 強漂移，可能跑得比較遠\n- **seed**（整數，可選）：retake 噪聲的獨立種子。留空 = 每次隨機。\n\n### ⚠️ 一致性要求\nRetake 只有在**其它所有條件都跟 baseline 一致**時才有意義。具體：\n\n- 主 **seed** 必須一致——關掉 random-seed 復選框，沿用 baseline 那一批的 seed。\n- **Think 必須關閉**，或者復用 baseline 的 LM codes。Think 開啟時 LM 每次都重新生成 audio codes，擴散模型的輸入起點就變了——Retake 的噪聲混合疊加在已經不同的起點上，結果是「LM 漂移 + 噪聲漂移」混在一起。\n- 其它所有參數（caption、lyrics、BPM、key、duration、guidance_scale、shift、sampler、DCW 等）都應跟 baseline 對齊。\n\n### 在 Think 模式結果上做 Retake 的工作流\n1. 在你想做變體的那個結果上，展開 **📊 Score & LRC & LM Codes** 折疊面板。\n2. 復制其中的 **LM Codes** 文本。\n3. 粘貼到生成區頂部的 **LM Codes Hints** 輸入框。\n4. **取消勾選 Think** —— 現在擴散模型會直接使用粘貼的 LM codes，不再重新生成。\n5. 鎖定主 seed 為 baseline 的 seed，勾選 **Retake**，給 `retake_seed` 一個固定整數，調 `variance`。\n\n### 參考\n詳見 [issue #1155](https://github.com/ace-step/ACE-Step-1.5/issues/1155)。퉠薍翹",
+    "## Retake (Variation Generation)\n\n**Best for:** producing controlled, smooth variations of a seeded baseline without changing prompts.\n\n### Principle\nRetake mixes a fresh independent noise draw into the seeded initial noise via a variance-preserving sin/cos blend:\n\n```\nmixed = cos(v · π/2) · base_noise + sin(v · π/2) · retake_noise\n```\n\nBecause `cos² + sin² = 1`, the total noise variance is preserved exactly.  `v=0` is a no-op (reproduces the baseline); `v=1` swaps the noise entirely.\n\n### Inputs\n- **variance** (0–1): blend factor.\n  - `0` = baseline (identical to no retake)\n  - `0.05–0.15` = subtle variation, same melody/structure with minor differences\n  - `0.3–0.5` = moderate drift\n  - `0.5+` = strong drift, may diverge significantly\n- **seed** (integer, optional): independent reproducibility seed for the retake noise.  Empty = random per call.\n\n### ⚠️ Consistency requirement\nRetake variation is **only meaningful** if every other condition matches the baseline run.  In particular:\n\n- The main **seed** must be the same — leave the random-seed checkbox off and reuse the seed from the baseline batch.\n- **Think** must be **off**, OR the LM-generated codes from the baseline must be reused.  With Think on the LM regenerates audio codes from scratch each call, so the input to the diffusion model is different — Retake's noise blend gets layered on top of an already-different starting point and the result mixes \"LM variation\" with \"noise variation\".\n- All other knobs (caption, lyrics, BPM, key, duration, guidance_scale, shift, sampler, DCW, etc.) should match the baseline.\n\n### Workflow for retaking a Think-mode result\n1. On the result you like, expand the **📊 Score & LRC & LM Codes** accordion.\n2. Copy the **LM Codes** text out of that result.\n3. Paste it into the **LM Codes Hints** textbox.\n4. **Uncheck Think** — the diffusion model will now use the pasted LM codes verbatim.\n5. Lock the main seed to the baseline's seed, enable **Retake**, set `retake_seed`, adjust `variance`.\n\n### Reference\nSee [issue #1155](https://github.com/ace-step/ACE-Step-1.5/issues/1155).",
+    "## Retake（バリエーション生成）\n\n**用途：** プロンプトを変えずにシード固定のベースラインから滑らかなバリエーションを作る。\n\n### 原理\nRetakeは分散保存型のsin/cosブレンドで、新しい独立ノイズをシード固定ノイズに混ぜます：\n\n```\nmixed = cos(v · π/2) · base_noise + sin(v · π/2) · retake_noise\n```\n\n`cos² + sin² = 1`なのでノイズ分散は完全に保たれます。`v=0`はノーオペ（ベースラインと同一）、`v=1`はノイズを完全に置き換え。\n\n### 入力\n- **variance**（0–1）：ブレンド係数。\n  - `0` = ベースライン\n  - `0.05–0.15` = 微妙なバリエーション\n  - `0.3–0.5` = 中程度のドリフト\n  - `0.5+` = 強いドリフト\n- **seed**（整数、任意）：retakeノイズの独立シード。空 = 毎回ランダム。\n\n### ⚠️ 一貫性要件\nRetakeはベースラインと**他の全条件が一致**する場合のみ意味があります：\n\n- メイン**シード**を一致させる（random-seedチェックボックスをオフ）。\n- **Thinkはオフ**にするか、ベースラインのLMコードを再利用する。Thinkがオンだと毎回LMが新たにaudio codesを生成し、拡散モデルの入力起点が変わるため、Retakeのノイズ混合が「LMドリフト + ノイズドリフト」の混合になる。\n- 他のすべてのパラメータ（caption、lyrics、BPM、key、duration、guidance_scale、shift、sampler、DCWなど）もベースラインと一致させる。\n\n### Thinkモード結果でRetakeするワークフロー\n1. 対象結果の **📊 Score & LRC & LM Codes** アコーディオンを展開。\n2. **LM Codes** テキストをコピー。\n3. **LM Codes Hints** テキストボックスに貼り付け。\n4. **Thinkのチェックを外す** — 拡散モデルは貼り付けたコードをそのまま使う。\n5. メインシードをロックし、**Retake**を有効化、`retake_seed`を設定、`variance`を調整。\n\n### 参考\n[issue #1155](https://github.com/ace-step/ACE-Step-1.5/issues/1155)を参照。"
+  ],
+  "## Simple Mode Tutorial\n\n**Best for:** Quick music creation with minimal effort.\n\n### Steps\n1. Select **Simple** in Generation Mode\n2. Type a description, e.g. *\"upbeat pop song with catchy guitar riff\"*\n3. (Optional) Check **Instrumental** for no vocals\n4. (Optional) Select **Vocal Language**\n5. Click **Create Sample** — AI generates caption, lyrics, metadata\n6. Review and edit the generated content if needed\n7. Click **Generate Music**\n\n### Tips\n- Click 🎲 for random inspiration\n- The more specific your description, the better the result\n- Leave BPM/Key empty to let AI decide": [
+    "## Simple 模式教程\n\n**适合：** 快速创作音乐，最少操作。\n\n### 步骤\n1. 在生成模式中选择 **Simple**\n2. 输入描述，如 *\"欢快的流行歌曲，带有吉他即兴演奏\"*\n3. （可选）勾选**纯音乐**不要人声\n4. （可选）选择**人声语言**\n5. 点击**创建样本** — AI 生成描述、歌词、元数据\n6. 检查并编辑生成的内容\n7. 点击**生成音乐**\n\n### 提示\n- 点击 🎲 获取随机灵感\n- 描述越具体，结果越好\n- 留空 BPM/调性让 AI 自动决定",
+    "## Simple 模式教程\n\n**適合：** 快速創作音樂，最少操作。\n\n### 步驟\n1. 在生成模式中選擇 **Simple**\n2. 輸入描述，如 *\"歡快的流行歌曲，帶有吉他即興演奏\"*\n3. （可選）勾選**純音樂**不要人聲\n4. （可選）選擇**人聲語言**\n5. 點擊**創建樣本** — AI 生成描述、歌詞、元數據\n6. 檢查并編輯生成的內容\n7. 點擊**生成音樂**\n\n### 提示\n- 點擊 🎲 獲取隨機靈感\n- 描述越具體，結果越好\n- 留空 BPM/調性讓 AI 自動決定蝍翹",
+    "## Simple Mode Tutorial\n\n**Best for:** Quick music creation with minimal effort.\n\n### Steps\n1. Select **Simple** in Generation Mode\n2. Type a description, e.g. *\"upbeat pop song with catchy guitar riff\"*\n3. (Optional) Check **Instrumental** for no vocals\n4. (Optional) Select **Vocal Language**\n5. Click **Create Sample** — AI generates caption, lyrics, metadata\n6. Review and edit the generated content if needed\n7. Click **Generate Music**\n\n### Tips\n- Click 🎲 for random inspiration\n- The more specific your description, the better the result\n- Leave BPM/Key empty to let AI decide",
+    "## Simpleモードチュートリアル\n\n**最適：** 最小限の操作で素早い音楽制作。\n\n### 手順\n1. 生成モードで**Simple**を選択\n2. 説明を入力、例：*「キャッチーなギターリフのあるアップビートなポップソング」*\n3. （オプション）ボーカル不要なら**インストゥルメンタル**をチェック\n4. （オプション）**ボーカル言語**を選択\n5. **サンプルを作成**をクリック — AIがキャプション、歌詞、メタデータを生成\n6. 生成されたコンテンツを確認・編集\n7. **音楽を生成**をクリック\n\n### ヒント\n- 🎲をクリックしてランダムなインスピレーション\n- 説明が具体的なほど結果が良くなる\n- BPM/キーを空にしてAIに任せる"
+  ],
+  "## Getting Started\n\n1. **Select a model** in the Settings accordion (e.g. `acestep-v15-turbo`)\n2. **Choose a 5Hz LM** if you want Thinking mode (recommended)\n3. Click **Initialize Service** and wait for the green status\n4. Pick a **Generation Mode** (start with Simple)\n5. Describe your music and click **Generate Music**\n\n> **Tip:** Turbo models are fastest. Enable \"Think\" for smarter generation.": [
+    "## 快速入门\n\n1. 在设置面板中**选择模型**（如 `acestep-v15-turbo`）\n2. 如需 Thinking 模式，**选择 5Hz LM**（推荐）\n3. 点击**初始化服务**，等待绿色状态\n4. 选择**生成模式**（建议从 Simple 开始）\n5. 描述你想要的音乐，点击**生成音乐**\n\n> **提示：** Turbo 模型最快。启用 Think 获得更智能的生成。",
+    "## 快速入門\n\n1. 在設置面板中**選擇模型**（如 `acestep-v15-turbo`）\n2. 如需 Thinking 模式，**選擇 5Hz LM**（推薦）\n3. 點擊**初始化服務**，等待綠色狀態\n4. 選擇**生成模式**（建議從 Simple 開始）\n5. 描述你想要的音樂，點擊**生成音樂**\n\n> **提示：** Turbo 模型最快。啟用 Think 獲得更智能的生成。\n\n### LM 参数\n- **温度**（0.0–2.0）：越高 = 越有创意/随机\n- **CFG 比例**（1.0–3.0）：越高 = 越遵循提示\n- **Top-K / Top-P**：多样性的采样策略\n\n### Think 模式\n启用 **Think** 使用 5Hz LM 进行更智能的生成：\n- 生成语义代码和元数据\n- 需要初始化 LM\n- **并行思考**：并行处理批次（更快）>)",
+    "## Getting Started\n\n1. **Select a model** in the Settings accordion (e.g. `acestep-v15-turbo`)\n2. **Choose a 5Hz LM** if you want Thinking mode (recommended)\n3. Click **Initialize Service** and wait for the green status\n4. Pick a **Generation Mode** (start with Simple)\n5. Describe your music and click **Generate Music**\n\n> **Tip:** Turbo models are fastest. Enable \"Think\" for smarter generation.",
+    "## はじめに\n\n1. 設定アコーディオンで**モデルを選択**（例：`acestep-v15-turbo`）\n2. Thinkingモードを使うなら**5Hz LMを選択**（推奨）\n3. **サービスを初期化**をクリックし、緑色のステータスを待つ\n4. **生成モード**を選択（Simpleから始めましょう）\n5. 音楽を説明して**音楽を生成**をクリック\n\n> **ヒント：** Turboモデルが最速です。「Think」を有効にするとよりスマートな生成が可能です。"
+  ],
+  "## Results Section\n\n### Per-Sample Controls\n- **Audio Player**: Play, pause, download\n- **Send To Remix/Repaint**: Use this result as source for further editing\n- **Save**: Export audio + metadata as JSON\n- **Score**: Calculate quality score (perplexity-based)\n- **LRC**: Generate lyrics timestamps\n\n### Batch Navigation\n- Use **◀ Previous** / **Next ▶** to browse batches\n- Enable **AutoGen** to auto-generate next batch\n- Click **Apply These Settings to UI** to reuse parameters from a good result\n\n### Tips\n- Generate 2–4 variations (batch size) and pick the best\n- Use Score to objectively compare results\n- Save good results for reference": [
+    "## 结果区域\n\n### 每个样本的控制\n- **音频播放器**：播放、暂停、下载\n- **发送到混音/重绘**：将此结果作为源进行进一步编辑\n- **保存**：导出音频 + 元数据为 JSON\n- **评分**：计算质量分数（基于困惑度）\n- **LRC**：生成歌词时间戳\n\n### 批次导航\n- 使用 **◀ 上一个** / **下一个 ▶** 浏览批次\n- 启用 **自动生成** 自动生成下一批\n- 点击**将这些设置应用到 UI** 以重用好结果的参数\n\n### 提示\n- 生成 2-4 个变体（批量大小）并选择最好的\n- 使用评分客观比较结果\n- 保存好的结果以备参考",
+    "## 結果區域\n\n### 每個樣本的控制\n- **音頻播放器**：播放、暫停、下載\n- **發送到混音/重繪**：將此結果作為源進行進一步編輯\n- **保存**：導出音頻 + 元數據為 JSON\n- **評分**：計算質量分數（基于困惑度）\n- **LRC**：生成歌詞時間戳\n\n### 批次導航\n- 使用 **◀ 上一個** / **下一個 ▶** 瀏覽批次\n- 啟用 **自動生成** 自動生成下一批\n- 點擊**將這些設置應用到 UI** 以重用好結果的參數\n\n### 提示\n- 生成 2-4 個變體（批量大小）并選擇最好的\n- 使用評分客觀比較結果\n- 保存好的結果以備參考",
+    "## Results Section\n\n### Per-Sample Controls\n- **Audio Player**: Play, pause, download\n- **Send To Remix/Repaint**: Use this result as source for further editing\n- **Save**: Export audio + metadata as JSON\n- **Score**: Calculate quality score (perplexity-based)\n- **LRC**: Generate lyrics timestamps\n\n### Batch Navigation\n- Use **◀ Previous** / **Next ▶** to browse batches\n- Enable **AutoGen** to auto-generate next batch\n- Click **Apply These Settings to UI** to reuse parameters from a good result\n\n### Tips\n- Generate 2–4 variations (batch size) and pick the best\n- Use Score to objectively compare results\n- Save good results for reference",
+    "## 結果セクション\n\n### サンプルごとのコントロール\n- **オーディオプレーヤー**：再生、一時停止、ダウンロード\n- **リミックス/リペイントに送信**：この結果をソースとして更に編集\n- **保存**：オーディオ + メタデータをJSONでエクスポート\n- **スコア**：品質スコアを計算（パープレキシティベース）\n- **LRC**：歌詞タイムスタンプを生成\n\n### バッチナビゲーション\n- **◀ 前へ** / **次へ ▶** でバッチを閲覧\n- **自動生成**を有効にして次のバッチを自動生成\n- **これらの設定をUIに適用**をクリックして良い結果のパラメータを再利用\n\n### ヒント\n- 2–4個のバリエーション（バッチサイズ）を生成して最良を選択\n- スコアで客観的に結果を比較\n- 良い結果を参考用に保存"
+  ],
+  "## Service Configuration\n\n### Quick Setup\n1. Select **Main Model Path** (turbo recommended)\n2. Select **5Hz LM Model Path** (auto-filtered by GPU)\n3. Choose **Backend**: `vllm` (fast, NVIDIA ≥8GB) or `pt` (universal)\n4. Check **Initialize 5Hz LM** for Thinking mode\n5. Click **Initialize Service**\n\n### Performance Tips\n- **Flash Attention**: Faster inference (needs flash_attn)\n- **CPU Offload**: Auto-enabled on GPUs <20GB\n- **INT8 Quantization**: Reduces VRAM, auto-enabled <20GB\n- **Compile**: Required for quantization, enabled by default\n\n### LoRA\n- Set LoRA path → Load → Enable \"Use LoRA\"\n- ⚠️ Cannot use LoRA with INT8 quantization": [
+    "## 服务配置\n\n### 快速设置\n1. 选择**主模型路径**（推荐 turbo）\n2. 选择 **5Hz LM 模型路径**（按 GPU 自动筛选）\n3. 选择**后端**：`vllm`（快速，NVIDIA ≥8GB）或 `pt`（通用）\n4. 勾选**初始化 5Hz LM** 以启用 Thinking 模式\n5. 点击**初始化服务**\n\n### 性能提示\n- **Flash Attention**：更快推理（需要 flash_attn）\n- **闲置时转移到 CPU**：GPU <20GB 时自动启用\n- **INT8 量化**：减少显存，<20GB 时自动启用\n- **编译**：量化必需，默认启用\n\n### LoRA\n- 设置 LoRA 路径 → 加载 → 启用「使用 LoRA」\n- ⚠️ 不能在 INT8 量化下使用 LoRA",
+    "## 服務配置\n\n### 快速設置\n1. 選擇**主模型路徑**（推薦 turbo）\n2. 選擇 **5Hz LM 模型路徑**（按 GPU 自動篩選）\n3. 選擇**后端**：`vllm`（快速，NVIDIA ≥8GB）或 `pt`（通用）\n4. 勾選**初始化 5Hz LM** 以啟用 Thinking 模式\n5. 點擊**初始化服務**\n\n### 性能提示\n- **Flash Attention**：更快推理（需要 flash_attn）\n- **閑置時轉移到 CPU**：GPU <20GB 時自動啟用\n- **INT8 量化**：減少顯存，<20GB 時自動啟用\n- **編譯**：量化必需，默認啟用\n\n### LoRA\n- 設置 LoRA 路徑 → 加載 → 啟用「使用 LoRA」\n- ⚠️ 不能在 INT8 量化下使用 LoRA閭镲庛叫譈悅￿䣿䢍䠈喋ᅜﻘ譈䡍譈さ뿨깍䠣풹閭锾庛譈悅￿䣿傋䠈䶋䶚庮쀳薉ｔ￿꿩\u0001䠀薋｠￿襈炅￿䣿�閭销庛譈悅￿䣿䂋䠐薉｠￿薋＠￿죿薉＠￿붃＠￿缀䠑趍＠￿䢺\u0001䗦庮荈悽￿ÿ蔏ﺛ￿譈၅譈䠀薉ﻸ￿譈￾䣿䂋䠰譈぀襈￾䣿붃ﻰ￿琀䠜薋ﻰ￿襈ゅ￿⟪ﻥ⟌ﻥ䣌趋ﻸ￿멈ঀ蛳翹",
+    "## Service Configuration\n\n### Quick Setup\n1. Select **Main Model Path** (turbo recommended)\n2. Select **5Hz LM Model Path** (auto-filtered by GPU)\n3. Choose **Backend**: `vllm` (fast, NVIDIA ≥8GB) or `pt` (universal)\n4. Check **Initialize 5Hz LM** for Thinking mode\n5. Click **Initialize Service**\n\n### Performance Tips\n- **Flash Attention**: Faster inference (needs flash_attn)\n- **CPU Offload**: Auto-enabled on GPUs <20GB\n- **INT8 Quantization**: Reduces VRAM, auto-enabled <20GB\n- **Compile**: Required for quantization, enabled by default\n\n### LoRA\n- Set LoRA path → Load → Enable \"Use LoRA\"\n- ⚠️ Cannot use LoRA with INT8 quantization",
+    "## サービス設定\n\n### クイックセットアップ\n1. **メインモデルパス**を選択（turbo推奨）\n2. **5Hz LMモデルパス**を選択（GPUに応じて自動フィルタ）\n3. **バックエンド**を選択：`vllm`（高速、NVIDIA ≥8GB）または`pt`（汎用）\n4. Thinkingモード用に**5Hz LMを初期化**をチェック\n5. **サービスを初期化**をクリック\n\n### パフォーマンスのヒント\n- **Flash Attention**：高速推論（flash_attn必要）\n- **CPUオフロード**：GPU <20GBで自動有効\n- **INT8量子化**：VRAM削減、<20GBで自動有効\n- **コンパイル**：量子化に必要、デフォルト有効\n\n### LoRA\n- LoRAパスを設定 → 読み込み → 「LoRAを使用」を有効化\n- ⚠️ INT8量子化ではLoRAを使用できません"
+  ],
+  "## Dataset Builder Tutorial\n\n### Step 1: Load or Scan\n- **Load**: Enter path to existing dataset JSON → Click Load\n- **Scan**: Enter audio folder path → Click Scan\n  - Supported: wav, mp3, flac, ogg, opus\n\n### Step 2: Configure\n- Set **Dataset Name**\n- Check **All Instrumental** if no vocals\n- Set **Custom Activation Tag** (unique trigger word for your LoRA)\n- Choose **Tag Position**: Prepend, Append, or Replace\n\n### Step 3: Auto-Label\n- Click **Auto-Label All** to generate captions, BPM, key, time sig\n- Use **Skip Metas** to skip BPM/Key/TimeSig (faster)\n\n### Step 4: Preview & Edit\n- Use slider to browse samples\n- Edit caption, lyrics, BPM, key manually\n- Click **Save Changes** per sample\n\n### Step 5: Save\n- Enter save path → Click **Save Dataset**\n\n### Step 6: Preprocess\n- Set tensor output directory → Click **Preprocess**\n- This encodes audio/text to tensors for training\n\n### 📖 Documentation\n- [LoRA Training Tutorial](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/en/LoRA_Training_Tutorial.md) — Full step-by-step guide\n- [Side-Step Advanced Training](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/sidestep/Getting%20Started.md) — CLI-based training with advanced features": [
+    "## 数据集构建教程\n\n### 步骤 1：加载或扫描\n- **加载**：输入现有数据集 JSON 路径 → 点击加载\n- **扫描**：输入音频文件夹路径 → 点击扫描\n  - 支持：wav、mp3、flac、ogg、opus\n\n### 步骤 2：配置\n- 设置**数据集名称**\n- 勾选**全部为纯音乐**（如果没有人声）\n- 设置**自定义激活标签**（LoRA 的唯一触发词）\n- 选择**标签位置**：前置、后置或替换\n\n### 步骤 3：自动标注\n- 点击**自动标注全部**生成描述、BPM、调性、拍号\n- 使用**跳过元数据**跳过 BPM/调性/拍号（更快）\n\n### 步骤 4：预览与编辑\n- 使用滑块浏览样本\n- 手动编辑描述、歌词、BPM、调性\n- 每个样本点击**保存更改**\n\n### 步骤 5：保存\n- 输入保存路径 → 点击**保存数据集**\n\n### 步骤 6：预处理\n- 设置张量输出目录 → 点击**预处理**\n- 将音频/文本编码为张量用于训练\n\n### 📖 文档\n- [LoRA 训练教程](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/zh/LoRA_Training_Tutorial.md) — 完整分步指南\n- [Side-Step 高级训练](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/sidestep/Getting%20Started.md) — 命令行训练，支持高级功能",
+    "## 數據集構建教程\n\n### 步驟 1：加載或掃描\n- **加載**：輸入現有數據集 JSON 路徑 → 點擊加載\n- **掃描**：輸入音頻文件夾路徑 → 點擊掃描\n  - 支持：wav、mp3、flac、ogg、opus\n\n### 步驟 2：配置\n- 設置**數據集名稱**\n- 勾選**全部為純音樂**（如果沒有人聲）\n- 設置**自定義激活標簽**（LoRA 的唯一觸發詞）\n- 選擇**標簽位置**：前置、后置或替換\n\n### 步驟 3：自動標注\n- 點擊**自動標注全部**生成描述、BPM、調性、拍號\n- 使用**跳過元數據**跳過 BPM/調性/拍號（更快）\n\n### 步驟 4：預覽與編輯\n- 使用滑塊瀏覽樣本\n- 手動編輯描述、歌詞、BPM、調性\n- 每個樣本點擊**保存更改**\n\n### 步驟 5：保存\n- 輸入保存路徑 → 點擊**保存數據集**\n\n### 步驟 6：預處理\n- 設置張量輸出目錄 → 點擊**預處理**\n- 將音頻/文本編碼為張量用于訓練\n\n### 📖 文檔\n- [LoRA 訓練教程](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/zh/LoRA_Training_Tutorial.md) — 完整分步指南\n- [Side-Step 高級訓練](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/sidestep/Getting%20Started.md) — 命令行訓練，支持高級功能",
+    "## Dataset Builder Tutorial\n\n### Step 1: Load or Scan\n- **Load**: Enter path to existing dataset JSON → Click Load\n- **Scan**: Enter audio folder path → Click Scan\n  - Supported: wav, mp3, flac, ogg, opus\n\n### Step 2: Configure\n- Set **Dataset Name**\n- Check **All Instrumental** if no vocals\n- Set **Custom Activation Tag** (unique trigger word for your LoRA)\n- Choose **Tag Position**: Prepend, Append, or Replace\n\n### Step 3: Auto-Label\n- Click **Auto-Label All** to generate captions, BPM, key, time sig\n- Use **Skip Metas** to skip BPM/Key/TimeSig (faster)\n\n### Step 4: Preview & Edit\n- Use slider to browse samples\n- Edit caption, lyrics, BPM, key manually\n- Click **Save Changes** per sample\n\n### Step 5: Save\n- Enter save path → Click **Save Dataset**\n\n### Step 6: Preprocess\n- Set tensor output directory → Click **Preprocess**\n- This encodes audio/text to tensors for training\n\n### 📖 Documentation\n- [LoRA Training Tutorial](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/en/LoRA_Training_Tutorial.md) — Full step-by-step guide\n- [Side-Step Advanced Training](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/sidestep/Getting%20Started.md) — CLI-based training with advanced features",
+    "## データセットビルダーチュートリアル\n\n### ステップ1：読み込みまたはスキャン\n- **読み込み**：既存のデータセットJSONパスを入力 → 読み込みをクリック\n- **スキャン**：オーディオフォルダパスを入力 → スキャンをクリック\n  - 対応：wav、mp3、flac、ogg、opus\n\n### ステップ2：設定\n- **データセット名**を設定\n- ボーカルなしなら**すべてインストゥルメンタル**をチェック\n- **カスタムアクティベーションタグ**を設定（LoRAのユニークなトリガーワード）\n- **タグの位置**を選択：前置、後置、または置換\n\n### ステップ3：自動ラベル\n- **一括自動ラベル**をクリックしてキャプション、BPM、キー、拍子を生成\n- **メタをスキップ**でBPM/キー/拍子をスキップ（高速）\n\n### ステップ4：プレビューと編集\n- スライダーでサンプルを閲覧\n- キャプション、歌詞、BPM、キーを手動編集\n- サンプルごとに**変更を保存**をクリック\n\n### ステップ5：保存\n- 保存パスを入力 → **データセットを保存**をクリック\n\n### ステップ6：前処理\n- テンソル出力ディレクトリを設定 → **前処理**をクリック\n- オーディオ/テキストをトレーニング用テンソルにエンコード\n\n### 📖 ドキュメント\n- [LoRA トレーニングチュートリアル](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/ja/LoRA_Training_Tutorial.md) — 完全なステップバイステップガイド\n- [Side-Step 高度なトレーニング](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/sidestep/Getting%20Started.md) — CLIベースのトレーニング、高度な機能付き"
+  ],
+  "## Using Your Trained LoRA\n\n### Export\n1. After training, enter export path\n2. Click **Export LoRA**\n\n### Load & Use\n1. In Settings, set **LoRA Path** to your exported directory\n2. Click **Load LoRA**\n3. Enable **Use LoRA** checkbox\n4. Generate music — your LoRA style will be applied\n\n### Tips\n- Use your **Custom Activation Tag** in captions to trigger the style\n- ⚠️ LoRA is incompatible with INT8 quantization\n- You can unload and switch between different LoRAs": [
+    "## 使用训练好的 LoRA\n\n### 导出\n1. 训练后，输入导出路径\n2. 点击**导出 LoRA**\n\n### 加载与使用\n1. 在设置中，将 **LoRA 路径**设置为导出目录\n2. 点击**加载 LoRA**\n3. 启用**使用 LoRA** 复选框\n4. 生成音乐 — 你的 LoRA 风格将被应用\n\n### 提示\n- 在描述中使用你的**自定义激活标签**来触发风格\n- ⚠️ LoRA 与 INT8 量化不兼容\n- 你可以卸载并在不同的 LoRA 之间切换",
+    "## 使用訓練好的 LoRA\n\n### 導出\n1. 訓練后，輸入導出路徑\n2. 點擊**導出 LoRA**\n\n### 加載與使用\n1. 在設置中，將 **LoRA 路徑**設置為導出目錄\n2. 點擊**加載 LoRA**\n3. 啟用**使用 LoRA** 復選框\n4. 生成音樂 — 你的 LoRA 風格將被應用\n\n### 提示\n- 在描述中使用你的**自定義激活標簽**來觸發風格\n- ⚠️ LoRA 與 INT8 量化不兼容\n- 你可以卸載并在不同的 LoRA 之間切換؀翸",
+    "## Using Your Trained LoRA\n\n### Export\n1. After training, enter export path\n2. Click **Export LoRA**\n\n### Load & Use\n1. In Settings, set **LoRA Path** to your exported directory\n2. Click **Load LoRA**\n3. Enable **Use LoRA** checkbox\n4. Generate music — your LoRA style will be applied\n\n### Tips\n- Use your **Custom Activation Tag** in captions to trigger the style\n- ⚠️ LoRA is incompatible with INT8 quantization\n- You can unload and switch between different LoRAs",
+    "## トレーニング済みLoRAの使用\n\n### エクスポート\n1. トレーニング後、エクスポートパスを入力\n2. **LoRAをエクスポート**をクリック\n\n### 読み込みと使用\n1. 設定で**LoRAパス**をエクスポートディレクトリに設定\n2. **LoRAを読み込み**をクリック\n3. **LoRAを使用**チェックボックスを有効化\n4. 音楽を生成 — LoRAスタイルが適用されます\n\n### ヒント\n- キャプションに**カスタムアクティベーションタグ**を使用してスタイルをトリガー\n- ⚠️ LoRAはINT8量子化と互換性がありません\n- 異なるLoRA間でアンロードと切り替えが可能"
+  ],
+  "## 🚀 LoKr Training Tutorial\n\nLoKr (Low-rank Kronecker product) has greatly improved training efficiency. What used to take an hour with LoRA now only takes 5 minutes — **over 10× faster**. This is crucial for training on consumer-grade GPUs.\n\n### Setup\n1. Enter **Preprocessed Tensors Directory** → Click **Load Dataset**\n2. Configure LoKr:\n   - **Linear Dim**: 64 default (similar to LoRA rank)\n   - **Linear Alpha**: 128 default (scaling factor)\n   - **Weight Decompose (DoRA)**: Enabled by default for better quality\n\n### Training\n3. Set **Learning Rate** (LoKr commonly uses higher LR, start with 1e-3)\n4. Set **Max Epochs** (500 default)\n5. Click **Start LoKr Training**\n6. Monitor loss curve — it should decrease over time\n7. Click **Stop Training** when satisfied\n\n### Export\n8. Enter export path → Click **Export LoKr**\n9. Load in Settings: set LoRA Path → Load LoRA → Enable Use LoRA\n\n### LoKr vs LoRA\n| | LoKr | LoRA |\n|---|---|---|\n| Speed | ⚡ ~10× faster | Slower |\n| VRAM | Lower | Higher |\n| Quality | Comparable | Baseline |\n| Best for | Consumer GPUs, rapid iteration | Maximum fidelity |\n\n### Tips\n- LoKr uses Kronecker decomposition for extreme efficiency\n- Enable **DoRA** (Weight Decompose) for improved quality\n- Use **Tucker decomposition** for additional compression\n- Higher learning rate (1e-3) often works better than LoRA's typical 1e-4": [
+    "## 🚀 LoKr 训练教程\n\nLoKr（低秩 Kronecker 积）大幅提升了训练效率，原来使用 LoRA 需要一小时的训练现在只需 5 分钟——**速度提升超过 10 倍**。这对于在消费级 GPU 上训练至关重要。\n\n### 设置\n1. 输入**预处理张量目录** → 点击**加载数据集**\n2. 配置 LoKr：\n   - **Linear Dim**：默认 64（类似 LoRA 的秩）\n   - **Linear Alpha**：默认 128（缩放因子）\n   - **Weight Decompose (DoRA)**：默认启用，质量更好\n\n### 训练\n3. 设置**学习率**（LoKr 通常使用更高的学习率，从 1e-3 开始）\n4. 设置**最大轮数**（默认 500）\n5. 点击**开始 LoKr 训练**\n6. 监控损失曲线 — 应该随时间下降\n7. 满意时点击**停止训练**\n\n### 导出\n8. 输入导出路径 → 点击**导出 LoKr**\n9. 在设置中加载：设置 LoRA 路径 → 加载 LoRA → 启用使用 LoRA\n\n### LoKr vs LoRA 对比\n| | LoKr | LoRA |\n|---|---|---|\n| 速度 | ⚡ 快约 10 倍 | 较慢 |\n| 显存 | 更低 | 更高 |\n| 质量 | 相当 | 基准 |\n| 适合 | 消费级 GPU、快速迭代 | 追求最高保真度 |\n\n### 提示\n- LoKr 使用 Kronecker 分解实现极致效率\n- 启用 **DoRA**（Weight Decompose）可提升质量\n- 使用 **Tucker 分解** 可进一步压缩\n- 更高的学习率（1e-3）通常比 LoRA 的 1e-4 效果更好",
+    "## 🚀 LoKr 訓練教程\n\nLoKr（低秩 Kronecker 積）大幅提升了訓練效率，原來使用 LoRA 需要一小時的訓練現在只需 5 分鐘——**速度提升超過 10 倍**。這對于在消費級 GPU 上訓練至關重要。\n\n### 設置\n1. 輸入**預處理張量目錄** → 點擊**加載數據集**\n2. 配置 LoKr：\n   - **Linear Dim**：默認 64（類似 LoRA 的秩）\n   - **Linear Alpha**：默認 128（縮放因子）\n   - **Weight Decompose (DoRA)**：默認啟用，質量更好\n\n### 訓練\n3. 設置**學習率**（LoKr 通常使用更高的學習率，從 1e-3 開始）\n4. 設置**最大輪數**（默認 500）\n5. 點擊**開始 LoKr 訓練**\n6. 監控損失曲線 — 應該隨時間下降\n7. 滿意時點擊**停止訓練**\n\n### 導出\n8. 輸入導出路徑 → 點擊**導出 LoKr**\n9. 在設置中加載：設置 LoRA 路徑 → 加載 LoRA → 啟用使用 LoRA\n\n### LoKr vs LoRA 對比\n| | LoKr | LoRA |\n|---|---|---|\n| 速度 | ⚡ 快約 10 倍 | 較慢 |\n| 顯存 | 更低 | 更高 |\n| 質量 | 相當 | 基準 |\n| 適合 | 消費級 GPU、快速迭代 | 追求最高保真度 |\n\n### 提示\n- LoKr 使用 Kronecker 分解實現極致效率\n- 啟用 **DoRA**（Weight Decompose）可提升質量\n- 使用 **Tucker 分解** 可進一步壓縮\n- 更高的學習率（1e-3）通常比 LoRA 的 1e-4 效果更好蚢翹",
+    "## 🚀 LoKr Training Tutorial\n\nLoKr (Low-rank Kronecker product) has greatly improved training efficiency. What used to take an hour with LoRA now only takes 5 minutes — **over 10× faster**. This is crucial for training on consumer-grade GPUs.\n\n### Setup\n1. Enter **Preprocessed Tensors Directory** → Click **Load Dataset**\n2. Configure LoKr:\n   - **Linear Dim**: 64 default (similar to LoRA rank)\n   - **Linear Alpha**: 128 default (scaling factor)\n   - **Weight Decompose (DoRA)**: Enabled by default for better quality\n\n### Training\n3. Set **Learning Rate** (LoKr commonly uses higher LR, start with 1e-3)\n4. Set **Max Epochs** (500 default)\n5. Click **Start LoKr Training**\n6. Monitor loss curve — it should decrease over time\n7. Click **Stop Training** when satisfied\n\n### Export\n8. Enter export path → Click **Export LoKr**\n9. Load in Settings: set LoRA Path → Load LoRA → Enable Use LoRA\n\n### LoKr vs LoRA\n| | LoKr | LoRA |\n|---|---|---|\n| Speed | ⚡ ~10× faster | Slower |\n| VRAM | Lower | Higher |\n| Quality | Comparable | Baseline |\n| Best for | Consumer GPUs, rapid iteration | Maximum fidelity |\n\n### Tips\n- LoKr uses Kronecker decomposition for extreme efficiency\n- Enable **DoRA** (Weight Decompose) for improved quality\n- Use **Tucker decomposition** for additional compression\n- Higher learning rate (1e-3) often works better than LoRA's typical 1e-4",
+    "## 🚀 LoKr トレーニングチュートリアル\n\nLoKr（低ランククロネッカー積）はトレーニング効率を大幅に向上させました。LoRAで1時間かかっていたトレーニングが、わずか5分で完了します——**10倍以上の高速化**。コンシューマーGPUでのトレーニングに最適です。\n\n### セットアップ\n1. **前処理済みテンソルディレクトリ**を入力 → **データセットを読み込み**をクリック\n2. LoKrを設定：\n   - **Linear Dim**：デフォルト64（LoRAのランクに相当）\n   - **Linear Alpha**：デフォルト128（スケーリング係数）\n   - **Weight Decompose (DoRA)**：デフォルト有効、品質向上\n\n### トレーニング\n3. **学習率**を設定（LoKrは通常より高いLRを使用、1e-3から開始）\n4. **最大エポック数**を設定（デフォルト500）\n5. **LoKrトレーニング開始**をクリック\n6. 損失曲線を監視 — 時間とともに減少するはず\n7. 満足したら**トレーニング停止**をクリック\n\n### エクスポート\n8. エクスポートパスを入力 → **LoKrをエクスポート**をクリック\n9. 設定で読み込み：LoRAパスを設定 → LoRAを読み込み → LoRAを使用を有効化\n\n### LoKr vs LoRA 比較\n| | LoKr | LoRA |\n|---|---|---|\n| 速度 | ⚡ 約10倍高速 | 遅い |\n| VRAM | 少ない | 多い |\n| 品質 | 同等 | 基準 |\n| 最適 | コンシューマーGPU、高速反復 | 最高忠実度 |\n\n### ヒント\n- LoKrはクロネッカー分解で極限の効率を実現\n- **DoRA**（Weight Decompose）を有効にして品質向上\n- **Tucker分解**でさらなる圧縮が可能\n- 高い学習率（1e-3）がLoRAの典型的な1e-4より効果的"
+  ],
+  "## LoRA Training Tutorial\n\n### Setup\n1. Enter **Preprocessed Tensors Directory** → Click **Load Dataset**\n2. Configure LoRA:\n   - **Rank** (r): 64 default. Higher = more capacity\n   - **Alpha**: Usually 2× rank (128)\n   - **Dropout**: 0.1 for regularization\n\n### Training\n3. Set **Learning Rate** (start with 1e-4)\n4. Set **Max Epochs** (500 default)\n5. Click **Start Training**\n6. Monitor loss curve — it should decrease over time\n7. Click **Stop Training** when satisfied\n\n### Export\n8. Enter export path → Click **Export LoRA**\n9. Load in Settings: set LoRA Path → Load LoRA → Enable Use LoRA\n\n### 🚀 Try LoKr for Faster Training\nLoKr has greatly improved training efficiency. What used to take an hour now only takes 5 minutes — **over 10× faster**. This is crucial for training on consumer-grade GPUs. Switch to the **Train LoKr** tab to get started.\n\n### Tips\n- Use small batch size (1) if VRAM is limited\n- Gradient accumulation increases effective batch size\n- Save checkpoints frequently (every 200 epochs)\n\n### 📖 Documentation\n- [LoRA Training Tutorial](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/en/LoRA_Training_Tutorial.md) — Full step-by-step guide\n- [Side-Step Advanced Training](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/sidestep/Getting%20Started.md) — CLI training with corrected timesteps, LoKR, VRAM optimization": [
+    "## LoRA 训练教程\n\n### 设置\n1. 输入**预处理张量目录** → 点击**加载数据集**\n2. 配置 LoRA：\n   - **秩** (r)：默认 64。越高 = 容量越大\n   - **Alpha**：通常为秩的 2 倍（128）\n   - **Dropout**：0.1 用于正则化\n\n### 训练\n3. 设置**学习率**（从 1e-4 开始）\n4. 设置**最大轮数**（默认 500）\n5. 点击**开始训练**\n6. 监控损失曲线 — 应该随时间下降\n7. 满意时点击**停止训练**\n\n### 导出\n8. 输入导出路径 → 点击**导出 LoRA**\n9. 在设置中加载：设置 LoRA 路径 → 加载 LoRA → 启用使用 LoRA\n\n### 🚀 推荐使用 LoKr 加速训练\nLoKr 大幅提升了训练效率，原来需要一小时的训练现在只需 5 分钟——**速度提升超过 10 倍**。这对于在消费级 GPU 上训练至关重要。切换到 **Train LoKr** 标签页即可开始。\n\n### 提示\n- 显存有限时使用小批量（1）\n- 梯度累积增加有效批量大小\n- 频繁保存检查点（每 200 轮）\n\n### 📖 文档\n- [LoRA 训练教程](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/zh/LoRA_Training_Tutorial.md) — 完整分步指南\n- [Side-Step 高级训练](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/sidestep/Getting%20Started.md) — 命令行训练，修正时间步采样、LoKR、显存优化",
+    "## LoRA 訓練教程\n\n### 設置\n1. 輸入**預處理張量目錄** → 點擊**加載數據集**\n2. 配置 LoRA：\n   - **秩** (r)：默認 64。越高 = 容量越大\n   - **Alpha**：通常為秩的 2 倍（128）\n   - **Dropout**：0.1 用于正則化\n\n### 訓練\n3. 設置**學習率**（從 1e-4 開始）\n4. 設置**最大輪數**（默認 500）\n5. 點擊**開始訓練**\n6. 監控損失曲線 — 應該隨時間下降\n7. 滿意時點擊**停止訓練**\n\n### 導出\n8. 輸入導出路徑 → 點擊**導出 LoRA**\n9. 在設置中加載：設置 LoRA 路徑 → 加載 LoRA → 啟用使用 LoRA\n\n### 🚀 推薦使用 LoKr 加速訓練\nLoKr 大幅提升了訓練效率，原來需要一小時的訓練現在只需 5 分鐘——**速度提升超過 10 倍**。這對于在消費級 GPU 上訓練至關重要。切換到 **Train LoKr** 標簽頁即可開始。\n\n### 提示\n- 顯存有限時使用小批量（1）\n- 梯度累積增加有效批量大小\n- 頻繁保存檢查點（每 200 輪）\n\n### 📖 文檔\n- [LoRA 訓練教程](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/zh/LoRA_Training_Tutorial.md) — 完整分步指南\n- [Side-Step 高級訓練](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/sidestep/Getting%20Started.md) — 命令行訓練，修正時間步采樣、LoKR、顯存優化翹",
+    "## LoRA Training Tutorial\n\n### Setup\n1. Enter **Preprocessed Tensors Directory** → Click **Load Dataset**\n2. Configure LoRA:\n   - **Rank** (r): 64 default. Higher = more capacity\n   - **Alpha**: Usually 2× rank (128)\n   - **Dropout**: 0.1 for regularization\n\n### Training\n3. Set **Learning Rate** (start with 1e-4)\n4. Set **Max Epochs** (500 default)\n5. Click **Start Training**\n6. Monitor loss curve — it should decrease over time\n7. Click **Stop Training** when satisfied\n\n### Export\n8. Enter export path → Click **Export LoRA**\n9. Load in Settings: set LoRA Path → Load LoRA → Enable Use LoRA\n\n### 🚀 Try LoKr for Faster Training\nLoKr has greatly improved training efficiency. What used to take an hour now only takes 5 minutes — **over 10× faster**. This is crucial for training on consumer-grade GPUs. Switch to the **Train LoKr** tab to get started.\n\n### Tips\n- Use small batch size (1) if VRAM is limited\n- Gradient accumulation increases effective batch size\n- Save checkpoints frequently (every 200 epochs)\n\n### 📖 Documentation\n- [LoRA Training Tutorial](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/en/LoRA_Training_Tutorial.md) — Full step-by-step guide\n- [Side-Step Advanced Training](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/sidestep/Getting%20Started.md) — CLI training with corrected timesteps, LoKR, VRAM optimization",
+    "## LoRAトレーニングチュートリアル\n\n### セットアップ\n1. **前処理済みテンソルディレクトリ**を入力 → **データセットを読み込み**をクリック\n2. LoRAを設定：\n   - **ランク** (r)：デフォルト64。高い = より大きな容量\n   - **Alpha**：通常はランクの2倍（128）\n   - **Dropout**：正則化に0.1\n\n### トレーニング\n3. **学習率**を設定（1e-4から開始）\n4. **最大エポック数**を設定（デフォルト500）\n5. **トレーニング開始**をクリック\n6. 損失曲線を監視 — 時間とともに減少するはず\n7. 満足したら**トレーニング停止**をクリック\n\n### エクスポート\n8. エクスポートパスを入力 → **LoRAをエクスポート**をクリック\n9. 設定で読み込み：LoRAパスを設定 → LoRAを読み込み → LoRAを使用を有効化\n\n### 🚀 LoKr で高速トレーニング\nLoKr はトレーニング効率を大幅に向上させました。以前は1時間かかっていたトレーニングが、わずか5分で完了します——**10倍以上の高速化**。コンシューマーGPUでのトレーニングに最適です。**Train LoKr** タブに切り替えて始めましょう。\n\n### ヒント\n- VRAMが限られている場合は小さいバッチサイズ（1）を使用\n- 勾配累積で実効バッチサイズを増加\n- チェックポイントを頻繁に保存（200エポックごと）\n\n### 📖 ドキュメント\n- [LoRA トレーニングチュートリアル](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/ja/LoRA_Training_Tutorial.md) — 完全なステップバイステップガイド\n- [Side-Step 高度なトレーニング](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/docs/sidestep/Getting%20Started.md) — CLIトレーニング、修正タイムステップ、LoKR、VRAM最適化"
+  ],
+  "Already at first batch": [
+    "已在第一批次",
+    "已在第一批次翸",
+    "Already at first batch",
+    "すでに最初のバッチです"
+  ],
+  "No next batch available": [
+    "没有下一批次可用",
+    "沒有下一批次可用�䊗Ǘ",
+    "No next batch available",
+    "次のバッチはありません"
+  ],
+  "🔄 AutoGen enabled - next batch will generate after this": [
+    "🔄 已启用自动生成 - 下一批次将在此之后生成",
+    "🔄 已啟用自動生成 - 下一批次將在此之后生成\u0001",
+    "🔄 AutoGen enabled - next batch will generate after this",
+    "🔄 自動生成が有効 - このあと次のバッチを生成します"
+  ],
+  "❌ Background generation failed: {error}": [
+    "❌ 后台生成失败: {error}",
+    "❌ 后臺生成失敗: {error}㝤Ǘ",
+    "❌ Background generation failed: {error}",
+    "❌ バックグラウンド生成に失敗しました: {error}"
+  ],
+  "🔄 Starting background generation for Batch {n}.": [
+    "🔄 开始为批次 {n} 进行后台生成.",
+    "🔄 開始為批次 {n} 進行后臺生成.\u0001",
+    "🔄 Starting background generation for Batch {n}.",
+    "🔄 バッチ {n} のバックグラウンド生成を開始."
+  ],
+  "Batch {n} not found in queue": [
+    "在队列中未找到批次 {n}",
+    "在隊列中未找到批次 {n}䊘Ǘ",
+    "Batch {n} not found in queue",
+    "キューにバッチ {n} が見つかりません"
+  ],
+  "✅ Batch {n} ready! Click 'Next' to view.": [
+    "✅ 批次 {n} 就绪!点击'下一个'查看。",
+    "✅ 批次 {n} 就緒!點擊'下一個'查看。",
+    "✅ Batch {n} ready! Click 'Next' to view.",
+    "✅ バッチ {n} の準備完了！'次へ'をクリックして表示。"
+  ],
+  "⚠️ Please enter a music description.": [
+    "⚠️ 请输入音乐描述。",
+    "⚠️ 請輸入音樂描述。",
+    "⚠️ Please enter a music description.",
+    "⚠️ 音楽の説明を入力してください。"
+  ],
+  "Error loading example: {error}": [
+    "加载示例时出错: {error}",
+    "加載示例時出錯: {error}쉐㝤Ǘ",
+    "Error loading example: {error}",
+    "サンプル読み込みエラー: {error}"
+  ],
+  "Failed to parse JSON file {filename}: {error}": [
+    "解析JSON文件 {filename} 失败: {error}",
+    "解析JSON文件 {filename} 失敗: {error}",
+    "Failed to parse JSON file {filename}: {error}",
+    "JSONファイル {filename} の解析に失敗しました: {error}"
+  ],
+  "📁 Loaded example from {filename}": [
+    "📁 已从 {filename} 加载示例",
+    "📁 已從 {filename} 加載示例",
+    "📁 Loaded example from {filename}",
+    "📁 {filename} からサンプルを読み込みました"
+  ],
+  "❌ Format failed: {error}": [
+    "❌ 格式化失败: {error}",
+    "❌ 格式化失敗: {error}쉐㝤Ǘ",
+    "❌ Format failed: {error}",
+    "❌ フォーマットに失敗しました: {error}"
+  ],
+  "✅ Caption and lyrics formatted successfully": [
+    "✅ 描述和歌词格式化成功",
+    "✅ 描述和歌詞格式化成功斐䊘Ǘ",
+    "✅ Caption and lyrics formatted successfully",
+    "✅ キャプションと歌詞のフォーマットに成功しました"
+  ],
+  "❌ Invalid JSON file: {error}": [
+    "❌ 无效的JSON文件: {error}",
+    "❌ 無效的JSON文件: {error}\u0001",
+    "❌ Invalid JSON file: {error}",
+    "❌ 無効なJSONファイル: {error}"
+  ],
+  "⚠️ Invalid timesteps format. Using default schedule.": [
+    "⚠️ 时间步格式无效，使用默认调度。",
+    "⚠️ 時間步格式無效，使用默認調度。Ǘ",
+    "⚠️ Invalid timesteps format. Using default schedule.",
+    "⚠️ タイムステップ形式が無効です。デフォルトスケジュールを使用します。"
+  ],
+  "Failed to generate example using LM, falling back to examples directory": [
+    "使用LM生成示例失败,回退到示例目录",
+    "使用LM生成示例失敗,回退到示例目錄Ǘ",
+    "Failed to generate example using LM, falling back to examples directory",
+    "LMを使用したサンプル生成に失敗、サンプルディレクトリにフォールバック"
+  ],
+  "🤖 Generated example using LM": [
+    "🤖 使用LM生成的示例",
+    "🤖 使用LM生成的示例門䊘Ǘ",
+    "🤖 Generated example using LM",
+    "🤖 LMを使用してサンプルを生成しました"
+  ],
+  "❌ 5Hz LM not initialized. Please initialize it first.": [
+    "❌ 5Hz LM未初始化。请先初始化它。",
+    "❌ 5Hz LM未初始化。請先初始化它。\u0001",
+    "❌ 5Hz LM not initialized. Please initialize it first.",
+    "❌ 5Hz LMが初期化されていません。最初に初期化してください。"
+  ],
+  "❌ Error loading file: {error}": [
+    "❌ 加载文件时出错: {error}",
+    "❌ 加載文件時出錯: {error}Ǘ",
+    "❌ Error loading file: {error}",
+    "❌ ファイルの読み込みエラー: {error}"
+  ],
+  "⚠️ LRC generation produced empty result.": [
+    "⚠️ LRC生成结果为空。",
+    "⚠️ LRC生成結果為空。䊘Ǘ",
+    "⚠️ LRC generation produced empty result.",
+    "⚠️ LRC生成の結果が空です。"
+  ],
+  "❌ Missing required tensors for LRC generation.": [
+    "❌ 缺少LRC生成所需的张量。",
+    "❌ 缺少LRC生成所需的張量。",
+    "❌ Missing required tensors for LRC generation.",
+    "❌ LRC生成に必要なテンソルがありません。"
+  ],
+  "❌ No batch data found. Please generate music first.": [
+    "❌ 未找到批次数据。请先生成音乐。",
+    "❌ 未找到批次數據。請先生成音樂。㝤Ǘ",
+    "❌ No batch data found. Please generate music first.",
+    "❌ バッチデータが見つかりません。最初に音楽を生成してください。"
+  ],
+  "❌ No extra outputs found. Condition tensors not available.": [
+    "❌ 未找到额外输出。条件张量不可用。",
+    "❌ 未找到額外輸出。條件張量不可用。Ǘ",
+    "❌ No extra outputs found. Condition tensors not available.",
+    "❌ 追加出力が見つかりません。条件テンソルが利用できません。"
+  ],
+  "❌ Sample does not exist in current batch.": [
+    "❌ 当前批次中不存在该样本。",
+    "❌ 當前批次中不存在該樣本。Ǘ",
+    "❌ Sample does not exist in current batch.",
+    "❌ 現在のバッチにサンプルが存在しません。"
+  ],
+  "❌ LRC generation is disabled in save-memory mode (ACESTEP_SAVE_MEMORY=1). Intermediate tensors are not stored to reduce RAM usage.": [
+    "❌ 省内存模式已开启 (ACESTEP_SAVE_MEMORY=1)，LRC 生成不可用。中间张量未保存以减少内存占用。",
+    "❌ 省內存模式已開啟 (ACESTEP_SAVE_MEMORY=1)，LRC 生成不可用。中間張量未保存以減少內存占用。ቸ\r",
+    "❌ LRC generation is disabled in save-memory mode (ACESTEP_SAVE_MEMORY=1). Intermediate tensors are not stored to reduce RAM usage.",
+    "❌ 省メモリモードが有効です (ACESTEP_SAVE_MEMORY=1)。中間テンソルは保存されないため、LRC生成は使用できません。"
+  ],
+  "❌ No audio to save": [
+    "❌ 没有要保存的音频",
+    "❌ 沒有要保存的音頻Ǘ",
+    "❌ No audio to save",
+    "❌ 保存するオーディオがありません"
+  ],
+  "No batch data found to restore.": [
+    "没有要恢复的批次数据。",
+    "沒有要恢復的批次數據。",
+    "No batch data found to restore.",
+    "復元するバッチデータがありません。"
+  ],
+  "❌ No audio codes available. Please generate music first.": [
+    "❌ 没有可用的音频代码。请先生成音乐。",
+    "❌ 沒有可用的音頻代碼。請先生成音樂。",
+    "❌ No audio codes available. Please generate music first.",
+    "❌ 利用可能なオーディオコードがありません。最初に音楽を生成してください。"
+  ],
+  "⚠️ No file selected": [
+    "⚠️ 未选择文件",
+    "⚠️ 未選擇文件⛀䊙Ǘ",
+    "⚠️ No file selected",
+    "⚠️ ファイルが選択されていません"
+  ],
+  "✅ Parameters loaded from {filename}": [
+    "✅ 已从 {filename} 加载参数",
+    "✅ 已從 {filename} 加載參數\u0001",
+    "✅ Parameters loaded from {filename}",
+    "✅ {filename} からパラメータを読み込みました"
+  ],
+  "✅ UI Parameters restored from Batch {n}": [
+    "✅ 已从批次 {n} 恢复UI参数",
+    "✅ 已從批次 {n} 恢復UI參數㝤Ǘ",
+    "✅ UI Parameters restored from Batch {n}",
+    "✅ バッチ {n} からUIパラメータを復元しました"
+  ],
+  "✅ Sample created! Review the caption and lyrics, then click Generate Music.": [
+    "✅ 样本已创建！检查描述和歌词，然后点击生成音乐。",
+    "✅ 樣本已創建！檢查描述和歌詞，然后點擊生成音樂。",
+    "✅ Sample created! Review the caption and lyrics, then click Generate Music.",
+    "✅ サンプルが作成されました！キャプションと歌詞を確認して、音楽を生成をクリックしてください。"
+  ],
+  "❌ Failed to create sample. Please try again.": [
+    "❌ 创建样本失败。请重试。",
+    "❌ 創建樣本失敗。請重試。䊙Ǘ",
+    "❌ Failed to create sample. Please try again.",
+    "❌ サンプルの作成に失敗しました。もう一度お試しください。"
+  ],
+  "❌ Failed to save: {error}": [
+    "❌ 保存失败: {error}",
+    "❌ 保存失敗: {error}",
+    "❌ Failed to save: {error}",
+    "❌ 保存に失敗しました: {error}"
+  ],
+  "✅ Saved audio and metadata to {filename}": [
+    "✅ 已将音频和元数据保存到 {filename}",
+    "✅ 已將音頻和元數據保存到 {filename}\u0001",
+    "✅ Saved audio and metadata to {filename}",
+    "✅ オーディオとメタデータを {filename} に保存しました"
+  ],
+  "❌ Error calculating score: {error}": [
+    "❌ 计算分数时出错: {error}",
+    "❌ 計算分數時出錯: {error}Ǘ",
+    "❌ Error calculating score: {error}",
+    "❌ スコア計算エラー: {error}"
+  ],
+  "❌ Scoring failed: {error}": [
+    "❌ 评分失败: {error}",
+    "❌ 評分失敗: {error}",
+    "❌ Scoring failed: {error}",
+    "❌ スコアリングに失敗しました: {error}"
+  ],
+  "❌ Error: Batch data not found": [
+    "❌ 错误: 未找到批次数据",
+    "❌ 錯誤: 未找到批次數據䊙Ǘ",
+    "❌ Error: Batch data not found",
+    "❌ エラー: バッチデータが見つかりません"
+  ],
+  "🎲 Loaded random example from {filename}": [
+    "🎲 已从 {filename} 加载随机示例",
+    "🎲 已從 {filename} 加載隨機示例",
+    "🎲 Loaded random example from {filename}",
+    "🎲 {filename} からランダムサンプルを読み込みました"
+  ],
+  "⚠️ No example files found in simple mode examples.": [
+    "⚠️ 简单模式示例中没有示例文件。",
+    "⚠️ 簡單模式示例中沒有示例文件。㝤Ǘ",
+    "⚠️ No example files found in simple mode examples.",
+    "⚠️ シンプルモードサンプルにファイルがありません。"
+  ],
+  "⚠️ Simple mode examples directory not found.": [
+    "⚠️ 未找到简单模式示例目录。",
+    "⚠️ 未找到簡單模式示例目錄。",
+    "⚠️ Simple mode examples directory not found.",
+    "⚠️ シンプルモードサンプルディレクトリが見つかりません。"
+  ],
+  "⚡ Skipping Phase 1 metas COT (sample already formatted)": [
+    "⚡ 跳过 Phase 1 元数据 COT（样本已格式化）",
+    "⚡ 跳過 Phase 1 元數據 COT（樣本已格式化）㸆翹",
+    "⚡ Skipping Phase 1 metas COT (sample already formatted)",
+    "⚡ Phase 1 メタデータ COT をスキップ（サンプルは既にフォーマット済み）"
+  ],
+  "⚠️ 'Think' requires 5Hz LM to be initialized. Think has been disabled — generation will proceed without LM thinking.": [
+    "⚠️ \"Think\"功能需要先初始化 5Hz LM。Think 已自动关闭，生成将不使用 LM 思考。",
+    "⚠️ \"Think\"功能需要先初始化 5Hz LM。Think 已自動關閉，生成將不使用 LM 思考。",
+    "⚠️ 'Think' requires 5Hz LM to be initialized. Think has been disabled — generation will proceed without LM thinking.",
+    "⚠️ 「Think」機能には5Hz LMの初期化が必要です。Thinkは無効化されました — LM思考なしで生成を続行します。"
+  ],
+  "⚠️ Timesteps count ({actual}) differs from inference_steps ({expected}). Using timesteps count.": [
+    "⚠️ 时间步数量 ({actual}) 与推理步数 ({expected}) 不匹配，将使用时间步数量。",
+    "⚠️ 時間步數量 ({actual}) 與推理步數 ({expected}) 不匹配，將使用時間步數量。⼨薛翹",
+    "⚠️ Timesteps count ({actual}) differs from inference_steps ({expected}). Using timesteps count.",
+    "⚠️ タイムステップ数 ({actual}) が推論ステップ数 ({expected}) と異なります。タイムステップ数を使用します。"
+  ],
+  "⚠️ Timesteps must be in range [0, 1]. Using default schedule.": [
+    "⚠️ 时间步必须在 [0, 1] 范围内，使用默认调度。",
+    "⚠️ 時間步必須在 [0, 1] 范圍內，使用默認調度。ꆰ㞘Ǘ",
+    "⚠️ Timesteps must be in range [0, 1]. Using default schedule.",
+    "⚠️ タイムステップは [0, 1] の範囲内である必要があります。デフォルトスケジュールを使用します。"
+  ],
+  "✅ Viewing Batch {n}": [
+    "✅ 查看批次 {n}",
+    "✅ 查看批次 {n}Ǘ",
+    "✅ Viewing Batch {n}",
+    "✅ バッチ {n} を表示中"
+  ],
+  "📁 All Generated Files (Download)": [
+    "📁 所有生成的文件(下载)",
+    "📁 所有生成的文件(下載)Ǘ",
+    "📁 All Generated Files (Download)",
+    "📁 すべての生成ファイル(ダウンロード)"
+  ],
+  "Batch {current} / {total}": [
+    "批次 {current} / {total}",
+    "批次 {current} / {total}",
+    "Batch {current} / {total}",
+    "バッチ {current} / {total}"
+  ],
+  "📁 Batch Results & Generation Details": [
+    "👇 点击查看批量结果和生成详情",
+    "👇 點擊查看批量結果和生成詳情쉐㝤Ǘ",
+    "📁 Batch Results & Generation Details",
+    "👇 クリックしてバッチ結果と生成詳細を表示"
+  ],
+  "LM Codes (Sample {n})": [
+    "LM 代码(样本 {n})",
+    "LM 代碼(樣本 {n})䊚Ǘ",
+    "LM Codes (Sample {n})",
+    "LM コード(サンプル {n})"
+  ],
+  "🔄 Convert To Codes": [
+    "🔄 转换为代码",
+    "🔄 轉換為代碼䌀䊚Ǘ",
+    "🔄 Convert To Codes",
+    "🔄 コードに変換"
+  ],
+  "Current Batch": [
+    "当前批次",
+    "當前批次⽯翸",
+    "Current Batch",
+    "現在のバッチ"
+  ],
+  "📊 Score & LRC & LM Codes": [
+    "📊 评分与LRC与LM代码",
+    "📊 評分與LRC與LM代碼Ǘ",
+    "📊 Score & LRC & LM Codes",
+    "📊 スコア & LRC & LM コード"
+  ],
+  "🎵 Generated Music (Sample {n})": [
+    "🎵 生成的音乐(样本 {n})",
+    "🎵 生成的音樂(樣本 {n})쉐㝤Ǘ",
+    "🎵 Generated Music (Sample {n})",
+    "🎵 生成された音楽(サンプル {n})"
+  ],
+  "Generation Details": [
+    "生成详情",
+    "生成詳情⽯翸",
+    "Generation Details",
+    "生成詳細"
+  ],
+  "Generation Status": [
+    "生成状态",
+    "生成狀態⽯翸",
+    "Generation Status",
+    "生成ステータス"
+  ],
+  "🎵 Get LRC": [
+    "🎵 获取 LRC",
+    "🎵 獲取 LRC䊚Ǘ",
+    "🎵 Get LRC",
+    "🎵 LRC 取得"
+  ],
+  "Lyrics Timestamps (Sample {n})": [
+    "歌词时间戳(样本 {n})",
+    "歌詞時間戳(樣本 {n})䊚Ǘ",
+    "Lyrics Timestamps (Sample {n})",
+    "歌詞タイムスタンプ(サンプル {n})"
+  ],
+  "Click 'LRC' to generate timestamps": [
+    "点击'LRC'生成时间戳",
+    "點擊'LRC'生成時間戳鷈䊚Ǘ",
+    "Click 'LRC' to generate timestamps",
+    "'LRC'をクリックしてタイムスタンプを生成"
+  ],
+  "Next Batch Status": [
+    "下一批次状态",
+    "下一批次狀態翸",
+    "Next Batch Status",
+    "次のバッチステータス"
+  ],
+  "Next ▶": [
+    "下一个 ▶",
+    "下一個 ▶翸",
+    "Next ▶",
+    "次へ ▶"
+  ],
+  "◀ Previous": [
+    "◀ 上一个",
+    "◀ 上一個翸",
+    "◀ Previous",
+    "◀ 前へ"
+  ],
+  "Quality Score (Sample {n})": [
+    "质量分数(样本 {n})",
+    "質量分數(樣本 {n})쫘䊚Ǘ",
+    "Quality Score (Sample {n})",
+    "品質スコア(サンプル {n})"
+  ],
+  "Click 'Score' to calculate perplexity-based quality score": [
+    "点击'评分'以计算基于困惑度的质量分数",
+    "點擊'評分'以計算基于困惑度的質量分數",
+    "Click 'Score' to calculate perplexity-based quality score",
+    "'スコア'をクリックしてパープレキシティベースの品質スコアを計算"
+  ],
+  "↙️ Apply These Settings to UI (Restore Batch Parameters)": [
+    "↙️ 将这些设置应用到UI(恢复批次参数)",
+    "↙️ 將這些設置應用到UI(恢復批次參數)",
+    "↙️ Apply These Settings to UI (Restore Batch Parameters)",
+    "↙️ これらの設定をUIに適用(バッチパラメータを復元)"
+  ],
+  "💾 Save": [
+    "💾 保存",
+    "💾 保存翸",
+    "💾 Save",
+    "💾 保存"
+  ],
+  "💾 Save LRC": [
+    "💾 保存 LRC",
+    "💾 保存 LRC䊚Ǘ",
+    "💾 Save LRC",
+    "💾 LRC 保存"
+  ],
+  "📊 Get Score": [
+    "📊 获取评分",
+    "📊 獲取評分",
+    "📊 Get Score",
+    "📊 スコア取得"
+  ],
+  "🔗 Send To Remix": [
+    "🔗 发送到混音",
+    "🔗 發送到混音ᄠ䊛Ǘ",
+    "🔗 Send To Remix",
+    "🔗 リミックスに送信"
+  ],
+  "🔗 Send To Repaint": [
+    "🔗 发送到重绘",
+    "🔗 發送到重繪ᱰ䊛Ǘ",
+    "🔗 Send To Repaint",
+    "🔗 リペイントに送信"
+  ],
+  "🎵 Results": [
+    "🎵 结果",
+    "🎵 結果翸",
+    "🎵 Results",
+    "🎵 結果"
+  ],
+  "Engine for the 5Hz LM. vLLM = significantly faster inference, recommended for NVIDIA GPUs with ≥8GB VRAM. PyTorch (pt) = slower but works on all hardware (CPU, MPS, XPU). Use pt if vLLM won't install or you're on non-NVIDIA hardware.": [
+    "选择5Hz LM的后端: vllm(更快)或pt(PyTorch, 更兼容)。",
+    "選擇5Hz LM的后端: vllm(更快)或pt(PyTorch, 更兼容)。",
+    "Engine for the 5Hz LM. vLLM = significantly faster inference, recommended for NVIDIA GPUs with ≥8GB VRAM. PyTorch (pt) = slower but works on all hardware (CPU, MPS, XPU). Use pt if vLLM won't install or you're on non-NVIDIA hardware.",
+    "5Hz LMのバックエンドを選択: vllm(高速)またはpt(PyTorch、より互換性あり)。"
+  ],
+  "5Hz LM Backend": [
+    "5Hz LM 后端",
+    "5Hz LM 后端䊛Ǘ",
+    "5Hz LM Backend",
+    "5Hz LM バックエンド"
+  ],
+  "The model weights file to load. 'turbo' models are faster (4–8 steps), 'base' models are slower but support more features (guidance scale, extract/lego modes). Pick turbo for quick generation, base for maximum control.": [
+    "选择训练好的模型检查点文件(完整路径或文件名)。",
+    "選擇訓練好的模型檢查點文件(完整路徑或文件名)。\u0001",
+    "The model weights file to load. 'turbo' models are faster (4–8 steps), 'base' models are slower but support more features (guidance scale, extract/lego modes). Pick turbo for quick generation, base for maximum control.",
+    "訓練済みモデルのチェックポイントファイルを選択(フルパスまたはファイル名)。"
+  ],
+  "Checkpoint File": [
+    "检查点文件",
+    "檢查點文件翸",
+    "Checkpoint File",
+    "チェックポイントファイル"
+  ],
+  "Optimizes the model using PyTorch compilation for faster inference. First generation takes longer (compilation overhead), subsequent generations are ~10–20% faster. Required if you want to use INT8 quantization. Recommended to keep enabled.": [
+    "使用 torch.compile 优化模型（量化必需）。",
+    "使用 torch.compile 優化模型（量化必需）。㸆翹",
+    "Optimizes the model using PyTorch compilation for faster inference. First generation takes longer (compilation overhead), subsequent generations are ~10–20% faster. Required if you want to use INT8 quantization. Recommended to keep enabled.",
+    "torch.compileでモデルを最適化（量子化に必要）。"
+  ],
+  "Compile Model (torch.compile)": [
+    "编译模型",
+    "編譯模型⽯翸",
+    "Compile Model (torch.compile)",
+    "モデルをコンパイル"
+  ],
+  "Which hardware to run on. 'auto' picks the best available (recommended). 'cuda' = NVIDIA GPU, 'mps' = Apple Silicon, 'xpu' = Intel GPU, 'cpu' = very slow, last resort.": [
+    "处理设备(建议自动检测)。",
+    "處理設備(建議自動檢測)。䊛Ǘ",
+    "Which hardware to run on. 'auto' picks the best available (recommended). 'cuda' = NVIDIA GPU, 'mps' = Apple Silicon, 'xpu' = Intel GPU, 'cpu' = very slow, last resort.",
+    "処理デバイス(自動検出を推奨)。"
+  ],
+  "Device": [
+    "设备",
+    "設備",
+    "Device",
+    "デバイス"
+  ],
+  "Flash attention not available (flash_attn package not installed). Install with: pip install flash-attn. Provides ~20–30% speedup with no quality change.": [
+    "Flash attention不可用(未安装flash_attn包)",
+    "Flash attention不可用(未安裝flash_attn包)Ǘ",
+    "Flash attention not available (flash_attn package not installed). Install with: pip install flash-attn. Provides ~20–30% speedup with no quality change.",
+    "Flash attentionは利用できません(flash_attnパッケージがインストールされていません)"
+  ],
+  "Speeds up DiT inference by ~20–30% with lower memory usage. No quality difference — purely a performance optimization. Recommended if available. Requires the flash_attn package.": [
+    "启用flash attention以加快推理速度(需要flash_attn包)",
+    "啟用flash attention以加快推理速度(需要flash_attn包)",
+    "Speeds up DiT inference by ~20–30% with lower memory usage. No quality difference — purely a performance optimization. Recommended if available. Requires the flash_attn package.",
+    "推論を高速化するためにflash attentionを有効にする(flash_attnパッケージが必要)"
+  ],
+  "Use Flash Attention": [
+    "使用Flash Attention",
+    "使用Flash Attention㝤Ǘ",
+    "Use Flash Attention",
+    "Flash Attention を使用"
+  ],
+  "Auto-detected Tier": [
+    "自动检测层级",
+    "自動檢測層級翸",
+    "Auto-detected Tier",
+    "自動検出ティア"
+  ],
+  "Initialize Service": [
+    "初始化服务",
+    "初始化服務翸",
+    "Initialize Service",
+    "サービスを初期化"
+  ],
+  "Load the 5Hz LM into memory on startup. Required for: Think mode, CoT metadata generation, caption/lyrics enhancement, and Auto Score. Uses additional VRAM (~2–6GB depending on model size). Disable if you only need basic generation without LM features.": [
+    "勾选以在服务初始化期间初始化5Hz LM。",
+    "勾選以在服務初始化期間初始化5Hz LM。",
+    "Load the 5Hz LM into memory on startup. Required for: Think mode, CoT metadata generation, caption/lyrics enhancement, and Auto Score. Uses additional VRAM (~2–6GB depending on model size). Disable if you only need basic generation without LM features.",
+    "サービス初期化中に5Hz LMを初期化する場合はチェック。"
+  ],
+  "Initialize 5Hz LM": [
+    "初始化 5Hz LM",
+    "初始化 5Hz LMǗ",
+    "Initialize 5Hz LM",
+    "5Hz LM を初期化"
+  ],
+  "Select interface language.": [
+    "选择界面语言。",
+    "選擇界面語言。",
+    "Select interface language.",
+    "インターフェース言語を選択。"
+  ],
+  "UI Language": [
+    "界面语言",
+    "界面語言⽯翸",
+    "UI Language",
+    "UI言語"
+  ],
+  "The language model that powers Think mode, CoT metadata, caption enhancement, and semantic code generation. Required for Think mode. Larger LMs produce better results but need more VRAM.": [
+    "选择5Hz LM模型检查点(从检查点自动扫描)。",
+    "選擇5Hz LM模型檢查點(從檢查點自動掃描)。\u0001",
+    "The language model that powers Think mode, CoT metadata, caption enhancement, and semantic code generation. Required for Think mode. Larger LMs produce better results but need more VRAM.",
+    "5Hz LMモデルチェックポイントを選択(チェックポイントから自動スキャン)。"
+  ],
+  "5Hz LM Model Path": [
+    "5Hz LM 模型路径",
+    "5Hz LM 模型路徑",
+    "5Hz LM Model Path",
+    "5Hz LM モデルパス"
+  ],
+  "⚠️ LM not available for this GPU tier (VRAM too low)": [
+    "⚠️ 当前GPU档位不支持LM（显存不足）",
+    "⚠️ 當前GPU檔位不支持LM（顯存不足）",
+    "⚠️ LM not available for this GPU tier (VRAM too low)",
+    "⚠️ このGPUティアではLMを利用できません（VRAM不足）"
+  ],
+  "MLX not available. Requires: macOS + Apple Silicon (M1/M2/M3/M4) + mlx package installed. Install with: pip install mlx.": [
+    "MLX 不可用（需要 macOS + Apple Silicon + mlx 包）",
+    "MLX 不可用（需要 macOS + Apple Silicon + mlx 包）Ѐ",
+    "MLX not available. Requires: macOS + Apple Silicon (M1/M2/M3/M4) + mlx package installed. Install with: pip install mlx.",
+    "MLXは利用不可（macOS + Apple Silicon + mlxパッケージが必要）"
+  ],
+  "Runs the DiT diffusion model using Apple's native MLX framework instead of PyTorch MPS. Significantly faster on M1/M2/M3/M4 Macs. Recommended for Apple Silicon users.": [
+    "使用原生 MLX 加速 DiT 扩散推理（比 MPS 更快）",
+    "使用原生 MLX 加速 DiT 擴散推理（比 MPS 更快）翹",
+    "Runs the DiT diffusion model using Apple's native MLX framework instead of PyTorch MPS. Significantly faster on M1/M2/M3/M4 Macs. Recommended for Apple Silicon users.",
+    "Apple SiliconでMLXネイティブDiT拡散を使用（MPSより高速）"
+  ],
+  "MLX DiT (Apple Silicon)": [
+    "MLX DiT (Apple Silicon)",
+    "MLX DiT (Apple Silicon)",
+    "MLX DiT (Apple Silicon)",
+    "MLX DiT (Apple Silicon)"
+  ],
+  "The directory containing model config and architecture files. Auto-detected from your checkpoint selection. Only change this if you have a custom model setup.": [
+    "选择模型配置目录(从检查点自动扫描)。",
+    "選擇模型配置目錄(從檢查點自動掃描)。",
+    "The directory containing model config and architecture files. Auto-detected from your checkpoint selection. Only change this if you have a custom model setup.",
+    "モデル設定ディレクトリを選択(チェックポイントから自動スキャン)。"
+  ],
+  "Main Model Path": [
+    "主模型路径",
+    "主模型路徑翸",
+    "Main Model Path",
+    "メインモデルパス"
+  ],
+  "Moves models to system RAM when not actively running, freeing GPU VRAM for the active model. Adds a small delay (~1–3s) when switching between models. Essential for GPUs with <16GB VRAM. Negligible impact on GPUs with >24GB.": [
+    "不使用时将模型转移到CPU以节省GPU显存。",
+    "不使用時將模型轉移到CPU以節省GPU顯存。",
+    "Moves models to system RAM when not actively running, freeing GPU VRAM for the active model. Adds a small delay (~1–3s) when switching between models. Essential for GPUs with <16GB VRAM. Negligible impact on GPUs with >24GB.",
+    "使用していない時にモデルをCPUにオフロードしてGPUメモリを節約。"
+  ],
+  "Offload to CPU": [
+    "闲置时转移到 CPU",
+    "閑置時轉移到 CPUǗ",
+    "Offload to CPU",
+    "CPUにオフロード"
+  ],
+  "Also offloads the DiT model to CPU (in addition to the base offload). Saves more VRAM but adds extra swap time. Requires 'Offload to CPU' to be enabled. Use on very low VRAM GPUs (<10GB).": [
+    "将DiT转移到CPU(需要启用闲置时转移到 CPU)。",
+    "將DiT轉移到CPU(需要啟用閑置時轉移到 CPU)。",
+    "Also offloads the DiT model to CPU (in addition to the base offload). Saves more VRAM but adds extra swap time. Requires 'Offload to CPU' to be enabled. Use on very low VRAM GPUs (<10GB).",
+    "DiTをCPUにオフロード(CPUへのオフロードが必要)。"
+  ],
+  "Offload DiT to CPU": [
+    "将DiT转移到CPU",
+    "將DiT轉移到CPUǗ",
+    "Offload DiT to CPU",
+    "DiTをCPUにオフロード"
+  ],
+  "Reduces model weights from 32-bit to 8-bit, cutting VRAM usage by ~50% with minimal quality loss. Essential for GPUs with <16GB VRAM. Requires 'Compile Model' to be enabled. Note: incompatible with LoRA adapters.": [
+    "启用 INT8 仅权重量化以减少显存占用（需要启用编译模型）。",
+    "啟用 INT8 僅權重量化以減少顯存占用（需要啟用編譯模型）。",
+    "Reduces model weights from 32-bit to 8-bit, cutting VRAM usage by ~50% with minimal quality loss. Essential for GPUs with <16GB VRAM. Requires 'Compile Model' to be enabled. Note: incompatible with LoRA adapters.",
+    "INT8重み量子化を有効にしてVRAMを節約（モデルのコンパイルが必要）。"
+  ],
+  "INT8 Quantization": [
+    "INT8 量化",
+    "INT8 量化",
+    "INT8 Quantization",
+    "INT8 量子化"
+  ],
+  "🔄 Refresh": [
+    "🔄 刷新",
+    "🔄 刷新翸",
+    "🔄 Refresh",
+    "🔄 更新"
+  ],
+  "Status": [
+    "状态",
+    "狀態",
+    "Status",
+    "ステータス"
+  ],
+  "Override the auto-detected GPU capability tier. Each tier adjusts defaults for offload, quantization, and backend to match your VRAM. Use 'Auto' unless the auto-detection is wrong or you want to force specific optimization settings.": [
+    "手动选择 GPU 层级以调整优化默认值（卸载、量化、后端等）。",
+    "手動選擇 GPU 層級以調整優化默認值（卸載、量化、后端等）。",
+    "Override the auto-detected GPU capability tier. Each tier adjusts defaults for offload, quantization, and backend to match your VRAM. Use 'Auto' unless the auto-detection is wrong or you want to force specific optimization settings.",
+    "GPUティアを手動で選択して最適化のデフォルト（オフロード、量子化、バックエンドなど）を調整します。"
+  ],
+  "GPU Tier Override": [
+    "GPU 层级覆盖",
+    "GPU 層級覆蓋⁸䊝Ǘ",
+    "GPU Tier Override",
+    "GPU ティアの手動選択"
+  ],
+  "🔧 Service Configuration": [
+    "🔧 服务配置",
+    "🔧 服務配置",
+    "🔧 Service Configuration",
+    "🔧 サービス設定"
+  ],
+  "All Instrumental": [
+    "全部为纯音乐",
+    "全部為純音樂翸",
+    "All Instrumental",
+    "すべてインストゥルメンタル"
+  ],
+  "Check if all tracks are instrumental (no vocals).": [
+    "勾选表示所有曲目均为纯音乐（无人声）。",
+    "勾選表示所有曲目均為純音樂（無人聲）。",
+    "Check if all tracks are instrumental (no vocals).",
+    "すべてのトラックがインストゥルメンタル（ボーカルなし）の場合にチェック。"
+  ],
+  "Audio Preview": [
+    "音频预览",
+    "音頻預覽⽯翸",
+    "Audio Preview",
+    "オーディオプレビュー"
+  ],
+  "🏷️ Auto-Label All": [
+    "🏷️ 自动标注全部",
+    "🏷️ 自動標注全部\r",
+    "🏷️ Auto-Label All",
+    "🏷️ 一括自動ラベル"
+  ],
+  "Increase if VRAM allows.": [
+    "显存充足时可增大。",
+    "顯存充足時可增大。䊝Ǘ",
+    "Increase if VRAM allows.",
+    "VRAM に余裕があれば増やせます。"
+  ],
+  "BPM": [
+    "BPM",
+    "BPM",
+    "BPM",
+    "BPM"
+  ],
+  "Caption": [
+    "描述",
+    "描述",
+    "Caption",
+    "キャプション"
+  ],
+  "Custom Trigger Tag": [
+    "自定义激活标签",
+    "自定義激活標簽",
+    "Custom Trigger Tag",
+    "カスタムアクティベーションタグ"
+  ],
+  "Unique tag to activate this LoRA style.": [
+    "用于激活此 LoRA 风格的唯一标签。",
+    "用于激活此 LoRA 風格的唯一標簽。",
+    "Unique tag to activate this LoRA style.",
+    "この LoRA のスタイルを有効にする一意のタグ。"
+  ],
+  "Dataset Info.": [
+    "数据集信息。",
+    "數據集信息。翸",
+    "Dataset Info.",
+    "データセット情報。"
+  ],
+  "Dataset Name": [
+    "数据集名称",
+    "數據集名稱翸",
+    "Dataset Name",
+    "データセット名"
+  ],
+  "Enter dataset name": [
+    "输入数据集名称",
+    "輸入數據集名稱",
+    "Enter dataset name",
+    "データセット名を入力"
+  ],
+  "Dataset Settings": [
+    "数据集设置",
+    "數據集設置翸",
+    "Dataset Settings",
+    "データセット設定"
+  ],
+  "Duration (s)": [
+    "时长 (秒)",
+    "時長 (秒)翸",
+    "Duration (s)",
+    "長さ (秒)"
+  ],
+  "Edit Status": [
+    "编辑状态",
+    "編輯狀態⽯翸",
+    "Edit Status",
+    "編集状態"
+  ],
+  "❌ Export failed: {error}": [
+    "❌ 导出失败: {error}",
+    "❌ 導出失敗: {error}",
+    "❌ Export failed: {error}",
+    "❌ エクスポートに失敗しました: {error}"
+  ],
+  "Export LoRA": [
+    "导出 LoRA",
+    "導出 LoRA",
+    "Export LoRA",
+    "LoRA をエクスポート"
+  ],
+  "📦 Export LoKr": [
+    "📦 导出 LoKr",
+    "📦 導出 LoKrǗ",
+    "📦 Export LoKr",
+    "📦 LoKr をエクスポート"
+  ],
+  "📦 Export LoRA": [
+    "📦 导出 LoRA",
+    "📦 導出 LoRAǗ",
+    "📦 Export LoRA",
+    "📦 LoRA をエクスポート"
+  ],
+  "Export Path": [
+    "导出路径",
+    "導出路徑⽯翸",
+    "Export Path",
+    "エクスポートパス"
+  ],
+  "❌ Please enter an export path": [
+    "❌ 请输入导出路径",
+    "❌ 請輸入導出路徑䊞Ǘ",
+    "❌ Please enter an export path",
+    "❌ エクスポートパスを入力してください"
+  ],
+  "Export Status": [
+    "导出状态",
+    "導出狀態⽯翸",
+    "Export Status",
+    "エクスポート状態"
+  ],
+  "Filename": [
+    "文件名",
+    "文件名",
+    "Filename",
+    "ファイル名"
+  ],
+  "Found Audio Files": [
+    "已找到的音频文件",
+    "已找到的音頻文件匈䊞Ǘ",
+    "Found Audio Files",
+    "見つかったオーディオファイル"
+  ],
+  "Genre": [
+    "风格",
+    "風格",
+    "Genre",
+    "ジャンル"
+  ],
+  "Genre Ratio (%)": [
+    "风格比例 (%)",
+    "風格比例 (%)楸䊞Ǘ",
+    "Genre Ratio (%)",
+    "ジャンル比率 (%)"
+  ],
+  "0%=All Caption, 100%=All Genre. Single sample override takes precedence.": [
+    "0%=全部描述，100%=全部风格。单样本覆盖优先。",
+    "0%=全部描述，100%=全部風格。單樣本覆蓋優先。",
+    "0%=All Caption, 100%=All Genre. Single sample override takes precedence.",
+    "0%=すべてキャプション、100%=すべてジャンル。サンプル単位の上書きが優先。"
+  ],
+  "Gradient Accumulation": [
+    "梯度累积",
+    "梯度累積⽯翸",
+    "Gradient Accumulation",
+    "勾配累積"
+  ],
+  "Effective Batch Size = batch_size * accum_steps.": [
+    "有效批大小 = batch_size × 累积步数。",
+    "有效批大小 = batch_size × 累積步數。",
+    "Effective Batch Size = batch_size * accum_steps.",
+    "実効バッチ = batch_size × 累積。"
+  ],
+  "❌ Invalid export path": [
+    "❌ 导出路径无效",
+    "❌ 導出路徑無效ꏘ䊞Ǘ",
+    "❌ Invalid export path",
+    "❌ 無効なエクスポートパス"
+  ],
+  "❌ Invalid LoRA output directory": [
+    "❌ LoRA 输出目录无效",
+    "❌ LoRA 輸出目錄無效䊞Ǘ",
+    "❌ Invalid LoRA output directory",
+    "❌ 無効なLoRA出力ディレクトリ"
+  ],
+  "C Major": [
+    "C 大调",
+    "C 大調⽯翸",
+    "C Major",
+    "C Major"
+  ],
+  "Labeling Progress": [
+    "标注进度",
+    "標注進度⽯翸",
+    "Labeling Progress",
+    "ラベル付け進捗"
+  ],
+  "Language": [
+    "语言",
+    "語言",
+    "Language",
+    "言語"
+  ],
+  "Latest (auto)": [
+    "最新（自动）",
+    "最新（自動）",
+    "Latest (auto)",
+    "最新（自動）"
+  ],
+  "Learning Rate": [
+    "学习率",
+    "學習率",
+    "Learning Rate",
+    "学習率"
+  ],
+  "Start with 3e-4, adjust as needed.": [
+    "建议从 3e-4 开始，按需调整。",
+    "建議從 3e-4 開始，按需調整。㝤Ǘ",
+    "Start with 3e-4, adjust as needed.",
+    "3e-4 から始め、必要に応じて調整。"
+  ],
+  "📂 Load Dataset": [
+    "📂 加载数据集",
+    "📂 加載數據集ᓐ䊟Ǘ",
+    "📂 Load Dataset",
+    "📂 データセットを読み込み"
+  ],
+  "Load a previously saved dataset.": [
+    "加载之前保存的数据集。",
+    "加載之前保存的數據集。",
+    "Load a previously saved dataset.",
+    "以前保存したデータセットを読み込む。"
+  ],
+  "Dataset JSON Path": [
+    "数据集 JSON 路径",
+    "數據集 JSON 路徑",
+    "Dataset JSON Path",
+    "データセット JSON パス"
+  ],
+  "Path to previously saved dataset JSON file.": [
+    "之前保存的数据集 JSON 文件路径。",
+    "之前保存的數據集 JSON 文件路徑。",
+    "Path to previously saved dataset JSON file.",
+    "以前保存したデータセット JSON ファイルのパス。"
+  ],
+  "Load Existing Dataset": [
+    "加载已有数据集",
+    "加載已有數據集",
+    "Load Existing Dataset",
+    "既存データセットを読み込み"
+  ],
+  "Load Status": [
+    "加载状态",
+    "加載狀態⽯翸",
+    "Load Status",
+    "読み込み状態"
+  ],
+  "Checkpoint Epoch": [
+    "Checkpoint Epoch",
+    "Checkpoint Epoch쉐㝤Ǘ",
+    "Checkpoint Epoch",
+    "Checkpoint Epoch"
+  ],
+  "Select a specific epoch checkpoint to export, or keep Latest (auto).": [
+    "Select a specific epoch checkpoint to export, or keep Latest (auto).",
+    "Select a specific epoch checkpoint to export, or keep Latest (auto).ቸ\r",
+    "Select a specific epoch checkpoint to export, or keep Latest (auto).",
+    "Select a specific epoch checkpoint to export, or keep Latest (auto)."
+  ],
+  "Decompose Both Sides": [
+    "Decompose Both Sides",
+    "Decompose Both Sides\u0001",
+    "Decompose Both Sides",
+    "Decompose Both Sides"
+  ],
+  "When enabled, decomposes both left and right matrices.": [
+    "When enabled, decomposes both left and right matrices.",
+    "When enabled, decomposes both left and right matrices.翹",
+    "When enabled, decomposes both left and right matrices.",
+    "When enabled, decomposes both left and right matrices."
+  ],
+  "Export LoKr": [
+    "导出 LoKr",
+    "導出 LoKr",
+    "Export LoKr",
+    "LoKr をエクスポート"
+  ],
+  "✅ LoKr exported to {path}": [
+    "✅ LoKr 已导出到 {path}",
+    "✅ LoKr 已導出到 {path}Ǘ",
+    "✅ LoKr exported to {path}",
+    "✅ LoKr を {path} にエクスポートしました"
+  ],
+  "LoKr Factor": [
+    "LoKr Factor",
+    "LoKr Factor",
+    "LoKr Factor",
+    "LoKr Factor"
+  ],
+  "Kronecker factor (-1 for auto).": [
+    "Kronecker factor (-1 for auto).",
+    "Kronecker factor (-1 for auto).",
+    "Kronecker factor (-1 for auto).",
+    "Kronecker factor (-1 for auto)."
+  ],
+  "✅ Found {count} LoKr checkpoints": [
+    "✅ 找到 {count} 个 LoKr 检查点",
+    "✅ 找到 {count} 個 LoKr 檢查點",
+    "✅ Found {count} LoKr checkpoints",
+    "✅ {count} 個のLoKrチェックポイントが見つかりました"
+  ],
+  "LoKr commonly uses a higher LR than LoRA. Tune per dataset.": [
+    "LoKr commonly uses a higher LR than LoRA. Tune per dataset.",
+    "LoKr commonly uses a higher LR than LoRA. Tune per dataset.",
+    "LoKr commonly uses a higher LR than LoRA. Tune per dataset.",
+    "LoKr commonly uses a higher LR than LoRA. Tune per dataset."
+  ],
+  "LoKr Linear Alpha": [
+    "LoKr Linear Alpha",
+    "LoKr Linear Alpha㝤Ǘ",
+    "LoKr Linear Alpha",
+    "LoKr Linear Alpha"
+  ],
+  "Scaling factor for LoKr (usually similar to dim).": [
+    "Scaling factor for LoKr (usually similar to dim).",
+    "Scaling factor for LoKr (usually similar to dim).䊟Ǘ",
+    "Scaling factor for LoKr (usually similar to dim).",
+    "Scaling factor for LoKr (usually similar to dim)."
+  ],
+  "LoKr Linear Dim": [
+    "LoKr Linear Dim",
+    "LoKr Linear Dim",
+    "LoKr Linear Dim",
+    "LoKr Linear Dim"
+  ],
+  "Rank (dimension) for LoKr adaptation matrices.": [
+    "Rank (dimension) for LoKr adaptation matrices.",
+    "Rank (dimension) for LoKr adaptation matrices.\r",
+    "Rank (dimension) for LoKr adaptation matrices.",
+    "Rank (dimension) for LoKr adaptation matrices."
+  ],
+  "ℹ No checkpoints found; export will use latest available weights": [
+    "ℹ 未找到检查点；导出将使用最新可用权重",
+    "ℹ 未找到檢查點；導出將使用最新可用權重\u0001",
+    "ℹ No checkpoints found; export will use latest available weights",
+    "ℹ チェックポイントが見つかりません。エクスポートには最新の利用可能な重みが使用されます"
+  ],
+  "ℹ No exportable epoch checkpoints found": [
+    "ℹ 未找到可导出的轮次检查点",
+    "ℹ 未找到可導出的輪次檢查點Ǘ",
+    "ℹ No exportable epoch checkpoints found",
+    "ℹ エクスポート可能なエポックチェックポイントが見つかりません"
+  ],
+  "❌ No trained LoKr weights found in {path}": [
+    "❌ 在 {path} 中未找到训练好的 LoKr 权重",
+    "❌ 在 {path} 中未找到訓練好的 LoKr 權重",
+    "❌ No trained LoKr weights found in {path}",
+    "❌ {path} にトレーニング済みLoKr重みが見つかりません"
+  ],
+  "❌ No LoKr weights found in latest checkpoint: {checkpoint}": [
+    "❌ 最新检查点 {checkpoint} 中未找到 LoKr 权重",
+    "❌ 最新檢查點 {checkpoint} 中未找到 LoKr 權重㝤Ǘ",
+    "❌ No LoKr weights found in latest checkpoint: {checkpoint}",
+    "❌ 最新チェックポイント {checkpoint} にLoKr重みが見つかりません"
+  ],
+  "❌ No LoKr weights found for selected epoch: {epoch}": [
+    "❌ 所选轮次 {epoch} 中未找到 LoKr 权重",
+    "❌ 所選輪次 {epoch} 中未找到 LoKr 權重",
+    "❌ No LoKr weights found for selected epoch: {epoch}",
+    "❌ 選択したエポック {epoch} にLoKr重みが見つかりません"
+  ],
+  "Directory to save trained LoKr weights.": [
+    "保存训练后 LoKr 权重的目录。",
+    "保存訓練后 LoKr 權重的目錄。㝤Ǘ",
+    "Directory to save trained LoKr weights.",
+    "トレーニング済み LoKr 重みの保存先ディレクトリ。"
+  ],
+  "⚠️ Enter LoKr output directory first": [
+    "⚠️ 请先输入 LoKr 输出目录",
+    "⚠️ 請先輸入 LoKr 輸出目錄㝤Ǘ",
+    "⚠️ Enter LoKr output directory first",
+    "⚠️ 最初にLoKr出力ディレクトリを入力してください"
+  ],
+  "LoKr Settings": [
+    "LoKr 设置",
+    "LoKr 設置",
+    "LoKr Settings",
+    "LoKr 設定"
+  ],
+  "Preprocessed Tensors": [
+    "预处理数据集选择",
+    "預處理數據集選擇䊣Ǘ",
+    "Preprocessed Tensors",
+    "前処理済みデータセット選択"
+  ],
+  "❌ Selected epoch not found: {chosen}. Available: {available}": [
+    "❌ 未找到所选轮次: {chosen}。可用: {available}",
+    "❌ 未找到所選輪次: {chosen}。可用: {available}",
+    "❌ Selected epoch not found: {chosen}. Available: {available}",
+    "❌ 選択したエポックが見つかりません: {chosen}。利用可能: {available}"
+  ],
+  "Select the directory containing preprocessed tensor files (`.pt` files).\nThese are created using the 'Preprocess' button in the 'Dataset Builder' tab.": [
+    "选择包含预处理张量文件（`.pt` 文件）的目录。\n这些文件在「数据集构建」标签页中使用「预处理」按钮创建。",
+    "選擇包含預處理張量文件（`.pt` 文件）的目錄。\n這些文件在「數據集構建」標簽頁中使用「預處理」按鈕創建。翹",
+    "Select the directory containing preprocessed tensor files (`.pt` files).\nThese are created using the 'Preprocess' button in the 'Dataset Builder' tab.",
+    "前処理されたテンソルファイル（`.pt` ファイル）を含むディレクトリを選択します。\nこれらは「データセットビルダー」タブの「前処理」ボタンを使用して作成されます。"
+  ],
+  "LoKr Training Loss": [
+    "LoKr 训练损失",
+    "LoKr 訓練損失䊠Ǘ",
+    "LoKr Training Loss",
+    "LoKr トレーニング損失"
+  ],
+  "Use Scalar Gate": [
+    "Use Scalar Gate",
+    "Use Scalar Gate",
+    "Use Scalar Gate",
+    "Use Scalar Gate"
+  ],
+  "Enable scalar gating for LoKr weights.": [
+    "Enable scalar gating for LoKr weights.",
+    "Enable scalar gating for LoKr weights.翹",
+    "Enable scalar gating for LoKr weights.",
+    "Enable scalar gating for LoKr weights."
+  ],
+  "Use Tucker Decomposition": [
+    "Use Tucker Decomposition",
+    "Use Tucker Decomposition\u0001",
+    "Use Tucker Decomposition",
+    "Use Tucker Decomposition"
+  ],
+  "Apply Tucker decomposition when applicable.": [
+    "Apply Tucker decomposition when applicable.",
+    "Apply Tucker decomposition when applicable.",
+    "Apply Tucker decomposition when applicable.",
+    "Apply Tucker decomposition when applicable."
+  ],
+  "Weight Decompose (WD)": [
+    "Weight Decompose (WD)",
+    "Weight Decompose (WD)",
+    "Weight Decompose (WD)",
+    "Weight Decompose (WD)"
+  ],
+  "Enable weight decomposition for more stable LoKr training.": [
+    "Enable weight decomposition for more stable LoKr training.",
+    "Enable weight decomposition for more stable LoKr training.",
+    "Enable weight decomposition for more stable LoKr training.",
+    "Enable weight decomposition for more stable LoKr training."
+  ],
+  "LoRA Alpha": [
+    "LoRA Alpha",
+    "LoRA AlphaǗ",
+    "LoRA Alpha",
+    "LoRA Alpha"
+  ],
+  "Scaling factor (usually 2x Rank).": [
+    "缩放因子（通常为 2× 秩）。",
+    "縮放因子（通常為 2× 秩）。",
+    "Scaling factor (usually 2x Rank).",
+    "スケーリング係数（通常はランクの2倍）。"
+  ],
+  "LoRA Dropout": [
+    "LoRA Dropout",
+    "LoRA Dropout﹐䊠Ǘ",
+    "LoRA Dropout",
+    "LoRA Dropout"
+  ],
+  "✅ LoRA exported to {path}": [
+    "✅ LoRA 已导出到 {path}",
+    "✅ LoRA 已導出到 {path}Ǘ",
+    "✅ LoRA exported to {path}",
+    "✅ LoRA を {path} にエクスポートしました"
+  ],
+  "LoRA Rank (r)": [
+    "LoRA 秩 (r)",
+    "LoRA 秩 (r)Ǘ",
+    "LoRA Rank (r)",
+    "LoRA ランク (r)"
+  ],
+  "Higher capacity but more VRAM.": [
+    "越高容量越大，显存占用越多。",
+    "越高容量越大，顯存占用越多。Ǘ",
+    "Higher capacity but more VRAM.",
+    "高いほど容量は増えるがメモリ使用量も増加。"
+  ],
+  "Loss": [
+    "损失",
+    "損失",
+    "Loss",
+    "損失"
+  ],
+  "Lyrics (Editable for Training)": [
+    "歌词（可编辑，用于训练）",
+    "歌詞（可編輯，用于訓練）㘈䊡Ǘ",
+    "Lyrics (Editable for Training)",
+    "歌詞（編集可、トレーニング用）"
+  ],
+  "Max Epochs": [
+    "最大轮数",
+    "最大輪數⽯翸",
+    "Max Epochs",
+    "最大エポック数"
+  ],
+  "❌ No checkpoints found": [
+    "❌ 未找到检查点",
+    "❌ 未找到檢查點䲀䊡Ǘ",
+    "❌ No checkpoints found",
+    "❌ チェックポイントが見つかりません"
+  ],
+  "(No .txt lyrics file)": [
+    "（无 .txt 歌词文件）",
+    "（無 .txt 歌詞文件）䊡Ǘ",
+    "(No .txt lyrics file)",
+    "（.txt 歌詞ファイルなし）"
+  ],
+  "❌ No trained model found in {path}": [
+    "❌ 在 {path} 中未找到训练好的模型",
+    "❌ 在 {path} 中未找到訓練好的模型",
+    "❌ No trained model found in {path}",
+    "❌ {path} にトレーニング済みモデルが見つかりません"
+  ],
+  "Only Unlabeled": [
+    "仅未标注",
+    "僅未標注⽯翸",
+    "Only Unlabeled",
+    "未ラベルのみ"
+  ],
+  "Only label samples with no caption (for continuing failed labeling).": [
+    "仅标注无描述的样本（用于继续失败的标注）。",
+    "僅標注無描述的樣本（用于繼續失敗的標注）。",
+    "Only label samples with no caption (for continuing failed labeling).",
+    "キャプションのないサンプルのみラベル付け（失敗したラベル付けの再開に便利）。"
+  ],
+  "Output Directory": [
+    "输出目录",
+    "輸出目錄⽯翸",
+    "Output Directory",
+    "出力ディレクトリ"
+  ],
+  "Directory to save trained LoRA weights.": [
+    "保存训练后 LoRA 权重的目录。",
+    "保存訓練后 LoRA 權重的目錄。㝤Ǘ",
+    "Directory to save trained LoRA weights.",
+    "トレーニング済み LoRA 重みの保存先ディレクトリ。"
+  ],
+  "⚡ Preprocess": [
+    "⚡ 预处理",
+    "⚡ 預處理翸",
+    "⚡ Preprocess",
+    "⚡ 前処理"
+  ],
+  "Preprocessing Progress": [
+    "预处理进度",
+    "預處理進度翸",
+    "Preprocessing Progress",
+    "前処理進捗"
+  ],
+  "Preprocessed Tensors Directory": [
+    "预处理张量目录",
+    "預處理張量目錄",
+    "Preprocessed Tensors Directory",
+    "前処理済みテンソルディレクトリ"
+  ],
+  "Directory containing preprocessed .pt tensor files.": [
+    "包含预处理 .pt 张量文件的目录。",
+    "包含預處理 .pt 張量文件的目錄。Ǘ",
+    "Directory containing preprocessed .pt tensor files.",
+    "前処理済み .pt テンソルファイルを含むディレクトリ。"
+  ],
+  "Override global ratio for this sample.": [
+    "覆盖本样本的全局比例。",
+    "覆蓋本樣本的全局比例。",
+    "Override global ratio for this sample.",
+    "このサンプルのグローバル比率を上書き。"
+  ],
+  "Prompt Override (This Sample)": [
+    "提示覆盖（本样本）",
+    "提示覆蓋（本樣本）䊡Ǘ",
+    "Prompt Override (This Sample)",
+    "プロンプト上書き（このサンプル）"
+  ],
+  "🚀 Quick Start": [
+    "🚀 快速开始",
+    "🚀 快速開始",
+    "🚀 Quick Start",
+    "🚀 クイックスタート"
+  ],
+  "Raw Lyrics (from .txt file)": [
+    "原始歌词（来自 .txt 文件）",
+    "原始歌詞（來自 .txt 文件）쉐㝤Ǘ",
+    "Raw Lyrics (from .txt file)",
+    "生歌詞（.txt ファイルから）"
+  ],
+  "↻ Refresh Epochs": [
+    "↻ 刷新 Epochs",
+    "↻ 刷新 Epochs",
+    "↻ Refresh Epochs",
+    "↻ 更新 Epochs"
+  ],
+  "💾 Save Changes": [
+    "💾 保存更改",
+    "💾 保存更改",
+    "💾 Save Changes",
+    "💾 変更を保存"
+  ],
+  "💾 Save Dataset": [
+    "💾 保存数据集",
+    "💾 保存數據集ੀ䊢Ǘ",
+    "💾 Save Dataset",
+    "💾 データセットを保存"
+  ],
+  "Save Every N Epochs": [
+    "每 N 轮保存",
+    "每 N 輪保存",
+    "Save Every N Epochs",
+    "N エポックごとに保存"
+  ],
+  "Save Path": [
+    "保存路径",
+    "保存路徑⽯翸",
+    "Save Path",
+    "保存パス"
+  ],
+  "Path to save dataset JSON.": [
+    "数据集 JSON 的保存路径。",
+    "數據集 JSON 的保存路徑。",
+    "Path to save dataset JSON.",
+    "データセット JSON の保存先パス。"
+  ],
+  "Save Status": [
+    "保存状态",
+    "保存狀態⽯翸",
+    "Save Status",
+    "保存状態"
+  ],
+  "🔍 Scan": [
+    "🔍 扫描",
+    "🔍 掃描翸",
+    "🔍 Scan",
+    "🔍 スキャン"
+  ],
+  "Scan for audio files (wav, mp3, flac, ogg, opus).": [
+    "扫描音频文件（wav、mp3、flac、ogg、opus）。",
+    "掃描音頻文件（wav、mp3、flac、ogg、opus）。翹",
+    "Scan for audio files (wav, mp3, flac, ogg, opus).",
+    "オーディオファイルをスキャン（wav、mp3、flac、ogg、opus）。"
+  ],
+  "Audio Directory Path": [
+    "音频目录路径",
+    "音頻目錄路徑翸",
+    "Audio Directory Path",
+    "オーディオディレクトリパス"
+  ],
+  "Scan Status": [
+    "扫描状态",
+    "掃描狀態⽯翸",
+    "Scan Status",
+    "スキャン状態"
+  ],
+  "Select Sample #": [
+    "选择样本 #",
+    "選擇樣本 #翸",
+    "Select Sample #",
+    "サンプル # を選択"
+  ],
+  "Select sample to preview and edit.": [
+    "选择要预览和编辑的样本。",
+    "選擇要預覽和編輯的樣本。茐䊢Ǘ",
+    "Select sample to preview and edit.",
+    "プレビューと編集するサンプルを選択。"
+  ],
+  "Timestep shift for Turbo models.": [
+    "Turbo 模型时间步偏移。",
+    "Turbo 模型時間步偏移。Ǘ",
+    "Timestep shift for Turbo models.",
+    "ターボモデル用タイムステップシフト。"
+  ],
+  "Skip BPM/Key/TimeSig": [
+    "跳过 BPM/调性/拍号",
+    "跳過 BPM/調性/拍號ꐨ䊢Ǘ",
+    "Skip BPM/Key/TimeSig",
+    "BPM/キー/拍子をスキップ"
+  ],
+  "Skip BPM/Key/TimeSig generation. Captions and genres are still generated by LM.": [
+    "跳过 BPM/调性/拍号生成。描述和风格仍由 LM 生成。",
+    "跳過 BPM/調性/拍號生成。描述和風格仍由 LM 生成。翹",
+    "Skip BPM/Key/TimeSig generation. Captions and genres are still generated by LM.",
+    "BPM/キー/拍子の生成をスキップ。キャプションとジャンルは LM が生成。"
+  ],
+  "🚀 Start Training LoKr": [
+    "🚀 开始训练 LoKr",
+    "🚀 開始訓練 LoKr뭸䊢Ǘ",
+    "🚀 Start Training LoKr",
+    "🚀 トレーニング開始 LoKr"
+  ],
+  "🚀 Start Training": [
+    "🚀 开始训练",
+    "🚀 開始訓練",
+    "🚀 Start Training",
+    "🚀 トレーニング開始"
+  ],
+  "Step": [
+    "步数",
+    "步數",
+    "Step",
+    "ステップ"
+  ],
+  "Click the button below to use AI to automatically generate metadata for all audio files:\n- **Caption**: Music style, genre, mood description\n- **BPM**: Beats per minute\n- **Key**: Music key (e.g. C Major, Am)\n- **Time Signature**: 4/4, 3/4 etc.": [
+    "点击下方按钮，使用 AI 自动为所有音频文件生成元数据：\n- **描述**：音乐风格、流派、情绪描述\n- **BPM**：每分钟节拍数\n- **调性**：音乐调（例如 C Major、Am）\n- **拍号**：4/4、3/4 等。",
+    "點擊下方按鈕，使用 AI 自動為所有音頻文件生成元數據：\n- **描述**：音樂風格、流派、情緒描述\n- **BPM**：每分鐘節拍數\n- **調性**：音樂調（例如 C Major、Am）\n- **拍號**：4/4、3/4 等。",
+    "Click the button below to use AI to automatically generate metadata for all audio files:\n- **Caption**: Music style, genre, mood description\n- **BPM**: Beats per minute\n- **Key**: Music key (e.g. C Major, Am)\n- **Time Signature**: 4/4, 3/4 etc.",
+    "以下のボタンをクリックして、AI を使用してすべてのオーディオファイルのメタデータを自動生成します：\n- **キャプション**：音楽スタイル、ジャンル、ムードの説明\n- **BPM**：1分間あたりのビート数\n- **キー**：音楽キー（例：C Major、Am）\n- **拍子記号**：4/4、3/4 など。"
+  ],
+  "Step 2: AI Auto-Labeling": [
+    "步骤 2：AI 自动标注",
+    "步驟 2：AI 自動標注䊢Ǘ",
+    "Step 2: AI Auto-Labeling",
+    "ステップ 2: AI で自動ラベル"
+  ],
+  "Step 3: Preview & Edit": [
+    "步骤 3：预览与编辑",
+    "步驟 3：預覽與編輯Ǘ",
+    "Step 3: Preview & Edit",
+    "ステップ 3: プレビューと編集"
+  ],
+  "Step 4: Save Dataset": [
+    "步骤 4：保存数据集",
+    "步驟 4：保存數據集Ǘ",
+    "Step 4: Save Dataset",
+    "ステップ 4: データセットを保存"
+  ],
+  "This step will:\n- Encode audio to VAE latents\n- Encode captions and lyrics to text embeddings\n- Run condition encoders\n- Save all tensors to `.pt` files\n\n⚠️ **This requires loading models and may take a few minutes.**": [
+    "此步骤：\n- 将音频编码为 VAE 潜变量\n- 将描述和歌词编码为文本嵌入\n- 运行条件编码器\n- 将所有张量保存到 `.pt` 文件\n\n⚠️ **这需要加载模型，可能需要几分钟。**",
+    "此步驟：\n- 將音頻編碼為 VAE 潛變量\n- 將描述和歌詞編碼為文本嵌入\n- 運行條件編碼器\n- 將所有張量保存到 `.pt` 文件\n\n⚠️ **這需要加載模型，可能需要幾分鐘。**ᇬ䊣Ǘ",
+    "This step will:\n- Encode audio to VAE latents\n- Encode captions and lyrics to text embeddings\n- Run condition encoders\n- Save all tensors to `.pt` files\n\n⚠️ **This requires loading models and may take a few minutes.**",
+    "このステップ：\n- オーディオを VAE 潜在変数にエンコード\n- キャプションと歌詞をテキスト埋め込みにエンコード\n- 条件エンコーダーを実行\n- すべてのテンソルを `.pt` ファイルに保存\n\n⚠️ **これにはモデルの読み込みが必要で、数分かかる場合があります。**"
+  ],
+  "**Preprocessing converts your dataset into pre-computed tensors for fast training.**\n\nYou can:\n- Use the dataset from steps 1-4 above, **OR**\n- Load an existing dataset JSON file (if you have one saved)": [
+    "**预处理将您的数据集转换为预计算的张量，以便快速训练。**\n\n您可以：\n- 使用上述步骤 1-4 的数据集，**或者**\n- 加载现有的数据集 JSON 文件（如果您已经保存了一个）",
+    "**預處理將您的數據集轉換為預計算的張量，以便快速訓練。**\n\n您可以：\n- 使用上述步驟 1-4 的數據集，**或者**\n- 加載現有的數據集 JSON 文件（如果您已經保存了一個）∔䊣Ǘ",
+    "**Preprocessing converts your dataset into pre-computed tensors for fast training.**\n\nYou can:\n- Use the dataset from steps 1-4 above, **OR**\n- Load an existing dataset JSON file (if you have one saved)",
+    "**前処理により、データセットを高速トレーニング用の事前計算されたテンソルに変換します。**\n\n次のいずれかを選択できます：\n- 上記のステップ 1-4 のデータセットを使用する、**または**\n- 既存のデータセット JSON ファイルを読み込む（既に保存している場合）"
+  ],
+  "Step 5: Preprocess to Tensors": [
+    "步骤 5：预处理为张量",
+    "步驟 5：預處理為張量",
+    "Step 5: Preprocess to Tensors",
+    "ステップ 5: テンソルに前処理"
+  ],
+  "ℹ No training in progress": [
+    "ℹ 当前没有正在进行的训练",
+    "ℹ 當前沒有正在進行的訓練䊣Ǘ",
+    "ℹ No training in progress",
+    "ℹ トレーニングは実行されていません"
+  ],
+  "⏹️ Stopping training...": [
+    "⏹️ 正在停止训练...",
+    "⏹️ 正在停止訓練...䔰䊣Ǘ",
+    "⏹️ Stopping training...",
+    "⏹️ トレーニングを停止中..."
+  ],
+  "⏹️ Stop Training": [
+    "⏹️ 停止训练",
+    "⏹️ 停止訓練",
+    "⏹️ Stop Training",
+    "⏹️ トレーニング停止"
+  ],
+  "📁 Dataset Builder": [
+    "📁 数据集构建",
+    "📁 數據集構建寐䊣Ǘ",
+    "📁 Dataset Builder",
+    "📁 データセットビルダー"
+  ],
+  "🎓 LoRA Training": [
+    "🎓 LoRA 训练",
+    "🎓 LoRA 訓練Ǘ",
+    "🎓 LoRA Training",
+    "🎓 LoRA トレーニング"
+  ],
+  "🚀 Train LoKr": [
+    "🚀 训练 LoKr",
+    "🚀 訓練 LoKrǗ",
+    "🚀 Train LoKr",
+    "🚀 LoKr をトレーニング"
+  ],
+  "🚀 Train LoRA": [
+    "🚀 训练 LoRA",
+    "🚀 訓練 LoRAǗ",
+    "🚀 Train LoRA",
+    "🚀 LoRA をトレーニング"
+  ],
+  "Append (Caption, Tag)": [
+    "后置（描述，标签）",
+    "后置（描述，標簽）䊣Ǘ",
+    "Append (Caption, Tag)",
+    "後置（キャプション、タグ）"
+  ],
+  "Tag Position": [
+    "标签位置",
+    "標簽位置⽯翸",
+    "Tag Position",
+    "タグの位置"
+  ],
+  "Where to place the custom tag in the caption.": [
+    "在描述中放置自定义标签的位置。",
+    "在描述中放置自定義標簽的位置。",
+    "Where to place the custom tag in the caption.",
+    "キャプション内でカスタムタグを配置する位置。"
+  ],
+  "Prepend (Tag, Caption)": [
+    "前置（标签，描述）",
+    "前置（標簽，描述）䊣Ǘ",
+    "Prepend (Tag, Caption)",
+    "前置（タグ、キャプション）"
+  ],
+  "Replace Caption": [
+    "替换描述",
+    "替換描述⽯翸",
+    "Replace Caption",
+    "キャプションを置換"
+  ],
+  "Tensor Output Directory": [
+    "张量输出目录",
+    "張量輸出目錄翸",
+    "Tensor Output Directory",
+    "テンソル出力ディレクトリ"
+  ],
+  "Directory to save preprocessed tensor files.": [
+    "保存预处理张量文件的目录。",
+    "保存預處理張量文件的目錄。䊣Ǘ",
+    "Directory to save preprocessed tensor files.",
+    "前処理済みテンソルファイルの保存先ディレクトリ。"
+  ],
+  "Time Sig": [
+    "拍号",
+    "拍號",
+    "Time Sig",
+    "拍子"
+  ],
+  "LoRA Settings": [
+    "LoRA 设置",
+    "LoRA 設置",
+    "LoRA Settings",
+    "LoRA 設定"
+  ],
+  "Training Parameters": [
+    "训练参数",
+    "訓練參數⽯翸",
+    "Training Parameters",
+    "トレーニングパラメータ"
+  ],
+  "Training Log": [
+    "训练日志",
+    "訓練日志⽯翸",
+    "Training Log",
+    "トレーニングログ"
+  ],
+  "Training Loss": [
+    "训练损失",
+    "訓練損失⽯翸",
+    "Training Loss",
+    "トレーニング損失"
+  ],
+  "Training Progress": [
+    "训练进度",
+    "訓練進度⽯翸",
+    "Training Progress",
+    "トレーニング進捗"
+  ],
+  "Text (待合成文本)": [
+    "待合成文本",
+    "待合成文字",
+    "Text to synthesize",
+    "読み上げるテキスト"
+  ],
+  "Target Text (待合成文本)": [
+    "待合成文本",
+    "待合成文字",
+    "Target text",
+    "読み上げるテキスト"
+  ],
+  "Enter text to synthesize (输入要合成的文本).": [
+    "输入要合成的文本。",
+    "輸入要合成的文字。",
+    "Enter text to synthesize.",
+    "読み上げるテキストを入力してください。"
+  ],
+  "Language (语种)": [
+    "语种",
+    "語言",
+    "Language",
+    "言語"
+  ],
+  "Speaker (说话人)": [
+    "说话人",
+    "說話者",
+    "Speaker",
+    "話者"
+  ],
+  "Instruction (Optional) (控制指令，可不输入)": [
+    "声音指令（可选）",
+    "聲音指令（選填）",
+    "Voice instruction (optional)",
+    "音声の指示（任意）"
+  ],
+  "e.g. Say it in a very angry tone (例如：用特别伤心的语气说).": [
+    "例如：用温和、自然的语气说。",
+    "例如：用溫和、自然的語氣說。",
+    "For example: speak in a warm, natural tone.",
+    "例：温かく自然な口調で話してください。"
+  ],
+  "Generate (生成)": [
+    "生成",
+    "生成",
+    "Generate",
+    "生成"
+  ],
+  "Output Audio (合成结果)": [
+    "合成音频",
+    "合成音訊",
+    "Generated audio",
+    "生成音声"
+  ],
+  "Status (状态)": [
+    "状态",
+    "狀態",
+    "Status",
+    "状態"
+  ],
+  "Voice Design Instruction (音色描述)": [
+    "音色描述",
+    "音色描述",
+    "Voice description",
+    "声の説明"
+  ],
+  "Clone & Generate (克隆并合成)": [
+    "克隆并合成",
+    "複製並合成",
+    "Clone and generate",
+    "クローンして生成"
+  ],
+  "Reference Audio (参考音频)": [
+    "参考音频",
+    "參考音訊",
+    "Reference audio",
+    "参照音声"
+  ],
+  "Reference Text (参考音频文本)": [
+    "参考音频文本",
+    "參考音訊文字",
+    "Reference transcript",
+    "参照音声の文字起こし"
+  ],
+  "Required if not set use x-vector only (不勾选use x-vector only时必填).": [
+    "未选择仅用说话人向量时必填。",
+    "未選擇僅用說話者向量時必填。",
+    "Required unless speaker-vector-only mode is selected.",
+    "話者ベクトルのみのモード以外では必須です。"
+  ],
+  "Use x-vector only (仅用说话人向量，效果有限，但不用传入参考音频文本)": [
+    "仅使用说话人向量（无需参考文本，效果有限）",
+    "僅使用說話者向量（無需參考文字，效果有限）",
+    "Speaker vector only (no transcript, limited fidelity)",
+    "話者ベクトルのみ（文字起こし不要、再現性に制限）"
+  ],
+  "Save / Load Voice (保存/加载克隆音色)": [
+    "保存或加载音色",
+    "儲存或載入音色",
+    "Save or load voice",
+    "声を保存・読み込み"
+  ],
+  "Save Voice (保存音色)": [
+    "保存音色",
+    "儲存音色",
+    "Save voice",
+    "声を保存"
+  ],
+  "Save Voice File (保存音色文件)": [
+    "保存音色文件",
+    "儲存音色檔案",
+    "Save voice file",
+    "声ファイルを保存"
+  ],
+  "Voice File (音色文件)": [
+    "音色文件",
+    "音色檔案",
+    "Voice file",
+    "声ファイル"
+  ],
+  "Load Voice (加载音色)": [
+    "加载音色",
+    "載入音色",
+    "Load voice",
+    "声を読み込む"
+  ],
+  "Finished. (生成完成)": [
+    "生成完成。",
+    "生成完成。",
+    "Generation complete.",
+    "生成が完了しました。"
+  ],
+  "Source Audio / 源音频": [
+    "源音频",
+    "來源音訊",
+    "Source audio",
+    "元の音声"
+  ],
+  "Reference Audio / 参考音频": [
+    "参考音频",
+    "參考音訊",
+    "Reference audio",
+    "参照音声"
+  ],
+  "Diffusion Steps / 扩散步数": [
+    "扩散步数",
+    "擴散步數",
+    "Diffusion steps",
+    "拡散ステップ数"
+  ],
+  "10 by default, 50~100 for best quality / 默认为 10，50~100 为最佳质量": [
+    "默认 10 步，提高到 50–100 步可改善质量。",
+    "預設 10 步，提高到 50–100 步可改善品質。",
+    "Default: 10 steps. Try 50–100 for higher quality.",
+    "標準は 10。高品質には 50〜100 ステップをお試しください。"
+  ],
+  "Length Adjust / 长度调整": [
+    "长度调整",
+    "長度調整",
+    "Length adjustment",
+    "長さの調整"
+  ],
+  "<1.0 for speed-up speech, >1.0 for slow-down speech / <1.0 加速语速，>1.0 减慢语速": [
+    "小于 1 加速，大于 1 减速。",
+    "小於 1 加速，大於 1 減速。",
+    "Below 1 speeds up; above 1 slows down.",
+    "1 未満で速く、1 より大きいと遅くなります。"
+  ],
+  "Inference CFG Rate": [
+    "推理引导强度",
+    "推理引導強度",
+    "Inference guidance",
+    "推論ガイダンス"
+  ],
+  "has subtle influence / 有微小影响": [
+    "对生成结果有轻微影响。",
+    "對生成結果有輕微影響。",
+    "Has a subtle influence on the output.",
+    "生成結果にわずかに影響します。"
+  ],
+  "Auto F0 adjust / 自动F0调整": [
+    "自动调整基频",
+    "自動調整基頻",
+    "Automatic pitch matching",
+    "基本周波数の自動調整"
+  ],
+  "Pitch shift / 音调变换": [
+    "音调变换",
+    "音調變換",
+    "Pitch shift",
+    "音程シフト"
+  ],
+  "Stream Output Audio / 流式输出": [
+    "流式试听",
+    "串流試聽",
+    "Streaming preview",
+    "ストリーミング試聴"
+  ],
+  "Full Output Audio / 完整输出": [
+    "完整音频",
+    "完整音訊",
+    "Complete audio",
+    "完成した音声"
+  ],
+  "Examples": [
+    "示例",
+    "範例",
+    "Examples",
+    "例"
+  ],
+  "Submit": [
+    "开始处理",
+    "開始處理",
+    "Submit",
+    "実行"
+  ],
+  "Clear": [
+    "清空",
+    "清空",
+    "Clear",
+    "クリア"
+  ],
+  "Stop": [
+    "停止",
+    "停止",
+    "Stop",
+    "停止"
+  ],
+  "Download": [
+    "下载",
+    "下載",
+    "Download",
+    "ダウンロード"
+  ],
+  "Upload": [
+    "上传文件",
+    "上傳檔案",
+    "Upload",
+    "ファイルを選択"
+  ],
+  "Click to Upload": [
+    "点击选择文件",
+    "點擊選擇檔案",
+    "Click to upload",
+    "クリックしてファイルを選択"
+  ],
+  "Drop Audio Here": [
+    "拖入音频",
+    "拖入音訊",
+    "Drop audio here",
+    "音声をここにドロップ"
+  ],
+  "Record": [
+    "录音",
+    "錄音",
+    "Record",
+    "録音"
+  ],
+  "Checkpoint:": [
+    "模型权重：",
+    "模型權重：",
+    "Checkpoint:",
+    "モデルの重み："
+  ],
+  "Model Type:": [
+    "模型类型：",
+    "模型類型：",
+    "Model type:",
+    "モデルの種類："
+  ],
+  "Qwen3 TTS Demo": [
+    "Qwen3-TTS 工作台",
+    "Qwen3-TTS 工作台",
+    "Qwen3-TTS workbench",
+    "Qwen3-TTS ワークベンチ"
+  ],
+  "Seed Voice Conversion": [
+    "Seed-VC 歌声转换",
+    "Seed-VC 歌聲轉換",
+    "Seed-VC voice conversion",
+    "Seed-VC 歌声変換"
+  ],
+  "Reference audio is limited to 25 seconds. When source and reference exceed 30 seconds combined, the source is processed in chunks.": [
+    "参考音频最长 25 秒；源音频与参考音频合计超过 30 秒时，源音频将分段处理。",
+    "參考音訊最長 25 秒；來源與參考音訊合計超過 30 秒時，來源音訊會分段處理。",
+    "Reference audio is limited to 25 seconds. When source and reference exceed 30 seconds combined, the source is processed in chunks.",
+    "参照音声は 25 秒まで。元音声との合計が 30 秒を超える場合は、分割して処理します。"
+  ],
+  "Load Voice & Generate (加载音色并合成)": [
+    "加载音色并合成",
+    "載入音色並合成",
+    "Load voice and generate",
+    "声を読み込んで生成"
+  ],
+  "Upload Prompt File (上传提示文件)": [
+    "上传音色文件",
+    "上傳音色檔案",
+    "Upload voice file",
+    "声ファイルを選択"
+  ],
+  "Upload reference audio and text, choose use x-vector only or not, then save a reusable voice prompt file.": [
+    "上传参考音频和文本，选择是否仅使用说话人向量，然后保存可重复使用的音色文件。",
+    "上傳參考音訊和文字，選擇是否僅使用說話者向量，然後儲存可重複使用的音色檔案。",
+    "Upload reference audio and text, choose whether to use only the speaker vector, then save a reusable voice file.",
+    "参照音声と文字起こしを入力し、話者ベクトルのみを使うか選んで、再利用できる声ファイルを保存します。"
+  ],
+  "(上传参考音频和参考文本，选择是否使用 use x-vector only 模式后保存为可复用的音色文件)": [
+    "音色文件可在下次生成时重新加载。",
+    "音色檔案可在下次生成時重新載入。",
+    "Load the voice file again for future generation.",
+    "保存した声ファイルは次回の生成でも読み込めます。"
+  ],
+  "Upload a previously saved voice file, then synthesize new text.": [
+    "上传已保存的音色文件，再输入要合成的新文本。",
+    "上傳已儲存的音色檔案，再輸入要合成的新文字。",
+    "Upload a previously saved voice file, then synthesize new text.",
+    "保存済みの声ファイルを読み込み、新しいテキストを音声にします。"
+  ],
+  "(上传已保存提示文件后，输入新文本进行合成)": [
+    "请只加载自己保存或可信来源的音色文件。",
+    "請只載入自己儲存或可信來源的音色檔案。",
+    "Only load voice files you saved yourself or trust.",
+    "自分で保存した、または信頼できる声ファイルのみ読み込んでください。"
+  ],
+  "Roughly adjust F0 to match target voice. Only works when F0 conditioned model is used. / 粗略调整 F0 以匹配目标音色，仅在勾选 '启用F0输入' 时生效": [
+    "粗略匹配目标声音的基频，仅对基频条件模型生效。",
+    "粗略匹配目標聲音的基頻，僅對基頻條件模型生效。",
+    "Roughly match the target pitch. Requires an F0-conditioned model.",
+    "目標の声に基本周波数を近づけます。F0 条件付きモデルでのみ有効です。"
+  ],
+  "Pitch shift in semitones, only works when F0 conditioned model is used / 半音数的音高变换，仅在勾选 '启用F0输入' 时生效": [
+    "以半音为单位调整音高，仅对基频条件模型生效。",
+    "以半音為單位調整音高，僅對基頻條件模型生效。",
+    "Shift pitch in semitones. Requires an F0-conditioned model.",
+    "半音単位で音程を変えます。F0 条件付きモデルでのみ有効です。"
+  ],
+  "Zero-shot voice conversion with in-context learning. For local deployment please check": [
+    "无需训练的语音与歌声转换。部署说明和更新请查看",
+    "無需訓練的語音與歌聲轉換。部署說明和更新請查看",
+    "Zero-shot voice conversion. Deployment instructions and updates:",
+    "学習不要の音声・歌声変換。導入方法と更新情報："
+  ],
+  "GitHub repository": [
+    "GitHub 仓库",
+    "GitHub 儲存庫",
+    "GitHub repository",
+    "GitHub リポジトリ"
+  ],
+  "for details and updates.": [
+    "。",
+    "。",
+    ".",
+    "。"
+  ],
+  "Note that any reference audio will be forcefully clipped to 25s if beyond this length.": [
+    "参考音频超过 25 秒时会自动截取前 25 秒。",
+    "參考音訊超過 25 秒時會自動截取前 25 秒。",
+    "Reference audio longer than 25 seconds is clipped to 25 seconds.",
+    "参照音声が 25 秒を超える場合、先頭 25 秒に切り詰めます。"
+  ],
+  "If total duration of source and reference audio exceeds 30s, source audio will be processed in chunks.": [
+    "源音频与参考音频合计超过 30 秒时，源音频会分段处理。",
+    "來源音訊與參考音訊合計超過 30 秒時，來源音訊會分段處理。",
+    "If source and reference audio exceed 30 seconds combined, the source is processed in chunks.",
+    "元音声と参照音声の合計が 30 秒を超える場合、元音声を分割して処理します。"
+  ],
+  "无需训练的 zero-shot 语音/歌声转换模型，若需本地部署查看": [
+    "本地部署说明：",
+    "本機部署說明：",
+    "Local deployment:",
+    "ローカル導入："
+  ],
+  "GitHub页面": [
+    "GitHub 页面",
+    "GitHub 頁面",
+    "GitHub page",
+    "GitHub ページ"
+  ],
+  "请注意，参考音频若超过 25 秒，则会被自动裁剪至此长度。": [
+    "参考音频限制：25 秒。",
+    "參考音訊限制：25 秒。",
+    "Reference limit: 25 seconds.",
+    "参照音声の上限：25 秒。"
+  ],
+  "若源音频和参考音频的总时长超过 30 秒，源音频将被分段处理。": [
+    "超过 30 秒的输入会分段处理。",
+    "超過 30 秒的輸入會分段處理。",
+    "Inputs exceeding 30 seconds are processed in chunks.",
+    "30 秒を超える入力は分割して処理します。"
+  ],
+  "Chinese": [
+    "中文",
+    "中文",
+    "Chinese",
+    "中国語"
+  ],
+  "Japanese": [
+    "日语",
+    "日語",
+    "Japanese",
+    "日本語"
+  ],
+  "German": [
+    "德语",
+    "德語",
+    "German",
+    "ドイツ語"
+  ],
+  "Italian": [
+    "意大利语",
+    "義大利語",
+    "Italian",
+    "イタリア語"
+  ],
+  "Portuguese": [
+    "葡萄牙语",
+    "葡萄牙語",
+    "Portuguese",
+    "ポルトガル語"
+  ],
+  "Spanish": [
+    "西班牙语",
+    "西班牙語",
+    "Spanish",
+    "スペイン語"
+  ],
+  "Korean": [
+    "韩语",
+    "韓語",
+    "Korean",
+    "韓国語"
+  ],
+  "French": [
+    "法语",
+    "法語",
+    "French",
+    "フランス語"
+  ],
+  "Russian": [
+    "俄语",
+    "俄語",
+    "Russian",
+    "ロシア語"
+  ],
+  "Use via API": [
+    "通过 API 使用",
+    "透過 API 使用",
+    "Use via API",
+    "API から利用"
+  ],
+  "or": [
+    "或",
+    "或",
+    "or",
+    "または"
+  ],
+  "Settings": [
+    "设置",
+    "設定",
+    "Settings",
+    "設定"
+  ],
+  "Built with": [
+    "界面框架：",
+    "介面框架：",
+    "Built with",
+    "UI フレームワーク："
+  ],
+  "Clear audio": [
+    "清除音频",
+    "清除音訊",
+    "Clear audio",
+    "音声をクリア"
+  ],
+  "Upload audio": [
+    "选择音频",
+    "選擇音訊",
+    "Upload audio",
+    "音声を選択"
+  ],
+  "Record audio": [
+    "录制音频",
+    "錄製音訊",
+    "Record audio",
+    "音声を録音"
+  ],
+  "Play": [
+    "播放",
+    "播放",
+    "Play",
+    "再生"
+  ],
+  "Pause": [
+    "暂停",
+    "暫停",
+    "Pause",
+    "一時停止"
+  ],
+  "Playback speed": [
+    "播放速度",
+    "播放速度",
+    "Playback speed",
+    "再生速度"
+  ],
+  "分享": [
+    "分享",
+    "分享",
+    "Share",
+    "共有"
+  ],
+  "清除": [
+    "清除",
+    "清除",
+    "Clear",
+    "クリア"
+  ],
+  "Adjust volume": [
+    "调整音量",
+    "調整音量",
+    "Adjust volume",
+    "音量を調整"
+  ],
+  "High volume": [
+    "高音量",
+    "高音量",
+    "High volume",
+    "大音量"
+  ],
+  "Low volume": [
+    "低音量",
+    "低音量",
+    "Low volume",
+    "小音量"
+  ],
+  "Mute": [
+    "静音",
+    "靜音",
+    "Mute",
+    "ミュート"
+  ],
+  "Reset audio": [
+    "重置音频",
+    "重設音訊",
+    "Reset audio",
+    "音声をリセット"
+  ],
+  "undo": [
+    "撤销",
+    "復原",
+    "Undo",
+    "元に戻す"
+  ],
+  "Trim audio to selection": [
+    "裁剪到选中区域",
+    "裁剪至選取範圍",
+    "Trim audio to selection",
+    "選択範囲に音声を切り詰める"
+  ],
+  "Adjust playback speed to {0}x": [
+    "调整播放速度为 {0} 倍",
+    "調整播放速度為 {0} 倍",
+    "Adjust playback speed to {0}x",
+    "再生速度を {0} 倍に調整"
+  ],
+  "Skip backwards by {0} seconds": [
+    "后退 {0} 秒",
+    "倒退 {0} 秒",
+    "Skip backwards by {0} seconds",
+    "{0} 秒戻る"
+  ],
+  "Skip forward by {0} seconds": [
+    "前进 {0} 秒",
+    "前進 {0} 秒",
+    "Skip forward by {0} seconds",
+    "{0} 秒進む"
+  ],
+  "number input for {0}": [
+    "{0}：数值输入",
+    "{0}：數值輸入",
+    "Number input for {0}",
+    "{0}：数値入力"
+  ],
+  "range slider for {0}": [
+    "{0}：滑块",
+    "{0}：滑桿",
+    "Range slider for {0}",
+    "{0}：スライダー"
+  ],
+  "Reset to default value": [
+    "恢复默认值",
+    "恢復預設值",
+    "Reset to default value",
+    "初期値に戻す"
+  ],
+  "10 by default, 50100 for best quality / 默认为 10，50100 为最佳质量": [
+    "默认 10 步，提高到 50–100 步可改善质量。",
+    "預設 10 步，提高到 50–100 步可改善品質。",
+    "Default: 10 steps. Try 50–100 for higher quality.",
+    "標準は 10。高品質には 50〜100 ステップをお試しください。"
+  ],
+  "将音频文件拖放到此处以上传": [
+    "将音频文件拖放到此处以上传",
+    "將音訊檔案拖放到此處上傳",
+    "Drop an audio file here to upload",
+    "音声ファイルをここにドロップして選択"
+  ],
+  "将音频拖放到此处": [
+    "将音频拖放到此处",
+    "將音訊拖放到此處",
+    "Drop audio here",
+    "音声をここにドロップ"
+  ],
+  "- 或 -": [
+    "- 或 -",
+    "- 或 -",
+    "- or -",
+    "- または -"
+  ],
+  "点击上传": [
+    "点击上传",
+    "點擊上傳",
+    "Click to upload",
+    "クリックしてファイルを選択"
+  ],
+  "Upload file": [
+    "上传文件",
+    "上傳檔案",
+    "Upload file",
+    "ファイルを選択"
+  ],
+  "将文件拖放到此处": [
+    "将文件拖放到此处",
+    "將檔案拖放到此處",
+    "Drop files here",
+    "ファイルをここにドロップ"
+  ],
+  "Click to upload or drop files": [
+    "点击选择或拖入文件",
+    "點擊選擇或拖入檔案",
+    "Click to upload or drop files",
+    "クリックして選択、またはファイルをドロップ"
+  ],
+  "Empty value": [
+    "暂无音频",
+    "尚無音訊",
+    "No audio yet",
+    "音声はまだありません"
+  ],
+  "Gradio footer navigation": [
+    "工作台页脚导航",
+    "工作台頁尾導覽",
+    "Workbench footer navigation",
+    "ワークベンチのフッターナビゲーション"
+  ],
+  "使用 Gradio 构建": [
+    "使用 Gradio 构建",
+    "使用 Gradio 建置",
+    "Built with Gradio",
+    "Gradio で構築"
+  ],
+  "标志": [
+    "标志",
+    "標誌",
+    "Logo",
+    "ロゴ"
+  ],
+  "Disclaimer (免责声明)": [
+    "免责声明",
+    "免責聲明",
+    "Disclaimer",
+    "免責事項"
+  ],
+  "The audio is automatically generated/synthesized by an AI model solely to demonstrate the model’s capabilities; it may be inaccurate or inappropriate, does not represent the views of the developer/operator, and does not constitute professional advice. You are solely responsible for evaluating, using, distributing, or relying on this audio; to the maximum extent permitted by applicable law, the developer/operator disclaims liability for any direct, indirect, incidental, or consequential damages arising from the use of or inability to use the audio, except where liability cannot be excluded by law. Do not use this service to intentionally generate or replicate unlawful, harmful, defamatory, fraudulent, deepfake, or privacy/publicity/copyright/trademark‑infringing content; if a user prompts, supplies materials, or otherwise facilitates any illegal or infringing conduct, the user bears all legal consequences and the developer/operator is not responsible.": [
+    "音频由人工智能模型自动生成/合成，仅用于体验与展示模型效果，可能存在不准确或不当之处；其内容不代表开发者/运营方立场，亦不构成任何专业建议。用户应自行评估并承担使用、传播或依赖该音频所产生的一切风险与责任；在适用法律允许的最大范围内，开发者/运营方不对因使用或无法使用本音频造成的任何直接、间接、附带或后果性损失承担责任（法律另有强制规定的除外）。严禁利用本服务故意引导生成或复制违法、有害、诽谤、欺诈、深度伪造、侵犯隐私/肖像/著作权/商标等内容；如用户通过提示词、素材或其他方式实施或促成任何违法或侵权行为，相关法律后果由用户自行承担，与开发者/运营方无关。",
+    "音訊由人工智慧模型自動生成或合成，僅用於體驗與展示模型效果，可能存在不準確或不當之處；內容不代表開發者或營運方立場，亦不構成專業建議。使用者應自行評估並承擔使用、傳播或依賴該音訊的一切風險與責任。在適用法律允許的最大範圍內，開發者或營運方不對因使用或無法使用音訊造成的直接、間接、附帶或衍生損失負責，但法律禁止免責者除外。禁止故意生成或複製違法、有害、誹謗、詐欺、深度偽造，或侵犯隱私、肖像、著作權、商標的內容。使用者透過提示、素材或其他方式實施或促成違法或侵權行為，應自行承擔法律後果，開發者或營運方不負責。",
+    "This AI-generated audio demonstrates model capabilities only. It may be inaccurate or inappropriate, does not represent the developer/operator, and is not professional advice. You are responsible for evaluating, using, sharing, or relying on it. To the maximum extent allowed by applicable law, the developer/operator disclaims direct, indirect, incidental, and consequential liability from using or being unable to use the audio, except liability that cannot legally be excluded. Do not intentionally generate or replicate unlawful, harmful, defamatory, fraudulent, deepfake, or privacy, publicity, copyright, or trademark-infringing content. Users who prompt, supply materials, or otherwise facilitate illegal or infringing conduct bear the legal consequences; the developer/operator is not responsible.",
+    "この音声は AI モデルの機能を体験・紹介するために自動生成されたものです。不正確または不適切な内容を含む可能性があり、開発者・運営者の見解や専門的助言ではありません。評価、利用、配布、依拠に伴うリスクと責任は利用者が負います。適用法で認められる最大限の範囲で、開発者・運営者は音声の利用または利用不能に起因する直接、間接、付随的、結果的損害の責任を負いません。ただし法律上免責できない責任は除きます。違法、有害、名誉毀損、詐欺、ディープフェイク、プライバシー・肖像・著作権・商標を侵害する内容を意図的に生成・複製してはいけません。指示、素材の提供などで違法行為や権利侵害を実施・助長した利用者が法的結果を負い、開発者・運営者は責任を負いません。"
+  ]
+}

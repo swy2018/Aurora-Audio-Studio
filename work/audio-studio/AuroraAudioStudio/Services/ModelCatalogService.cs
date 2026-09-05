@@ -4,6 +4,7 @@ namespace AuroraAudioStudio.Services;
 
 public sealed class ModelCatalogService(SettingsService settings)
 {
+    private readonly LocalizationService localization = new(settings);
     public IReadOnlyList<ModelDefinition> Definitions { get; } =
     [
         new("ace-step", "ACE-Step 1.5 XL Turbo", "music", "ACE-Step-1.5", @"acestep\acestep_v15_pipeline.py", "GitHub Release + Hugging Face", "github-release-git", "https://github.com/ACE-Step/ACE-Step-1.5.git", true),
@@ -40,10 +41,52 @@ public sealed class ModelCatalogService(SettingsService settings)
     public IReadOnlyList<ModelState> GetStates() => Definitions.Select(ToState).ToList();
     public IReadOnlyList<ModelState> GetDefaultStates() => Definitions.Where(x => x.IsDefault).Select(ToState).ToList();
     public ModelDefinition? Find(string id) => Definitions.FirstOrDefault(x => x.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+    public string DisplayName(ModelDefinition model)
+    {
+        var parts = model.Name.Split(" · ", 2);
+        return parts.Length == 2 ? parts[0] + " · " + localization.Translate(parts[1]) : model.Name;
+    }
 
     public bool IsInstalled(ModelDefinition model)
     {
         return ModelHealthPolicy.IsReady(model, settings.Current.LocalAiRoot);
+    }
+
+    public void RecordSuccessfulRun(string modelId, string device)
+    {
+        if (Find(modelId) is not { } model) return;
+        var directory = Path.Combine(settings.AppDataRoot, "ModelVerification");
+        Directory.CreateDirectory(directory);
+        var version = VerificationSignature(model);
+        File.WriteAllText(Path.Combine(directory, modelId + ".json"), System.Text.Json.JsonSerializer.Serialize(new Verification(version, device, DateTimeOffset.Now)));
+    }
+
+    private sealed record Verification(string Version, string Device, DateTimeOffset At);
+    private Verification? ReadVerification(string id, string version)
+    {
+        try
+        {
+            var path = Path.Combine(settings.AppDataRoot, "ModelVerification", id + ".json");
+            var result = File.Exists(path) ? System.Text.Json.JsonSerializer.Deserialize<Verification>(File.ReadAllText(path)) : null;
+            if (result is null) return null;
+            return Find(id) is { } model && result?.Version == VerificationSignature(model) ? result : null;
+        }
+        catch { return null; }
+    }
+
+    private string VerificationSignature(ModelDefinition model)
+    {
+        var root = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
+        var runtime = model.Id.StartsWith("qwen3-tts-") ? Path.Combine(settings.Current.LocalAiRoot, "Qwen3-TTS", "Python312")
+            : model.Id is "ace-step" or "seed-vc" ? Path.Combine(root, ".venv")
+            : model.Id == "minimax-music3" ? Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "minimax-music3-env")
+            : model.Id == "roformer-vocals" ? Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "roformer-env")
+            : model.Id == "piano" ? Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "piano-env") : root;
+        if (model.Id == "ace-step" && File.Exists(Path.Combine(root, "python_embeded", "python.exe"))) runtime = Path.Combine(root, "python_embeded");
+        runtime = RuntimeEnvironment.Resolve(runtime);
+        var packages = Path.Combine(runtime, "Lib", "site-packages");
+        var versions = Directory.Exists(packages) ? string.Join(";", Directory.EnumerateDirectories(packages, "*.dist-info").Select(Path.GetFileName).Order(StringComparer.Ordinal)) : "";
+        return ReadVersion(root, model) + "|" + runtime + "|" + File.GetLastWriteTimeUtc(Path.Combine(root, model.Marker)).Ticks + "|" + versions;
     }
 
     private ModelState ToState(ModelDefinition model)
@@ -51,17 +94,23 @@ public sealed class ModelCatalogService(SettingsService settings)
         var path = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
         var installed = IsInstalled(model);
         var version = ReadVersion(path, model);
-        return new ModelState(model.Id, model.Name, model.Feature, installed,
-            installed ? Pick("可用", "可用", "Ready", "利用可能") : Pick("未安装", "未安裝", "Not installed", "未インストール"),
+        var verification = ReadVerification(model.Id, version);
+        var stateText = model.Id == "subtitle-edit" ? Pick("外部字幕编辑器", "外部字幕編輯器", "External subtitle editor", "外部字幕エディター")
+            : model.Id == "faster-whisper" ? Pick("字幕共享运行组件", "字幕共用執行元件", "Shared subtitle runtime", "字幕用共通ランタイム")
+            : !model.IsRunnable ? Pick("仅模型管理 · 尚未接入工作台", "僅模型管理 · 尚未接入工作台", "Model management only · no workbench", "モデル管理のみ・操作画面未対応")
+            : installed ? verification is not null ? Pick("短任务已验证", "短任務已驗證", "Short task verified", "短いタスクで検証済み") : Pick("文件齐全 · 待运行验证", "檔案齊全 · 待執行驗證", "Files present · not yet verified", "ファイル確認済み・実行未検証")
+            : Directory.Exists(path) ? Pick("需要修复", "需要修復", "Repair needed", "修復が必要") : Pick("未安装", "未安裝", "Not installed", "未インストール");
+        return new ModelState(model.Id, DisplayName(model), model.Feature, installed,
+            stateText,
             model.Source, path, version,
-            installed ? Pick("运行环境与模型完整性检查通过", "執行環境與模型完整性檢查通過", "Runtime and model integrity checks passed", "実行環境とモデルの整合性チェック済み")
+            installed ? verification is not null ? $"{verification.At.LocalDateTime:yyyy-MM-dd HH:mm} · {verification.Device} · {stateText}" : stateText
                 : model.IsDefault ? Pick("默认配置 · 需要安装或修复", "預設配置 · 需要安裝或修復", "Default component · install or repair required", "標準コンポーネント · インストールまたは修復が必要")
                 : Pick("可选模型 · 仅在确认后下载", "選用模型 · 僅在確認後下載", "Optional model · downloads only after confirmation", "オプションモデル · 確認後にのみダウンロード"),
             RecommendedVram(model), FeatureDisplay(model.Feature), Purpose(model.Id), Languages(model.Id), ModelInstallPlanner.EstimatedDownload(model.Id), License(model.Id),
             DetailLine(version, RecommendedVram(model), ModelInstallPlanner.EstimatedDownload(model.Id), License(model.Id), model.Source),
             model.IsDefault ? DefaultEditionDisplay : Pick("可选模型", "選用模型", "Optional", "オプション"),
             installed ? Pick("检查 / 修复", "檢查 / 修復", "Check / Repair", "確認 / 修復") : Pick("安装", "安裝", "Install", "インストール"),
-            Pick("回退", "回復", "Roll back", "ロールバック"), Pick("卸载", "解除安裝", "Uninstall", "アンインストール"));
+            Pick("回退", "回復", "Roll back", "ロールバック"), Pick("卸载", "解除安裝", "Uninstall", "アンインストール"), RuntimeEnvironment.CanRollback(path));
     }
 
     public string FormatSummary(IReadOnlyList<ModelState> states)
@@ -70,15 +119,16 @@ public sealed class ModelCatalogService(SettingsService settings)
         var optional = Definitions.Count(x => !x.IsDefault);
         return settings.EffectiveLanguage() switch
         {
-            "zh-TW" => $"{states.Count} 個元件 · {installed} 個已就緒 · {optional} 個可選模型",
-            "en-US" => $"{states.Count} components · {installed} ready · {optional} optional models",
-            "ja-JP" => $"{states.Count} コンポーネント · {installed} 利用可能 · {optional} オプションモデル",
-            _ => $"{states.Count} 个组件 · {installed} 个已就绪 · {optional} 个可选模型"
+            "zh-TW" => $"{states.Count} 個元件 · {installed} 個檔案齊全 · {optional} 個可選模型",
+            "en-US" => $"{states.Count} components · {installed} files present · {optional} optional models",
+            "ja-JP" => $"{states.Count} コンポーネント · {installed} ファイル確認済み · {optional} オプションモデル",
+            _ => $"{states.Count} 个组件 · {installed} 个文件齐全 · {optional} 个可选模型"
         };
     }
 
     private static string ReadVersion(string path, ModelDefinition model)
     {
+        if (model.UpdateKind == "uv-package") path = RuntimeEnvironment.Resolve(path);
         foreach (var marker in new[] { ".aurora-version", ".aurora-revision", "version.txt" })
         {
             var file = Path.Combine(path, marker);
@@ -162,14 +212,15 @@ public sealed class ModelCatalogService(SettingsService settings)
         _ => Pick("不依赖文本语言", "不依賴文字語言", "Language-independent", "言語非依存")
     };
 
-    private static string License(string id) => id switch
+    private string License(string id) => id switch
     {
         "ace-step" or "heartmula-3b" or "soulx-singer-svc" or "qwen3-asr-06b" or "qwen3-asr-17b" or "qwen3-forced-aligner" or "qwen3-tts-base" or "qwen3-tts-custom" or "qwen3-tts-design" or "qwen3-tts-06b-base" or "qwen3-tts-06b-custom" or "basic-pitch" => "Apache-2.0",
         "indextts-2-5" => "Bilibili Model License",
-        "f5-tts" or "demucs" or "faster-whisper" or "whisper-small" or "whisper-large-v3-turbo" or "whisper-large-v3" or "transkun" => "MIT",
+        "f5-tts" => Pick("代码 MIT / 模型 CC-BY-NC-4.0（非商业）", "程式碼 MIT / 模型 CC-BY-NC-4.0（非商業）", "MIT code / CC-BY-NC-4.0 weights (noncommercial)", "コード MIT / モデル CC-BY-NC-4.0（非商用）"),
+        "demucs" or "faster-whisper" or "whisper-small" or "whisper-large-v3-turbo" or "whisper-large-v3" or "transkun" => "MIT",
         "minimax-music3" => "MiniMax-Music3 Community License",
         "subtitle-edit" => "GPL-3.0",
-        _ => "上游许可"
+        _ => Pick("请查阅上游许可", "請查閱上游授權", "Review upstream license", "上流のライセンスを確認")
     };
 
     private string Pick(string zh, string zhTw, string en, string ja) => settings.EffectiveLanguage() switch

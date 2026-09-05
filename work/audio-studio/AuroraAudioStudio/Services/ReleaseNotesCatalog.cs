@@ -8,6 +8,7 @@ public static class ReleaseNotesCatalog
 
     private static readonly Entry[] Entries =
     [
+        ReadCurrentEntry(),
         new(new(1, 8, 1), "2026-09-03", [
             "• 修复安装到 Program Files 后创作引擎显示‘已连接’、中央工作区却为空白的问题。WebView2 用户数据现在固定保存到可写的本地应用数据目录，音乐、配音和歌声工作台可真正显示。\n• 新增安装目录回归门禁，并验证 Qwen3-TTS、Seed-VC 嵌入式工作台与分轨、扒谱、字幕原生操作页。",
             "• 修正安裝到 Program Files 後創作引擎顯示「已連線」、中央工作區卻空白的問題。WebView2 使用者資料現在固定儲存在可寫入的本機應用程式資料目錄，音樂、配音和歌聲工作台可正常顯示。\n• 新增安裝目錄回歸門檻，並驗證 Qwen3-TTS、Seed-VC 嵌入式工作台及分軌、扒譜、字幕原生操作頁。",
@@ -114,6 +115,14 @@ public static class ReleaseNotesCatalog
             "• Rebuilt the native desktop workbench with .NET 10, WinUI 3, and Windows App SDK.\n• Embedded local AI workbenches directly in Aurora.\n• Established four-language UI, standard setup, model management, and GitHub updates.",
             "• .NET 10、WinUI 3、Windows App SDK でネイティブデスクトップを再構築。\n• ローカル AI ワークベンチを Aurora に統合。\n• 4言語、標準セットアップ、モデル管理、GitHub 更新の基盤を追加。"])
     ];
+
+    private static Entry ReadCurrentEntry()
+    {
+        using var stream = typeof(ReleaseNotesCatalog).Assembly.GetManifestResourceStream("Aurora.Release.json") ?? throw new InvalidDataException("Missing release metadata.");
+        using var document = System.Text.Json.JsonDocument.Parse(stream);
+        var entry = document.RootElement;
+        return new(Version.Parse(entry.GetProperty("version").GetString()!), entry.GetProperty("date").GetString()!, entry.GetProperty("notes").EnumerateArray().Select(x => x.GetString()!).ToArray());
+    }
 
     public static IReadOnlyList<ReleaseNoteDisplay> CurrentAndRecent(string currentVersion, string language, int count = 5)
     {

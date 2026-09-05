@@ -31,12 +31,13 @@ public partial class App : Application
     /// </summary>
     public App()
     {
+        Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = new SettingsService().EffectiveLanguage();
         InitializeComponent();
         UnhandledException += (_, args) =>
         {
             try
             {
-                var folder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aurora Audio Studio", "Logs");
+                var folder = System.IO.Path.Combine(SettingsService.DefaultDataRoot, "Logs");
                 Directory.CreateDirectory(folder);
                 File.AppendAllText(System.IO.Path.Combine(folder, "crash.log"), $"[{DateTimeOffset.Now:O}] {args.Exception}\r\n");
             }

@@ -5,6 +5,19 @@ public sealed class LocalizationService(SettingsService settings)
     private readonly Dictionary<string, string[]> values = new(StringComparer.OrdinalIgnoreCase)
     {
         ["home"] = ["首页", "首頁", "Home", "ホーム"],
+        ["languageImmediateHint"] = ["选择语言后立即生效并保存，无需点击下方的保存按钮。", "選擇語言後立即生效並儲存，無需點擊下方的儲存按鈕。", "Language changes apply and save immediately; no Save button is needed.", "言語を選ぶとすぐに反映・保存されます。下の保存ボタンを押す必要はありません。"],
+        ["languageChanged"] = ["已切换为简体中文。", "已切換為繁體中文。", "Switched to English.", "日本語に切り替えました。"],
+        ["sourcesAdded"] = ["已添加 {0} 个素材，等待开始处理", "已加入 {0} 個素材，等待開始處理", "{0} files added, ready to process", "{0} 件の素材を追加しました。処理を開始できます。"],
+        ["processSources"] = ["处理 {0} 个素材", "處理 {0} 個素材", "Process {0} files", "{0} 件を処理"],
+        ["percentCompleted"] = ["已完成 {0}%", "已完成 {0}%", "{0}% complete", "{0}% 完了"],
+        ["batchSubmitted"] = ["已提交 {0} 个任务，将按顺序处理。", "已提交 {0} 個任務，將依序處理。", "Queued {0} tasks for sequential processing.", "{0} 件のタスクを順番に処理します。"],
+        ["batchProcessing"] = ["正在处理 {0} / {1}：{2}", "正在處理 {0} / {1}：{2}", "Processing {0} / {1}: {2}", "処理中 {0} / {1}：{2}"],
+        ["batchItemCompleted"] = ["已完成：{0}", "已完成：{0}", "Completed: {0}", "完了：{0}"],
+        ["batchItemFailed"] = ["未完成：{0}", "未完成：{0}", "Not completed: {0}", "未完了：{0}"],
+        ["batchSummary"] = ["已完成 {0} / {1}", "已完成 {0} / {1}", "Completed {0} / {1}", "完了 {0} / {1}"],
+        ["resultImportFailed"] = ["收录成品失败：{0}", "收錄成品失敗：{0}", "Could not import results: {0}", "成果を取り込めませんでした：{0}"],
+        ["artifactExported"] = ["已导出：{0}", "已匯出：{0}", "Exported: {0}", "書き出しました：{0}"],
+        ["midiPreviewHint"] = ["MIDI 包含 {0} 个音符。请用默认音乐软件试听或编辑；Aurora 尚不提供内置 MIDI 合成器。", "MIDI 包含 {0} 個音符。請用預設音樂軟體試聽或編輯；Aurora 尚未提供內建 MIDI 合成器。", "MIDI contains {0} notes. Open it in your music app to listen or edit; Aurora does not include a MIDI synthesizer.", "MIDI に {0} 個のノートがあります。音楽ソフトで試聴・編集してください。Aurora には MIDI 音源は含まれません。"],
         ["homeSubtitle"] = ["选择一个功能，直接开始当前任务。", "選擇一個功能，直接開始目前任務。", "Choose a feature and start your task.", "機能を選んで、すぐにタスクを始めましょう。"],
         ["tasks"] = ["任务中心", "任務中心", "Task Center", "タスクセンター"],
         ["tasksSubtitle"] = ["查看排队、处理中、已完成与可恢复的任务。", "查看排隊、處理中、已完成與可恢復的任務。", "Review queued, running, completed, and recoverable tasks.", "待機中、処理中、完了、復旧可能なタスクを確認します。"],
@@ -108,6 +121,31 @@ public sealed class LocalizationService(SettingsService settings)
 
     private readonly Dictionary<string, string[]> phrases = new(StringComparer.OrdinalIgnoreCase)
     {
+        ["AI 配音"] = ["AI 配音", "AI 配音", "AI voice", "AI 音声"],
+        ["模型包"] = ["模型包", "模型套件", "model package", "モデルパッケージ"],
+        ["ACE-Step 隔离运行环境"] = ["ACE-Step 隔离运行环境", "ACE-Step 獨立執行環境", "isolated ACE-Step runtime", "ACE-Step 専用ランタイム"],
+        ["ACE-Step 基础权重"] = ["ACE-Step 基础权重", "ACE-Step 基礎權重", "ACE-Step base weights", "ACE-Step 基本モデル"],
+        ["ACE-Step 1.5 XL Turbo 官方权重"] = ["ACE-Step 1.5 XL Turbo 官方权重", "ACE-Step 1.5 XL Turbo 官方權重", "official ACE-Step 1.5 XL Turbo weights", "ACE-Step 1.5 XL Turbo 公式モデル"],
+        ["Seed-VC Python 3.10 隔离环境"] = ["Seed-VC Python 3.10 隔离环境", "Seed-VC Python 3.10 獨立環境", "isolated Seed-VC Python 3.10 environment", "Seed-VC 専用 Python 3.10 環境"],
+        ["Seed-VC 官方权重与配置"] = ["Seed-VC 官方权重与配置", "Seed-VC 官方權重與設定", "official Seed-VC weights and configuration", "Seed-VC 公式モデルと設定"],
+        ["Seed-VC CAMPPlus 声纹模型"] = ["Seed-VC CAMPPlus 声纹模型", "Seed-VC CAMPPlus 聲紋模型", "Seed-VC CAMPPlus speaker model", "Seed-VC CAMPPlus 話者モデル"],
+        ["Seed-VC RMVPE 音高模型"] = ["Seed-VC RMVPE 音高模型", "Seed-VC RMVPE 音高模型", "Seed-VC RMVPE pitch model", "Seed-VC RMVPE 音程モデル"],
+        ["Seed-VC BigVGAN 声码器"] = ["Seed-VC BigVGAN 声码器", "Seed-VC BigVGAN 聲碼器", "Seed-VC BigVGAN vocoder", "Seed-VC BigVGAN ボコーダー"],
+        ["Seed-VC Whisper 编码器"] = ["Seed-VC Whisper 编码器", "Seed-VC Whisper 編碼器", "Seed-VC Whisper encoder", "Seed-VC Whisper エンコーダー"],
+        ["隔离运行环境"] = ["隔离运行环境", "獨立執行環境", "isolated runtime", "専用ランタイム"],
+        ["独立模型下载组件"] = ["独立模型下载组件", "獨立模型下載元件", "isolated model downloader", "専用モデルダウンローダー"],
+        ["Qwen3-TTS Python 3.12 隔离环境"] = ["Qwen3-TTS Python 3.12 隔离环境", "Qwen3-TTS Python 3.12 獨立環境", "isolated Qwen3-TTS Python 3.12 environment", "Qwen3-TTS 専用 Python 3.12 環境"],
+        ["Qwen3-TTS 所需的 SoX 音频组件"] = ["Qwen3-TTS 所需的 SoX 音频组件", "Qwen3-TTS 所需的 SoX 音訊元件", "SoX audio tools for Qwen3-TTS", "Qwen3-TTS 用 SoX 音声ツール"],
+        ["FFmpeg 音频组件"] = ["FFmpeg 音频组件", "FFmpeg 音訊元件", "FFmpeg audio tools", "FFmpeg 音声ツール"],
+        ["模型部署组件 uv"] = ["模型部署组件 uv", "模型部署元件 uv", "uv runtime installer", "uv ランタイムインストーラー"],
+        ["BS-RoFormer-SW 多轨权重"] = ["BS-RoFormer-SW 多轨权重", "BS-RoFormer-SW 多軌權重", "BS-RoFormer-SW multistem weights", "BS-RoFormer-SW マルチステムモデル"],
+        ["YourMT3+ 多乐器权重"] = ["YourMT3+ 多乐器权重", "YourMT3+ 多樂器權重", "YourMT3+ multi-instrument weights", "YourMT3+ 多楽器モデル"],
+        ["正在校验官方模型文件"] = ["正在校验官方模型文件", "正在驗證官方模型檔案", "Verifying official model files", "公式モデルファイルを検証中"],
+        ["正在校验 GitHub Release 摘要"] = ["正在校验 GitHub Release 摘要", "正在驗證 GitHub Release 摘要", "Verifying the GitHub Release digest", "GitHub Release のダイジェストを検証中"],
+        ["正在检查模型部署组件"] = ["正在检查模型部署组件", "正在檢查模型部署元件", "Checking model installation tools", "モデル導入ツールを確認中"],
+        ["正在校验模型包完整性"] = ["正在校验模型包完整性", "正在驗證模型套件完整性", "Verifying model package integrity", "モデルパッケージの整合性を検証中"],
+        ["正在安装模型文件"] = ["正在安装模型文件", "正在安裝模型檔案", "Installing model files", "モデルファイルをインストール中"],
+        ["正在读取模型版本"] = ["正在读取模型版本", "正在讀取模型版本", "Reading model version", "モデルのバージョンを確認中"],
         ["分轨模式"] = ["分轨模式", "分軌模式", "Stem mode", "ステムモード"],
         ["二轨：人声 + 伴奏"] = ["二轨：人声 + 伴奏", "二軌：人聲 + 伴奏", "Two stems: vocals + instrumental", "2 ステム：ボーカル + 伴奏"],
         ["多轨：完整分轨"] = ["多轨：完整分轨", "多軌：完整分軌", "Multi-stem: full separation", "マルチステム：完全分離"],
@@ -265,12 +303,79 @@ public sealed class LocalizationService(SettingsService settings)
         ["查看更新日志"] = ["查看更新日志", "查看更新記錄", "View release notes", "更新履歴を表示"],
         ["反馈问题或建议"] = ["反馈问题或建议", "回報問題或建議", "Send feedback or suggestions", "問題や提案を送る"],
         ["反馈问题 / 建议"] = ["反馈问题 / 建议", "回報問題 / 建議", "Feedback / Suggestions", "フィードバック / 提案"],
-        ["等待"] = ["等待", "等待", "Waiting", "待機中"]
+        ["等待"] = ["等待", "等待", "Waiting", "待機中"],
+        ["文字到完整歌曲"] = ["文字到完整歌曲", "文字到完整歌曲", "Text to music", "テキストから楽曲へ"],
+        ["设计与克隆音色"] = ["设计与克隆音色", "設計與複製音色", "Design and clone voices", "声のデザインとクローン"],
+        ["人声与乐器分轨"] = ["人声与乐器分轨", "人聲與樂器分軌", "Separate vocals and instruments", "ボーカルと楽器を分離"],
+        ["识别演奏与旋律"] = ["识别演奏与旋律", "辨識演奏與旋律", "Transcribe piano performances", "ピアノ演奏を採譜"],
+        ["视频语音到时间轴"] = ["视频语音到时间轴", "影片語音到時間軸", "Speech to timed captions", "動画音声から字幕へ"],
+        ["创作引擎"] = ["创作引擎", "創作引擎", "Creative engine", "制作エンジン"],
+        ["保存位置"] = ["保存位置", "儲存位置", "Save location", "保存先"],
+        ["运行状态"] = ["运行状态", "執行狀態", "Runtime status", "実行状態"],
+        ["中文"] = ["中文", "中文", "Chinese", "中国語"],
+        ["队列会按顺序使用 GPU；重启 Aurora 后仍可查看、重试或打开结果。"] = ["队列会按顺序执行；重启后可重新执行保留的任务。", "佇列會依序執行；重新啟動後可重新執行保留的任務。", "Tasks run sequentially. Retained tasks can be restarted after reopening Aurora.", "順番にタスクを実行します。再起動後も保持したタスクを再実行できます。"],
+        ["日志"] = ["日志", "記錄", "Log", "ログ"],
+        ["任务日志"] = ["任务日志", "任務記錄", "Task log", "タスクログ"],
+        ["还没有任务记录"] = ["还没有任务记录", "還沒有任務記錄", "No tasks yet", "タスクはまだありません"],
+        ["从首页选择一个创作任务，Aurora 会在这里保留进度与结果。"] = ["从首页选择一个创作任务，Aurora 会在这里保留进度与结果。", "從首頁選擇創作任務，Aurora 會在這裡保留進度與成果。", "Choose a workflow from Home. Aurora keeps its progress and results here.", "ホームから機能を選択すると、進捗と成果がここに表示されます。"],
+        ["按时间查看 Aurora 生成的音轨、MIDI、字幕与其他成品。"] = ["按时间查看 Aurora 生成的音轨、MIDI、字幕与其他成品。", "依時間查看 Aurora 產生的音軌、MIDI、字幕與其他成品。", "Browse generated audio, MIDI, and subtitles by date.", "音声、MIDI、字幕などの成果を日時順に確認します。"],
+        ["还没有成品"] = ["还没有成品", "還沒有成品", "No results yet", "成果はまだありません"],
+        ["完成任务后，结果会自动汇总到这里。"] = ["完成任务后，结果会自动汇总到这里。", "完成任務後，成果會自動彙整到這裡。", "Completed output is added here automatically.", "完了した成果はここに自動で追加されます。"],
+        ["安装详情"] = ["安装详情", "安裝詳情", "Installation details", "インストールの詳細"],
+        ["素材语言"] = ["素材语言", "素材語言", "Source language", "素材の言語"],
+        ["声音克隆"] = ["声音克隆", "聲音複製", "Voice cloning", "声のクローン"],
+        ["专业音色"] = ["专业音色", "專業音色", "Preset voices", "プリセット音声"],
+        ["音色设计"] = ["音色设计", "音色設計", "Voice design", "声のデザイン"],
+        ["轻量声音克隆"] = ["轻量声音克隆", "輕量聲音複製", "Lightweight cloning", "軽量な声のクローン"],
+        ["轻量专业音色"] = ["轻量专业音色", "輕量專業音色", "Lightweight preset voices", "軽量プリセット音声"],
+        ["多语言声音克隆"] = ["多语言声音克隆", "多語言聲音複製", "Multilingual cloning", "多言語の声のクローン"],
+        ["可控配音"] = ["可控配音", "可控配音", "Controllable voice", "制御可能な音声"],
+        ["零样本歌声转换"] = ["零样本歌声转换", "零樣本歌聲轉換", "Zero-shot singing conversion", "ゼロショット歌声変換"],
+        ["多轨高质量"] = ["多轨高质量", "多軌高品質", "High-quality multistem", "高品質マルチステム"],
+        ["二轨"] = ["二轨", "二軌", "Two stems", "2 ステム"],
+        ["通用四轨分离"] = ["通用四轨分离", "通用四軌分離", "General four-stem separation", "汎用 4 ステム分離"],
+        ["钢琴扒谱"] = ["钢琴扒谱", "鋼琴扒譜", "Piano transcription", "ピアノ採譜"],
+        ["经典模型"] = ["经典模型", "經典模型", "Classic model", "従来モデル"],
+        ["轻量扒谱"] = ["轻量扒谱", "輕量扒譜", "Lightweight transcription", "軽量採譜"],
+        ["快速识别"] = ["快速识别", "快速辨識", "Fast recognition", "高速認識"],
+        ["高质量识别"] = ["高质量识别", "高品質辨識", "High-quality recognition", "高品質認識"],
+        ["词级时间轴"] = ["词级时间轴", "詞級時間軸", "Word-level alignment", "単語単位の時刻合わせ"],
+        ["Task completed."] = ["任务已完成。", "任務已完成。", "Task completed.", "タスクが完了しました。"],
+        ["AI 分轨"] = ["AI 分轨", "AI 分軌", "Stem separation", "音源分離"],
+        ["AI 扒谱"] = ["AI 扒谱", "AI 扒譜", "MIDI transcription", "MIDI 採譜"],
+        ["视频字幕"] = ["视频字幕", "影片字幕", "Video subtitles", "動画字幕"],
+        ["字幕"] = ["字幕", "字幕", "Subtitles", "字幕"],
+        ["配音"] = ["配音", "配音", "Voice", "音声"],
+        ["歌声"] = ["歌声", "歌聲", "Singing", "歌声"],
+        ["音乐"] = ["音乐", "音樂", "Music", "音楽"],
+        ["等待添加素材"] = ["等待添加素材", "等待加入素材", "Add media to begin", "素材を追加してください"],
+        ["正在等待安装进程返回最新活动…"] = ["正在等待安装进程返回最新活动…", "正在等待安裝程序回傳最新活動…", "Waiting for the installer to report progress…", "インストーラーの進捗を待っています…"],
+        ["正在安全停止当前操作…"] = ["正在安全停止当前操作…", "正在安全停止目前操作…", "Stopping the current operation safely…", "現在の操作を安全に停止しています…"],
+        ["正在读取 GPU 信息…"] = ["正在读取 GPU 信息…", "正在讀取 GPU 資訊…", "Reading GPU information…", "GPU 情報を読み込み中…"],
+        ["处理记录已载入，可以重新处理或查看原素材。"] = ["处理记录已载入，可以重新处理或查看原素材。", "處理記錄已載入，可以重新處理或查看原素材。", "Processing record loaded. Run again or inspect the source.", "処理履歴を読み込みました。再実行または素材を確認できます。"],
+        ["自动识别"] = ["自动识别", "自動識別", "Auto detect", "自動判定"],
+        ["预览"] = ["预览", "預覽", "Preview", "プレビュー"],
+        ["导出"] = ["导出", "匯出", "Export", "書き出す"],
+        ["复制路径"] = ["复制路径", "複製路徑", "Copy path", "パスをコピー"],
+        ["打开位置"] = ["打开位置", "開啟位置", "Open folder", "フォルダーを開く"],
+        ["取消本批任务"] = ["取消本批任务", "取消本批任務", "Cancel batch", "バッチを中止"],
+        ["编辑字幕"] = ["编辑字幕", "編輯字幕", "Edit subtitles", "字幕を編集"],
+        ["保存副本"] = ["保存副本", "儲存副本", "Save a copy", "コピーを保存"],
+        ["用默认程序打开"] = ["用默认程序打开", "用預設程式開啟", "Open in default app", "既定のアプリで開く"],
+        ["成品路径已复制。"] = ["成品路径已复制。", "成品路徑已複製。", "Result path copied.", "成果のパスをコピーしました。"],
+        ["成品已自动加入成品库。"] = ["成品已自动加入成品库。", "成品已自動加入成品庫。", "Output added to Results.", "成果をライブラリに追加しました。"],
+        ["任务已安全取消。"] = ["任务已安全取消。", "任務已安全取消。", "Task canceled safely.", "タスクを安全に中止しました。"],
+        ["安全模式已启用，无法执行或重试任务。"] = ["安全模式已启用，无法执行或重试任务。", "安全模式已啟用，無法執行或重試任務。", "Safe mode blocks running and retrying tasks.", "セーフモードでは実行・再試行できません。"],
+        ["请先结束运行中的任务与引擎，再更改保存目录。"] = ["请先结束运行中的任务与引擎，再更改保存目录。", "請先結束執行中的任務與引擎，再變更儲存目錄。", "Stop active tasks and engines before changing storage folders.", "保存先の変更前にタスクとエンジンを終了してください。"],
+        ["请先安装可打开 MIDI 的音乐软件。"] = ["请先安装可打开 MIDI 的音乐软件。", "請先安裝可開啟 MIDI 的音樂軟體。", "Install a music app that opens MIDI files first.", "MIDI に対応する音楽ソフトをインストールしてください。"],
+        ["字幕超过 2 MB，请使用外部编辑器打开。"] = ["字幕超过 2 MB，请使用外部编辑器打开。", "字幕超過 2 MB，請使用外部編輯器開啟。", "Subtitles exceed 2 MB. Use an external editor.", "字幕が 2 MB を超えています。外部エディターを使用してください。"],
+        ["待恢复"] = ["待恢复", "待恢復", "Ready to retry", "再実行可能"],
+        ["上次未完成的任务已保留，可继续处理或取消。"] = ["上次未完成的任务已保留，可继续处理或取消。", "上次未完成的任務已保留，可繼續處理或取消。", "The unfinished task was retained. Retry it or cancel.", "未完了タスクを保持しました。再実行または中止できます。"]
     };
 
     public string Get(string key)
     {
-        if (!values.TryGetValue(key, out var options)) return key;
+        if (!values.TryGetValue(key, out var options) && !phrases.TryGetValue(key, out options)) return key;
         return settings.EffectiveLanguage() switch
         {
             "zh-TW" => options[1],
@@ -282,10 +387,60 @@ public sealed class LocalizationService(SettingsService settings)
 
     public string Translate(string source)
     {
-        var pair = phrases.FirstOrDefault(x => x.Value.Contains(source, StringComparer.OrdinalIgnoreCase));
-        if (pair.Value is null) return source;
+        if (string.IsNullOrEmpty(source)) return source;
+        if (source.StartsWith("Starting ", StringComparison.Ordinal)) source = "正在启动 " + source[9..];
+        if (values.ContainsKey(source) || phrases.ContainsKey(source)) return Get(source);
+        var pair = phrases.Concat(values).FirstOrDefault(x => x.Value.Contains(source, StringComparer.OrdinalIgnoreCase));
+        if (pair.Value is null)
+        {
+            foreach (var template in templates)
+            {
+                var pattern = "^" + System.Text.RegularExpressions.Regex.Escape(template[0]).Replace("\\{0}", "(.+?)").Replace("\\{1}", "(.+?)") + "$";
+                var match = System.Text.RegularExpressions.Regex.Match(source, pattern, System.Text.RegularExpressions.RegexOptions.Singleline);
+                if (!match.Success) continue;
+                var index = settings.EffectiveLanguage() switch { "zh-TW" => 1, "en-US" => 2, "ja-JP" => 3, _ => 0 };
+                var args = match.Groups.Cast<System.Text.RegularExpressions.Group>().Skip(1).Select(group => string.Join(" · ", group.Value.Split(" · ").Select(part => phrases.ContainsKey(part) || values.ContainsKey(part) ? Get(part) : part))).Cast<object>().ToArray();
+                return string.Format(template[index], args);
+            }
+            return source;
+        }
         return settings.EffectiveLanguage() switch { "zh-TW" => pair.Value[1], "en-US" => pair.Value[2], "ja-JP" => pair.Value[3], _ => pair.Value[0] };
     }
 
+    private static readonly string[][] templates =
+    [
+        ["正在准备 {0}", "正在準備 {0}", "Preparing {0}", "{0} を準備中"],
+        ["正在安装 {0}", "正在安裝 {0}", "Installing {0}", "{0} をインストール中"],
+        ["正在部署 {0}", "正在部署 {0}", "Setting up {0}", "{0} を設定中"],
+        ["正在下载 {0}", "正在下載 {0}", "Downloading {0}", "{0} をダウンロード中"],
+        ["正在配置 {0}", "正在設定 {0}", "Configuring {0}", "{0} を設定中"],
+        ["正在创建 {0}", "正在建立 {0}", "Creating {0}", "{0} を作成中"],
+        ["正在从 Hugging Face 下载 {0}", "正在從 Hugging Face 下載 {0}", "Downloading {0} from Hugging Face", "Hugging Face から {0} をダウンロード中"],
+        ["正在从 BS-RoFormer 官方注册表下载 {0}", "正在從 BS-RoFormer 官方登錄表下載 {0}", "Downloading {0} from the BS-RoFormer registry", "BS-RoFormer レジストリから {0} をダウンロード中"],
+        ["模型安装未完成：{0}", "模型安裝未完成：{0}", "Model installation did not complete: {0}", "モデルのインストールが完了しませんでした：{0}"],
+        ["已添加 {0} 个素材。可继续添加或直接开始处理。", "已加入 {0} 個素材。可繼續加入或開始處理。", "Added {0} files. Add more or start processing.", "{0} 件の素材を追加しました。追加を続けるか、処理を開始できます。"],
+        ["已是最新日期版 {0}", "已是最新日期版 {0}", "Latest dated version: {0}", "最新の日付版：{0}"],
+        ["发现日期版 {0}", "發現日期版 {0}", "Dated update available: {0}", "日付版の更新があります：{0}"],
+        ["已是最新正式版 {0}", "已是最新正式版 {0}", "Latest stable release: {0}", "最新の正式版：{0}"],
+        ["发现正式版 {0}", "發現正式版 {0}", "Stable release available: {0}", "正式版の更新があります：{0}"],
+        ["已是最新版本 {0}", "已是最新版本 {0}", "Up to date: {0}", "最新です：{0}"],
+        ["发现新版本 {0}", "發現新版本 {0}", "Update available: {0}", "更新があります：{0}"],
+        ["正在载入 {0} 工作台…", "正在載入 {0} 工作台…", "Loading {0} workbench…", "{0} ワークベンチを読み込み中…"],
+        ["已连接 {0}", "已連線 {0}", "Connected to {0}", "{0} に接続済み"],
+        ["正在启动 {0}…", "正在啟動 {0}…", "Starting {0}…", "{0} を起動中…"],
+        ["正在处理：{0}", "正在處理：{0}", "Processing: {0}", "処理中：{0}"],
+        ["工作台界面加载失败：{0}", "工作台介面載入失敗：{0}", "Workbench loading failed: {0}", "ワークベンチの読み込みに失敗：{0}"],
+        ["{0} 已下载并部署完成", "{0} 已下載並部署完成", "{0} installed and configured", "{0} をインストール・設定しました"],
+        ["{0} 已安装并通过上游校验", "{0} 已安裝並通過上游驗證", "{0} installed and verified upstream", "{0} のインストールと検証が完了しました"],
+        ["{0} 已安装并校验", "{0} 已安裝並驗證", "{0} installed and checked", "{0} のインストールと確認が完了しました"],
+        ["{0} 已恢复到上一个运行环境。", "{0} 已回復至上一個執行環境。", "{0} restored to the previous runtime.", "{0} を以前の実行環境に戻しました。"],
+        ["{0} 已恢复到上一个可用版本。", "{0} 已回復至上一個可用版本。", "{0} restored to the retained version.", "{0} を保持したバージョンに戻しました。"],
+        ["请先结束 {0} 再回退模型。", "請先結束 {0} 再回復模型。", "Stop {0} before rolling back the model.", "モデルを戻す前に {0} を終了してください。"],
+        ["当前可用空间：{0}", "目前可用空間：{0}", "Available disk space: {0}", "空き容量：{0}"],
+        ["任务失败：{0}", "任務失敗：{0}", "Task failed: {0}", "タスクが失敗しました：{0}"]
+    ];
+
     public string Format(string key, params object[] args) => string.Format(Get(key), args);
+
+    public IReadOnlyCollection<string[]> Translations => phrases.Values.Concat(values.Values).ToArray();
 }

@@ -28,7 +28,7 @@ public sealed partial class MainWindow : Window
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        var displayVersion = version is null ? "1.8.1" : version.Revision > 0 ? version.ToString(4) : version.ToString(3);
+        var displayVersion = version is null ? "unknown" : version.Revision > 0 ? version.ToString(4) : version.ToString(3);
         AppTitleBar.Subtitle = displayVersion;
 
         var versionedIcon = Path.Combine(AppContext.BaseDirectory, "Assets", $"AppIcon-{displayVersion}.ico");

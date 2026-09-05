@@ -26,6 +26,8 @@
 !work/audio-studio/AuroraAudioStudio/**
 !work/audio-studio/AuroraAudioStudio.UpdateFlowTests/
 !work/audio-studio/AuroraAudioStudio.UpdateFlowTests/**
+!work/audio-studio/AuroraAudioStudio.BehaviorTests/
+!work/audio-studio/AuroraAudioStudio.BehaviorTests/**
 !work/audio-studio/tools/
 !work/audio-studio/tools/**
 work/audio-studio/AuroraAudioStudio/bin/

@@ -15,7 +15,16 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
     private readonly HttpClient client = CreateClient();
     private readonly HttpClient metadataClient = CreateMetadataClient();
     public string? FindRunningProcess(ModelDefinition model)
-        => RunningProcessGuard.FindInRoot(Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot));
+    {
+        var root = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
+        var runtime = model.Id.StartsWith("qwen3-tts-") ? Path.Combine(settings.Current.LocalAiRoot, "Qwen3-TTS", "Python312")
+            : model.Id.StartsWith("whisper-") ? Path.Combine(settings.Current.LocalAiRoot, "Faster-Whisper-XXL")
+            : model.Id == "roformer-vocals" ? Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "roformer-env")
+            : model.Id == "piano" ? Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "piano-env")
+            : model.Id == "minimax-music3" ? Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "minimax-music3-env")
+            : model.Id is "ace-step" or "seed-vc" ? Path.Combine(root, ".venv") : root;
+        return RunningProcessGuard.FindInRoot(root) ?? RunningProcessGuard.FindInRoot(RuntimeEnvironment.Resolve(runtime));
+    }
 
     public async Task<OperationResult> CheckAsync(ModelDefinition model, CancellationToken cancellationToken = default)
     {
@@ -67,6 +76,12 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
 
     public async Task<OperationResult> UpdateAsync(ModelDefinition model, IProgress<ModelInstallProgress>? progress = null, CancellationToken cancellationToken = default)
     {
+        if (FindRunningProcess(model) is { } running) return new(false, $"{running} 正在使用此模型，请保存工作并结束引擎后再更新。", "available");
+        if (model.IsRunnable)
+        {
+            var audio = await EnsureFfmpegAsync(progress, cancellationToken);
+            if (!audio.Success) return audio;
+        }
         var root = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
         var migration = MigrateLegacyWhisperRoot(model, root);
         if (!migration.Success) return migration;
@@ -111,7 +126,13 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
 
     private async Task<OperationResult> InstallFixedFileAsync(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
-        ModelInstallTransaction.Prepare(root);
+        if (model.Id == "piano")
+        {
+            var environment = new ModelDefinition("piano-runtime", "ByteDance Piano runtime", "transcription", @"AudioTools\piano-env", @"Scripts\python.exe", "PyPI", "uv-package", "piano-transcription-inference");
+            var runtime = await InstallUvPackageAsync(environment, Path.Combine(settings.Current.LocalAiRoot, environment.RelativeRoot), progress, cancellationToken);
+            if (!runtime.Success) return runtime;
+        }
+        ModelInstallTransaction.Prepare(root, model.Id + ":" + PianoCheckpointSha256);
         var staging = ModelInstallTransaction.StagingPath(root);
         var destination = Path.Combine(staging, model.Marker);
         Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
@@ -130,8 +151,14 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
 
     private async Task<OperationResult> InstallRoformerRegistryModelAsync(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
-        var downloader = Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "roformer-env", "Scripts", "bs-roformer-download.exe");
-        if (!File.Exists(downloader)) return new(false, "请先在模型中心安装 BS-RoFormer-SW 运行环境。");
+        var downloader = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "roformer-env")), "Scripts", "bs-roformer-download.exe");
+        if (!File.Exists(downloader))
+        {
+            var environment = catalog.Find("roformer")!;
+            var runtime = await InstallUvPackageAsync(environment, Path.Combine(settings.Current.LocalAiRoot, environment.RelativeRoot), progress, cancellationToken, false);
+            if (!runtime.Success) return runtime;
+            downloader = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "roformer-env")), "Scripts", "bs-roformer-download.exe");
+        }
         var modelsRoot = Path.GetDirectoryName(root)!;
         var info = new ProcessStartInfo(downloader) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
         foreach (var value in new[] { "--output-dir", modelsRoot, "--model", model.Repository! }) info.ArgumentList.Add(value);
@@ -181,10 +208,16 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         }
 
         progress?.Report(new(null, $"正在准备 {model.Name} 官方代码"));
-        ModelInstallTransaction.Prepare(root);
+        ModelInstallTransaction.Prepare(root, model.Id + ":" + release.Tag + release.Commit);
         var staging = ModelInstallTransaction.StagingPath(root);
-        var clone = await RunGitAsync(Path.GetDirectoryName(staging)!, $"clone --quiet --no-checkout \"{model.Repository}\" \"{staging}\"", cancellationToken, TimeSpan.FromMinutes(10));
-        if (!clone.Success) return clone;
+        if (!Directory.Exists(Path.Combine(staging, ".git")))
+        {
+            // Prepare's identity file makes the staging folder nonempty; initialize and fetch explicitly.
+            var init = await RunGitAsync(staging, "init --quiet", cancellationToken);
+            if (!init.Success) return init;
+            var remote = await RunGitAsync(staging, $"remote add origin \"{model.Repository}\"", cancellationToken);
+            if (!remote.Success) return remote;
+        }
         OperationResult checkout;
         if (!string.IsNullOrWhiteSpace(release.Tag))
         {
@@ -207,6 +240,12 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         File.WriteAllText(Path.Combine(staging, ".aurora-revision"), string.IsNullOrWhiteSpace(release.Commit) ? release.Tag : release.Commit);
         File.WriteAllText(Path.Combine(staging, ".aurora-version"), version);
         ModelInstallTransaction.Commit(root);
+        var finalProbe = await ProbeGitRuntimeAsync(model, root, cancellationToken);
+        if (!finalProbe.Success)
+        {
+            ModelInstallTransaction.RestorePrevious(root);
+            return finalProbe;
+        }
         WriteInstalledVersion(model.Id, version);
         return new(true, $"{model.Name} 已安装并配置至 {(string.IsNullOrWhiteSpace(release.Tag) ? "日期版" : "正式版")} {version}", "current");
     }
@@ -219,41 +258,58 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         {
             progress?.Report(new(null, "正在配置 ACE-Step 隔离运行环境"));
             var sync = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var value in new[] { "sync", "--project", root }) sync.ArgumentList.Add(value);
+            var runtimeRoot = ExistingOrNewGitRuntime(root, model.Id);
+            foreach (var value in new[] { "sync", "--project", root, "--no-editable" }) sync.ArgumentList.Add(value);
+            sync.Environment["UV_PROJECT_ENVIRONMENT"] = runtimeRoot;
             var syncResult = await RunProcessAsync(sync, cancellationToken, progress);
             if (syncResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(syncResult.Error) ? "ACE-Step 运行环境配置失败。" : syncResult.Error);
-            var downloader = Path.Combine(root, ".venv", "Scripts", "acestep-download.exe");
+            RuntimeEnvironment.Activate(Path.Combine(root, ".venv"), runtimeRoot);
+            var downloader = Path.Combine(runtimeRoot, "Scripts", "acestep-download.exe");
             if (!File.Exists(downloader)) return new(false, "ACE-Step 官方模型下载器未生成，正式目录未被修改。");
             var baseDownload = new ProcessStartInfo(downloader) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            baseDownload.ArgumentList.Add("--dir"); baseDownload.ArgumentList.Add(Path.Combine(root, "checkpoints"));
             progress?.Report(new(null, "正在下载 ACE-Step 基础权重"));
             var baseResult = await RunProcessAsync(baseDownload, cancellationToken, progress);
             if (baseResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(baseResult.Error) ? "ACE-Step 基础权重下载失败。" : baseResult.Error);
 
             var download = new ProcessStartInfo(downloader) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var value in new[] { "--model", "acestep-v15-xl-turbo" }) download.ArgumentList.Add(value);
+            foreach (var value in new[] { "--model", "acestep-v15-xl-turbo", "--dir", Path.Combine(root, "checkpoints") }) download.ArgumentList.Add(value);
             progress?.Report(new(null, "正在下载 ACE-Step 1.5 XL Turbo 官方权重"));
             var downloadResult = await RunProcessAsync(download, cancellationToken, progress);
             if (downloadResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(downloadResult.Error) ? "ACE-Step 官方权重下载失败。" : downloadResult.Error);
-            return ModelHealthPolicy.IsReady(model, settings.Current.LocalAiRoot)
-                ? new(true, "ACE-Step 已配置", "current") : new(false, "ACE-Step 运行环境完整性检查失败。");
+            return await ProbeGitRuntimeAsync(model, root, cancellationToken);
         }
 
         if (model.Id.Equals("seed-vc", StringComparison.OrdinalIgnoreCase))
         {
             progress?.Report(new(null, "正在配置 Seed-VC Python 3.10 隔离环境"));
-            var python = Path.Combine(root, ".venv", "Scripts", "python.exe");
+            var runtimeRoot = ExistingOrNewGitRuntime(root, model.Id);
+            var python = Path.Combine(runtimeRoot, "Scripts", "python.exe");
             var create = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var value in new[] { "venv", "--python", "3.10", Path.Combine(root, ".venv") }) create.ArgumentList.Add(value);
-            var createResult = await RunProcessAsync(create, cancellationToken, progress);
-            if (createResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(createResult.Error) ? "Seed-VC 隔离环境创建失败。" : createResult.Error);
+            foreach (var value in new[] { "venv", "--python", "3.10", runtimeRoot }) create.ArgumentList.Add(value);
+            if (!File.Exists(python))
+            {
+                var createResult = await RunProcessAsync(create, cancellationToken, progress);
+                if (createResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(createResult.Error) ? "Seed-VC 隔离环境创建失败。" : createResult.Error);
+            }
+            RuntimeEnvironment.Activate(Path.Combine(root, ".venv"), runtimeRoot);
+            File.Copy(Path.Combine(AppContext.BaseDirectory, "Tools", "seed_vc_entry.py"), Path.Combine(root, "app_svc_local.py"), true);
+            // Upstream mixes nightly switches and an older CPU/GPU trio. Aurora owns the
+            // tested Windows CUDA trio. Resemblyzer is used only by upstream eval.py;
+            // it pulls the obsolete pre-Python-3.5 typing backport, not needed by app_svc.
+            var requirements = Path.Combine(root, ".aurora-seed-requirements.txt");
+            File.WriteAllLines(requirements, File.ReadLines(Path.Combine(root, "requirements.txt")).Where(line => !Regex.IsMatch(line, @"^\s*(torch|torchvision|torchaudio|resemblyzer)(\s|[=<>!~\[]|$)")));
             var install = new ProcessStartInfo(uv) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var value in new[] { "pip", "install", "--python", python, "-r", Path.Combine(root, "requirements.txt") }) install.ArgumentList.Add(value);
+            // Resolve Gradio/Pillow/NumPy and CUDA together; a later --upgrade torch
+            // silently upgraded Pillow beyond Gradio's supported range.
+            foreach (var value in new[] { "pip", "install", "--python", python, "-r", requirements, "torch==2.8.0+cu128", "torchaudio==2.8.0+cu128", "torchvision==0.23.0+cu128", "--extra-index-url", "https://download.pytorch.org/whl/cu128" }) install.ArgumentList.Add(value);
             var installResult = await RunProcessAsync(install, cancellationToken, progress);
             if (installResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(installResult.Error) ? "Seed-VC 依赖安装失败。" : installResult.Error);
-            var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "torch", "torchaudio", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
-            var torchResult = await RunProcessAsync(torch, cancellationToken, progress);
-            if (torchResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(torchResult.Error) ? "Seed-VC CUDA 环境配置失败。" : torchResult.Error);
+            var dependencyCheck = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var value in new[] { "pip", "check", "--python", python }) dependencyCheck.ArgumentList.Add(value);
+            var checkedDependencies = await RunProcessAsync(dependencyCheck, cancellationToken, progress);
+            if (checkedDependencies.ExitCode != 0) return new(false, "Seed-VC 依赖检查失败：" + checkedDependencies.Error);
+            await FreezeRuntimeAsync(uv, python, runtimeRoot, cancellationToken);
             var bootstrap = await EnsureHuggingFaceBootstrapAsync(progress, cancellationToken);
             if (!bootstrap.Success || string.IsNullOrWhiteSpace(bootstrap.Path)) return bootstrap;
             var manual = Path.Combine(root, "checkpoints", "manual");
@@ -285,10 +341,32 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
                 var dependencyResult = await RunProcessAsync(dependencyInfo, cancellationToken, progress);
                 if (dependencyResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(dependencyResult.Error) ? $"Seed-VC {dependency.Label}下载失败。" : dependencyResult.Error);
             }
-            return ModelHealthPolicy.IsReady(model, settings.Current.LocalAiRoot)
-                ? new(true, "Seed-VC 已配置并通过离线完整性检查", "current") : new(false, "Seed-VC 运行环境或辅助模型不完整，请重试检查 / 修复。");
+            return await ProbeGitRuntimeAsync(model, root, cancellationToken);
         }
         return File.Exists(Path.Combine(root, model.Marker)) ? new(true, "组件已配置", "current") : new(false, "组件完整性检查失败。");
+    }
+
+    private string ExistingOrNewGitRuntime(string deploymentRoot, string modelId)
+    {
+        var markerRoot = Path.Combine(deploymentRoot, ".venv");
+        var existing = RuntimeEnvironment.Resolve(markerRoot);
+        return File.Exists(Path.Combine(existing, "Scripts", "python.exe")) && !existing.StartsWith(deploymentRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+            ? existing : RuntimeEnvironment.CreateCandidate(settings.Current.LocalAiRoot, modelId);
+    }
+
+    private async Task<OperationResult> ProbeGitRuntimeAsync(ModelDefinition model, string root, CancellationToken cancellationToken)
+    {
+        var missing = ModelHealthPolicy.MissingRequirements(model, settings.Current.LocalAiRoot, root);
+        if (missing.Count > 0) return new(false, "候选安装不完整：" + string.Join("、", missing));
+        var python = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(root, ".venv")), "Scripts", "python.exe");
+        if (!File.Exists(python)) python = Path.Combine(root, "python_embeded", "python.exe");
+        var probe = new ProcessStartInfo(python) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        probe.ArgumentList.Add("-B"); probe.ArgumentList.Add("-c");
+        probe.ArgumentList.Add(model.Id == "seed-vc" ? "import torch,torchaudio,gradio,app_svc; print('AURORA_RUNTIME_OK')" : "import torch,gradio,acestep; print('AURORA_RUNTIME_OK')");
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(TimeSpan.FromMinutes(2));
+        var result = await RunProcessAsync(probe, deadline.Token);
+        return result.ExitCode == 0 ? new(true, "运行环境导入检查通过。", "current") : new(false, "候选运行环境导入失败：" + result.Error);
     }
 
     private async Task<GitHubRepositoryRelease?> GetGitHubRepositoryReleaseAsync(string repositoryUrl, CancellationToken cancellationToken = default)
@@ -476,7 +554,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         }
         return Normalize(local).Equals(Normalize(remote), StringComparison.OrdinalIgnoreCase);
     }
-    private async Task<OperationResult> InstallUvPackageAsync(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    private async Task<OperationResult> InstallUvPackageAsync(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken, bool includeWeights = true)
     {
         progress?.Report(new(null, "正在检查模型部署组件"));
         var uv = ResolveUvExecutable();
@@ -490,24 +568,28 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             if (uv is null) return new(false, "uv 已安装，但当前 Aurora 会话尚未找到它。请重新打开 Aurora 后重试。");
         }
 
+        var logicalRoot = root;
+        root = RuntimeEnvironment.CreateCandidate(settings.Current.LocalAiRoot, model.Id);
         var python = Path.Combine(root, "Scripts", "python.exe");
         var environment = await EnsureUvEnvironmentAsync(uv, root, python, progress, cancellationToken);
         if (!environment.Success) return environment;
         var install = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, model.Repository! }) install.ArgumentList.Add(value);
+        using var packageDocument = JsonDocument.Parse(await metadataClient.GetStringAsync($"https://pypi.org/pypi/{Uri.EscapeDataString(PyPiPackageName(model.Repository!))}/json", cancellationToken));
+        var packageVersion = packageDocument.RootElement.GetProperty("info").GetProperty("version").GetString()!;
+        foreach (var value in new[] { "pip", "install", "--python", python, model.Repository! + "==" + packageVersion }) install.ArgumentList.Add(value);
         if (model.Id.Equals("transkun", StringComparison.OrdinalIgnoreCase)) install.ArgumentList.Add("setuptools<81");
         progress?.Report(new(null, $"正在部署 {model.Name}"));
         var installResult = await RunProcessAsync(install, cancellationToken, progress);
         if (installResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(installResult.Error) ? $"{model.Name} 部署失败。" : installResult.Error);
-        if (model.Id.Equals("transkun", StringComparison.OrdinalIgnoreCase))
+        if (model.Id is "transkun" or "roformer" or "yourmt3" or "demucs" or "f5-tts" or "piano-runtime")
         {
-            progress?.Report(new(null, "正在下载并配置 TransKun CUDA 运行环境（PyTorch 组件较大，请耐心等待）"));
+            progress?.Report(new(null, $"正在配置 {model.Name} 的配套 CUDA 运行环境"));
             var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "torch", "torchaudio", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
+            foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "torch==2.8.0", "torchaudio==2.8.0", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
             var torchResult = await RunProcessAsync(torch, cancellationToken, progress);
             if (torchResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(torchResult.Error) ? "TransKun CUDA 环境配置失败。" : torchResult.Error);
         }
-        if (model.Id.Equals("roformer", StringComparison.OrdinalIgnoreCase))
+        if (includeWeights && model.Id.Equals("roformer", StringComparison.OrdinalIgnoreCase))
         {
             var downloader = Path.Combine(root, "Scripts", "bs-roformer-download.exe");
             var modelsRoot = Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "roformer-models");
@@ -532,13 +614,34 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             var assetResult = await RunProcessAsync(assets, cancellationToken, progress);
             if (assetResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(assetResult.Error) ? "YourMT3+ 权重下载失败。" : assetResult.Error);
         }
-        if (!catalog.IsInstalled(model)) return new(false, $"{model.Name} 已完成环境安装，但启动组件未通过完整性检查。");
-        WriteInstalledVersion(model.Id, DateTime.UtcNow.ToString("yyyy.MM.dd"));
+        if (includeWeights && ModelHealthPolicy.MissingRequirements(model, settings.Current.LocalAiRoot, root).Count > 0) return new(false, $"{model.Name} 的候选运行环境未通过完整性检查，现有环境已保留。");
+        if (model.Id == "piano-runtime")
+        {
+            var pianoProbe = await ProbePythonRuntimeAsync(python, "import torch, torchaudio, piano_transcription_inference", cancellationToken);
+            if (!pianoProbe.Success) return pianoProbe;
+        }
+        var dependencyCheck = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "pip", "check", "--python", python }) dependencyCheck.ArgumentList.Add(value);
+        var dependencyResult = await RunProcessAsync(dependencyCheck, cancellationToken, progress);
+        if (dependencyResult.ExitCode != 0) return new(false, "候选环境存在依赖冲突，现有环境已保留：" + dependencyResult.Error);
+        var probe = new ProcessStartInfo(Path.Combine(root, model.Marker)) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        probe.ArgumentList.Add("--help");
+        var probeResult = await RunProcessAsync(probe, cancellationToken, progress);
+        if (probeResult.ExitCode != 0) return new(false, "候选引擎无法启动：" + probeResult.Error);
+        var freeze = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "pip", "freeze", "--python", python }) freeze.ArgumentList.Add(value);
+        var frozen = await RunProcessAsync(freeze, cancellationToken);
+        if (frozen.ExitCode != 0) return new(false, "无法记录候选环境的依赖组合。");
+        File.WriteAllText(Path.Combine(root, "requirements.aurora.txt"), frozen.Output);
+        File.WriteAllText(Path.Combine(root, ".aurora-version"), packageVersion);
+        RuntimeEnvironment.Activate(logicalRoot, root);
+        WriteInstalledVersion(model.Id, packageVersion);
         return new(true, $"{model.Name} 已下载并部署完成", "current");
     }
 
     private async Task<OperationResult> CheckPyPiPackageAsync(ModelDefinition model, string root, CancellationToken cancellationToken)
     {
+        root = RuntimeEnvironment.Resolve(root);
         var python = Path.Combine(root, "Scripts", "python.exe");
         if (!File.Exists(python)) return new(false, "隔离运行环境不完整", "manual");
         var package = PyPiPackageName(model.Repository!);
@@ -546,7 +649,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         localInfo.ArgumentList.Add("-c");
         localInfo.ArgumentList.Add("import importlib.metadata as m,sys; print(m.version(sys.argv[1]))");
         localInfo.ArgumentList.Add(package);
-        var local = await RunProcessAsync(localInfo);
+        var local = await RunProcessAsync(localInfo, cancellationToken);
         if (local.ExitCode != 0 || string.IsNullOrWhiteSpace(local.Output)) return new(false, "无法读取已安装版本", "manual");
         try
         {
@@ -592,14 +695,15 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             uv = ResolveUvExecutable();
             if (uv is null) return new(false, "uv 已安装，但当前 Aurora 会话尚未找到它。请重新打开 Aurora 后重试。");
         }
-        var environmentRoot = Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "minimax-music3-env");
+        var logicalEnvironment = Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "minimax-music3-env");
+        var environmentRoot = RuntimeEnvironment.CreateCandidate(settings.Current.LocalAiRoot, model.Id);
         var python = Path.Combine(environmentRoot, "Scripts", "python.exe");
         var environment = await EnsureUvEnvironmentAsync(uv, environmentRoot, python, progress, cancellationToken);
         if (!environment.Success) return environment;
 
         progress?.Report(new(null, "正在下载并配置 MiniMax-Music3 CUDA 运行环境（PyTorch 组件较大，请耐心等待）"));
         var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "torch", "torchaudio", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
+        foreach (var value in new[] { "pip", "install", "--python", python, "torch==2.8.0", "torchaudio==2.8.0", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
         var torchResult = await RunProcessAsync(torch, cancellationToken, progress);
         if (torchResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(torchResult.Error) ? "MiniMax-Music3 CUDA 环境配置失败。" : torchResult.Error);
 
@@ -607,12 +711,15 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "git+https://github.com/huggingface/diffusers@dafe3733fcfdbf3c48915fe77be3aef65b5d6a2d", "transformers", "accelerate", "soundfile", "gradio", "huggingface_hub[hf_xet]" }) dependencies.ArgumentList.Add(value);
         var dependencyResult = await RunProcessAsync(dependencies, cancellationToken, progress);
         if (dependencyResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(dependencyResult.Error) ? "MiniMax-Music3 依赖配置失败。" : dependencyResult.Error);
+        var probe = await ProbePythonRuntimeAsync(python, "import torch, torchaudio, gradio; from diffusers import ModularPipeline", cancellationToken);
+        if (!probe.Success) return probe;
+        await FreezeRuntimeAsync(uv, python, environmentRoot, cancellationToken);
 
         var version = await GetHuggingFaceVersionAsync(model.Repository!, cancellationToken);
         if (version is null) return new(false, "暂时无法读取 MiniMax-Music3 官方版本。");
         var hf = Path.Combine(environmentRoot, "Scripts", "hf.exe");
         if (!File.Exists(hf)) return new(false, "MiniMax-Music3 下载组件未正确安装。");
-        ModelInstallTransaction.Prepare(root);
+        ModelInstallTransaction.Prepare(root, model.Id + ":" + version.Revision);
         var staging = ModelInstallTransaction.StagingPath(root);
         var download = new ProcessStartInfo(hf) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
         foreach (var value in new[] { "download", model.Repository!, "--revision", version.Revision, "--local-dir", staging }) download.ArgumentList.Add(value);
@@ -629,6 +736,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         File.WriteAllText(Path.Combine(staging, ".aurora-revision"), version.Revision);
         File.WriteAllText(Path.Combine(staging, ".aurora-version"), version.DateVersion);
         ModelInstallTransaction.Commit(root);
+        RuntimeEnvironment.Activate(logicalEnvironment, environmentRoot);
         WriteInstalledVersion(model.Id, version.DateVersion);
         return new(true, "MiniMax-Music3 已安装、自动配置并可在音乐创作中启用", "current");
     }
@@ -750,9 +858,11 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
 
     public async Task<OperationResult> RollbackAsync(ModelDefinition model)
     {
+        if (FindRunningProcess(model) is { } running) return new(false, $"请先结束 {running} 再回退模型。");
         var root = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
         try
         {
+            if (RuntimeEnvironment.Rollback(root)) return new(true, $"{model.Name} 已恢复到上一个运行环境。", "current");
             if (ModelInstallTransaction.RestorePrevious(root))
             {
                 var restoredRevision = ReadModelRevision(root);
@@ -780,7 +890,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         var info = new ProcessStartInfo(launcher) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
         info.ArgumentList.Add("download"); info.ArgumentList.Add(model.Repository!);
         info.ArgumentList.Add("--revision"); info.ArgumentList.Add(revision);
-        ModelInstallTransaction.Prepare(root);
+        ModelInstallTransaction.Prepare(root, model.Id + ":" + revision);
         var staging = ModelInstallTransaction.StagingPath(root);
         info.ArgumentList.Add("--local-dir"); info.ArgumentList.Add(staging);
         if (model.Id.Equals("soulx-singer-svc", StringComparison.OrdinalIgnoreCase))
@@ -794,7 +904,8 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         progress?.Report(new(null, $"正在从 Hugging Face 下载 {model.Name}"));
         var result = await RunProcessAsync(info, cancellationToken, progress);
         if (result.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(result.Error) ? "模型更新失败" : result.Error);
-        if (!File.Exists(Path.Combine(staging, model.Marker))) return new(false, "下载已结束，但模型完整性检查未通过。正式模型目录未被修改。");
+        var missing = ModelHealthPolicy.MissingRequirements(model, settings.Current.LocalAiRoot, staging);
+        if (missing.Count > 0) return new(false, "模型完整性检查未通过：" + string.Join("、", missing) + "。正式模型目录未被修改。");
         File.WriteAllText(Path.Combine(staging, ".aurora-revision"), revision);
         if (!string.IsNullOrWhiteSpace(dateVersion)) File.WriteAllText(Path.Combine(staging, ".aurora-version"), dateVersion);
         File.Delete(Path.Combine(staging, ".aurora-installing"));
@@ -827,27 +938,54 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         var sox = await EnsureSoxAsync(progress, cancellationToken);
         if (!sox.Success) return sox;
         var root = Path.Combine(settings.Current.LocalAiRoot, "Qwen3-TTS", "Python312");
-        var launcher = Path.Combine(root, "Scripts", "qwen-tts-demo.exe");
-        if (File.Exists(launcher)) return new(true, "Qwen3-TTS 运行环境已就绪", "current");
+        var current = RuntimeEnvironment.Resolve(root);
+        if (File.Exists(Path.Combine(current, "Scripts", "qwen-tts-demo.exe")))
+        {
+            var ready = await ProbePythonRuntimeAsync(RuntimeEnvironment.PythonPath(current), "import torch, torchaudio, qwen_tts, gradio", cancellationToken);
+            if (ready.Success) return ready;
+        }
         var uv = await EnsureUvExecutableAsync(progress, cancellationToken);
         if (uv is null) return new(false, "无法安装或找到模型部署组件 uv，无法创建 Qwen3-TTS 运行环境。");
-        var python = Path.Combine(root, "Scripts", "python.exe");
-        Directory.CreateDirectory(Path.GetDirectoryName(root)!);
+        var candidate = RuntimeEnvironment.CreateCandidate(settings.Current.LocalAiRoot, "qwen3-tts");
+        var python = Path.Combine(candidate, "Scripts", "python.exe");
+        var launcher = Path.Combine(candidate, "Scripts", "qwen-tts-demo.exe");
         var create = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var value in new[] { "venv", "--python", "3.12", root }) create.ArgumentList.Add(value);
+        foreach (var value in new[] { "venv", "--python", "3.12", candidate }) create.ArgumentList.Add(value);
         progress?.Report(new(null, "正在创建 Qwen3-TTS Python 3.12 隔离环境"));
         var createResult = await RunProcessAsync(create, cancellationToken, progress);
         if (createResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(createResult.Error) ? "Qwen3-TTS 隔离环境创建失败。" : createResult.Error);
         var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "torch", "torchaudio", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
+        foreach (var value in new[] { "pip", "install", "--python", python, "torch==2.8.0", "torchaudio==2.8.0", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
         var torchResult = await RunProcessAsync(torch, cancellationToken, progress);
         if (torchResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(torchResult.Error) ? "Qwen3-TTS CUDA 环境配置失败。" : torchResult.Error);
         var install = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "qwen-tts", "huggingface_hub[hf_xet]" }) install.ArgumentList.Add(value);
+        foreach (var value in new[] { "pip", "install", "--python", python, "qwen-tts==0.1.1", "huggingface_hub[hf_xet]" }) install.ArgumentList.Add(value);
         var installResult = await RunProcessAsync(install, cancellationToken, progress);
-        return installResult.ExitCode == 0 && File.Exists(launcher)
-            ? new(true, "Qwen3-TTS 运行环境已就绪", "current")
-            : new(false, string.IsNullOrWhiteSpace(installResult.Error) ? "Qwen3-TTS 运行环境配置失败。" : installResult.Error);
+        if (installResult.ExitCode != 0 || !File.Exists(launcher)) return new(false, string.IsNullOrWhiteSpace(installResult.Error) ? "Qwen3-TTS 运行环境配置失败。" : installResult.Error);
+        var candidateProbe = await ProbePythonRuntimeAsync(python, "import torch, torchaudio, qwen_tts, gradio", cancellationToken);
+        if (!candidateProbe.Success) return candidateProbe;
+        await FreezeRuntimeAsync(uv, python, candidate, cancellationToken);
+        RuntimeEnvironment.Activate(root, candidate);
+        return new(true, "Qwen3-TTS 运行环境已就绪", "current");
+    }
+
+    private static async Task<OperationResult> ProbePythonRuntimeAsync(string python, string imports, CancellationToken cancellationToken)
+    {
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(TimeSpan.FromMinutes(2));
+        var info = new ProcessStartInfo(python) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "-B", "-c", imports + "; print('AURORA_RUNTIME_OK')" }) info.ArgumentList.Add(value);
+        var result = await RunProcessAsync(info, timeout.Token);
+        return result.ExitCode == 0 ? new(true, "运行环境导入检查通过。") : new(false, "运行环境导入检查失败：" + result.Error);
+    }
+
+    private static async Task FreezeRuntimeAsync(string uv, string python, string root, CancellationToken cancellationToken)
+    {
+        var info = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "pip", "freeze", "--python", python }) info.ArgumentList.Add(value);
+        var result = await RunProcessAsync(info, cancellationToken);
+        if (result.ExitCode != 0) throw new InvalidOperationException("无法记录候选运行环境依赖。" + result.Error);
+        await File.WriteAllTextAsync(Path.Combine(root, "requirements.aurora.txt"), result.Output, cancellationToken);
     }
 
     private async Task<OperationResult> EnsureSoxAsync(IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
@@ -862,6 +1000,17 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
         return result.ExitCode == 0 && ExecutableOnPath("sox.exe")
             ? new(true, "SoX 音频组件已就绪", "current")
             : new(false, string.IsNullOrWhiteSpace(result.Error) ? "SoX 音频组件安装失败，请在模型管理中重试。" : result.Error);
+    }
+
+    private async Task<OperationResult> EnsureFfmpegAsync(IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    {
+        if (AudioRuntime.FindFfmpeg(settings.Current.LocalAiRoot) is not null) return new(true, "FFmpeg 已就绪。");
+        progress?.Report(new(null, "正在安装 FFmpeg 音频组件"));
+        var install = new ProcessStartInfo("winget.exe") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var value in new[] { "install", "--id", "Gyan.FFmpeg", "-e", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity" }) install.ArgumentList.Add(value);
+        var result = await RunProcessAsync(install, cancellationToken, progress);
+        RefreshProcessPath();
+        return result.ExitCode == 0 && AudioRuntime.FindFfmpeg(settings.Current.LocalAiRoot) is not null ? new(true, "FFmpeg 已就绪。") : new(false, "FFmpeg 组件未就绪：" + result.Error);
     }
 
     private static IEnumerable<string> PathEntries(string? value)

@@ -6,7 +6,7 @@ public sealed record WindowState(int Width = 1560, int Height = 960, bool IsMaxi
 
 public sealed class WindowStateService
 {
-    private readonly string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aurora Audio Studio", "window-state.json");
+    private readonly string path = Path.Combine(SettingsService.DefaultDataRoot, "window-state.json");
 
     public WindowState Load()
     {

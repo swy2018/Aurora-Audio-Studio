@@ -32,15 +32,16 @@ public static class ModelInstallPlanner
         "qwen3-asr-06b" => "≈ 1.6 GB",
         "qwen3-asr-17b" => "≈ 4.1 GB",
         "qwen3-forced-aligner" => "≈ 1.9 GB",
-        "transkun" => "≈ 4.5 GB（含 CUDA PyTorch）",
-        "roformer" or "yourmt3" => "< 100 MB",
-        "roformer-vocals" => "≈ 600 MB",
+        "transkun" => "≈ 4.5 GB",
+        "roformer" or "yourmt3" => "≈ 4–7 GB",
+        "roformer-vocals" => "≈ 0.6–7 GB",
         "piano" => "≈ 165 MB",
         "faster-whisper" => "≈ 1.4 GB",
         "subtitle-edit" => "≈ 110 MB",
-        "ace-step" => "≈ 8 GB",
-        "seed-vc" => "≈ 5 GB",
-        "f5-tts" or "demucs" or "basic-pitch" => "< 1 GB",
+        "ace-step" => "≈ 32–36 GB",
+        "seed-vc" => "≈ 8–10 GB",
+        "f5-tts" or "demucs" => "≈ 4–7 GB",
+        "basic-pitch" => "≈ 1 GB",
         _ => "—"
     };
 
@@ -59,14 +60,15 @@ public static class ModelInstallPlanner
         "qwen3-asr-17b" => "≈ 9 GB",
         "qwen3-forced-aligner" => "≈ 4 GB",
         "transkun" => "≈ 10 GB",
-        "roformer" or "yourmt3" => "≈ 1 GB",
-        "roformer-vocals" => "≈ 1.5 GB",
+        "roformer" or "yourmt3" => "≈ 12 GB",
+        "roformer-vocals" => "≈ 12 GB",
         "piano" => "≈ 500 MB",
         "faster-whisper" => "≈ 3 GB",
         "subtitle-edit" => "≈ 300 MB",
-        "ace-step" => "≈ 16 GB",
-        "seed-vc" => "≈ 10 GB",
-        "f5-tts" or "demucs" or "basic-pitch" => "≈ 2 GB",
+        "ace-step" => "≈ 50 GB",
+        "seed-vc" => "≈ 20 GB",
+        "f5-tts" or "demucs" => "≈ 12 GB",
+        "basic-pitch" => "≈ 3 GB",
         _ => "请参考模型来源"
     };
 
@@ -85,13 +87,14 @@ public static class ModelInstallPlanner
         "qwen3-asr-17b" => 9L * 1024 * 1024 * 1024,
         "qwen3-forced-aligner" => 4L * 1024 * 1024 * 1024,
         "transkun" => 10L * 1024 * 1024 * 1024,
-        "roformer" or "yourmt3" => 1L * 1024 * 1024 * 1024,
-        "roformer-vocals" => 1536L * 1024 * 1024,
+        "roformer" or "yourmt3" or "roformer-vocals" => 12L * 1024 * 1024 * 1024,
         "piano" => 512L * 1024 * 1024,
         "faster-whisper" => 3L * 1024 * 1024 * 1024,
         "subtitle-edit" => 512L * 1024 * 1024,
-        "ace-step" => 16L * 1024 * 1024 * 1024,
-        "seed-vc" => 10L * 1024 * 1024 * 1024,
+        "ace-step" => 50L * 1024 * 1024 * 1024,
+        "seed-vc" => 20L * 1024 * 1024 * 1024,
+        "f5-tts" or "demucs" => 12L * 1024 * 1024 * 1024,
+        "basic-pitch" => 3L * 1024 * 1024 * 1024,
         _ => 2L * 1024 * 1024 * 1024
     };
 

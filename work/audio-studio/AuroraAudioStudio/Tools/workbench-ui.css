@@ -1,0 +1,26 @@
+/* Japanese needs its own metrics; do not use thin Latin UI fallback glyphs. */
+@font-face {
+  font-family: 'Aurora Japanese';
+  src: url('https://aurora-fonts.local/NotoSansJP.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+html:lang(ja) .gradio-container {
+  --font: 'Aurora Japanese', 'Noto Sans JP', 'Yu Gothic UI', sans-serif;
+  --body-text-size: 14px;
+  --block-label-text-size: 14px;
+  --block-label-text-weight: 500;
+  --button-large-text-size: 14px;
+  --button-large-text-weight: 600;
+  font-family: var(--font);
+  line-height: 1.65;
+}
+html:lang(ja) .prose { max-width: 72em; line-height: 1.75; }
+html:lang(ja) .gradio-container :is(input,textarea,button,select,label,.prose,.prose p,.prose a) { font-family: 'Aurora Japanese', 'Noto Sans JP', 'Yu Gothic UI', sans-serif; }
+html:lang(ja) .prose h1 { font-size: 24px; font-weight: 600; line-height: 1.4; margin: 4px 0 16px; text-align: left; }
+html:lang(ja) .prose h2 { font-size: 20px; font-weight: 600; line-height: 1.5; }
+html:lang(ja) .prose h3 { font-size: 17px; font-weight: 600; line-height: 1.5; }
+html:lang(ja) .prose p { margin-block: 8px 16px; }
+html:lang(ja) button { line-height: 1.5; }
+html:lang(ja) textarea { line-height: 1.75; }

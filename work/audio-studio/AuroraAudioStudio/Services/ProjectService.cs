@@ -18,7 +18,7 @@ public sealed class ProjectService(SettingsService settings, ModelCatalogService
         new("subtitles", "为视频生成字幕", "本地识别并输出时间轴字幕", "subtitles", "faster-whisper", "\uE8BA")
     ];
 
-    public async Task<AuroraProject> CreateAsync(string feature, string sourcePath, string modelId)
+    public async Task<AuroraProject> CreateAsync(string feature, string sourcePath, string modelId, CancellationToken cancellationToken = default)
     {
         var name = string.IsNullOrWhiteSpace(sourcePath) ? NewProjectName(feature) : Path.GetFileNameWithoutExtension(sourcePath);
         var project = new AuroraProject
@@ -27,10 +27,10 @@ public sealed class ProjectService(SettingsService settings, ModelCatalogService
             Feature = feature,
             SourcePath = sourcePath,
             ModelId = modelId,
-            SourceSha256 = await HashSourceAsync(sourcePath)
+            SourceSha256 = await HashSourceAsync(sourcePath, cancellationToken)
         };
         project.ModelVersion = catalog?.GetStates().FirstOrDefault(x => x.Id.Equals(modelId, StringComparison.OrdinalIgnoreCase))?.Version ?? "";
-        project.Parameters["appVersion"] = typeof(ProjectService).Assembly.GetName().Version?.ToString(3) ?? "1.8.1";
+        project.Parameters["appVersion"] = typeof(ProjectService).Assembly.GetName().Version?.ToString(3) ?? "unknown";
         var safeName = string.Join("-", name.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries)).Trim();
         if (string.IsNullOrWhiteSpace(safeName)) safeName = "Aurora-Project";
         project.FilePath = Path.Combine(settings.Current.ProjectsRoot, $"{safeName}-{project.Id[..8]}.arr");
@@ -40,7 +40,7 @@ public sealed class ProjectService(SettingsService settings, ModelCatalogService
 
     public IReadOnlyList<AuroraProject> Recent(int count = 8)
     {
-        Directory.CreateDirectory(settings.Current.ProjectsRoot);
+        if (!Directory.Exists(settings.Current.ProjectsRoot)) return [];
         return Directory.EnumerateFiles(settings.Current.ProjectsRoot, "*.arr", SearchOption.TopDirectoryOnly)
             .Concat(Directory.EnumerateFiles(settings.Current.ProjectsRoot, "*.aurora", SearchOption.TopDirectoryOnly))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -48,7 +48,7 @@ public sealed class ProjectService(SettingsService settings, ModelCatalogService
             .OrderByDescending(x => x.UpdatedAt).Take(count).ToList();
     }
 
-    public AuroraProject? Find(string id) => Recent(200).FirstOrDefault(x => x.Id == id);
+    public AuroraProject? Find(string id) => Recent(int.MaxValue).FirstOrDefault(x => x.Id == id);
 
     public IReadOnlyList<ArtifactDisplay> Artifacts(int count = 120) => Recent(300)
         .SelectMany(project => project.Artifacts.Select(artifact => new ArtifactDisplay
@@ -74,6 +74,10 @@ public sealed class ProjectService(SettingsService settings, ModelCatalogService
     {
         var project = Find(projectId);
         if (project is null) return;
+        project.Parameters["preset"] = task.Preset;
+        project.Parameters["trackMode"] = task.TrackMode;
+        project.Parameters["sourceLanguage"] = task.SourceLanguage;
+        project.Parameters["device"] = task.Device;
         project.UpdatedAt = DateTimeOffset.Now;
         foreach (var path in ResolveArtifacts(task))
             if (!project.Artifacts.Any(x => x.Path.Equals(path, StringComparison.OrdinalIgnoreCase)))
@@ -83,19 +87,8 @@ public sealed class ProjectService(SettingsService settings, ModelCatalogService
 
     private static IReadOnlyList<string> ResolveArtifacts(AuroraTaskRecord task)
     {
-        if (string.IsNullOrWhiteSpace(task.OutputPath)) return [];
-        if (File.Exists(task.OutputPath)) return [task.OutputPath];
-        if (!Directory.Exists(task.OutputPath)) return [];
-        var earliest = (task.StartedAt ?? task.CreatedAt).UtcDateTime.AddSeconds(-2);
-        try
-        {
-            return Directory.EnumerateFiles(task.OutputPath, "*", SearchOption.AllDirectories)
-                .Where(path => File.GetLastWriteTimeUtc(path) >= earliest)
-                .OrderByDescending(File.GetLastWriteTimeUtc)
-                .Take(200)
-                .ToList();
-        }
-        catch { return []; }
+        if (task.Status != AuroraTaskStates.Completed) return [];
+        return task.OutputFiles.Where(File.Exists).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
     }
 
     public async Task SaveAsync(AuroraProject project)
@@ -132,11 +125,11 @@ public sealed class ProjectService(SettingsService settings, ModelCatalogService
         }
     }
 
-    private static async Task<string> HashSourceAsync(string path)
+    private static async Task<string> HashSourceAsync(string path, CancellationToken cancellationToken)
     {
         if (!File.Exists(path)) return "";
         await using var stream = File.OpenRead(path);
-        return Convert.ToHexString(await SHA256.HashDataAsync(stream)).ToLowerInvariant();
+        return Convert.ToHexString(await SHA256.HashDataAsync(stream, cancellationToken)).ToLowerInvariant();
     }
 
     private static string NewProjectName(string feature) => feature switch

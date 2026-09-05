@@ -47,6 +47,17 @@ jobs:
       - name: Run regression checks
         run: dotnet run --project work/audio-studio/AuroraAudioStudio.UpdateFlowTests/AuroraAudioStudio.UpdateFlowTests.csproj --configuration Release -- work/audio-studio/AuroraAudioStudio.iss
 
+      - name: Verify behavior, localization, and published catalog
+        shell: pwsh
+        run: |
+          dotnet run --project work/audio-studio/AuroraAudioStudio.BehaviorTests --configuration Release
+          if ($LASTEXITCODE) { throw 'Behavior checks failed.' }
+          dotnet run --project work/audio-studio/AuroraAudioStudio.BehaviorTests --configuration Release --no-build -- --strings .
+          if ($LASTEXITCODE) { throw 'Localization checks failed.' }
+          dotnet run --project work/audio-studio/AuroraAudioStudio.BehaviorTests --configuration Release --no-build -- --catalog . --check
+          if ($LASTEXITCODE) { throw 'Published capability matrix is stale.' }
+          & ./work/audio-studio/tools/sync-release.ps1 -Check
+
       - name: Publish application
         run: dotnet publish work/audio-studio/AuroraAudioStudio/AuroraAudioStudio.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore -p:Platform=x64 -p:PublishSingleFile=false -p:ContinuousIntegrationBuild=true --output publish/ci-app
 

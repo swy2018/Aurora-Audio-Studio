@@ -86,12 +86,13 @@ Require(mainPageXaml.Contains("AutomationProperties.Name=\"本地 AI 创作工�
 var repositoryRoot = Path.GetFullPath(Path.Combine(audioStudioRoot, "..", ".."));
 var workflow = File.ReadAllText(Path.Combine(repositoryRoot, ".github", "workflows", "build.yml"));
 Require(workflow.Contains("AuroraAudioStudio.UpdateFlowTests", StringComparison.Ordinal), "CI must run the regression program before packaging.");
-Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains("<Version>1.8.1</Version>", StringComparison.Ordinal), "The application project must publish version 1.8.1.");
-Require(installerScript.Contains("MyAppVersion \"1.8.1\"", StringComparison.Ordinal), "The installer fallback version must match 1.8.1.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains("Aurora-Audio-Studio-1.8.1-Setup-x64.exe", StringComparison.Ordinal), "README download instructions must match 1.8.1.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains("Download 1.8.1", StringComparison.Ordinal), "The website download action must match 1.8.1.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-download-181.svg")).Contains(">1.8.1</text>", StringComparison.Ordinal), "The README download badge must render version 1.8.1.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", "readme-button-changelog-181.svg")).Contains(">1.8.1</text>", StringComparison.Ordinal), "The README changelog badge must render version 1.8.1.");
+using var releaseMetadata = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "release.json")));
+var currentVersion = releaseMetadata.RootElement.GetProperty("version").GetString()!;
+Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains($"<Version>{currentVersion}</Version>", StringComparison.Ordinal), "The application version must match release metadata.");
+Require(installerScript.Contains($"MyAppVersion \"{currentVersion}\"", StringComparison.Ordinal), "The installer version must match release metadata.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains($"Aurora-Audio-Studio-{currentVersion}-Setup-x64.exe", StringComparison.Ordinal), "README downloads must match release metadata.");
+Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains($"Download {currentVersion}", StringComparison.Ordinal), "Website downloads must match release metadata.");
+foreach (var badge in new[] { "download", "changelog" }) Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", $"readme-button-{badge}.svg")).Contains($">{currentVersion}</text>", StringComparison.Ordinal), "README badge version must match release metadata.");
 
 var qwen = new ModelDefinition("qwen3-tts-06b-base", "Qwen3-TTS 0.6B", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "model.safetensors", "Qwen", "huggingface", "Qwen/Qwen3-TTS-12Hz-0.6B-Base");
 var plan = ModelInstallPlanner.Create(qwen, @"D:\AuroraModels");
@@ -169,7 +170,8 @@ Require(mainPageSource.Contains("UpdateAllModelsButton_Click", StringComparison.
 Require(mainPageSource.Contains("private readonly UpdateFlowGuard modelInstallFlow = new();", StringComparison.Ordinal)
     && mainPageSource.Contains("if (!modelInstallFlow.TryBegin())", StringComparison.Ordinal)
     && mainPageSource.Contains("modelInstallFlow.End();", StringComparison.Ordinal), "Model installation must reject a second concurrent operation and release its guard afterward.");
-Require(mainPageSource.Contains("$\"{model.Name} · {value.Detail}\"", StringComparison.Ordinal), "Model installation progress must identify the active model.");
+Require(mainPageSource.Contains("$\"{catalog.DisplayName(model)} · {displayProgress.Detail}\"", StringComparison.Ordinal)
+    && mainPageSource.Contains("Stage = localization.Translate(value.Stage)", StringComparison.Ordinal), "Model installation progress must identify the localized model and stage while retaining transfer details.");
 Require(modelUpdateSource.Contains("PyTorch 组件较大，请耐心等待", StringComparison.Ordinal), "Large CUDA dependency installs must explain that an indeterminate wait can still be active.");
 Require(modelUpdateSource.Contains("IsProgressNoise", StringComparison.Ordinal)
     && modelUpdateSource.Contains("Using Python", StringComparison.Ordinal), "uv environment headers must not replace the active installation stage in the progress UI.");
@@ -266,7 +268,7 @@ Require(modelUpdateSource.Contains("setuptools", StringComparison.Ordinal), "Tra
 Require(backendSource.Contains("DetectTorchDeviceAsync", StringComparison.Ordinal)
     && backendSource.Contains("transkunInfo.ArgumentList.Add(device)", StringComparison.Ordinal), "TransKun must detect CUDA availability at runtime and fall back to CPU instead of blindly requesting CUDA.");
 var transkunPackageInstall = modelUpdateSource.IndexOf("正在部署 {model.Name}", StringComparison.Ordinal);
-var transkunCudaInstall = modelUpdateSource.IndexOf("正在下载并配置 TransKun CUDA 运行环境", StringComparison.Ordinal);
+var transkunCudaInstall = modelUpdateSource.IndexOf("正在配置 {model.Name} 的配套 CUDA 运行环境", StringComparison.Ordinal);
 Require(transkunPackageInstall >= 0 && transkunCudaInstall > transkunPackageInstall, "TransKun must install its package first and apply the matching CUDA torch/torchaudio pair last.");
 Require(modelUpdateSource.Contains("正在下载 ACE-Step 基础权重", StringComparison.Ordinal) && modelUpdateSource.Contains("acestep-v15-xl-turbo", StringComparison.Ordinal), "ACE-Step installation must download both the official base components and XL checkpoint.");
 Require(catalogSource.Contains("\"faster-whisper\"", StringComparison.Ordinal) && catalogSource.Contains("\"subtitle-edit\"", StringComparison.Ordinal)
@@ -289,8 +291,8 @@ Require(backendSource.Contains("ModelHealthPolicy.MissingRequirements", StringCo
     && backendSource.Contains("[\"TRANSFORMERS_OFFLINE\"] = \"1\"", StringComparison.Ordinal), "Seed-VC startup must validate every local dependency and enforce offline loading.");
 Require(modelUpdateSource.Contains("Distinct(StringComparer.OrdinalIgnoreCase)", StringComparison.Ordinal), "Refreshing PATH must remain idempotent instead of duplicating every entry after each model action.");
 Require(mainPageXaml.Contains("x:Name=\"UtilityScrollViewer\"", StringComparison.Ordinal), "The utility workspace must scroll instead of clipping controls at supported window sizes.");
-Require(mainPageXaml.Contains("AutomationProperties.Name=\"处理引擎选择\"", StringComparison.Ordinal)
-    && mainPageXaml.Contains("AutomationProperties.Name=\"创作引擎选择\"", StringComparison.Ordinal), "Model selectors must expose stable screen-reader names.");
+Require(mainPageXaml.Contains("ui:LocalizedText.NameKey=\"处理引擎选择\"", StringComparison.Ordinal)
+    && mainPageXaml.Contains("ui:LocalizedText.NameKey=\"创作引擎选择\"", StringComparison.Ordinal), "Model selectors must expose localized screen-reader names.");
 Require(mainPageXaml.Contains("x:Name=\"RunUtilityButton\"", StringComparison.Ordinal) && mainPageXaml.Contains("IsEnabled=\"False\"", StringComparison.Ordinal), "Utility processing must start disabled until valid source material and a ready engine are selected.");
 Require(mainPageSource.Contains("UpdateUtilityRunState", StringComparison.Ordinal), "Utility intake and model selection must continuously refresh whether processing can start.");
 Require(mainPageSource.Contains("SetStatus(localization.Get(\"ready\"))", StringComparison.Ordinal), "A no-update result must restore the persistent footer to a stable ready state.");
@@ -311,14 +313,14 @@ Require(mainPageSource.Contains("workbenchStartupCancellation?.Cancel()", String
 Require(mainPageSource.Contains("using Microsoft.Windows.Storage.Pickers;", StringComparison.Ordinal)
     && !mainPageSource.Contains("using Windows.Storage.Pickers;", StringComparison.Ordinal), "All file and folder actions must use the current Windows App SDK picker API.");
 Require(mainPageSource.Contains("new FileOpenPicker(App.MainWindow.AppWindow.Id)", StringComparison.Ordinal)
-    && Regex.Matches(mainPageSource, "new FolderPicker\\(App\\.MainWindow\\.AppWindow\\.Id\\)").Count == 2, "Every picker must be owned by the Aurora AppWindow without legacy HWND initialization.");
+    && Regex.Matches(mainPageSource, @"new (?:FolderPicker|FileOpenPicker)\(([^)]*)\)").Cast<Match>().All(match => match.Groups[1].Value == "App.MainWindow.AppWindow.Id"), "Every picker must be owned by the Aurora AppWindow without legacy HWND initialization.");
 foreach (var automationId in new[] { "MaintenanceScanButton", "MaintenanceDiagnosticsButton", "OpenLogsButton", "SaveSettingsButton", "OpenOutputButton", "ReleaseEngineButton" })
     Require(mainPageXaml.Contains($"x:Name=\"{automationId}\"", StringComparison.Ordinal), $"Primary action {automationId} must expose a stable UI Automation id.");
 var localizationSource = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "Services", "LocalizationService.cs"));
 Require(mainPageSource.Contains("RefreshCurrentPageHeading();", StringComparison.Ordinal), "Changing language must immediately refresh the current page title and subtitle.");
 Require(localizationSource.Contains("设置已保存。", StringComparison.Ordinal)
     && mainPageSource.Contains("localization.Translate(\"设置已保存。\")", StringComparison.Ordinal), "The settings-saved status must use the newly selected language immediately.");
-Require(mainPageSource.Contains("combo.Items.OfType<ComboBoxItem>()", StringComparison.Ordinal), "Collapsed ComboBox items must be localized even before their popup is opened.");
+Require(mainPageSource.Contains("LocalizedText.Refresh(localization)", StringComparison.Ordinal) && mainPageXaml.Contains("ui:LocalizedText.Key", StringComparison.Ordinal), "Authored localization keys must apply before a popup is opened without rewriting framework template children.");
 foreach (var phrase in new[] { "浅色", "深色", "跟随系统" })
     Require(localizationSource.Contains($"[\"{phrase}\"]", StringComparison.Ordinal), $"Theme option {phrase} must have translations.");
 Require(mainPageSource.Contains("LocalizeTree(target);", StringComparison.Ordinal), "A page that was collapsed during startup must be localized when first shown.");
