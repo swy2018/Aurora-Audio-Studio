@@ -36,6 +36,8 @@ foreach ($button in @('download','changelog')) {
 "@
 }
 $readme = [IO.File]::ReadAllText((Join-Path $repo 'README.md'))
+$packages = "<!-- current-packages:start -->`n当前源码构建 / Current source builds: ``Aurora-Audio-Studio-$version-Setup-x64.exe`` · ``Aurora-Audio-Studio-$version-arm64.dmg```n<!-- current-packages:end -->"
+$readme = [regex]::Replace($readme, '(?s)<!-- current-packages:start -->.*?<!-- current-packages:end -->', [Text.RegularExpressions.MatchEvaluator]{ param($m) $packages })
 foreach ($language in @('zh','en')) {
     $index = if ($language -eq 'zh') { 0 } else { 2 }
     $body = ($metadata.notes[$index] -split "`n" | ForEach-Object { $_ -replace '^• ', '- ' }) -join "`n"

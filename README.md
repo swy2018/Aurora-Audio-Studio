@@ -38,6 +38,10 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 
 ## 当前版本更新
 
+<!-- current-packages:start -->
+当前源码构建 / Current source builds: `Aurora-Audio-Studio-1.9.9-Setup-x64.exe` · `Aurora-Audio-Studio-1.9.9-arm64.dmg`
+<!-- current-packages:end -->
+
 <!-- release-notes-zh:start -->
 - Windows 与 Mac 统一版本号；同一个 Release 提供各自安装包与独立 SHA-256 校验文件。
 - 新增正式版与测试版更新通道，默认正式版。测试版需主动选择，切回正式版不自动降级。
