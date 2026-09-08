@@ -58,7 +58,7 @@ public sealed class StudioText(MacWorkspace workspace)
         ["workbenchAvailable"] = ["工作台可启动", "工作台可啟動", "Workbench available", "ワークベンチを起動できます"],
         ["workbenchConnected"] = ["工作台已连接", "工作台已連線", "Workbench connected", "ワークベンチ接続済み"],
         ["workbenchStarting"] = ["正在启动工作台…", "正在啟動工作台…", "Starting workbench…", "ワークベンチを起動中…"],
-        ["workbenchMissing"] = ["请先到模型管理安装或修复所选模型，然后进入工作台。", "請先到模型管理安裝或修復所選模型，然後進入工作台。", "Install or repair this model in Models, then open the workbench.", "モデル管理で導入・修復してからワークベンチを開いてください。"],
+        ["workbenchMissing"] = ["所选模型尚未就绪。点击“自动安装模型”可下载安装，或在模型中心检查与修复。", "所選模型尚未就緒。點擊「自動安裝模型」可下載安裝，或在模型中心檢查與修復。", "This model is not ready. Use Auto-install model here, or check and repair it in Models.", "モデルの準備ができていません。この画面で自動インストールするか、モデル管理で確認・修復してください。"],
         ["workbenchCanceled"] = ["工作台启动已取消。", "工作台啟動已取消。", "Workbench startup canceled.", "ワークベンチの起動をキャンセルしました。"],
         ["previewUnsupported"] = ["此格式暂不支持内嵌预览，素材已保留。", "此格式暫不支援內嵌預覽，素材已保留。", "Inline preview is unavailable for this format. The source is retained.", "この形式の埋め込みプレビューには未対応です。素材は保持されます。"],
         ["sourcesAdded"] = ["已添加 {0} 个素材", "已加入 {0} 個素材", "Added {0} sources", "素材を {0} 件追加しました"],
