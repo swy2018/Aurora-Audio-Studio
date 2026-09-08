@@ -4,15 +4,15 @@
 
 ## Platform
 
-Windows desktop
+Windows x64 and macOS Apple Silicon desktop
 
 ## Stack
 
-Windows desktop application built with .NET 10, WinUI 3, Windows App SDK, and WebView2. The native shell owns navigation, model management, settings, task status, updates, and local process orchestration. Embedded model tools render their local web interfaces inside Aurora.
+Desktop applications built with .NET 10: WinUI 3 / Windows App SDK / WebView2 on Windows, Avalonia and the native WebView on macOS. Shared services preserve task, settings, project, and result behavior. Each shell owns platform installation and process orchestration. Embedded model tools render their local web interfaces inside Aurora.
 
 ## Users
 
-Chinese-speaking Windows creators who want to produce music, voice, singing, stems, MIDI, and video subtitles locally without assembling separate AI tools by hand. The primary use is a personal production workstation with an NVIDIA GPU.
+Creators on Windows or Mac who want to produce music, voice, singing, stems, MIDI, and subtitles locally without assembling separate AI tools by hand. Windows NVIDIA workstations and Apple Silicon Macs are equally important audiences; requirements vary by engine.
 
 ## Product Purpose
 
@@ -24,17 +24,20 @@ Aurora unifies independently installed local audio models behind a four-language
 
 ## Operating Context
 
-- Runs on Windows as a desktop application.
+- Runs on Windows 10/11 x64 and macOS 26+ Apple Silicon. The current Mac real-device acceptance machine runs macOS 27 beta; do not claim all OS versions were tested.
 - Uses a configurable `LocalAI` root for models and tools.
 - Organizes results into a configurable `AI工作流` output root.
 - Supports system-adaptive Simplified Chinese, Traditional Chinese, English, and Japanese UI.
 - Language selection applies and saves immediately, independently of unsaved storage settings. Japanese uses bundled Noto Sans JP and an adapted type scale.
 - Does not start with Windows.
 - Models download only after an explicit install action.
+- Stable is the default application update channel. Beta is opt-in and includes later stable versions; changing back does not silently downgrade. Version 1.9.9 introduces channels, followed by a functionally identical 2.0.0-beta.1. The 2.0 final release requires testing first.
+- Website, README, and repository About present Aurora 2.0 with equal platform visibility. Website product screenshots are actual Mac captures, not generated product proof; explicitly identify the 1.9.9 capture version as functionally identical to Beta 1.
 
 ## Capabilities and Constraints
 
 - Music generation with ACE-Step 1.5 XL Turbo, plus optional on-demand MiniMax-Music3 with an isolated low-VRAM CUDA runtime.
+- The current MiniMax-Music3 CUDA backend and Faster-Whisper XXL binary are excluded on Mac. Native Whisper provides Mac subtitles. Six management-only models retain the same non-inference scope on both platforms.
 - AI voice creation with the default Qwen3-TTS 1.7B suite, plus optional Qwen3-TTS 0.6B and F5-TTS engines.
 - Singing voice cloning with Seed-VC at 44.1 kHz.
 - Two-stem vocals/instrumental separation with Vocals Revive V3e, six-stem separation with BS-RoFormer-SW, and optional Demucs 4 separation.

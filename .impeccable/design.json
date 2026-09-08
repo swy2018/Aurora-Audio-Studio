@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-08T20:14:27.477Z",
+  "title": "Design System: Aurora Audio Studio",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "paper",
+        "tonalRamp": [
+          "oklch(15.00% 0.00658 160.08)",
+          "oklch(26.43% 0.00658 160.08)",
+          "oklch(37.86% 0.00658 160.08)",
+          "oklch(49.29% 0.00658 160.08)",
+          "oklch(60.71% 0.00658 160.08)",
+          "oklch(72.14% 0.00658 160.08)",
+          "oklch(83.57% 0.00658 160.08)",
+          "oklch(95.00% 0.00658 160.08)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.00000 89.88)",
+          "oklch(26.43% 0.00000 89.88)",
+          "oklch(37.86% 0.00000 89.88)",
+          "oklch(49.29% 0.00000 89.88)",
+          "oklch(60.71% 0.00000 89.88)",
+          "oklch(72.14% 0.00000 89.88)",
+          "oklch(83.57% 0.00000 89.88)",
+          "oklch(95.00% 0.00000 89.88)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.02044 168.84)",
+          "oklch(26.43% 0.02044 168.84)",
+          "oklch(37.86% 0.02044 168.84)",
+          "oklch(49.29% 0.02044 168.84)",
+          "oklch(60.71% 0.02044 168.84)",
+          "oklch(72.14% 0.02044 168.84)",
+          "oklch(83.57% 0.02044 168.84)",
+          "oklch(95.00% 0.02044 168.84)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "muted",
+        "tonalRamp": [
+          "oklch(15.00% 0.02983 164.65)",
+          "oklch(26.43% 0.02983 164.65)",
+          "oklch(37.86% 0.02983 164.65)",
+          "oklch(49.29% 0.02983 164.65)",
+          "oklch(60.71% 0.02983 164.65)",
+          "oklch(72.14% 0.02983 164.65)",
+          "oklch(83.57% 0.02983 164.65)",
+          "oklch(95.00% 0.02983 164.65)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "line",
+        "tonalRamp": [
+          "oklch(15.00% 0.02115 166.04)",
+          "oklch(26.43% 0.02115 166.04)",
+          "oklch(37.86% 0.02115 166.04)",
+          "oklch(49.29% 0.02115 166.04)",
+          "oklch(60.71% 0.02115 166.04)",
+          "oklch(72.14% 0.02115 166.04)",
+          "oklch(83.57% 0.02115 166.04)",
+          "oklch(95.00% 0.02115 166.04)"
+        ]
+      },
+      "mint": {
+        "role": "neutral",
+        "displayName": "mint",
+        "tonalRamp": [
+          "oklch(15.00% 0.01428 169.25)",
+          "oklch(26.43% 0.01428 169.25)",
+          "oklch(37.86% 0.01428 169.25)",
+          "oklch(49.29% 0.01428 169.25)",
+          "oklch(60.71% 0.01428 169.25)",
+          "oklch(72.14% 0.01428 169.25)",
+          "oklch(83.57% 0.01428 169.25)",
+          "oklch(95.00% 0.01428 169.25)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "accent",
+        "tonalRamp": [
+          "oklch(15.00% 0.07590 172.29)",
+          "oklch(26.43% 0.07590 172.29)",
+          "oklch(37.86% 0.07590 172.29)",
+          "oklch(49.29% 0.07590 172.29)",
+          "oklch(60.71% 0.07590 172.29)",
+          "oklch(72.14% 0.07590 172.29)",
+          "oklch(83.57% 0.07590 172.29)",
+          "oklch(95.00% 0.07590 172.29)"
+        ]
+      },
+      "hover": {
+        "role": "primary",
+        "displayName": "hover",
+        "tonalRamp": [
+          "oklch(15.00% 0.07079 169.84)",
+          "oklch(26.43% 0.07079 169.84)",
+          "oklch(37.86% 0.07079 169.84)",
+          "oklch(49.29% 0.07079 169.84)",
+          "oklch(60.71% 0.07079 169.84)",
+          "oklch(72.14% 0.07079 169.84)",
+          "oklch(83.57% 0.07079 169.84)",
+          "oklch(95.00% 0.07079 169.84)"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "focus",
+        "tonalRamp": [
+          "oklch(15.00% 0.08878 169.37)",
+          "oklch(26.43% 0.08878 169.37)",
+          "oklch(37.86% 0.08878 169.37)",
+          "oklch(49.29% 0.08878 169.37)",
+          "oklch(60.71% 0.08878 169.37)",
+          "oklch(72.14% 0.08878 169.37)",
+          "oklch(83.57% 0.08878 169.37)",
+          "oklch(95.00% 0.08878 169.37)"
+        ]
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "scroll",
+        "value": "smooth",
+        "purpose": "Anchor navigation only; prefers-reduced-motion uses auto."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-min",
+        "value": "1400px"
+      },
+      {
+        "name": "tablet-max",
+        "value": "850px"
+      },
+      {
+        "name": "mobile-max",
+        "value": "520px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Download",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Shared primary action for either platform.",
+      "html": "<a class=\"ds-button\" href=\"#download\">Windows 下载 →</a>",
+      "css": ".ds-button{font-family:var(--studio-font,\"Segoe UI Variable Text\",\"Segoe UI\",\"PingFang SC\",\"Microsoft YaHei UI\",sans-serif);font-size:16px;line-height:1.65;display:inline-flex;align-items:center;justify-content:center;gap:18px;min-height:56px;padding:14px 28px;border-radius:12px;background:var(--accent,#165f4d);color:white;text-decoration:none;font-weight:600}.ds-button:hover{background:var(--hover,#0f513f);color:white}.ds-button:focus-visible{outline:3px solid #0f6a52;outline-offset:4px;}"
+    },
+    {
+      "name": "Workflow Tabs",
+      "kind": "nav",
+      "refersTo": "workflow-tab",
+      "description": "Task navigation; actual runtime supplies roving selection and keyboard behavior.",
+      "html": "<div class=\"ds-tabs\" role=\"tablist\" aria-label=\"Workflows\"><button role=\"tab\" aria-selected=\"true\">音乐创作</button><button role=\"tab\" aria-selected=\"false\">AI 分轨</button><button role=\"tab\" aria-selected=\"false\">MIDI 扒谱</button></div>",
+      "css": ".ds-tabs{display:grid;grid-template-columns:repeat(3,1fr);background:white;border:1px solid var(--line,#cfe0d8);border-radius:12px;overflow:hidden}.ds-tabs button{font-family:var(--studio-font,\"Segoe UI Variable Text\",\"Segoe UI\",\"PingFang SC\",\"Microsoft YaHei UI\",sans-serif);font-size:16px;line-height:1.65;border:0;border-right:1px solid var(--line,#cfe0d8);padding:25px 12px;background:transparent;color:var(--ink,#17241f);font-weight:600;cursor:pointer}.ds-tabs button:last-child{border-right:0}.ds-tabs button:hover{background:var(--mint,#eaf6f1)}.ds-tabs button[aria-selected=true]{background:var(--accent,#165f4d);color:white}.ds-tabs button:focus-visible{outline:3px solid #0f6a52;outline-offset:4px;outline-offset:-5px}"
+    },
+    {
+      "name": "Download Channel",
+      "kind": "input",
+      "refersTo": "channel-select",
+      "description": "Native channel selector with Stable as the initial option.",
+      "html": "<label class=\"ds-label\">下载通道 <select class=\"ds-select\"><option>正式版（推荐）</option><option>测试版</option></select></label>",
+      "css": ".ds-label{font-family:var(--studio-font,\"Segoe UI Variable Text\",\"Segoe UI\",\"PingFang SC\",\"Microsoft YaHei UI\",sans-serif);font-size:16px;line-height:1.65;display:flex;align-items:center;gap:18px;font-weight:600}.ds-select{font-family:var(--studio-font,\"Segoe UI Variable Text\",\"Segoe UI\",\"PingFang SC\",\"Microsoft YaHei UI\",sans-serif);font-size:16px;line-height:1.65;background:white;color:var(--ink,#17241f);border:1px solid var(--line,#cfe0d8);padding:10px 34px 10px 12px;border-radius:8px;max-width:100%;cursor:pointer}.ds-select:focus-visible{outline:3px solid #0f6a52;outline-offset:4px;}"
+    },
+    {
+      "name": "Workflow Copy",
+      "kind": "card",
+      "refersTo": "workflow-copy",
+      "description": "Flat task explanation paired with a real screenshot.",
+      "html": "<article class=\"ds-copy\"><h2>从文字到完整歌曲</h2><p>输入创作描述、歌词与风格，在本地模型工作台中完成创作。</p><a href=\"#models\">查看平台与模型支持 →</a></article>",
+      "css": ".ds-copy{font-family:var(--studio-font,\"Segoe UI Variable Text\",\"Segoe UI\",\"PingFang SC\",\"Microsoft YaHei UI\",sans-serif);font-size:16px;line-height:1.65;padding:32px;background:white;border-radius:12px;color:var(--ink,#17241f)}.ds-copy h2{font-size:clamp(29px,3.1vw,44px);line-height:1.15;letter-spacing:-.025em;margin:0 0 22px}.ds-copy p{font-size:18px;color:var(--muted,#52675d);margin:0 0 20px}.ds-copy a{color:var(--accent,#165f4d);text-underline-offset:.22em}.ds-copy a:hover{color:var(--hover,#0f513f)}.ds-copy a:focus-visible{outline:3px solid #0f6a52;outline-offset:4px;}"
+    },
+    {
+      "name": "Navigation and Language",
+      "kind": "nav",
+      "description": "Wrapping site links with a divider-separated language action.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#workflows\">功能</a><a href=\"#download\">下载</a><button>EN</button></nav>",
+      "css": ".ds-nav{font-family:var(--studio-font,\"Segoe UI Variable Text\",\"Segoe UI\",\"PingFang SC\",\"Microsoft YaHei UI\",sans-serif);font-size:16px;line-height:1.65;display:flex;align-items:center;gap:28px;flex-wrap:wrap}.ds-nav a{color:var(--accent,#165f4d);text-decoration:none}.ds-nav a:hover{color:var(--hover,#0f513f)}.ds-nav button{font-family:var(--studio-font,\"Segoe UI Variable Text\",\"Segoe UI\",\"PingFang SC\",\"Microsoft YaHei UI\",sans-serif);font-size:16px;line-height:1.65;background:transparent;border:0;color:var(--accent,#165f4d);padding:9px 12px;border-left:1px solid var(--line,#cfe0d8);cursor:pointer}.ds-nav a:focus-visible,.ds-nav button:focus-visible{outline:3px solid #0f6a52;outline-offset:4px;}"
+    },
+    {
+      "name": "Model Disclosure",
+      "kind": "custom",
+      "description": "Native disclosure with flat white enclosure.",
+      "html": "<details class=\"ds-details\"><summary>查看模型目录与许可证</summary><p>模型支持与许可证按目录数据展示。</p></details>",
+      "css": ".ds-details{font-family:var(--studio-font,\"Segoe UI Variable Text\",\"Segoe UI\",\"PingFang SC\",\"Microsoft YaHei UI\",sans-serif);font-size:16px;line-height:1.65;margin-top:30px;background:white;border-radius:12px;padding:20px 24px;color:var(--ink,#17241f)}.ds-details summary{cursor:pointer;font-weight:600}.ds-details summary:focus-visible{outline:3px solid #0f6a52;outline-offset:4px;}.ds-details p{color:var(--muted,#52675d);margin:20px 0 0}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Local Creator's Desk",
+    "overview": "Aurora uses calm white working surfaces, pale mint surroundings, forest text, and deep-green actions. Windows and Mac share that identity while retaining their own desktop typography, controls, and platform behavior. The approved dark rounded A-wave icon remains the application mark.\n\nThis refresh records the implemented website in docs/index.html, docs/styles.css, and docs/app.js. Its selected direction is workflow-first, candidate 5, seed 3bf050c7, as recorded in the page's direction contract. The website presents Aurora 2.0 with equal Windows and Mac visibility. Actual Mac 1.9.9 captures, explicitly identified as functionally identical to 2.0 Beta 1, provide product evidence. Version branding does not imply that 2.0 final has shipped; release truth remains in PRODUCT.md and the release data.\n\nThe frontmatter records website tokens, not replacement native-app tokens. The native rules below preserve application-specific behavior. The rendered references are .impeccable/review/desktop.png, mobile.png, and hero-repro.png; these visual records do not assert model inference success or release verification.",
+    "keyCharacteristics": [
+      "White and mint structure with forest text and clear green actions.",
+      "Equal platform visibility and a shared, calm studio identity.",
+      "Real product screenshots at their original proportions.",
+      "Flat surfaces, readable task information, and restrained geometry.",
+      "Visible keyboard focus, localized copy, and responsive reflow."
+    ],
+    "rules": [],
+    "dos": [
+      "**Do** let white, mint, and dividers carry the website structure.",
+      "**Do** give Windows and Mac equal download prominence.",
+      "**Do** retain real Mac screenshots, original proportions, and truthful capture-version captions.",
+      "**Do** preserve visible focus, keyboard tabs, reduced motion, and localized reflow.",
+      "**Do** keep native Windows and Mac typography and controls separate from web marketing tokens."
+    ],
+    "donts": [
+      "**Don't** introduce neon AI imagery, purple gradients, or generic glass panels.",
+      "**Don't** turn the six workflows into a repetitive card-heavy template.",
+      "**Don't** replace real application evidence with generated mockups or perspective effects.",
+      "**Don't** describe screenshot presence as inference, installation, or release verification.",
+      "**Don't** present the Aurora 2.0 brand as proof that 2.0 final has shipped."
+    ]
+  }
+}

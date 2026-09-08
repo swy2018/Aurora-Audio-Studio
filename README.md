@@ -5,8 +5,8 @@
   <p>Windows 与 macOS 的本地 AI 音频创作工作台</p>
   <p>
     <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img alt="官方网站" src="docs/assets/readme-button-website.svg"></a>
-    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.9.9" src="docs/assets/readme-button-download.svg"></a>
-    <a href="CHANGELOG.md"><img alt="更新日志" src="docs/assets/readme-button-changelog.svg"></a>
+    <a href="https://swy2018.github.io/Aurora-Audio-Studio/#download">Windows / macOS 下载</a> ·
+    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases">正式版与测试版 / Releases</a> · <a href="CHANGELOG.md">更新日志 / Changelog</a>
     <a href="#english"><img alt="English" src="docs/assets/readme-button-english.svg"></a>
   </p>
 </div>
