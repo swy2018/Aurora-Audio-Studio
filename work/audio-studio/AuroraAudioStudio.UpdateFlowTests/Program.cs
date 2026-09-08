@@ -128,7 +128,9 @@ var currentVersion = releaseMetadata.RootElement.GetProperty("version").GetStrin
 Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains($"<Version>{currentVersion}</Version>", StringComparison.Ordinal), "The application version must match release metadata.");
 Require(installerScript.Contains($"MyAppVersion \"{currentVersion}\"", StringComparison.Ordinal), "The installer version must match release metadata.");
 Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains($"Aurora-Audio-Studio-{currentVersion}-Setup-x64.exe", StringComparison.Ordinal), "README downloads must match release metadata.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html")).Contains($"Download {currentVersion}", StringComparison.Ordinal), "Website downloads must match release metadata.");
+var website = File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html"));
+Require(website.Contains("id=\"download-windows\"", StringComparison.Ordinal) && website.Contains("id=\"download-mac\"", StringComparison.Ordinal)
+    && website.Contains("id=\"download-channel\"", StringComparison.Ordinal), "Website must expose separate platform downloads and channel selection; the Node release-policy tests verify asset matching.");
 foreach (var badge in new[] { "download", "changelog" }) Require(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "assets", $"readme-button-{badge}.svg")).Contains($">{currentVersion}</text>", StringComparison.Ordinal), "README badge version must match release metadata.");
 
 var qwen = new ModelDefinition("qwen3-tts-06b-base", "Qwen3-TTS 0.6B", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "model.safetensors", "Qwen", "huggingface", "Qwen/Qwen3-TTS-12Hz-0.6B-Base");

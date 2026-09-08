@@ -56,6 +56,7 @@ if [[ -n "${AURORA_TEST_DATA_ROOT:-}" ]]; then
   plutil -insert LSEnvironment -json '{}' "$aurora_app/Contents/Info.plist"
   plutil -insert LSEnvironment.AURORA_DATA_ROOT -string "$AURORA_TEST_DATA_ROOT" "$aurora_app/Contents/Info.plist"
   plutil -insert LSEnvironment.AURORA_KEEP_TEST_FILES -string 1 "$aurora_app/Contents/Info.plist"
+  plutil -insert LSEnvironment.AURORA_VALIDATION_MODE -string 1 "$aurora_app/Contents/Info.plist"
 fi
 python3 "$aurora_root/work/audio-studio/tools/bundle-macos-tools.py" "$aurora_app"
 if [[ -n "${AURORA_SIGN_IDENTITY:-}" ]]; then

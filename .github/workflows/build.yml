@@ -57,6 +57,8 @@ jobs:
           dotnet run --project work/audio-studio/AuroraAudioStudio.BehaviorTests --configuration Release --no-build -- --catalog . --check
           if ($LASTEXITCODE) { throw 'Published capability matrix is stale.' }
           & ./work/audio-studio/tools/sync-release.ps1 -Check
+          node ./work/audio-studio/tools/test-release-policy.mjs
+          if ($LASTEXITCODE) { throw 'Website release-policy checks failed.' }
 
       - name: Publish application
         run: dotnet publish work/audio-studio/AuroraAudioStudio/AuroraAudioStudio.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore -p:Platform=x64 -p:PublishSingleFile=false -p:ContinuousIntegrationBuild=true --output publish/ci-app

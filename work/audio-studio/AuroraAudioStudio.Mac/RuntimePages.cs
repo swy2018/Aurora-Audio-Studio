@@ -12,6 +12,42 @@ public sealed partial class MainWindow
     private CancellationTokenSource? modelOperation;
     private string modelLog = "";
 
+    private async Task<bool> InstallFromFeatureAsync(string id)
+    {
+        if (modelOperation is not null || utilityRunning.Count > 0 || workspace.Queue.Items.Any(t => t.CanCancel)
+            || modelStudios.Values.Any(s => s.Connection is not null || s.Startup is not null))
+            throw new InvalidOperationException(L("请先结束正在运行的任务和模型工作台，再安装更新。"));
+        if (workspace.Settings.Current.SafeMode) throw new InvalidOperationException(L("安全模式已启用。"));
+        if (!workspace.Runtime.Models.TryGetValue(id, out var spec)) throw new InvalidOperationException(L("尚无 Mac 适配器"));
+        var caption = L("installModel") + " · " + workspace.Catalog.Find(id)!.Name;
+        var size = spec.Gb < .01 ? $"{spec.Gb * 1000:0.##} MB" : $"{spec.Gb:0.##} GB";
+        if (!await ConfirmModelChangeAsync(caption, L("featureInstallNotice") + "\n\n" + L("modelDownloadSize") + ": " + size
+            + "\n" + L("modelInstallLocation") + "\n" + workspace.Runtime.Current(id))) return false;
+        var progress = Txt(workspace.Localization.Format("modelInstalling", workspace.Catalog.Find(id)!.Name), 13);
+        var dialog = new Window { Title = caption, Width = 580, Height = 320, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+        dialog.Content = Panel(VStack(Txt(caption, 20, true), new ProgressBar { IsIndeterminate = true }, progress,
+            ActionButton(L("取消"), () => { modelOperation?.Cancel(); return Task.CompletedTask; })));
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+        timer.Tick += (_, _) => progress.Text = modelLog;
+        string? error = null;
+        dialog.Closing += (_, e) => { if (modelOperation is not null) { modelOperation.Cancel(); e.Cancel = true; } };
+        dialog.Opened += async (_, _) =>
+        {
+            timer.Start();
+            try
+            {
+                var action = workspace.Runtime.ModelStatus(id).Health.StartsWith("需要修复") ? "repair" : "install";
+                var success = await ModelActionAsync(id, action);
+                dialog.Close(success && workspace.Runtime.IsInstalled(id));
+            }
+            catch (Exception ex) { error = ex.Message; dialog.Close(false); }
+            finally { timer.Stop(); }
+        };
+        var installed = await dialog.ShowDialog<bool>(this);
+        if (error is not null) await MessageAsync(text["error"], error);
+        return installed;
+    }
+
     private void ReleaseOtherStudios(string? keep = null)
     {
         // Windows keeps music and voice independent; singing is exclusive with both.
@@ -24,6 +60,8 @@ public sealed partial class MainWindow
 
     private async Task RunUtilityAsync(string feature)
     {
+        if (!workspace.Engines.IsAvailable(workspace.Drafts[feature].ModelId)
+            && !await InstallFromFeatureAsync(workspace.Drafts[feature].ModelId)) return;
         if (!utilityRunning.Add(feature)) return;
         ReleaseOtherStudios();
         var draft = JsonSerializer.Deserialize<StudioDraft>(JsonSerializer.Serialize(workspace.Drafts[feature]))!;

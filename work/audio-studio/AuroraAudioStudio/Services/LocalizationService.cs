@@ -6,6 +6,7 @@ public sealed class LocalizationService(SettingsService settings)
     {
         ["home"] = ["首页", "首頁", "Home", "ホーム"],
         ["updateChannel"] = ["应用更新通道", "應用程式更新通道", "App update channel", "アプリ更新チャンネル"],
+        ["featureInstallNotice"] = ["将从官方来源下载并校验所选模型，运行环境和缓存空间另计。安装完成后可直接进入当前工作台。可在设置中更改模型目录。", "將從官方來源下載並驗證所選模型，執行環境和快取空間另計。安裝完成後可直接進入目前工作台。可在設定中變更模型目錄。", "Download and verify the selected model from its official source. Runtimes and caches need additional storage. Continue in this workspace after installation; change the model folder in Settings.", "公式配布元からモデルをダウンロードして検証します。実行環境とキャッシュには追加容量が必要です。導入後はこの画面で続行できます。保存先は設定で変更できます。"],
         ["updateStable"] = ["正式版", "正式版", "Stable", "正式版"],
         ["updateBeta"] = ["测试版（含正式版）", "測試版（含正式版）", "Beta and stable", "ベータ版と正式版"],
         ["updateChannelHint"] = ["保存设置后生效。测试版可能不稳定；切回正式版不会自动降级，将等待更新的正式版。", "儲存設定後生效。測試版可能不穩定；切回正式版不會自動降級，將等待更新的正式版。", "Save settings to apply. Betas may be unstable. Switching to Stable does not downgrade; it waits for a newer stable release.", "設定を保存すると反映されます。ベータ版は不安定な場合があります。正式版に切り替えてもダウングレードせず、新しい正式版を待ちます。"],

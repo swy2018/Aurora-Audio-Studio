@@ -48,7 +48,8 @@ public sealed partial class MainWindow : Window
     {
         text = new(workspace);
         settingsDraft = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(workspace.Settings.Current))!;
-        Title = "Aurora Audio Studio";
+        var validation = Environment.GetEnvironmentVariable("AURORA_VALIDATION_MODE") == "1";
+        Title = validation ? "Aurora QA · 隔离验证版" : "Aurora Audio Studio";
         Background = Canvas; Foreground = Ink;
         PropertyChanged += (_, e) => { if (e.Property == ActualThemeVariantProperty) UpdatePalette(); };
         ApplyTheme();
@@ -60,6 +61,7 @@ public sealed partial class MainWindow : Window
         brand.Children.Add(new Image { Source = new Bitmap(AssetLoader.Open(new Uri("avares://Aurora/Assets/AuroraIcon.png"))), Width = 38, Height = 38, VerticalAlignment = VerticalAlignment.Center });
         var brandText = new StackPanel { Spacing = 1, VerticalAlignment = VerticalAlignment.Center };
         brandText.Children.Add(Txt("Aurora", 20, true));
+        if (validation) brandText.Children.Add(Txt("QA · 隔离验证版", 13, true));
         brandText.Children.Add(Txt("Audio Studio", 11));
         brand.Children.Add(brandText);
         DockPanel.SetDock(brand, Dock.Top); sidebar.Children.Add(brand);

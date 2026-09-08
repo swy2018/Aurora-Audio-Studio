@@ -42,8 +42,8 @@ public sealed partial class MainWindow
         AutomationProperties.SetAutomationId(picker, "studio-model-" + feature);
         var open = new Button(); open.Classes.Add("primary");
         AutomationProperties.SetAutomationId(open, "open-model-workbench");
-        var install = ActionButton(L("模型管理"), () => { Navigate("models"); return Task.CompletedTask; });
-        AutomationProperties.SetAutomationId(install, "install-model-deferred");
+        var install = new Button { Content = L("installModel") };
+        AutomationProperties.SetAutomationId(install, "install-workbench-model");
         var actions = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), RowDefinitions = new RowDefinitions("Auto,Auto"), ColumnSpacing = 10, RowSpacing = 8 };
         picker.VerticalAlignment = VerticalAlignment.Center; actions.Children.Add(picker);
         var commands = Row(open, install); Grid.SetColumn(commands, 1); actions.Children.Add(commands);
@@ -80,6 +80,7 @@ public sealed partial class MainWindow
         string infoKey = "";
         state.Update = Update;
         state.Reset = Reset;
+        install.Click += async (_, _) => await SafeAsync(async () => { await InstallFromFeatureAsync(workspace.Drafts[feature].ModelId); Update(); });
         release.Click += (_, _) => { state.Dispose(); Reset(); };
         releaseTop.Click += (_, _) => { state.Dispose(); Reset(); };
         void Reset()
@@ -95,7 +96,7 @@ public sealed partial class MainWindow
             picker.ItemsSource = models.Select(workspace.Catalog.DisplayName).ToArray();
             picker.SelectedIndex = Math.Max(0, Array.FindIndex(models, m => m.Id == workspace.Drafts[feature].ModelId));
             updating = false;
-            open.Content = L("进入工作台"); install.Content = L("模型管理");
+            open.Content = L("进入工作台"); install.Content = L("installModel");
             cancel.Content = L("取消启动"); progressText.Text = L("正在启动本地引擎，首次加载可能需要几分钟…");
             emptyTitle.Text = L("开启你的下一次创作");
             emptyBody.Text = L("选择创作引擎，即刻在 Aurora 中开始。所有处理均在本机完成。");
@@ -103,6 +104,8 @@ public sealed partial class MainWindow
             engineLabel.Text = L("创作引擎"); locationLabel.Text = L("保存位置"); stateLabel.Text = L("运行状态");
             outputPath.Text = workspace.Settings.Current.OutputRoot; results.Content = L("查看我的成品"); release.Content = text["release"];
             var selected = models[picker.SelectedIndex];
+            install.IsVisible = !workspace.Workbenches.IsAvailable(selected.Id);
+            install.IsEnabled = modelOperation is null && state.Startup is null && !workspace.Settings.Current.SafeMode;
             modelName.Text = workspace.Catalog.DisplayName(selected);
             modelState.Text = workspace.Workbenches.IsAvailable(selected.Id) ? text["workbenchAvailable"]
                 : Directory.Exists(MacWorkspace.ModelPath(workspace.Settings.Current.LocalAiRoot, selected)) ? text["pendingMac"] : text["notInstalled"];
@@ -128,8 +131,12 @@ public sealed partial class MainWindow
             if (modelOperation is not null || workspace.Queue.Items.Any(t => t.Status is "running" or "preparing" or "waiting"))
             { await MessageAsync(text["error"], "请先等待当前处理或模型维护完成，再启动创作工作台。"); return; }
             var id = workspace.Drafts[feature].ModelId;
-            if (!workspace.Workbenches.IsAvailable(id))
-            { infoKey = "workbenchMissing"; Update(); return; }
+            try
+            {
+                if (!workspace.Workbenches.IsAvailable(id) && !await InstallFromFeatureAsync(id))
+                { infoKey = "workbenchMissing"; Update(); return; }
+            }
+            catch (Exception ex) { await MessageAsync(text["error"], ex.Message); return; }
             if (state.Connection is not null && state.ConnectedModel == id) return;
             ReleaseOtherStudios(feature);
             state.Dispose(); Reset();

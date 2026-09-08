@@ -117,14 +117,20 @@ public sealed partial class MainWindow
         }
         form.Children.Add(Txt(L(outputHint), 12));
         var run = ActionButton(L("开始处理"), () => RunUtilityAsync(feature)); run.Classes.Add("primary");
-        void UpdateRun() => run.IsEnabled = draft.Sources.Count > 0 && workspace.Engines.IsAvailable(draft.ModelId) && !utilityRunning.Contains(feature) && modelOperation is null && !workspace.Settings.Current.SafeMode;
+        var installModel = ActionButton(L("installModel"), async () => { await InstallFromFeatureAsync(draft.ModelId); if (current == feature) RenderPage(); }, "install-utility-model");
+        void UpdateRun()
+        {
+            run.IsEnabled = draft.Sources.Count > 0 && !utilityRunning.Contains(feature) && modelOperation is null && !workspace.Settings.Current.SafeMode;
+            installModel.IsVisible = !workspace.Engines.IsAvailable(draft.ModelId);
+            installModel.IsEnabled = modelOperation is null && !workspace.Settings.Current.SafeMode;
+        }
         model.SelectionChanged += (_, _) => UpdateRun(); UpdateRun();
         AutomationProperties.SetAutomationId(run, "utility-run");
         var buttons = new WrapPanel();
         foreach (var item in new Control[] { run, ActionButton(L("打开成品目录"), () => OpenPathAsync(workspace.Settings.Current.OutputRoot)), ActionButton(text["saveProject"], async () => { await workspace.SaveProjectAsync(draft); status.Text = text["saved"]; }, "save-utility-project") })
         { item.Margin = new Thickness(0, 0, 10, 6); buttons.Children.Add(item); }
         form.Children.Add(buttons);
-        if (!workspace.Engines.IsAvailable(draft.ModelId)) form.Children.Add(Txt(L("请先在模型管理中安装所选模型。"), 12));
+        form.Children.Add(installModel);
         form.Children.Add(Panel(VStack(Txt(L("在 Aurora 中完成"), 15, true), Txt(L("素材、处理过程与结果路径都留在同一个工作区；关闭应用时，Aurora 会安全结束由它启动的任务。"))), "#EFF7F3"));
         var logPanel = VStack(Txt(L("任务动态"), 18, true), Txt(L("当前会话的状态与处理记录"), 12),
             Panel(VStack(Txt(L("当前状态"), 12), Txt(utilityRunning.Contains(feature) ? "正在处理 · 可在任务中心查看进度或取消" : draft.Sources.Count == 0 ? L("等待添加素材") : text["waitingForModel"], 15, true))),
