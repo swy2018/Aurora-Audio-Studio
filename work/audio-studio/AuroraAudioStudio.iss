@@ -1,6 +1,6 @@
 #define MyAppName "Aurora Audio Studio"
 #ifndef MyAppVersion
-  #define MyAppVersion "1.9.9"
+  #define MyAppVersion "2.0.0-beta.1"
 #endif
 #ifndef PublishFolder
   #define PublishFolder "Aurora-Audio-Studio-1.9.9"
@@ -64,7 +64,7 @@ RestartApplications=no
 SetupLogging=yes
 SetupMutex=AuroraAudioStudioInstaller
 MinVersion=10.0.17763
-VersionInfoVersion=1.9.9.0
+VersionInfoVersion=2.0.0.0
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoCopyright={#MyAppCopyright}
 VersionInfoDescription=Aurora Audio Studio installer

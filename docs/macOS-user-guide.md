@@ -1,6 +1,6 @@
 # Aurora Audio Studio · Mac 使用说明
 
-版本：1.9.9，Apple Silicon（M 系列），macOS 26 或更高版本。
+版本：2.0.0-beta.1，Apple Silicon（M 系列），macOS 26 或更高版本。功能与 1.9.9 正式版相同，本包用于测试更新通道。
 
 ## 安装和打开
 
