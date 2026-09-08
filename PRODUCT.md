@@ -31,8 +31,8 @@ Aurora unifies independently installed local audio models behind a four-language
 - Language selection applies and saves immediately, independently of unsaved storage settings. Japanese uses bundled Noto Sans JP and an adapted type scale.
 - Does not start with Windows.
 - Models download only after an explicit install action.
-- Stable is the default application update channel. Beta is opt-in and includes later stable versions; changing back does not silently downgrade. Version 1.9.9 introduces channels, followed by a functionally identical 2.0.0-beta.1. The 2.0 final release requires testing first.
-- Website, README, and repository About present Aurora 2.0 with equal platform visibility. Website product screenshots are actual Mac captures, not generated product proof; explicitly identify the 1.9.9 capture version as functionally identical to Beta 1.
+- Stable is the default application update channel. Beta is opt-in and includes later stable versions; changing back does not silently downgrade. Stable and Beta releases use distinct version labels. Public copy describes available features, update choices, and relevant limitations rather than internal rollout procedures.
+- Website, README, and repository About present Aurora 2.0 with equal platform visibility. Website product screenshots are actual Mac captures, not generated product proof; identify the capture version without describing internal release procedures. Use professional, user-facing language and retain Beta, compatibility, licensing, and signing disclosures.
 
 ## Capabilities and Constraints
 
