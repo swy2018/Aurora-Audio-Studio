@@ -16,7 +16,7 @@
 
 ![Aurora Mac 实机首页](docs/assets/mac-2.0-home.png)
 
-2.0 当前处于 Beta 阶段；正式通道先使用 1.9.9。下方截图均来自 Mac 客户端，两端使用相同功能源码，保留各自系统控件。
+Aurora 提供正式版与 Beta 两个更新通道，支持 Windows 与 macOS。下方为 Mac 客户端实机截图；不同平台保留各自的系统控件。
 
 Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离、MIDI 扒谱和视频字幕集中到同一个本地入口。六个功能互相独立，可直接开始当前任务，不再需要手动管理多个启动器、端口和结果目录。
 
@@ -37,7 +37,7 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 
 在设置中选择“应用更新通道”，保存后生效。默认“正式版”；主动选择“测试版（含正式版）”才会收到 Beta。检查到更新并经你确认后，Aurora 会下载、校验并启动对应平台的安装流程；系统权限确认仍需你处理。
 
-当前发布顺序为 **1.9.9 正式版 → 2.0.0-beta.1 测试版 → 测试通过后再发布 2.0.0 正式版**。Beta 不会替换 GitHub 的 Latest 正式版。已装 Beta 后切回正式通道不会自动降级，等待后续正式版；如需回退，请先备份配置并手动恢复旧应用。
+日常使用推荐选择正式版；如需体验预发布版本，可在设置中选择 Beta 通道。Beta 可能存在兼容性或稳定性问题，升级前请备份重要配置。切回正式通道不会自动降级；如需回退，请恢复旧版应用及对应配置备份。
 
 ## 当前版本更新
 
@@ -184,7 +184,7 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 Aurora Audio Studio is a local AI audio production workspace for Windows and macOS. Both platforms provide six independent entry points for music, voice, singing, stems, MIDI, and subtitles. Windows x64 and Apple Silicon installers share a single Release, with separate checksums. See the platform table above and the [Mac guide](docs/macOS-user-guide.md).
 
-Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Version 2.0 remains a beta until its testing is complete.
+Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Beta releases are intended for users who want early access; back up important settings before upgrading.
 
 ### Current release notes
 
