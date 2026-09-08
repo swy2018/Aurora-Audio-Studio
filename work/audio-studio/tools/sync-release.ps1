@@ -26,11 +26,9 @@ Sync-Text $macProjectPath ([regex]::Replace($macProject, '<Version>[^<]+</Versio
 $installerPath = 'work/audio-studio/AuroraAudioStudio.iss'
 $installer = [IO.File]::ReadAllText((Join-Path $repo $installerPath))
 Sync-Text $installerPath ([regex]::Replace($installer, '(?m)^VersionInfoVersion=.*$', "VersionInfoVersion=$numericVersion.0"))
-foreach ($relative in @('README.md','docs/index.html','work/audio-studio/README-给音乐人的使用说明.md','work/audio-studio/AuroraAudioStudio.iss')) {
-    $text = [IO.File]::ReadAllText((Join-Path $repo $relative))
-    if ($previous -ne $version) { $text = $text.Replace($previous, $version) }
-    Sync-Text $relative $text
-}
+# Do not rewrite historical stable-download instructions when preparing a beta.
+$installer = [IO.File]::ReadAllText((Join-Path $repo $installerPath))
+Sync-Text $installerPath ([regex]::Replace($installer, '(?m)^(\s*#define MyAppVersion )"[^"]+"', "`$1`"$version`""))
 foreach ($button in @('download','changelog')) {
     $label = if ($button -eq 'download') { '下载' } else { '更新日志' }
     Sync-Text "docs/assets/readme-button-$button.svg" @"

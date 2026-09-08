@@ -1,8 +1,8 @@
 <div align="center">
   <img src="docs/assets/aurora-icon.png" width="104" alt="Aurora Audio Studio">
-  <h1>Aurora Audio Studio</h1>
+  <h1>Aurora Audio Studio 2.0</h1>
   <p><strong>让声音创作，回到创作本身。</strong></p>
-  <p>面向 Windows 的本地 AI 音频创作工作台</p>
+  <p>Windows 与 macOS 的本地 AI 音频创作工作台</p>
   <p>
     <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img alt="官方网站" src="docs/assets/readme-button-website.svg"></a>
     <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.9.9" src="docs/assets/readme-button-download.svg"></a>
@@ -11,13 +11,32 @@
   </p>
 </div>
 
-![Aurora Audio Studio 音乐创作工作台](docs/assets/aurora-workbench-music.png)
+![Aurora Mac 实机首页](docs/assets/mac-2.0-home.png)
+
+2.0 当前处于 Beta 阶段；正式通道先使用 1.9.9。下方截图均来自 Mac 客户端，两端使用相同功能源码，保留各自系统控件。
 
 Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离、MIDI 扒谱和视频字幕集中到同一个本地入口。六个功能互相独立，可直接开始当前任务，不再需要手动管理多个启动器、端口和结果目录。
 
-Mac 用户：Apple Silicon 本地版的安装与功能范围请看 [Mac 使用说明](docs/macOS-user-guide.md)，开发者构建及公证流程见 [Mac 发布说明](docs/macOS-release.md)。下文的 Windows 默认引擎和发布链接不代表 Mac 版已公开发布。
+## 选择你的平台
 
-## 1.9.9：可靠性与成果操作
+| | Windows | macOS |
+|---|---|---|
+| 系统 | Windows 10 / 11 x64 | macOS 26+ · Apple Silicon |
+| 安装包 | `Aurora-Audio-Studio-1.9.9-Setup-x64.exe` | `Aurora-Audio-Studio-1.9.9-arm64.dmg` |
+| 获取 | [正式版下载](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest) | [正式版下载](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest) |
+| 安装 | 运行标准安装程序 | 打开 DMG，拖入 Applications |
+| 加速 | NVIDIA RTX 推荐，依模型要求 | Apple Silicon 的 MPS / MLX 或 CPU，依模型实现 |
+| 指南 | [Windows 使用说明](work/audio-studio/README-给音乐人的使用说明.md) | [Mac 使用说明](docs/macOS-user-guide.md) |
+
+两端使用同一版本号、同一个 GitHub Release，分别下载自己平台的安装包和同名 `.sha256`。模型单独按需安装，不随安装包捆绑。Windows 签名状态与 Mac 公证状态分别说明，见[代码签名政策](CODE_SIGNING_POLICY.md)。
+
+### 正式版与测试版更新
+
+在设置中选择“应用更新通道”，保存后生效。默认“正式版”；主动选择“测试版（含正式版）”才会收到 Beta。检查到更新并经你确认后，Aurora 会下载、校验并启动对应平台的安装流程；系统权限确认仍需你处理。
+
+当前发布顺序为 **1.9.9 正式版 → 2.0.0-beta.1 测试版 → 测试通过后再发布 2.0.0 正式版**。Beta 不会替换 GitHub 的 Latest 正式版。已装 Beta 后切回正式通道不会自动降级，等待后续正式版；如需回退，请先备份配置并手动恢复旧应用。
+
+## 当前版本更新
 
 <!-- release-notes-zh:start -->
 - Windows 与 Mac 统一版本号；同一个 Release 提供各自安装包与独立 SHA-256 校验文件。
@@ -36,14 +55,14 @@ Mac 用户：Apple Silicon 本地版的安装与功能范围请看 [Mac 使用�
 
 | 工作流 | 默认引擎 | 可选引擎 | 主要输出 |
 |---|---|---|---|
-| 音乐创作 | ACE-Step 1.5 XL Turbo | MiniMax-Music3 | 完整歌曲、纯音乐与草稿 |
+| 音乐创作 | ACE-Step 1.5 XL Turbo | MiniMax-Music3（当前仅 Windows CUDA 后端） | 完整歌曲、纯音乐与草稿 |
 | AI 配音与声音克隆 | Qwen3-TTS 1.7B | Qwen3-TTS 0.6B、F5-TTS | 配音与克隆音频 |
 | 歌声克隆 | Seed-VC 44.1k | 按模型中心扩展 | 歌声与音色转换 |
 | 去人声 / AI 分轨 | BS-RoFormer Vocals Revive V3e（二轨） | BS-RoFormer-SW 六轨、Demucs 4 | 独立 WAV 音轨 |
 | AI 扒谱 | TransKun V2 | YourMT3+、ByteDance Piano、Basic Pitch | 标准 MIDI |
-| 视频 AI 字幕 | Faster-Whisper XXL | Small、Large v3 Turbo、Large v3 | SRT 与转写数据 |
+| 视频 AI 字幕 | Windows：Faster-Whisper XXL；Mac：原生 Whisper | Small、Large v3 Turbo、Large v3 | SRT 与转写数据 |
 
-模型与第三方工具保留各自上游许可。模型大小、显存建议、语言能力和来源会在模型中心逐项显示。
+模型与第三方工具保留各自上游许可。模型大小、显存建议、语言能力和来源会在模型中心逐项显示。下表是共同模型目录：MiniMax-Music3 的当前 CUDA 后端及 Faster-Whisper XXL 二进制不支持 Mac；其余“仅下载管理”项目在 Windows 中也没有推理入口，不应视作可运行模型。
 
 <!-- model-capabilities:start -->
 <details>
@@ -82,7 +101,7 @@ Mac 用户：Apple Silicon 本地版的安装与功能范围请看 [Mac 使用�
 </details>
 <!-- model-capabilities:end -->
 
-## 安装
+## Windows 安装
 
 ### 系统要求
 
@@ -118,7 +137,7 @@ Aurora 本身不提供云端生成服务。素材与生成结果留在用户指�
 
 ## 开发
 
-Aurora 桌面端使用 .NET 10、WinUI 3 和 Windows App SDK 构建，官网使用原生 HTML、CSS 与 ES Modules，可直接部署到 GitHub Pages。
+两端均使用 .NET 10。Windows 使用 WinUI 3 / Windows App SDK，Mac 使用 Avalonia，并共享设置、任务和成果等服务。官网使用原生 HTML、CSS 与 ES Modules，部署到 GitHub Pages。Mac 的本地编译、签名和公证见 [Mac 发布说明](docs/macOS-release.md)。
 
 ```powershell
 dotnet restore .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj --runtime win-x64
@@ -137,6 +156,8 @@ dotnet run --project .\work\audio-studio\AuroraAudioStudio.UpdateFlowTests\Auror
 ```text
 docs/                                      官方网站
 work/audio-studio/AuroraAudioStudio/       WinUI 3 桌面端
+work/audio-studio/AuroraAudioStudio.Mac/   Avalonia Mac 桌面端
+work/audio-studio/AuroraAudioStudio.Core/  共享服务与 Mac 运行时桥接
 work/audio-studio/AuroraAudioStudio.iss    Inno Setup 安装脚本
 model-manifest.json                        固定下载包的可验证模型更新清单
 CHANGELOG.md                               中英双语更新日志
@@ -154,9 +175,11 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 ## English
 
-Aurora Audio Studio is a local AI audio production workspace for Windows. Its six independent features provide direct entry points for music generation, voice cloning, singing conversion, stem separation, MIDI transcription, and video subtitles.
+Aurora Audio Studio is a local AI audio production workspace for Windows and macOS. Both platforms provide six independent entry points for music, voice, singing, stems, MIDI, and subtitles. Windows x64 and Apple Silicon installers share a single Release, with separate checksums. See the platform table above and the [Mac guide](docs/macOS-user-guide.md).
 
-### Version 1.9.9: reliability and results
+Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Version 2.0 remains a beta until its testing is complete.
+
+### Current release notes
 
 <!-- release-notes-en:start -->
 - Windows and Mac share one version and Release, with separate installers and SHA-256 checksum files.

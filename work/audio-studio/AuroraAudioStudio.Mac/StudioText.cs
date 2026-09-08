@@ -125,7 +125,7 @@ public sealed class StudioText(MacWorkspace workspace)
         ["sendHost"] = ["发送到 Aurora", "傳送到 Aurora", "Send to Aurora", "Aurora に送信"],
         ["webAudio"] = ["选择本地音频试听", "選擇本機音訊試聽", "Choose local audio to preview", "ローカル音声を選んで試聴"],
         ["received"] = ["Aurora 已收到：", "Aurora 已收到：", "Aurora received: ", "Aurora が受信："],
-        ["aboutBody"] = ["为本地音频创作而设计。基于 Aurora 1.9.0 源码，保留原版六大功能和四语言资源。", "為本機音訊創作而設計。基於 Aurora 1.9.0 原始碼，保留原版六大功能和四語言資源。", "Designed for local audio creation. Based on Aurora 1.9.0, preserving its six workflows and four languages.", "ローカル音声制作のために。Aurora 1.9.0 を基に、6つの機能と4言語のリソースを引き継いでいます。"],
+        ["aboutBody"] = ["为 Windows 与 Mac 的本地音频创作而设计。六类工作流、四种界面语言，模型与作品由你掌控。", "為 Windows 與 Mac 的本機音訊創作而設計。六類工作流程、四種介面語言，模型與作品由你掌控。", "Local audio creation for Windows and Mac. Six workflows, four interface languages, and control over your models and results.", "Windows と Mac のローカル音声制作。6つのワークフロー、4言語の UI。モデルと成果は自分で管理できます。"],
         ["aboutScope"] = ["模型与运行环境在本机管理。部分原版可选引擎尚无 Mac 适配器，模型页会明确标注。", "模型與執行環境在本機管理。部分原版選用引擎尚無 Mac 轉接器，模型頁會明確標示。", "Models and runtimes are managed locally. Original optional engines without a Mac adapter are explicitly marked.", "モデルと実行環境をローカル管理します。Mac 未対応のオプションエンジンはモデル画面に表示します。"],
         ["error"] = ["操作未完成", "操作未完成", "Action not completed", "操作を完了できませんでした"],
         ["retryWeb"] = ["重新加载页面", "重新載入頁面", "Reload page", "ページを再読み込み"],

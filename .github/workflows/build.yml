@@ -77,6 +77,11 @@ jobs:
             throw "Inno Setup failed with exit code $LASTEXITCODE"
           }
 
+      - name: Verify installed application launch
+        shell: pwsh
+        run: |
+          & ./work/audio-studio/tools/Test-InstalledApp.ps1 -Installer "publish/ci-installer/Aurora-Audio-Studio-$env:AURORA_VERSION-Setup-x64.exe" -EvidenceRoot "$env:RUNNER_TEMP/Aurora-installed-acceptance"
+
       - name: Create SHA-256 checksum
         shell: pwsh
         run: |
