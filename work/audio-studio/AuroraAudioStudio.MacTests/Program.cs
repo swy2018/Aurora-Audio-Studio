@@ -48,6 +48,14 @@ try
         && !Directory.Exists(utilityPath), "utility output naming matches Windows while Python retains directory creation ownership");
     Check(MacWorkspace.Features.All(f => workspace.Catalog.Definitions.Any(m => m.Feature == f)), "six feature groups preserved");
     Check(!Directory.Exists(workspace.Settings.Current.LocalAiRoot), "startup does not create or download model environments");
+    workspace.Drafts["music"].ModelId = "minimax-music3";
+    workspace.Drafts["voice"].ModelId = "indextts-2-5";
+    workspace.SaveDrafts();
+    var migrated = new MacWorkspace(workspace.Settings.AppDataRoot);
+    Check(migrated.Drafts["music"].ModelId == "ace-step" && migrated.Drafts["voice"].ModelId == "qwen3-tts-custom",
+        "legacy unsupported and management-only model selections recover to the displayed runnable Mac defaults");
+    Check(migrated.LoadProject(new AuroraProject { Feature = "music", ModelId = "minimax-music3" }).ModelId == "ace-step",
+        "imported Windows-only project model cannot disagree with the visible Mac selection");
     Check(workspace.Catalog.Definitions.All(m => !workspace.Engines.IsAvailable(m.Id)), "unconfigured models cannot generate");
     Check(workspace.Catalog.Definitions.All(m => !workspace.Workbenches.IsAvailable(m.Id)), "model workbench entry does not imply an installed engine");
     await Reject(() => workspace.Workbenches.StartAsync("ace-step", "zh-CN", CancellationToken.None), "missing original workbench fails immediately without downloading");
