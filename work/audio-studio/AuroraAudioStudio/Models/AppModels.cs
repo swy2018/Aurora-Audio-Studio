@@ -6,9 +6,10 @@ public sealed class AppSettings
 {
     public string Language { get; set; } = "auto";
     public string Theme { get; set; } = "light";
-    public string LocalAiRoot { get; set; } = @"C:\LocalAI";
+    public string LocalAiRoot { get; set; } = OperatingSystem.IsWindows() ? @"C:\LocalAI" : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Aurora", "Models");
     public string OutputRoot { get; set; } = SettingsDefaults.OutputRoot();
     public bool AutoCheckAppUpdates { get; set; } = true;
+    public string AppUpdateChannel { get; set; } = "stable";
     public string? LastAppUpdateCheckDate { get; set; }
     public bool AutoCheckModelUpdates { get; set; } = true;
     public bool ConfirmLargeModelDownloads { get; set; } = true;
@@ -23,6 +24,7 @@ public static class SettingsDefaults
     public static string OutputRoot()
     {
         var profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        if (!OperatingSystem.IsWindows()) return Path.Combine(profile, "Aurora", "Output");
         var preferred = Path.Combine(profile, "OneDrive", "云", "桌面", "AI工作流");
         if (Directory.Exists(Path.GetDirectoryName(preferred)!)) return preferred;
         var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);

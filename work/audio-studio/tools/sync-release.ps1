@@ -3,7 +3,8 @@ $ErrorActionPreference = 'Stop'
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
 $metadata = Get-Content -Raw -LiteralPath (Join-Path $repo 'docs/release.json') | ConvertFrom-Json
 $version = [string]$metadata.version
-if ($version -notmatch '^\d+\.\d+\.\d+$' -or $metadata.notes.Count -ne 4) { throw 'Invalid release metadata' }
+if ($version -notmatch '^(\d+\.\d+\.\d+)(?:-beta\.([1-9]|[1-8][0-9]|9[0-8]))?$' -or $metadata.notes.Count -ne 4) { throw 'Invalid release metadata' }
+$numericVersion = $version.Split('-')[0]
 $utf8 = [Text.UTF8Encoding]::new($false)
 function Sync-Text([string]$relative, [string]$text) {
     $path = Join-Path $repo $relative
@@ -17,8 +18,14 @@ $projectPath = 'work/audio-studio/AuroraAudioStudio/AuroraAudioStudio.csproj'
 $project = [IO.File]::ReadAllText((Join-Path $repo $projectPath))
 $previous = [regex]::Match($project, '<Version>([^<]+)</Version>').Groups[1].Value
 $project = [regex]::Replace($project, '<Version>[^<]+</Version>', "<Version>$version</Version>")
-$project = [regex]::Replace($project, '<(FileVersion|AssemblyVersion)>[^<]+</\1>', "<`$1>$version.0</`$1>")
+$project = [regex]::Replace($project, '<(FileVersion|AssemblyVersion)>[^<]+</\1>', "<`$1>$numericVersion.0</`$1>")
 Sync-Text $projectPath $project
+$macProjectPath = 'work/audio-studio/AuroraAudioStudio.Mac/AuroraAudioStudio.Mac.csproj'
+$macProject = [IO.File]::ReadAllText((Join-Path $repo $macProjectPath))
+Sync-Text $macProjectPath ([regex]::Replace($macProject, '<Version>[^<]+</Version>', "<Version>$version</Version>"))
+$installerPath = 'work/audio-studio/AuroraAudioStudio.iss'
+$installer = [IO.File]::ReadAllText((Join-Path $repo $installerPath))
+Sync-Text $installerPath ([regex]::Replace($installer, '(?m)^VersionInfoVersion=.*$', "VersionInfoVersion=$numericVersion.0"))
 foreach ($relative in @('README.md','docs/index.html','work/audio-studio/README-给音乐人的使用说明.md','work/audio-studio/AuroraAudioStudio.iss')) {
     $text = [IO.File]::ReadAllText((Join-Path $repo $relative))
     if ($previous -ne $version) { $text = $text.Replace($previous, $version) }
@@ -55,6 +62,6 @@ $changelog = [IO.File]::ReadAllText((Join-Path $repo 'CHANGELOG.md')).Replace("`
 # Keep historical release text intact; regenerate only the current entry.
 $pattern = '(?ms)^## ' + [regex]::Escape($version) + '.*?(?=^## |\z)'
 if ([regex]::IsMatch($changelog, $pattern)) { $changelog = [regex]::Replace($changelog, $pattern, [Text.RegularExpressions.MatchEvaluator]{ param($m) $note + "`n" }) }
-else { $changelog = [regex]::Replace($changelog, '(?m)^(# [^\n]+\n)', [Text.RegularExpressions.MatchEvaluator]{ param($m) $m.Value + "`n" + $note + "`n" }, 1) }
+else { $changelog = [regex]::Replace($changelog, '\A(# [^\n]+)\n+', [Text.RegularExpressions.MatchEvaluator]{ param($m) $m.Groups[1].Value + "`n`n" + $note + "`n" }, 1) }
 Sync-Text 'CHANGELOG.md' $changelog
 Write-Output "Release $version metadata verified."

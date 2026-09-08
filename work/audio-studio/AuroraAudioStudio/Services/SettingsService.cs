@@ -7,14 +7,18 @@ namespace AuroraAudioStudio.Services;
 public sealed class SettingsService
 {
     private readonly JsonSerializerOptions options = new() { WriteIndented = true };
-    public string AppDataRoot { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aurora Audio Studio");
+    public string AppDataRoot { get; } = PlatformDataRoot;
     public string SettingsPath => Path.Combine(AppDataRoot, "settings.json");
     public string LogsRoot => Path.Combine(AppDataRoot, "Logs");
     public string UpdatesRoot => Path.Combine(AppDataRoot, "Updates");
     public AppSettings Current { get; private set; } = new();
 
     public static string DefaultDataRoot => Environment.GetEnvironmentVariable("AURORA_DATA_ROOT") is { Length: > 0 } isolated && Path.IsPathFullyQualified(isolated)
-        ? Path.GetFullPath(isolated) : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aurora Audio Studio");
+        ? Path.GetFullPath(isolated) : PlatformDataRoot;
+
+    private static string PlatformDataRoot => OperatingSystem.IsMacOS()
+        ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "Aurora Audio Studio")
+        : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aurora Audio Studio");
 
     public string? StorageWarning { get; private set; }
     public SettingsService(string? appDataRoot = null)

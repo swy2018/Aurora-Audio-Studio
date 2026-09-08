@@ -5,6 +5,10 @@ public sealed class LocalizationService(SettingsService settings)
     private readonly Dictionary<string, string[]> values = new(StringComparer.OrdinalIgnoreCase)
     {
         ["home"] = ["首页", "首頁", "Home", "ホーム"],
+        ["updateChannel"] = ["应用更新通道", "應用程式更新通道", "App update channel", "アプリ更新チャンネル"],
+        ["updateStable"] = ["正式版", "正式版", "Stable", "正式版"],
+        ["updateBeta"] = ["测试版（含正式版）", "測試版（含正式版）", "Beta and stable", "ベータ版と正式版"],
+        ["updateChannelHint"] = ["保存设置后生效。测试版可能不稳定；切回正式版不会自动降级，将等待更新的正式版。", "儲存設定後生效。測試版可能不穩定；切回正式版不會自動降級，將等待更新的正式版。", "Save settings to apply. Betas may be unstable. Switching to Stable does not downgrade; it waits for a newer stable release.", "設定を保存すると反映されます。ベータ版は不安定な場合があります。正式版に切り替えてもダウングレードせず、新しい正式版を待ちます。"],
         ["languageImmediateHint"] = ["选择语言后立即生效并保存，无需点击下方的保存按钮。", "選擇語言後立即生效並儲存，無需點擊下方的儲存按鈕。", "Language changes apply and save immediately; no Save button is needed.", "言語を選ぶとすぐに反映・保存されます。下の保存ボタンを押す必要はありません。"],
         ["languageChanged"] = ["已切换为简体中文。", "已切換為繁體中文。", "Switched to English.", "日本語に切り替えました。"],
         ["sourcesAdded"] = ["已添加 {0} 个素材，等待开始处理", "已加入 {0} 個素材，等待開始處理", "{0} files added, ready to process", "{0} 件の素材を追加しました。処理を開始できます。"],

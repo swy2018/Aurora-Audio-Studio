@@ -5,7 +5,7 @@
   <p>面向 Windows 的本地 AI 音频创作工作台</p>
   <p>
     <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img alt="官方网站" src="docs/assets/readme-button-website.svg"></a>
-    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.9.0" src="docs/assets/readme-button-download.svg"></a>
+    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases/latest"><img alt="下载 Aurora Audio Studio 1.9.9" src="docs/assets/readme-button-download.svg"></a>
     <a href="CHANGELOG.md"><img alt="更新日志" src="docs/assets/readme-button-changelog.svg"></a>
     <a href="#english"><img alt="English" src="docs/assets/readme-button-english.svg"></a>
   </p>
@@ -15,16 +15,15 @@
 
 Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离、MIDI 扒谱和视频字幕集中到同一个本地入口。六个功能互相独立，可直接开始当前任务，不再需要手动管理多个启动器、端口和结果目录。
 
-## 1.9.0：可靠性与成果操作
+Mac 用户：Apple Silicon 本地版的安装与功能范围请看 [Mac 使用说明](docs/macOS-user-guide.md)，开发者构建及公证流程见 [Mac 发布说明](docs/macOS-release.md)。下文的 Windows 默认引擎和发布链接不代表 Mac 版已公开发布。
+
+## 1.9.9：可靠性与成果操作
 
 <!-- release-notes-zh:start -->
-- 安装与升级先验证候选目录，Python 环境保持固定路径；同一修订可继续下载，保留可回退版本。
-- 队列保留未完成任务与完整参数，支持重新执行；修复重复提交、晚到进度、取消误停和同名素材冲突。
-- 六类结果使用明确文件清单，创作工作台自动收录完成音频；新增试听、MIDI 信息、字幕编辑副本、导出与复制路径。
-- 模型中心区分文件齐全、短任务验证、仅下载管理与外部工具；字幕素材语言不再跟随界面语言。
-- 修正小窗口工作台布局、网站语言与键盘语义；官网、README、关于和更新日志共享发布数据。
-- 重做简体中文、繁体中文、英语、日语本地化；语言选择立即生效，保留工作台输入。日语采用随附 Noto Sans JP 字体与独立排版。
-- 修正音频试听关闭时的播放器释放顺序；ACE-Step 改用 PyTorch 后端与分阶段卸载，Seed-VC 的 CUDA 与界面依赖统一解析并校验。
+- Windows 与 Mac 统一版本号；同一个 Release 提供各自安装包与独立 SHA-256 校验文件。
+- 新增正式版与测试版更新通道，默认正式版。测试版需主动选择，切回正式版不自动降级。
+- 修复混合平台发布的安装包选择与校验；支持 Beta 数字排序及 Beta 升级到后续正式版。
+- Mac 接入六类本地音频工作流与官方字幕编辑器；原有模型、设置及作品继续保留。
 <!-- release-notes-zh:end -->
 
 “文件齐全”不代表已完成推理。模型中心在真实任务成功后记录当前模型版本、时间和设备。未接入工作台的模型明确标为“仅模型管理”，MiniMax 等未在本机验收的可选模型不承诺实测通过。
@@ -95,7 +94,7 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 ### 标准安装
 
 1. 打开 [Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest)。
-2. 下载 `Aurora-Audio-Studio-1.9.0-Setup-x64.exe` 和同名 `.sha256` 文件。
+2. 下载 `Aurora-Audio-Studio-1.9.9-Setup-x64.exe` 和同名 `.sha256` 文件。
 3. 运行安装程序，阅读并接受 GNU GPL v3.0，选择安装位置和桌面快捷方式。
 4. 首次打开 Aurora，直接选择需要的功能；需要时再确认模型、处理记录和成品目录。
 
@@ -124,7 +123,7 @@ Aurora 桌面端使用 .NET 10、WinUI 3 和 Windows App SDK 构建，官网使�
 ```powershell
 dotnet restore .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj --runtime win-x64
 dotnet build .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -p:Platform=x64
-dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.9.0
+dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.9.9
 ```
 
 运行回归检查：
@@ -157,19 +156,16 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 Aurora Audio Studio is a local AI audio production workspace for Windows. Its six independent features provide direct entry points for music generation, voice cloning, singing conversion, stem separation, MIDI transcription, and video subtitles.
 
-### Version 1.9.0: reliability and results
+### Version 1.9.9: reliability and results
 
 <!-- release-notes-en:start -->
-- Validate candidate deployments before activation. Python environments stay at fixed paths; same-revision downloads resume and previous versions remain recoverable.
-- Preserve unfinished tasks and their full parameters for reruns; fix duplicate submissions, late progress, cross-task cancellation, and filename collisions.
-- Register explicit output manifests, including completed creative-workbench audio. Add audio playback, MIDI information, subtitle-edit copies, export, and path copying.
-- Distinguish files present, short-task verification, download-only models, and external tools. Source-language selection is independent of UI language.
-- Improve narrow-window workspaces, website localization and keyboard semantics; public release information shares one source.
-- Rebuild Simplified Chinese, Traditional Chinese, English, and Japanese localization. Language changes apply immediately without losing workbench inputs. Japanese uses bundled Noto Sans JP and language-specific typography.
-- Correct audio-preview disposal; use ACE-Step's PyTorch backend with staged offloading, and resolve and validate Seed-VC CUDA and UI dependencies together.
+- Windows and Mac share one version and Release, with separate installers and SHA-256 checksum files.
+- Add Stable and Beta update channels, defaulting to Stable. Betas are opt-in; switching back never silently downgrades.
+- Select and verify the exact platform package, order beta revisions numerically, and upgrade betas to later stable releases.
+- Bring six local audio workflows and the official subtitle editor to Mac while preserving models, settings, and results.
 <!-- release-notes-en:end -->
 
-Read the [capability matrix](docs/capabilities.json) and [acceptance report](docs/validation-1.9.0.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. MIDI editing/playback requires your own music application; audio playback and subtitle-copy editing are available in Results.
+Read the [capability matrix](docs/capabilities.json) and [acceptance report](docs/validation-1.9.9.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. MIDI editing/playback requires your own music application; audio playback and subtitle-copy editing are available in Results.
 
 ### Local by design
 
@@ -178,7 +174,7 @@ Aurora does not operate a cloud generation service. Media and generated output r
 ### Install
 
 1. Open the latest [Release](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest).
-2. Download `Aurora-Audio-Studio-1.9.0-Setup-x64.exe` and its `.sha256` file.
+2. Download `Aurora-Audio-Studio-1.9.9-Setup-x64.exe` and its `.sha256` file.
 3. Run Setup, review GNU GPL v3.0, and choose the destination and shortcut options.
 4. Choose a feature on first launch; confirm model, processing-record, and output folders only when needed.
 

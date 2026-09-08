@@ -1,5 +1,7 @@
 # Code signing policy
 
+macOS 的 Apple Developer ID 签名与本地验收流程单独记录在 [Mac 发布说明](docs/macOS-release.md)。以下 SignPath 范围及审批流程仅适用于 Windows，不用于 Apple 证书。Mac 安装包会签署其内嵌运行时及工具，但不独立发布第三方工具，也不签署模型。
+
 [中文](#中文) | [English](#english)
 
 ## 中文

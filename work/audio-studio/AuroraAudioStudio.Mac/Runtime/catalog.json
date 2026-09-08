@@ -1,0 +1,288 @@
+{
+  "subtitle-edit": {
+    "family": "subtitle-edit", "download_only": true, "gb": 0.131,
+    "required": ["Subtitle Edit.app/Contents/Info.plist"], "assets": []
+  },
+  "heartmula-3b": {
+    "family": "download", "download_only": true, "gb": 15.8,
+    "required": ["weights/model.safetensors.index.json"],
+    "assets": [{"repo": "HeartMuLa/HeartMuLa-oss-3B-happy-new-year", "target": "weights"}]
+  },
+  "indextts-2-5": {
+    "family": "download", "download_only": true, "gb": 5.5,
+    "required": ["weights/config.yaml"],
+    "assets": [{"repo": "IndexTeam/IndexTTS-2.5", "target": "weights"}]
+  },
+  "soulx-singer-svc": {
+    "family": "download", "download_only": true, "gb": 2.8,
+    "required": ["weights/model-svc.pt"],
+    "assets": [{"repo": "Soul-AILab/SoulX-Singer", "target": "weights", "patterns": ["model-svc.pt", "config.yaml", "README.md"]}]
+  },
+  "qwen3-asr-06b": {
+    "family": "download", "download_only": true, "gb": 1.6,
+    "required": ["weights/model.safetensors"],
+    "assets": [{"repo": "Qwen/Qwen3-ASR-0.6B-hf", "target": "weights"}]
+  },
+  "qwen3-asr-17b": {
+    "family": "download", "download_only": true, "gb": 4.1,
+    "required": ["weights/model.safetensors"],
+    "assets": [{"repo": "Qwen/Qwen3-ASR-1.7B-hf", "target": "weights"}]
+  },
+  "qwen3-forced-aligner": {
+    "family": "download", "download_only": true, "gb": 1.9,
+    "required": ["weights/model.safetensors"],
+    "assets": [{"repo": "Qwen/Qwen3-ForcedAligner-0.6B-hf", "target": "weights"}]
+  },
+  "ace-step": {
+    "family": "ace",
+    "gb": 25.25,
+    "assets": [
+      {
+        "repo": "ACE-Step/acestep-v15-xl-turbo",
+        "target": "checkpoints/acestep-v15-xl-turbo"
+      },
+      {
+        "repo": "ACE-Step/Ace-Step1.5",
+        "target": "checkpoints",
+        "patterns": [
+          "acestep-5Hz-lm-1.7B/*",
+          "Qwen3-Embedding-0.6B/*",
+          "vae/*"
+        ]
+      }
+    ]
+  },
+  "qwen3-tts-custom": {
+    "family": "qwen",
+    "gb": 4.52,
+    "assets": [
+      {
+        "repo": "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
+        "target": "weights"
+      }
+    ]
+  },
+  "qwen3-tts-base": {
+    "family": "qwen",
+    "gb": 4.54,
+    "assets": [
+      {
+        "repo": "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+        "target": "weights"
+      }
+    ]
+  },
+  "qwen3-tts-design": {
+    "family": "qwen",
+    "gb": 4.52,
+    "assets": [
+      {
+        "repo": "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+        "target": "weights"
+      }
+    ]
+  },
+  "qwen3-tts-06b-base": {
+    "family": "qwen",
+    "gb": 2.52,
+    "assets": [
+      {
+        "repo": "Qwen/Qwen3-TTS-12Hz-0.6B-Base",
+        "target": "weights"
+      }
+    ]
+  },
+  "qwen3-tts-06b-custom": {
+    "family": "qwen",
+    "gb": 2.5,
+    "assets": [
+      {
+        "repo": "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice",
+        "target": "weights"
+      }
+    ]
+  },
+  "seed-vc": {
+    "family": "seed",
+    "gb": 2.49,
+    "assets": [
+      {
+        "repo": "Plachta/Seed-VC",
+        "target": "weights",
+        "patterns": [
+          "DiT_seed_v2_uvit_whisper_base_f0_44k_bigvgan_pruned_ft_ema_v2.pth",
+          "config_dit_mel_seed_uvit_whisper_base_f0_44k.yml"
+        ]
+      },
+      {
+        "repo": "nvidia/bigvgan_v2_44khz_128band_512x",
+        "target": "bigvgan",
+        "patterns": [
+          "bigvgan_generator.pt",
+          "config.json"
+        ]
+      },
+      {
+        "repo": "openai/whisper-small",
+        "target": "whisper",
+        "patterns": [
+          "*.json",
+          "*.txt",
+          "*.safetensors"
+        ]
+      },
+      {
+        "repo": "funasr/campplus",
+        "target": "campplus",
+        "patterns": [
+          "campplus_cn_common.bin"
+        ]
+      },
+      {
+        "repo": "lj1995/VoiceConversionWebUI",
+        "target": "rmvpe",
+        "patterns": [
+          "rmvpe.pt"
+        ]
+      }
+    ]
+  },
+  "roformer-vocals": {
+    "family": "roformer",
+    "gb": 0.64,
+    "assets": [
+      {
+        "repo": "pcunwa/BS-Roformer-Revive",
+        "target": "weights",
+        "patterns": [
+          "bs_roformer_revive3e.ckpt",
+          "config.yaml"
+        ]
+      }
+    ]
+  },
+  "roformer": {
+    "family": "roformer",
+    "gb": 0.7,
+    "assets": [
+      {
+        "repo": "enerjazzer/BS-ROFO-SW-Fixed",
+        "target": "weights",
+        "patterns": [
+          "BS-Rofo-SW-Fixed.ckpt",
+          "BS-Rofo-SW-Fixed.yaml"
+        ]
+      }
+    ]
+  },
+  "transkun": {
+    "family": "transkun",
+    "gb": 0.06,
+    "assets": [],
+    "bundled": [
+      "transkun/pretrained/2.0.pt",
+      "transkun/pretrained/2.0.conf"
+    ]
+  },
+  "whisper-small": {
+    "family": "whisper",
+    "gb": 0.49,
+    "assets": [
+      {
+        "repo": "Systran/faster-whisper-small",
+        "target": "weights"
+      }
+    ]
+  },
+  "whisper-large-v3-turbo": {
+    "family": "whisper",
+    "gb": 1.62,
+    "assets": [
+      {
+        "repo": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+        "target": "weights"
+      }
+    ]
+  },
+  "whisper-large-v3": {
+    "family": "whisper",
+    "gb": 3.1,
+    "assets": [
+      {
+        "repo": "Systran/faster-whisper-large-v3",
+        "target": "weights"
+      }
+    ]
+  },
+  "basic-pitch": {
+    "family": "basic",
+    "gb": 0.00023,
+    "assets": [],
+    "bundled": [
+      "basic_pitch/saved_models/icassp_2022/nmp.onnx"
+    ]
+  },
+  "demucs": {
+    "family": "demucs",
+    "gb": 0.09,
+    "assets": [
+      {
+        "repo": "adefossez/HTDemucs",
+        "target": "weights",
+        "patterns": [
+          "*.yaml",
+          "*.safetensors"
+        ]
+      }
+    ]
+  },
+  "yourmt3": {
+    "family": "mt3",
+    "gb": 0.56,
+    "assets": [
+      {
+        "repo": "mimbres/YourMT3",
+        "repo_type": "space",
+        "target": "weights",
+        "patterns": [
+          "amt/logs/2024/mc13_256_g4_all_v7_mt3f_sqr_rms_moe_wf4_n8k2_silu_rope_rp_b36_nops/checkpoints/last.ckpt"
+        ]
+      }
+    ]
+  },
+  "piano": {
+    "family": "piano",
+    "gb": 0.172,
+    "assets": [],
+    "urls": [
+      {
+        "url": "https://zenodo.org/api/records/4034264/files/CRNN_note_F1=0.9677_pedal_F1=0.9186.pth/content",
+        "target": "weights/piano.pth",
+        "size": 171966578,
+        "md5": "22b961b77c1878239fec963362097045"
+      }
+    ]
+  },
+  "f5-tts": {
+    "family": "f5",
+    "gb": 1.4,
+    "assets": [
+      {
+        "repo": "SWivid/F5-TTS",
+        "target": "weights",
+        "patterns": [
+          "F5TTS_v1_Base/model_1250000.safetensors",
+          "F5TTS_v1_Base/vocab.txt"
+        ]
+      },
+      {
+        "repo": "charactr/vocos-mel-24khz",
+        "target": "vocos",
+        "patterns": [
+          "config.yaml",
+          "pytorch_model.bin"
+        ]
+      }
+    ]
+  }
+}

@@ -28,6 +28,12 @@
 !work/audio-studio/AuroraAudioStudio.UpdateFlowTests/**
 !work/audio-studio/AuroraAudioStudio.BehaviorTests/
 !work/audio-studio/AuroraAudioStudio.BehaviorTests/**
+!work/audio-studio/AuroraAudioStudio.Core/
+!work/audio-studio/AuroraAudioStudio.Core/**
+!work/audio-studio/AuroraAudioStudio.Mac/
+!work/audio-studio/AuroraAudioStudio.Mac/**
+!work/audio-studio/AuroraAudioStudio.MacTests/
+!work/audio-studio/AuroraAudioStudio.MacTests/**
 !work/audio-studio/tools/
 !work/audio-studio/tools/**
 work/audio-studio/AuroraAudioStudio/bin/
@@ -42,6 +48,8 @@ work/audio-studio/AuroraAudioStudio/obj/
 # Never commit build outputs, release artifacts, local models, caches, or machine state.
 **/bin/
 **/obj/
+**/__pycache__/
+*.pyc
 .dotnet/
 发布/
 publish/

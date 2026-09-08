@@ -428,6 +428,11 @@
                         <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="OutputRootBox" ui:LocalizedText.HeaderKey="成品目录"/><Button x:Name="BrowseOutputRootButton" Grid.Column="1" ui:LocalizedText.Key="浏览…" Tag="output" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
                         <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="ProjectsRootBox" ui:LocalizedText.HeaderKey="处理记录目录"/><Button x:Name="BrowseProjectsRootButton" Grid.Column="1" ui:LocalizedText.Key="浏览…" Tag="projects" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
                         <ToggleSwitch x:Name="AppAutoUpdateToggle" ui:LocalizedText.HeaderKey="每天首次启动时检查应用更新"/>
+                        <ComboBox x:Name="AppUpdateChannelPicker" ui:LocalizedText.HeaderKey="updateChannel" MaxWidth="420" HorizontalAlignment="Stretch">
+                            <ComboBoxItem ui:LocalizedText.Key="updateStable" Tag="stable"/>
+                            <ComboBoxItem ui:LocalizedText.Key="updateBeta" Tag="beta"/>
+                        </ComboBox>
+                        <TextBlock ui:LocalizedText.Key="updateChannelHint" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
                         <ToggleSwitch x:Name="ModelAutoUpdateToggle" ui:LocalizedText.HeaderKey="启动时检查模型更新"/>
                         <ToggleSwitch x:Name="ConfirmLargeToggle" ui:LocalizedText.HeaderKey="下载大型模型前始终确认"/>
                         <ToggleSwitch x:Name="AutoReleaseSettingsToggle" ui:LocalizedText.HeaderKey="任务完成后自动释放显存"/>

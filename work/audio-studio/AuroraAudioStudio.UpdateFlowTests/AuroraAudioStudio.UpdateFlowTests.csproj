@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\AuroraAudioStudio\Services\AppReleaseVersion.cs" Link="AppReleaseVersion.cs" />
+    <Compile Include="..\AuroraAudioStudio\Services\WindowsReleasePolicy.cs" Link="WindowsReleasePolicy.cs" />
     <EmbeddedResource Include="..\..\..\docs\release.json" LogicalName="Aurora.Release.json" />
     <Compile Include="..\AuroraAudioStudio\Models\AppModels.cs" Link="AppModels.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\ModelInstallPlanner.cs" Link="ModelInstallPlanner.cs" />

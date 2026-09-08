@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Aurora</AssemblyName>
+    <Version>1.9.9</Version>
+    <PublishTrimmed>false</PublishTrimmed>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="Runtime/*.py;Runtime/*.json" Exclude="Runtime/test_*.py" CopyToOutputDirectory="PreserveNewest" />
+    <ProjectReference Include="../AuroraAudioStudio.Core/AuroraAudioStudio.Core.csproj" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Controls.WebView" Version="12.1.0" />
+    <AvaloniaResource Include="../AuroraAudioStudio/Assets/AuroraIcon.png" Link="Assets/AuroraIcon.png" />
+    <AvaloniaResource Include="../AuroraAudioStudio/Assets/Fonts/NotoSansJP.ttf" Link="Assets/Fonts/NotoSansJP.ttf" />
+    <Content Include="../AuroraAudioStudio/Assets/Fonts/NotoSansJP-OFL.txt" Link="Licenses/NotoSansJP-OFL.txt" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../LICENSE" Link="Licenses/LICENSE" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../AuroraAudioStudio/Tools/gradio_result_bridge.py" Link="Runtime/gradio_result_bridge.py" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../AuroraAudioStudio/Tools/workbench-ui.js;../AuroraAudioStudio/Tools/workbench-ui.css;../AuroraAudioStudio/Tools/workbench-i18n.json;../AuroraAudioStudio/Tools/workbench-i18n-extra.json" Link="Tools/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

@@ -4,7 +4,7 @@ public sealed record ReleaseNoteDisplay(string Version, string Date, string Body
 
 public static class ReleaseNotesCatalog
 {
-    private sealed record Entry(Version Version, string Date, string[] Bodies);
+    private sealed record Entry(Version Version, string Date, string[] Bodies, string? DisplayVersion = null);
 
     private static readonly Entry[] Entries =
     [
@@ -121,7 +121,8 @@ public static class ReleaseNotesCatalog
         using var stream = typeof(ReleaseNotesCatalog).Assembly.GetManifestResourceStream("Aurora.Release.json") ?? throw new InvalidDataException("Missing release metadata.");
         using var document = System.Text.Json.JsonDocument.Parse(stream);
         var entry = document.RootElement;
-        return new(Version.Parse(entry.GetProperty("version").GetString()!), entry.GetProperty("date").GetString()!, entry.GetProperty("notes").EnumerateArray().Select(x => x.GetString()!).ToArray());
+        var displayVersion = entry.GetProperty("version").GetString()!;
+        return new(Version.Parse(displayVersion.Split('-')[0]), entry.GetProperty("date").GetString()!, entry.GetProperty("notes").EnumerateArray().Select(x => x.GetString()!).ToArray(), displayVersion);
     }
 
     public static IReadOnlyList<ReleaseNoteDisplay> CurrentAndRecent(string currentVersion, string language, int count = 5)
@@ -129,6 +130,6 @@ public static class ReleaseNotesCatalog
         if (!Version.TryParse(currentVersion, out var current)) current = Entries[0].Version;
         var languageIndex = language switch { "zh-TW" => 1, "en-US" => 2, "ja-JP" => 3, _ => 0 };
         return Entries.Where(x => x.Version <= current).OrderByDescending(x => x.Version).Take(count)
-            .Select((x, index) => new ReleaseNoteDisplay(x.Version.ToString(3), x.Date, x.Bodies[languageIndex], index == 0)).ToList();
+            .Select((x, index) => new ReleaseNoteDisplay(x.DisplayVersion ?? x.Version.ToString(3), x.Date, x.Bodies[languageIndex], index == 0)).ToList();
     }
 }

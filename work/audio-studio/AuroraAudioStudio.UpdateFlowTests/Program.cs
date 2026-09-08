@@ -11,6 +11,43 @@ static void Require(bool condition, string message)
 }
 
 var today = new DateOnly(2026, 8, 8);
+var windowsPackage = WindowsReleasePolicy.InstallerName("v2.0.0");
+var windowsHash = new string('b', 64);
+Require(WindowsReleasePolicy.ReadChecksum(new string('a', 64) + "  Aurora-Audio-Studio-2.0.0-arm64.dmg\n" + windowsHash + "  " + windowsPackage, windowsPackage, false) == windowsHash,
+    "Mixed-platform checksums must match the Windows filename, not the first hash.");
+var wrongPlatformRejected = false;
+try { WindowsReleasePolicy.ReadChecksum(new string('a', 64) + "  mac.dmg", windowsPackage, false); }
+catch (InvalidDataException) { wrongPlatformRejected = true; }
+Require(wrongPlatformRejected, "A Mac checksum must not validate a Windows installer.");
+var mixedReleases = """
+[{"tag_name":"v2.1.0","draft":false,"prerelease":false,"assets":[{"name":"Aurora-Audio-Studio-2.1.0-arm64.dmg"}]},
+ {"tag_name":"v2.0.0","draft":false,"prerelease":false,"assets":[{"name":"Aurora-Audio-Studio-2.0.0-arm64.dmg"},{"name":"Aurora-Audio-Studio-2.0.0-Setup-x64.exe"}]}]
+""";
+Require(WindowsReleasePolicy.Select(mixedReleases)?.TagName == "v2.0.0", "Windows must skip Mac-only releases and select its exact installer.");
+if (args.Contains("--release-policy-only"))
+{
+    RunChannelChecks();
+    Console.WriteLine("Windows release selection, exact checksums, and stable/beta channel checks passed; Windows installation and single-instance tests were not run.");
+    return;
+}
+RunChannelChecks();
+
+static void RunChannelChecks()
+{
+    string Release(string version, bool beta, bool draft = false) => System.Text.Json.JsonSerializer.Serialize(new {
+        tag_name = "v" + version, prerelease = beta, draft,
+        assets = new[] { new { name = WindowsReleasePolicy.InstallerName(version) } }
+    });
+    var releases = "[" + string.Join(",", Release("1.9.9", false), Release("2.0.0-beta.2", true), Release("2.0.0-beta.10", true), Release("3.0.0", false, true)) + "]";
+    Require(WindowsReleasePolicy.Select(releases)?.TagName == "v1.9.9", "Stable channel must exclude prereleases and drafts.");
+    Require(WindowsReleasePolicy.Select(releases, "beta")?.TagName == "v2.0.0-beta.10", "Beta channel must compare numeric beta revisions.");
+    Require(WindowsReleasePolicy.Select(releases, "invalid")?.TagName == "v1.9.9", "Unknown channels must remain stable.");
+    Require(AppReleaseVersion.Parse("2.0.0") > AppReleaseVersion.Parse("2.0.0-beta.98"), "Final releases supersede betas.");
+    Require(AppReleaseVersion.Parse("1.9.9") < AppReleaseVersion.Parse("2.0.0-beta.1"), "Switching a beta install to stable must not offer an older stable downgrade.");
+    Require(!AppReleaseVersion.Allowed("2.0.0-beta.1", false, "stable"), "A mistagged beta is excluded even if GitHub prerelease is false.");
+    Require(AppReleaseVersion.Parse("2.0.0-beta.99") is null && AppReleaseVersion.Parse("../../2.0.0") is null, "Invalid release versions are rejected.");
+    Require(new AppSettings().AppUpdateChannel == "stable", "Existing settings migrate to stable by default.");
+}
 Require(UpdateFlowGuard.ShouldRunDailyCheck(null, today), "A first-ever launch must check for updates.");
 Require(!UpdateFlowGuard.ShouldRunDailyCheck("2026-08-08", today), "A second launch on the same day must not auto-check again.");
 Require(UpdateFlowGuard.ShouldRunDailyCheck("2026-08-07", today), "The first launch on a new day must auto-check again.");

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Version>1.9.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../AuroraAudioStudio/Services/AppReleaseVersion.cs" Link="Services/AppReleaseVersion.cs" />
+    <Compile Include="../AuroraAudioStudio/Models/AppModels.cs" Link="Models/AppModels.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/SettingsService.cs" Link="Services/SettingsService.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/SettingsPathValidator.cs" Link="Services/SettingsPathValidator.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/LocalizationService.cs" Link="Services/LocalizationService.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/ProjectService.cs" Link="Services/ProjectService.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/ProjectDocumentMigrator.cs" Link="Services/ProjectDocumentMigrator.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/TaskQueueService.cs" Link="Services/TaskQueueService.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/ArtifactValidator.cs" Link="Services/ArtifactValidator.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/ModelCatalogService.cs" Link="Services/ModelCatalogService.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/ModelHealthPolicy.cs" Link="Services/ModelHealthPolicy.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/ModelInstallPlanner.cs" Link="Services/ModelInstallPlanner.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/ModelInstallTransaction.cs" Link="Services/ModelInstallTransaction.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/RuntimeEnvironment.cs" Link="Services/RuntimeEnvironment.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/WorkbenchLocalization.cs" Link="Services/WorkbenchLocalization.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/WorkbenchResultService.cs" Link="Services/WorkbenchResultService.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/UpdateFlowGuard.cs" Link="Services/UpdateFlowGuard.cs" />
+  </ItemGroup>
+</Project>

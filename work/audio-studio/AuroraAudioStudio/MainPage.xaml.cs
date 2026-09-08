@@ -1183,9 +1183,11 @@ public sealed partial class MainPage : Page
             Theme = (ThemePicker.SelectedItem as ComboBoxItem)?.Tag as string ?? "light",
             LocalAiRoot = ModelRootBox.Text.Trim(), OutputRoot = OutputRootBox.Text.Trim(), ProjectsRoot = ProjectsRootBox.Text.Trim(),
             AutoCheckAppUpdates = AppAutoUpdateToggle.IsOn, LastAppUpdateCheckDate = settings.Current.LastAppUpdateCheckDate,
+            AppUpdateChannel = (AppUpdateChannelPicker.SelectedItem as ComboBoxItem)?.Tag as string ?? "stable",
             AutoCheckModelUpdates = ModelAutoUpdateToggle.IsOn, ConfirmLargeModelDownloads = ConfirmLargeToggle.IsOn,
             AutoReleaseVram = AutoReleaseSettingsToggle.IsOn, SafeMode = settings.Current.SafeMode, TaskHistoryLimit = settings.Current.TaskHistoryLimit
         };
+        if (candidate.AppUpdateChannel != settings.Current.AppUpdateChannel) candidate.LastAppUpdateCheckDate = null;
         if (!settings.TrySave(candidate, out var error)) { ShowUtility(false, error); SetStatus(error); return; }
         ApplyTheme(); ApplyLocalization(); RefreshModels(); RefreshWorkspace(); SetStatus(localization.Translate("设置已保存。"));
     }
@@ -1221,6 +1223,7 @@ public sealed partial class MainPage : Page
         SelectTag(LanguagePicker, settings.Current.Language); SelectTag(ThemePicker, settings.Current.Theme);
         ModelRootBox.Text = settings.Current.LocalAiRoot; OutputRootBox.Text = settings.Current.OutputRoot; ProjectsRootBox.Text = settings.Current.ProjectsRoot;
         AppAutoUpdateToggle.IsOn = settings.Current.AutoCheckAppUpdates; ModelAutoUpdateToggle.IsOn = settings.Current.AutoCheckModelUpdates; ConfirmLargeToggle.IsOn = settings.Current.ConfirmLargeModelDownloads;
+        AppUpdateChannelPicker.SelectedIndex = settings.Current.AppUpdateChannel == "beta" ? 1 : 0;
         AutoReleaseSettingsToggle.IsOn = settings.Current.AutoReleaseVram; AutoReleaseToggle.IsOn = settings.Current.AutoReleaseVram; SafeModeToggle.IsOn = settings.Current.SafeMode; ApplyTheme();
     }
 
@@ -1288,9 +1291,7 @@ public sealed partial class MainPage : Page
 
     private static string CurrentDisplayVersion()
     {
-        var version = Assembly.GetExecutingAssembly().GetName().Version;
-        if (version is null) return "unknown";
-        return version.Revision > 0 ? version.ToString(4) : version.ToString(3);
+        return Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0];
     }
 
     private void LocalizeTree(DependencyObject root)

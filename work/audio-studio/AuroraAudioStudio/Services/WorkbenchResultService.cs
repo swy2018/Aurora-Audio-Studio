@@ -4,7 +4,8 @@ using AuroraAudioStudio.Models;
 
 namespace AuroraAudioStudio.Services;
 
-public sealed class WorkbenchResultService(SettingsService settings, ProjectService projects, TaskQueueService queue, ModelCatalogService catalog)
+public sealed class WorkbenchResultService(SettingsService settings, ProjectService projects, TaskQueueService queue, ModelCatalogService catalog,
+    Func<string, string>? modelVersion = null, Action<string, string, string?>? recordRun = null)
 {
     private readonly HashSet<string> imported = [];
     private bool busy;
@@ -30,14 +31,16 @@ public sealed class WorkbenchResultService(SettingsService settings, ProjectServ
                 var receipt = JsonSerializer.Deserialize<Receipt>(await File.ReadAllTextAsync(receiptPath));
                 if (receipt is null || !Guid.TryParseExact(receipt.Id, "N", out _) || receipt.Feature is not ("music" or "voice" or "singing")) continue;
                 if (catalog.Find(receipt.ModelId) is not { } model || model.Feature != receipt.Feature) continue;
-                var outputRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(settings.Current.OutputRoot)) + Path.DirectorySeparatorChar;
-                if (!Path.GetFullPath(receipt.Path).StartsWith(outputRoot, StringComparison.OrdinalIgnoreCase)) continue;
+                var rootPath = Path.GetFullPath(settings.Current.OutputRoot);
+                rootPath = new DirectoryInfo(rootPath).ResolveLinkTarget(true)?.FullName ?? rootPath;
+                var outputRoot = Path.TrimEndingDirectorySeparator(rootPath) + Path.DirectorySeparatorChar;
+                if (!Path.GetFullPath(receipt.Path).StartsWith(outputRoot, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal)) continue;
                 var projectPath = Path.Combine(settings.Current.ProjectsRoot, receipt.Id + ".arr");
                 var existing = File.Exists(projectPath) ? projects.Find(receipt.Id) : null;
                 if (existing?.TaskIds.Count > 0) { imported.Add(receiptPath); continue; }
                 ArtifactValidator.Validate(receipt.Path);
                 var project = existing ?? new AuroraProject { Id = receipt.Id, Name = catalog.DisplayName(model) + " · " + File.GetLastWriteTime(receipt.Path).ToString("yyyy-MM-dd HH:mm:ss"), Feature = receipt.Feature, ModelId = receipt.ModelId, FilePath = projectPath };
-                project.ModelVersion = catalog.GetStates().FirstOrDefault(x => x.Id == receipt.ModelId)?.Version ?? "";
+                project.ModelVersion = receipt.ModelVersion ?? modelVersion?.Invoke(receipt.ModelId) ?? catalog.GetStates().FirstOrDefault(x => x.Id == receipt.ModelId)?.Version ?? "";
                 if (!project.Artifacts.Any(x => x.Path == receipt.Path)) project.Artifacts.Add(new AuroraArtifact { Path = receipt.Path, Kind = receipt.Feature });
                 project.Parameters["device"] = receipt.Device;
                 await projects.SaveAsync(project);
@@ -45,7 +48,8 @@ public sealed class WorkbenchResultService(SettingsService settings, ProjectServ
                 task.Device = receipt.Device;
                 queue.RegisterCompleted(task, [receipt.Path]);
                 await projects.AddTaskAsync(project, task);
-                catalog.RecordSuccessfulRun(receipt.ModelId, receipt.Device);
+                if (recordRun is not null) recordRun(receipt.ModelId, receipt.Device, receipt.RuntimeSignature);
+                else catalog.RecordSuccessfulRun(receipt.ModelId, receipt.Device);
                 imported.Add(receiptPath); count++;
                 }
                 catch (Exception ex) when (ex is IOException or JsonException or ArgumentException)
@@ -65,5 +69,7 @@ public sealed class WorkbenchResultService(SettingsService settings, ProjectServ
         [property: JsonPropertyName("feature")] string Feature,
         [property: JsonPropertyName("modelId")] string ModelId,
         [property: JsonPropertyName("path")] string Path,
-        [property: JsonPropertyName("device")] string Device);
+        [property: JsonPropertyName("device")] string Device,
+        [property: JsonPropertyName("modelVersion")] string? ModelVersion = null,
+        [property: JsonPropertyName("runtimeSignature")] string? RuntimeSignature = null);
 }

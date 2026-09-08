@@ -13,24 +13,24 @@ public sealed class UpdateService(SettingsService settings, LocalizationService 
 #if UPDATE_VALIDATION
     private const string LatestReleaseApi = "https://api.github.com/repos/swy2018/Aurora-Audio-Studio/releases/tags/v0.9.9";
 #else
-    private const string LatestReleaseApi = "https://api.github.com/repos/swy2018/Aurora-Audio-Studio/releases/latest";
+    private const string LatestReleaseApi = WindowsReleasePolicy.ReleasesApi;
 #endif
     private readonly HttpClient client = CreateClient();
 
     public async Task<AppUpdateInfo> CheckAsync(CancellationToken cancellationToken = default)
     {
-        var current = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.8.1";
+        var current = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0];
         try
         {
             using var response = await client.GetAsync(LatestReleaseApi, cancellationToken);
             response.EnsureSuccessStatusCode();
-            var release = await JsonSerializer.DeserializeAsync<GitHubRelease>(await response.Content.ReadAsStreamAsync(cancellationToken), cancellationToken: cancellationToken)
-                ?? throw new InvalidDataException("GitHub returned an empty release response.");
+            var release = WindowsReleasePolicy.Select(await response.Content.ReadAsStringAsync(cancellationToken), settings.Current.AppUpdateChannel)
+                ?? throw new InvalidDataException("No stable Windows installer is available in GitHub Releases.");
             var latestText = release.TagName.Trim().TrimStart('v', 'V');
-            var available = Version.TryParse(latestText, out var latest) && Version.TryParse(current, out var installed) && latest > installed;
-            var installer = release.Assets.FirstOrDefault(a => a.Name.EndsWith("Setup-x64.exe", StringComparison.OrdinalIgnoreCase));
-            var checksum = release.Assets.FirstOrDefault(a => a.Name.Equals(installer?.Name + ".sha256", StringComparison.OrdinalIgnoreCase)
-                || a.Name.EndsWith("SHA256SUMS.txt", StringComparison.OrdinalIgnoreCase));
+            var available = AppReleaseVersion.Parse(latestText) is { } latest && AppReleaseVersion.Parse(current) is { } installed && latest > installed;
+            var installer = release.Assets.First(a => a.Name == WindowsReleasePolicy.InstallerName(release.TagName));
+            var checksum = release.Assets.FirstOrDefault(a => a.Name == installer.Name + ".sha256")
+                ?? release.Assets.FirstOrDefault(a => a.Name == "SHA256SUMS.txt");
             var message = available
                 ? installer is null || checksum is null ? localization.Get("updateAssetsIncomplete") : localization.Get("updateReady")
                 : localization.Get("updateUpToDate");
@@ -56,9 +56,9 @@ public sealed class UpdateService(SettingsService settings, LocalizationService 
             WriteLog(clientLogPath, $"Update requested: {update.CurrentVersion} -> {update.LatestVersion}");
             progress?.Report(new(2, localization.Get("updateChecking"), true));
             var checksumText = await GetStringWithRetryAsync(update.ChecksumUrl, clientLogPath, cancellationToken);
-            var expected = checksumText.Split([' ', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
-                .FirstOrDefault(x => x.Length == 64 && x.All(Uri.IsHexDigit));
-            if (expected is null) return new(false, localization.Get("updateChecksumInvalid"));
+            var expected = WindowsReleasePolicy.ReadChecksum(checksumText,
+                WindowsReleasePolicy.InstallerName(update.LatestVersion),
+                new Uri(update.ChecksumUrl).AbsolutePath.EndsWith(".exe.sha256", StringComparison.Ordinal));
 
             progress?.Report(new(8, localization.Format("updateDownloading", update.LatestVersion)));
             await DownloadWithResumeAsync(update.InstallerUrl, installerPath, expected, clientLogPath, progress, update.LatestVersion, cancellationToken);

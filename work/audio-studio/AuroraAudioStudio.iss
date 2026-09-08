@@ -1,15 +1,15 @@
 #define MyAppName "Aurora Audio Studio"
 #ifndef MyAppVersion
-  #define MyAppVersion "1.9.0"
+  #define MyAppVersion "1.9.9"
 #endif
 #ifndef PublishFolder
-  #define PublishFolder "Aurora-Audio-Studio-1.9.0"
+  #define PublishFolder "Aurora-Audio-Studio-1.9.9"
 #endif
 #ifndef InstallerFolder
-  #define InstallerFolder "Aurora-Audio-Studio-1.9.0-installer"
+  #define InstallerFolder "Aurora-Audio-Studio-1.9.9-installer"
 #endif
 #ifndef InstallerBaseName
-  #define InstallerBaseName "Aurora-Audio-Studio-1.9.0-Setup-x64"
+  #define InstallerBaseName "Aurora-Audio-Studio-1.9.9-Setup-x64"
 #endif
 #define MyAppPublisher "Aurora Contributors"
 #define MyAppURL "https://github.com/swy2018/Aurora-Audio-Studio"
@@ -64,7 +64,7 @@ RestartApplications=no
 SetupLogging=yes
 SetupMutex=AuroraAudioStudioInstaller
 MinVersion=10.0.17763
-VersionInfoVersion={#MyAppVersion}.0
+VersionInfoVersion=1.9.9.0
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoCopyright={#MyAppCopyright}
 VersionInfoDescription=Aurora Audio Studio installer

@@ -53,7 +53,12 @@ def install_bridge():
                 raise ValueError("Generated audio is empty")
             destination = directory / "audio.wav"
             sf.write(destination, audio, rate, subtype="PCM_16")
-            receipt = dict(id=identity, feature=os.environ["AURORA_FEATURE"], modelId=os.environ["AURORA_MODEL_ID"], path=str(destination.resolve()), device="cuda" if torch.cuda.is_available() else "cpu")
+            receipt = dict(id=identity, feature=os.environ["AURORA_FEATURE"], modelId=os.environ["AURORA_MODEL_ID"], path=str(destination.resolve()),
+                           device=os.environ.get("AURORA_DEVICE") or ("cuda" if torch.cuda.is_available() else "cpu"))
+            if os.environ.get("AURORA_MODEL_VERSION"):
+                receipt["modelVersion"] = os.environ["AURORA_MODEL_VERSION"]
+            if os.environ.get("AURORA_RUNTIME_SIGNATURE"):
+                receipt["runtimeSignature"] = os.environ["AURORA_RUNTIME_SIGNATURE"]
             receipts.mkdir(parents=True, exist_ok=True)
             pending = receipts / (identity + ".tmp")
             pending.write_text(json.dumps(receipt, ensure_ascii=False), encoding="utf-8")
