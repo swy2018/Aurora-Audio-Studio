@@ -4,10 +4,13 @@
   <p><strong>让声音创作，回到创作本身。</strong></p>
   <p>Windows 与 macOS 的本地 AI 音频创作工作台</p>
   <p>
-    <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img alt="官方网站" src="docs/assets/readme-button-website.svg"></a>
-    <a href="https://swy2018.github.io/Aurora-Audio-Studio/#download">Windows / macOS 下载</a> ·
-    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases">正式版与测试版 / Releases</a> · <a href="CHANGELOG.md">更新日志 / Changelog</a>
-    <a href="#english"><img alt="English" src="docs/assets/readme-button-english.svg"></a>
+    <a href="https://swy2018.github.io/Aurora-Audio-Studio/"><img width="184" height="36" alt="官方网站" src="docs/assets/readme-button-website.svg"></a>
+    <a href="https://swy2018.github.io/Aurora-Audio-Studio/#download"><img width="184" height="36" alt="Windows / macOS 下载" src="docs/assets/readme-button-platforms.svg"></a>
+    <a href="https://github.com/swy2018/Aurora-Audio-Studio/releases"><img width="184" height="36" alt="正式版与测试版" src="docs/assets/readme-button-releases.svg"></a>
+  </p>
+  <p>
+    <a href="CHANGELOG.md"><img width="184" height="36" alt="更新日志" src="docs/assets/readme-button-history.svg"></a>
+    <a href="#english"><img width="184" height="36" alt="English README" src="docs/assets/readme-button-language.svg"></a>
   </p>
 </div>
 
