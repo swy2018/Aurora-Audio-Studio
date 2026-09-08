@@ -95,6 +95,7 @@ public sealed partial class MainWindow
             updating = true;
             picker.ItemsSource = models.Select(workspace.Catalog.DisplayName).ToArray();
             picker.SelectedIndex = Math.Max(0, Array.FindIndex(models, m => m.Id == workspace.Drafts[feature].ModelId));
+            workspace.Drafts[feature].ModelId = models[picker.SelectedIndex].Id;
             updating = false;
             open.Content = L("进入工作台"); install.Content = L("installModel");
             cancel.Content = L("取消启动"); progressText.Text = L("正在启动本地引擎，首次加载可能需要几分钟…");

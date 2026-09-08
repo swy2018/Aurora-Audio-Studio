@@ -86,10 +86,13 @@ public sealed class MacWorkspace
             var draft = Drafts[feature];
             draft.Feature = feature;
             if (draft.Sources.Count == 0 && !string.IsNullOrWhiteSpace(draft.Source)) draft.Sources.Add(draft.Source);
-            if (!Catalog.Definitions.Any(m => m.Id == draft.ModelId && m.Feature == feature))
+            if (!SupportsWorkflow(draft.ModelId, feature))
                 draft.ModelId = DefaultModel(feature);
         }
     }
+
+    private bool SupportsWorkflow(string modelId, string feature) => Catalog.Find(modelId) is { IsRunnable: true } model
+        && model.Feature == feature && Runtime.Models.TryGetValue(modelId, out var spec) && !spec.DownloadOnly;
 
     public static string DefaultModel(string feature) => feature switch
     {
@@ -142,7 +145,7 @@ public sealed class MacWorkspace
         };
         if (project.Parameters.TryGetValue("sources", out var sources)) draft.Sources = JsonSerializer.Deserialize<List<string>>(sources) ?? [];
         if (draft.Sources.Count == 0 && !string.IsNullOrWhiteSpace(draft.Source)) draft.Sources.Add(draft.Source);
-        if (!Catalog.Definitions.Any(m => m.Id == draft.ModelId && m.Feature == draft.Feature)) draft.ModelId = DefaultModel(draft.Feature);
+        if (!SupportsWorkflow(draft.ModelId, draft.Feature)) draft.ModelId = DefaultModel(draft.Feature);
         Drafts[draft.Feature] = draft;
         SaveDrafts();
         return draft;
