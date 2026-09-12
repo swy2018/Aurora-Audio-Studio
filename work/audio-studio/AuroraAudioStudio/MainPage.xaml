@@ -291,6 +291,7 @@
                             <StackPanel x:Name="ModelHeaderTitle" Spacing="5">
                                 <TextBlock ui:LocalizedText.Key="创作引擎与模型" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                 <TextBlock x:Name="ModelSummaryText" Text="正在读取本地模型…" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                                <HyperlinkButton ui:LocalizedText.Key="查看维护日志" Click="OpenModelLogsButton_Click" HorizontalAlignment="Left" Padding="0"/>
                             </StackPanel>
                             <StackPanel x:Name="ModelHeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                                 <ComboBox x:Name="ModelFilterPicker" Width="150" SelectedIndex="0" SelectionChanged="ModelFilterPicker_SelectionChanged" ui:LocalizedText.NameKey="模型筛选">
@@ -411,7 +412,7 @@
                             </StackPanel>
                             <ListView x:Name="HealthList" Grid.Row="1" SelectionMode="None"><ListView.ItemTemplate><DataTemplate><Grid Padding="14,12" ColumnSpacing="14" AutomationProperties.Name="{Binding Name}" AutomationProperties.HelpText="{Binding Detail}"><Grid.ColumnDefinitions><ColumnDefinition Width="180"/><ColumnDefinition Width="110"/><ColumnDefinition/></Grid.ColumnDefinitions><TextBlock Text="{Binding Name}" FontWeight="SemiBold"/><TextBlock Grid.Column="1" Text="{Binding State}"/><TextBlock Grid.Column="2" Text="{Binding Detail}" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/></Grid></DataTemplate></ListView.ItemTemplate></ListView>
                         </Grid>
-                        <Border x:Name="MaintenanceSidePanel" Grid.Column="1" Padding="24" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="14"><StackPanel Spacing="18"><TextBlock ui:LocalizedText.Key="运行环境" FontSize="20" FontWeight="SemiBold"/><TextBlock x:Name="GpuSummaryText" TextWrapping="Wrap"/><Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}"/><ToggleSwitch x:Name="SafeModeToggle" ui:LocalizedText.HeaderKey="安全模式" ui:LocalizedText.OffKey="允许启动通过检查的引擎" ui:LocalizedText.OnKey="仅查看任务与诊断" Toggled="SafeModeToggle_Toggled"/><ToggleSwitch x:Name="AutoReleaseToggle" ui:LocalizedText.HeaderKey="任务完成后释放显存" IsOn="True" Toggled="AutoReleaseToggle_Toggled"/><TextBlock ui:LocalizedText.Key="安全模式不会删除或更改模型，只会阻止第三方引擎启动，适合排查启动问题。" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Border>
+                        <Border x:Name="MaintenanceSidePanel" Grid.Column="1" Padding="24" Background="{ThemeResource AuroraPaneBrush}" CornerRadius="14"><StackPanel Spacing="18"><TextBlock ui:LocalizedText.Key="运行环境" FontSize="20" FontWeight="SemiBold"/><TextBlock x:Name="GpuSummaryText" TextWrapping="Wrap"/><Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}"/><ToggleSwitch x:Name="SafeModeToggle" ui:LocalizedText.HeaderKey="安全模式" ui:LocalizedText.OffKey="允许启动通过检查的引擎" ui:LocalizedText.OnKey="仅查看任务与诊断" Toggled="SafeModeToggle_Toggled"/><ToggleSwitch x:Name="AutoReleaseToggle" ui:LocalizedText.HeaderKey="任务完成后释放显存" IsOn="False" IsEnabled="False" ui:LocalizedText.OffKey="自动释放暂不支持，请手动结束引擎"/><TextBlock ui:LocalizedText.Key="安全模式不会删除或更改模型，只会阻止第三方引擎启动，适合排查启动问题。" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/></StackPanel></Border>
                     </Grid>
                     </ScrollViewer>
 
@@ -435,7 +436,7 @@
                         <TextBlock ui:LocalizedText.Key="updateChannelHint" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
                         <ToggleSwitch x:Name="ModelAutoUpdateToggle" ui:LocalizedText.HeaderKey="启动时检查模型更新"/>
                         <ToggleSwitch x:Name="ConfirmLargeToggle" ui:LocalizedText.HeaderKey="下载大型模型前始终确认"/>
-                        <ToggleSwitch x:Name="AutoReleaseSettingsToggle" ui:LocalizedText.HeaderKey="任务完成后自动释放显存"/>
+                        <ToggleSwitch x:Name="AutoReleaseSettingsToggle" IsEnabled="False" ui:LocalizedText.OffKey="自动释放暂不支持，请手动结束引擎" ui:LocalizedText.HeaderKey="任务完成后自动释放显存"/>
                         <Button x:Name="SaveSettingsButton" ui:LocalizedText.Key="保存设置" Click="SaveSettingsButton_Click" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Left"/>
                     </StackPanel></ScrollViewer>
 
@@ -483,17 +484,18 @@
                 <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal" Spacing="9">
+                    <Grid ColumnSpacing="9">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                         <FontIcon Glyph="&#xE895;" FontSize="16" Foreground="{ThemeResource AuroraAccentBrush}"/>
-                        <TextBlock x:Name="UpdateStageText" Text="正在准备更新…" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                    </StackPanel>
+                        <TextBlock x:Name="UpdateStageText" Grid.Column="1" Text="正在准备更新…" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                    </Grid>
                     <TextBlock x:Name="UpdatePercentText" Grid.Column="1" Text="0%" Foreground="{ThemeResource AuroraMutedBrush}"/>
                     <Button x:Name="CancelGlobalOperationButton" Grid.Column="2" ui:LocalizedText.Key="取消" Visibility="Collapsed" Click="CancelGlobalOperationButton_Click" Padding="10,3"/>
                 </Grid>
                 <ProgressBar x:Name="UpdateProgress" Grid.Row="1" Minimum="0" Maximum="100" Height="5" AutomationProperties.Name="下载与安装进度" AutomationProperties.LiveSetting="Polite"/>
                 <TextBlock x:Name="UpdateActivityText" Grid.Row="2" Text="正在准备" TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
-                <Expander Grid.Row="3" ui:LocalizedText.HeaderKey="安装详情">
-                    <ScrollViewer MaxHeight="180"><TextBlock x:Name="UpdateLogText" TextWrapping="Wrap" FontFamily="Consolas" FontSize="11" IsTextSelectionEnabled="True"/></ScrollViewer>
+                <Expander x:Name="UpdateLogExpander" Grid.Row="3" ui:LocalizedText.HeaderKey="运行日志" Visibility="Collapsed" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <ScrollViewer MaxHeight="180"><TextBlock x:Name="UpdateLogText" TextWrapping="Wrap" FontFamily="Consolas" FontSize="12" IsTextSelectionEnabled="True"/></ScrollViewer>
                 </Expander>
             </Grid>
         </Border>

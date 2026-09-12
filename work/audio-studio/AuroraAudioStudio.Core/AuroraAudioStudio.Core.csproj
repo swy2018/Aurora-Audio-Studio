@@ -23,5 +23,7 @@
     <Compile Include="../AuroraAudioStudio/Services/WorkbenchLocalization.cs" Link="Services/WorkbenchLocalization.cs" />
     <Compile Include="../AuroraAudioStudio/Services/WorkbenchResultService.cs" Link="Services/WorkbenchResultService.cs" />
     <Compile Include="../AuroraAudioStudio/Services/UpdateFlowGuard.cs" Link="Services/UpdateFlowGuard.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/OperationProgress.cs" Link="Services/OperationProgress.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/WorkbenchReadiness.cs" Link="Services/WorkbenchReadiness.cs" />
   </ItemGroup>
 </Project>

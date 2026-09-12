@@ -105,6 +105,13 @@ public sealed class SettingsService
         catch (Exception ex) { error = "无法保存设置：" + ex.Message; return false; }
     }
 
+    public bool TrySetSafeMode(bool enabled, out string error)
+    {
+        var candidate = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(Current))!;
+        candidate.SafeMode = enabled;
+        return Persist(candidate, out error);
+    }
+
     public string EffectiveLanguage()
     {
         if (!Current.Language.Equals("auto", StringComparison.OrdinalIgnoreCase)) return Current.Language;

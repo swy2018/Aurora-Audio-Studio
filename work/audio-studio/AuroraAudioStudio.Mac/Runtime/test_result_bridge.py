@@ -51,7 +51,7 @@ class ResultBridgeTests(unittest.TestCase):
             audio.postprocess("same-output")
         receipts = list((root / "receipts").glob("*.json"))
         self.assertEqual(len(receipts), 1)
-        receipt = json.loads(receipts[0].read_text())
+        receipt = json.loads(receipts[0].read_text(encoding="utf-8"))
         self.assertEqual(receipt["device"], "mps")
         self.assertEqual(receipt["modelVersion"], "fixture-version")
         self.assertEqual(receipt["runtimeSignature"], "fixture-signature")

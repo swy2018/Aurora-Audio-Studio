@@ -7,6 +7,7 @@ namespace AuroraAudioStudio.Services;
 public sealed class UpdateFlowGuard
 {
     private int active;
+    public bool IsRunning => Volatile.Read(ref active) != 0;
 
     public bool TryBegin() => Interlocked.CompareExchange(ref active, 1, 0) == 0;
 

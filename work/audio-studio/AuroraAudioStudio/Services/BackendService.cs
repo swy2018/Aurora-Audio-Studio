@@ -12,6 +12,7 @@ public sealed class BackendService(SettingsService settings)
     private readonly System.Collections.Concurrent.ConcurrentDictionary<string, Process> processes = new(StringComparer.OrdinalIgnoreCase);
     private readonly SemaphoreSlim workbenchGate = new(1, 1);
     private readonly Dictionary<string, string> activeModels = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, string> workbenchInstances = new(StringComparer.OrdinalIgnoreCase);
     private CancellationTokenSource? navigationCancellation;
     private string? startingKey;
     private string launchModel = "";
@@ -25,6 +26,10 @@ public sealed class BackendService(SettingsService settings)
     private string FfmpegRoot => Path.Combine(Root, "Faster-Whisper-XXL", "Faster-Whisper-XXL");
     public bool HasActiveOperations => processes.Keys.Any(IsRunning);
 
+    public bool CanStartWorkbench(string feature, string model) => !processes.Keys.Any(key =>
+        key is "music" or "voice" or "singing" && IsRunning(key)
+        && (key != feature || !activeModels.TryGetValue(key, out var active) || active != model));
+
     public async Task<OperationResult> StartWorkbenchAsync(string feature, string model, string language, CancellationToken cancellationToken = default)
     {
         if (settings.Current.SafeMode) return new(false, "安全模式已启用，无法启动引擎。");
@@ -37,6 +42,7 @@ public sealed class BackendService(SettingsService settings)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (settings.Current.SafeMode) return new(false, "安全模式已启用，无法启动引擎。");
+            if (!CanStartWorkbench(feature, model)) return new(false, "请返回正在运行的工作台，手动结束引擎后再切换模型。");
             launchModel = model;
             return feature switch
             {
@@ -73,7 +79,6 @@ public sealed class BackendService(SettingsService settings)
         if (!File.Exists(python) || !File.Exists(script)) return Missing("ACE-Step 1.5 XL Turbo");
         if (!HasXlLoadHeadroom(out var ram, out var commit))
             return new OperationResult(false, $"ACE-Step needs more memory headroom. Available RAM: {ram:F1} GB, commit headroom: {commit:F1} GB.");
-        Stop("singing");
         if (!IsRunning("music") || !activeModels.TryGetValue("music", out var current) || !current.Equals("ace-step", StringComparison.OrdinalIgnoreCase))
         {
             Stop("music");
@@ -99,7 +104,6 @@ public sealed class BackendService(SettingsService settings)
         if (!File.Exists(python) || !File.Exists(Path.Combine(modelRoot, "modular_model_index.json")) || !File.Exists(script)) return Missing("MiniMax-Music3");
         if (!HasXlLoadHeadroom(out var ram, out var commit))
             return new OperationResult(false, $"MiniMax-Music3 needs more memory headroom. Available RAM: {ram:F1} GB, commit headroom: {commit:F1} GB.");
-        Stop("singing");
         if (!IsRunning("music") || !activeModels.TryGetValue("music", out var current) || !current.Equals("minimax-music3", StringComparison.OrdinalIgnoreCase))
         {
             Stop("music");
@@ -126,7 +130,6 @@ public sealed class BackendService(SettingsService settings)
         };
         var checkpoint = Path.Combine(TtsRoot, "models", modelFolder);
         if (!File.Exists(launcher) || !File.Exists(Path.Combine(checkpoint, "model.safetensors"))) return Missing("Qwen3-TTS 1.7B");
-        Stop("singing");
         if (!IsRunning("voice") || !activeModels.TryGetValue("voice", out var current) || !current.Equals(modelId, StringComparison.OrdinalIgnoreCase))
         {
             Stop("voice");
@@ -150,7 +153,6 @@ public sealed class BackendService(SettingsService settings)
         var root = RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "f5-tts-env"));
         var launcher = Path.Combine(root, "Scripts", "f5-tts_infer-gradio.exe");
         if (!File.Exists(launcher)) return Missing("F5-TTS");
-        Stop("singing");
         if (!IsRunning("voice") || !activeModels.TryGetValue("voice", out var current) || !current.Equals("f5-tts", StringComparison.OrdinalIgnoreCase))
         {
             Stop("voice");
@@ -171,8 +173,6 @@ public sealed class BackendService(SettingsService settings)
         var missing = ModelHealthPolicy.MissingRequirements(healthModel, Root);
         if (missing.Count > 0) return new OperationResult(false, "Seed-VC 安装不完整：" + string.Join("、", missing) + "。请在模型管理中执行检查 / 修复。");
         if (!File.Exists(python) || !File.Exists(script) || !File.Exists(checkpoint) || !File.Exists(config)) return Missing("Seed-VC 44.1k");
-        Stop("music");
-        Stop("voice");
         if (!IsRunning("singing"))
         {
             var output = OutputFolder("AI歌声克隆");
@@ -192,12 +192,15 @@ public sealed class BackendService(SettingsService settings)
                 ["PYTHONUTF8"] = "1"
             };
             processes["singing"] = StartHidden("singing", python, $"\"{script}\" --checkpoint \"{checkpoint}\" --config \"{config}\" --fp16 True", SeedRoot, environment);
+            activeModels["singing"] = "seed-vc";
         }
         return await WaitForUrlAsync("singing", "http://127.0.0.1:7862", "Starting Seed-VC 44.1k");
     }
 
-    public async Task<OperationResult> RunUtilityAsync(string feature, string inputPath, string modelId, string language, IProgress<TaskExecutionProgress>? progress = null, CancellationToken cancellationToken = default)
+    public async Task<OperationResult> RunUtilityAsync(string feature, string inputPath, string modelId, string language, IProgress<TaskExecutionProgress>? progress = null, CancellationToken cancellationToken = default, string? trackMode = null)
     {
+        if (feature == "separation" && trackMode is not null && trackMode != (modelId == "roformer-vocals" ? "two-stem" : "multi-stem"))
+            return new(false, "分轨模式与引擎不匹配，请重新选择后提交任务。");
         if (settings.Current.SafeMode) return new(false, "安全模式已启用，无法执行或重试任务。");
         if (!File.Exists(inputPath)) return new(false, "素材文件不存在，请重新选择素材。");
         var catalog = new ModelCatalogService(settings);
@@ -537,6 +540,10 @@ public sealed class BackendService(SettingsService settings)
 
     private string RedactDiagnostics(string value)
     {
+        // Cover headers, JSON/env fields and URL query parameters before path redaction.
+        value = Regex.Replace(value, @"(?im)\bauthorization\s*[:=][^\r\n]+", "Authorization: [REDACTED]", RegexOptions.None, TimeSpan.FromSeconds(1));
+        value = Regex.Replace(value, """(?ix)(["']?(?:hf_token|hugging_face_hub_token|api[_-]?key|access[_-]?token|refresh[_-]?token|token|password|secret)["']?\s*[:=]\s*)("[^"]*"|'[^']*'|[^\s&,;]+)""",
+            "$1[REDACTED]", RegexOptions.None, TimeSpan.FromSeconds(1));
         var replacements = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             [Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)] = "%USERPROFILE%",
@@ -552,7 +559,7 @@ public sealed class BackendService(SettingsService settings)
 
     public void OpenFolder(string path)
     {
-        Directory.CreateDirectory(path);
+        if (!Directory.Exists(path)) { StatusChanged?.Invoke(this, "目录不存在，请检查保存位置。"); return; }
         Process.Start(new ProcessStartInfo("explorer.exe", $"\"{path}\"") { UseShellExecute = true });
     }
 
@@ -588,6 +595,7 @@ public sealed class BackendService(SettingsService settings)
     private void Stop(string key)
     {
         activeModels.Remove(key);
+        workbenchInstances.Remove(key);
         if (!processes.TryRemove(key, out var process)) return;
         try { if (!process.HasExited) process.Kill(true); } catch { }
         try { process.Dispose(); } catch { }
@@ -599,9 +607,8 @@ public sealed class BackendService(SettingsService settings)
     {
         var token = navigationCancellation?.Token ?? CancellationToken.None;
         processes.TryGetValue(key, out var launchedProcess);
-        startingKey = key;
         StatusChanged?.Invoke(this, "loading:" + message);
-        using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
+        using var client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { Timeout = TimeSpan.FromSeconds(3) };
         var elapsed = Stopwatch.StartNew();
         try
         {
@@ -615,9 +622,14 @@ public sealed class BackendService(SettingsService settings)
                 }
                 try
                 {
-                    using var response = await client.GetAsync(url, token);
-                    if (response.StatusCode is HttpStatusCode.OK or HttpStatusCode.Redirect)
+                    using var response = await client.GetAsync(url.TrimEnd('/') + "/config", token);
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        var config = await response.Content.ReadAsStringAsync(token);
+                        if (!workbenchInstances.TryGetValue(key, out var instance) || !WorkbenchReadiness.IsReady(config, instance))
+                            return new(false, "本地端口未提供本次引擎的完整工作台，请检查端口占用或修复引擎。");
                         return new OperationResult(true, "Connected to the local model.", Url: url);
+                    }
                 }
                 catch when (!token.IsCancellationRequested) { }
                 await Task.Delay(1000, token);
@@ -632,7 +644,7 @@ public sealed class BackendService(SettingsService settings)
         }
         finally
         {
-            if (token.IsCancellationRequested && launchedProcess is not null && processes.TryGetValue(key, out var current) && ReferenceEquals(current, launchedProcess)) Stop(key);
+            if (token.IsCancellationRequested && startingKey == key && launchedProcess is not null && processes.TryGetValue(key, out var current) && ReferenceEquals(current, launchedProcess)) Stop(key);
             if (startingKey?.Equals(key, StringComparison.OrdinalIgnoreCase) == true) startingKey = null;
         }
     }
@@ -687,13 +699,20 @@ public sealed class BackendService(SettingsService settings)
         process.StartInfo.Environment["AURORA_OUTPUT_ROOT"] = OutputFolder(key == "music" ? "AI音乐" : key == "voice" ? "AI配音" : "AI歌声克隆");
         process.StartInfo.Environment["AURORA_FEATURE"] = key;
         process.StartInfo.Environment["AURORA_MODEL_ID"] = launchModel;
+        var instance = Guid.NewGuid().ToString("N");
+        process.StartInfo.Environment["AURORA_WORKBENCH_INSTANCE"] = instance;
         process.StartInfo.Environment["GRADIO_ANALYTICS_ENABLED"] = "False";
         process.StartInfo.Environment["PYTHONUNBUFFERED"] = "1";
         process.OutputDataReceived += (_, e) => { if (e.Data is not null) AppendLog(logPath, e.Data); };
         process.ErrorDataReceived += (_, e) => { if (e.Data is not null) AppendLog(logPath, e.Data); };
-        process.Start(); process.BeginOutputReadLine(); process.BeginErrorReadLine();
+        process.Start();
+        startingKey = key;
+        workbenchInstances[key] = instance;
+        process.BeginOutputReadLine(); process.BeginErrorReadLine();
         return process;
     }
+
+    public string WorkbenchReadyScript(string key) => WorkbenchReadiness.DomScript(workbenchInstances[key]);
 
     private static ProcessStartInfo Hidden(string fileName, string workingDirectory) => new()
     {

@@ -5,6 +5,25 @@ public sealed class LocalizationService(SettingsService settings)
     private readonly Dictionary<string, string[]> values = new(StringComparer.OrdinalIgnoreCase)
     {
         ["home"] = ["首页", "首頁", "Home", "ホーム"],
+        ["工作台未在 30 秒内显示完整操作区域。请检查引擎日志后重试。"] = ["工作台未在 30 秒内显示完整操作区域。请检查引擎日志后重试。", "工作台未在 30 秒內顯示完整操作區域。請檢查引擎日誌後再試。", "The complete workbench controls did not appear within 30 seconds. Check the engine logs and retry.", "30 秒以内にワークベンチの操作エリアが表示されませんでした。エンジンのログを確認してから再試行してください。"],
+        ["自动释放暂不支持，请手动结束引擎"] = ["自动释放暂不支持，请手动结束引擎", "暫不支援自動釋放，請手動結束引擎", "Automatic release is not supported yet. End the engine manually.", "自動解放は未対応です。エンジンを手動で終了してください。"],
+        ["请返回正在运行的工作台，手动结束引擎后再切换模型。"] = ["请返回正在运行的工作台，手动结束引擎后再切换模型。", "請返回執行中的工作台，手動結束引擎後再切換模型。", "Return to the running workbench and end its engine before switching models.", "実行中のワークベンチに戻り、エンジンを手動で終了してからモデルを切り替えてください。"],
+        ["本地端口未提供本次引擎的完整工作台，请检查端口占用或修复引擎。"] = ["本地端口未提供本次引擎的完整工作台，请检查端口占用或修复引擎。", "本機連接埠未提供本次引擎的完整工作台，請檢查連接埠占用或修復引擎。", "The local port did not return this engine's complete workbench. Check for a port conflict or repair the engine.", "ローカルポートから今回のエンジンの完全なワークベンチが返されませんでした。ポートの競合を確認するか、エンジンを修復してください。"],
+        ["分轨模式与引擎不匹配，请重新选择后提交任务。"] = ["分轨模式与引擎不匹配，请重新选择后提交任务。", "分軌模式與引擎不符，請重新選擇後提交任務。", "The stem mode does not match the engine. Select it again before submitting.", "分離モードとエンジンが一致しません。選び直してからタスクを送信してください。"],
+        ["成品文件已移动或删除，请检查原保存位置。"] = ["成品文件已移动或删除，请检查原保存位置。", "成品檔案已移動或刪除，請檢查原儲存位置。", "The result file was moved or deleted. Check its original location.", "成果ファイルが移動または削除されています。元の保存先を確認してください。"],
+        ["目录不存在，请检查保存位置。"] = ["目录不存在，请检查保存位置。", "目錄不存在，請檢查儲存位置。", "The folder does not exist. Check the save location.", "フォルダーが存在しません。保存先を確認してください。"],
+        ["安装请求超时，请检查网络后重试；详情见维护日志。"] = ["安装请求超时，请检查网络后重试；详情见维护日志。", "安裝請求逾時，請確認網路後重試；詳情請見維護日誌。", "Installation request timed out. Check your connection and retry; see maintenance logs for details.", "インストール要求がタイムアウトしました。接続を確認して再試行してください。詳細はメンテナンスログにあります。"],
+        ["maintenanceCheckSummary"] = ["检查完成：可更新 {0}，已是最新 {1}，未安装或待修复 {2}，检查失败 {3}。", "檢查完成：可更新 {0}，已是最新 {1}，未安裝或待修復 {2}，檢查失敗 {3}。", "Check complete: {0} updates, {1} up to date, {2} missing or incomplete, {3} failed checks.", "確認完了：更新 {0}、最新 {1}、未導入・要修復 {2}、確認失敗 {3}。"],
+        ["maintenanceBatchCanceled"] = ["批量更新已停止：已完成 {0} 个组件，剩余组件未继续安装。", "批次更新已停止：已完成 {0} 個元件，其餘元件未繼續安裝。", "Batch update stopped: {0} components completed; remaining installations were not started.", "一括更新を停止しました。{0} 件が完了し、残りのインストールは開始していません。"],
+        ["已有维护操作正在进行，请等待完成或取消后再试。"] = ["已有维护操作正在进行，请等待完成或取消后再试。", "已有維護作業進行中，請等待完成或取消後再試。", "Maintenance is already running. Wait for completion or cancel it before trying again.", "メンテナンス実行中です。完了を待つかキャンセルしてから再試行してください。"],
+        ["查看维护日志"] = ["查看维护日志", "查看維護日誌", "View maintenance logs", "メンテナンスログを開く"],
+        ["运行日志"] = ["运行日志", "執行日誌", "Operation log", "実行ログ"],
+        ["修复"] = ["修复", "修復", "Repair", "修復"],
+        ["将重新校验并部署此模型的运行环境，可能重新下载文件。是否继续修复？"] = ["将重新校验并部署此模型的运行环境，可能重新下载文件。是否继续修复？", "將重新驗證並部署此模型的執行環境，可能重新下載檔案。是否繼續修復？", "Recheck and redeploy this model's runtime. Some files may need downloading again. Continue with repair?", "モデルの実行環境を再確認・再構築します。ファイルの再ダウンロードが必要な場合があります。修復を続けますか？"],
+        ["正在执行，请稍候…"] = ["正在执行，请稍候…", "正在執行，請稍候…", "Working, please wait…", "処理中です。しばらくお待ちください…"],
+        ["检查超时，请检查网络后重试。"] = ["检查超时，请检查网络后重试。", "檢查逾時，請確認網路後重試。", "The check timed out. Check your connection and try again.", "確認がタイムアウトしました。接続を確認して再試行してください。"],
+        ["尚未安装或运行环境不完整"] = ["尚未安装或运行环境不完整", "尚未安裝或執行環境不完整", "Not installed or runtime incomplete", "未インストール、または実行環境が不完全です"],
+        ["检查未完成："] = ["检查未完成：", "檢查未完成：", "Check incomplete: ", "確認未完了："],
         ["updateChannel"] = ["应用更新通道", "應用程式更新通道", "App update channel", "アプリ更新チャンネル"],
         ["featureInstallNotice"] = ["将从官方来源下载并校验所选模型，运行环境和缓存空间另计。安装完成后可直接进入当前工作台。可在设置中更改模型目录。", "將從官方來源下載並驗證所選模型，執行環境和快取空間另計。安裝完成後可直接進入目前工作台。可在設定中變更模型目錄。", "Download and verify the selected model from its official source. Runtimes and caches need additional storage. Continue in this workspace after installation; change the model folder in Settings.", "公式配布元からモデルをダウンロードして検証します。実行環境とキャッシュには追加容量が必要です。導入後はこの画面で続行できます。保存先は設定で変更できます。"],
         ["updateStable"] = ["正式版", "正式版", "Stable", "正式版"],
@@ -414,6 +433,7 @@ public sealed class LocalizationService(SettingsService settings)
 
     private static readonly string[][] templates =
     [
+        ["检查未完成：{0}", "檢查未完成：{0}", "Check incomplete: {0}", "確認未完了：{0}"],
         ["正在准备 {0}", "正在準備 {0}", "Preparing {0}", "{0} を準備中"],
         ["正在安装 {0}", "正在安裝 {0}", "Installing {0}", "{0} をインストール中"],
         ["正在部署 {0}", "正在部署 {0}", "Setting up {0}", "{0} を設定中"],

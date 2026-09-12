@@ -206,9 +206,17 @@ Require(mainPageXaml.Contains("Content=\"{Binding RollbackAction}\"", StringComp
 Require(!mainPageXaml.Contains("<ColumnDefinition Width=\"260\"/><ColumnDefinition Width=\"210\"/>", StringComparison.Ordinal), "Model rows must not rely on the old fixed-width four-column table layout.");
 Require(mainPageSource.Contains("modelUpdateChecks", StringComparison.Ordinal), "Model update check results must remain available to drive update actions.");
 Require(mainPageSource.Contains("UpdateAllModelsButton_Click", StringComparison.Ordinal), "The Update all button must execute available model updates.");
-Require(mainPageSource.Contains("private readonly UpdateFlowGuard modelInstallFlow = new();", StringComparison.Ordinal)
-    && mainPageSource.Contains("if (!modelInstallFlow.TryBegin())", StringComparison.Ordinal)
-    && mainPageSource.Contains("modelInstallFlow.End();", StringComparison.Ordinal), "Model installation must reject a second concurrent operation and release its guard afterward.");
+var installFlowSource = mainPageSource[mainPageSource.IndexOf("private async Task<OperationResult> RunModelInstallAsync", StringComparison.Ordinal)..mainPageSource.IndexOf("private void OpenModelLogsButton_Click", StringComparison.Ordinal)];
+Require(installFlowSource.Contains("await TryBeginMaintenanceAsync()", StringComparison.Ordinal)
+    && installFlowSource.Contains("finally", StringComparison.Ordinal)
+    && installFlowSource.Contains("updateFlow.End();", StringComparison.Ordinal), "Model installation must acquire and release the shared maintenance guard.");
+foreach (var progressType in new[] { "ModelCheckProgress", "ModelInstallProgress", "AppUpdateProgress" })
+    Require(mainPageSource.Contains("new OperationProgress<" + progressType + ">", StringComparison.Ordinal)
+        && !mainPageSource.Contains("new Progress<" + progressType + ">", StringComparison.Ordinal), "Global progress must reject callbacks after its operation finishes: " + progressType);
+Require(mainPageSource.Contains("if (result.Path == \"canceled\") { canceled = true; break; }", StringComparison.Ordinal), "Canceling an installation must stop the remaining batch.");
+Require(mainPageXaml.Contains("x:Name=\"UpdateLogExpander\"", StringComparison.Ordinal)
+    && mainPageSource.Contains("UpdateLogExpander.Visibility = Visibility.Collapsed", StringComparison.Ordinal)
+    && mainPageSource.Contains("UpdateLogExpander.Visibility = Visibility.Visible", StringComparison.Ordinal), "Operation details must be hidden when no logs are available.");
 Require(mainPageSource.Contains("$\"{catalog.DisplayName(model)} · {displayProgress.Detail}\"", StringComparison.Ordinal)
     && mainPageSource.Contains("Stage = localization.Translate(value.Stage)", StringComparison.Ordinal), "Model installation progress must identify the localized model and stage while retaining transfer details.");
 Require(modelUpdateSource.Contains("PyTorch 组件较大，请耐心等待", StringComparison.Ordinal), "Large CUDA dependency installs must explain that an indeterminate wait can still be active.");

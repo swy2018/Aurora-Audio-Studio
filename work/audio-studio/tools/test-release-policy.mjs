@@ -20,4 +20,8 @@ assert.equal(chooseDownload([{...release('1.9.9'),assets:[]}],'windows','stable'
 const malicious=release('1.9.9'); malicious.assets[0].browser_download_url='https://example.com/installer.exe';
 assert.equal(chooseDownload([malicious],'windows','stable'),null);
 assert(compareVersions(releaseVersion('2.0.0'),releaseVersion('2.0.0-beta.10'))>0);
-console.log('11 website release-policy checks passed, including current release metadata and both platforms.');
+const partialBeta = [release('2.0.0-beta.2',true,false,['windows']),release('2.0.0-beta.1',true),release('1.9.9')];
+assert.equal(chooseDownload(partialBeta,'windows','beta').version,'2.0.0-beta.2');
+assert.equal(chooseDownload(partialBeta,'mac','beta').version,'2.0.0-beta.1');
+assert.equal(chooseDownload(partialBeta,'windows','stable').version,'1.9.9');
+console.log('Website release-policy checks passed, including staggered Windows/Mac beta packages and unchanged Stable.');

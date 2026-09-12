@@ -31,7 +31,9 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 | 加速 | NVIDIA RTX 推荐，依模型要求 | Apple Silicon 的 MPS / MLX 或 CPU，依模型实现 |
 | 指南 | [Windows 使用说明](work/audio-studio/README-给音乐人的使用说明.md) | [Mac 使用说明](docs/macOS-user-guide.md) |
 
-两端使用同一版本号、同一个 GitHub Release，分别下载自己平台的安装包和同名 `.sha256`。模型单独按需安装，不随安装包捆绑。Windows 签名状态与 Mac 公证状态分别说明，见[代码签名政策](CODE_SIGNING_POLICY.md)。
+两端源码使用同一版本体系，分别下载实际已发布的平台安装包和同名 `.sha256`。本次 beta.2 先发布 Windows，Mac 仍提供 beta.1；Mac beta.2 待构建与验收后补入同一 Release。模型单独按需安装，不随安装包捆绑。Windows 签名状态与 Mac 公证状态分别说明，见[代码签名政策](CODE_SIGNING_POLICY.md)。
+
+Mac beta.2 构建：[源码交接与验收说明](docs/beta.2-mac-handoff.md)。上面的 1.9.9 下载属于稳定版，不会被本次 beta 替换。
 
 ### 正式版与测试版更新
 
@@ -42,15 +44,15 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 ## 当前版本更新
 
 <!-- current-packages:start -->
-当前源码构建 / Current source builds: `Aurora-Audio-Studio-2.0.0-beta.1-Setup-x64.exe` · `Aurora-Audio-Studio-2.0.0-beta.1-arm64.dmg`
+当前源码构建 / Current source builds: `Aurora-Audio-Studio-2.0.0-beta.2-Setup-x64.exe` · `Aurora-Audio-Studio-2.0.0-beta.2-arm64.dmg`
 <!-- current-packages:end -->
 
 <!-- release-notes-zh:start -->
-- Aurora 2.0 Beta 1 现已推出，提供 Windows 与 macOS 本地音频创作体验。
-- Windows 与 Mac 统一版本号；同一个 Release 提供各自安装包与独立 SHA-256 校验文件。
-- 新增正式版与测试版更新通道，默认正式版。测试版需主动选择，切回正式版不自动降级。
-- 修复混合平台发布的安装包选择与校验；支持 Beta 数字排序及 Beta 升级到后续正式版。
-- Mac 接入六类本地音频工作流与官方字幕编辑器；原有模型、设置及作品继续保留。
+- 2.0 Beta 2 本次提供 Windows 安装包；Mac 源码已同步，安装包待 Mac 构建、签名、公证及验收。
+- 修复模型检查或安装结束后进度面板不关闭、空日志下拉、下载文件占用、超时误判及批量取消后继续安装。
+- 工作台校验本次引擎身份与操作控件；切换模型不再静默结束其他引擎，失败重连保留原有引擎。
+- 修复重试进度串线、分轨模式不一致、维护期间路径变更及丢失成品误建目录；增强诊断凭据脱敏与设置保存失败处理。
+- 自动释放显存尚未支持，已禁用无效开关并提示手动结束引擎。85 项后台回归通过；六功能真实推理和可见 UI 全流程仍待实测，不承诺所有模型已验收。
 <!-- release-notes-zh:end -->
 
 “文件齐全”不代表已完成推理。模型中心在真实任务成功后记录当前模型版本、时间和设备。未接入工作台的模型明确标为“仅模型管理”，MiniMax 等未在本机验收的可选模型不承诺实测通过。
@@ -183,18 +185,18 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 ## English
 
-Aurora Audio Studio is a local AI audio production workspace for Windows and macOS. Both platforms provide six independent entry points for music, voice, singing, stems, MIDI, and subtitles. Windows x64 and Apple Silicon installers share a single Release, with separate checksums. See the platform table above and the [Mac guide](docs/macOS-user-guide.md).
+Aurora Audio Studio is a local AI audio production workspace for Windows and macOS. Both platforms provide six independent entry points for music, voice, singing, stems, MIDI, and subtitles. Windows beta.2 ships first; Mac beta.1 remains available until the beta.2 Mac build is signed, notarized, and accepted. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [beta.2 source handoff](docs/beta.2-mac-handoff.md).
 
 Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Beta releases are intended for users who want early access; back up important settings before upgrading.
 
 ### Current release notes
 
 <!-- release-notes-en:start -->
-- Aurora 2.0 Beta 1 is available for local audio creation on Windows and macOS.
-- Windows and Mac share one version and Release, with separate installers and SHA-256 checksum files.
-- Add Stable and Beta update channels, defaulting to Stable. Betas are opt-in; switching back never silently downgrades.
-- Select and verify the exact platform package, order beta revisions numerically, and upgrade betas to later stable releases.
-- Bring six local audio workflows and the official subtitle editor to Mac while preserving models, settings, and results.
+- Beta 2 provides a Windows installer. Mac source is synchronized; its package awaits a Mac build, signing, notarization, and acceptance.
+- Fix maintenance panels surviving completion, empty log expanders, download file locks, timeout classification, and batch installs continuing after cancellation.
+- Verify the launched engine identity and workbench controls. Switching models no longer silently stops another engine; failed reconnection preserves existing engines.
+- Fix stale retry progress, inconsistent stem modes, storage changes during maintenance, and missing results creating folders. Improve credential redaction and failed settings saves.
+- Automatic VRAM release remains unsupported: the ineffective switch is disabled with manual-release guidance. 85 background regressions passed; real inference and full visible UI workflows still need testing. Not all models are claimed as verified.
 <!-- release-notes-en:end -->
 
 Read the [capability matrix](docs/capabilities.json) and [acceptance report](docs/validation-1.9.9.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. MIDI editing/playback requires your own music application; audio playback and subtitle-copy editing are available in Results.

@@ -30,6 +30,8 @@ public sealed partial class MainPage : Page
     private readonly WorkbenchResultService workbenchResults;
     private readonly FileSystemWatcher resultWatcher;
     private bool utilitySubmissionBusy;
+    private bool syncingTrackMode;
+    private bool syncingSafeMode;
     private CancellationTokenSource? utilityBatchCancellation;
     private readonly HashSet<string> batchTaskIds = [];
     private readonly ObservableCollection<string> utilityLogs = [];
@@ -38,10 +40,12 @@ public sealed partial class MainPage : Page
     private CancellationTokenSource? workbenchStartupCancellation;
     private string? workbenchStartingFeature;
     private (string Feature, string Model, int Pid)? connectedWorkbench;
-    private readonly UpdateFlowGuard modelInstallFlow = new();
+    private bool modelBatchUpdating;
     private readonly SemaphoreSlim dialogGate = new(1, 1);
     private CancellationTokenSource? modelInstallCancellation;
     private CancellationTokenSource? modelCheckCancellation;
+    private CancellationTokenSource? silentModelCheckCancellation;
+    private Task? silentModelCheck;
     private readonly Queue<string> modelInstallLog = new();
     private readonly Dictionary<string, OperationResult> modelUpdateChecks = new(StringComparer.OrdinalIgnoreCase);
     private string feature = "music";
@@ -94,7 +98,7 @@ public sealed partial class MainPage : Page
             settings.TrySave(settings.Current, out _);
             await RunAppUpdateFlowAsync(false);
         }
-        if (settings.Current.AutoCheckModelUpdates) _ = CheckModelsSilentlyAsync();
+        if (settings.Current.AutoCheckModelUpdates) silentModelCheck = CheckModelsSilentlyAsync();
     }
 
     private void Shell_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -186,12 +190,18 @@ public sealed partial class MainPage : Page
         if (ModelPicker.SelectedItem is not ComboBoxItem item || item.Tag is not string modelId || catalog.Find(modelId) is not { } model) return;
         if (!catalog.IsInstalled(model) && !await InstallSelectedModelAsync(model)) return;
         if (settings.Current.SafeMode) { SetStatus("安全模式已启用。关闭安全模式后才能启动创作引擎。"); return; }
+        if (!backend.CanStartWorkbench(feature, modelId)) { SetStatus("请返回正在运行的工作台，手动结束引擎后再切换模型。"); return; }
         workbenchStartupCancellation?.Cancel();
         var startup = new CancellationTokenSource();
         workbenchStartupCancellation = startup;
         var launchFeature = feature;
+        var previousPid = backend.WorkbenchProcessId(launchFeature);
         connectedWorkbench = null;
         int? launchedPid = null;
+        void StopNewEngine()
+        {
+            if (launchedPid is int pid && pid != previousPid) backend.StopWorkbench(launchFeature, pid);
+        }
         workbenchStartingFeature = launchFeature;
         WorkbenchInfo.IsOpen = false;
         WorkbenchStartingPanel.Visibility = Visibility.Visible; WorkbenchProgress.IsActive = true; StudioEmpty.Visibility = Visibility.Collapsed;
@@ -204,29 +214,29 @@ public sealed partial class MainPage : Page
             startup.Token.ThrowIfCancellationRequested();
             if (!result.Success || result.Url is null)
             {
-                if (launchedPid is int failedPid) backend.StopWorkbench(launchFeature, failedPid);
+                StopNewEngine();
                 if (ReferenceEquals(workbenchStartupCancellation, startup)) ShowWorkbenchFailure(result.Message);
                 return;
             }
 
             SetStatus("正在载入 " + item.Content + " 工作台…");
-            await NavigateWorkbenchAsync(result.Url, startup.Token);
+            await NavigateWorkbenchAsync(result.Url, backend.WorkbenchReadyScript(launchFeature), startup.Token);
             if (launchedPid is int readyPid) connectedWorkbench = (launchFeature, modelId, readyPid);
             if (ReferenceEquals(workbenchStartupCancellation, startup)) SetStatus("已连接 " + item.Content);
         }
         catch (OperationCanceledException)
         {
-            if (launchedPid is int canceledPid) backend.StopWorkbench(launchFeature, canceledPid);
+            StopNewEngine();
             if (ReferenceEquals(workbenchStartupCancellation, startup)) ResetWorkbenchStartupUi("创作引擎启动已取消。");
         }
         catch (TimeoutException)
         {
-            if (launchedPid is int timedOutPid) backend.StopWorkbench(launchFeature, timedOutPid);
-            if (ReferenceEquals(workbenchStartupCancellation, startup)) ShowWorkbenchFailure("工作台界面加载超过 30 秒。已结束本地引擎，请重试；若仍失败，请在维护与恢复中导出诊断。");
+            StopNewEngine();
+            if (ReferenceEquals(workbenchStartupCancellation, startup)) ShowWorkbenchFailure("工作台未在 30 秒内显示完整操作区域。请检查引擎日志后重试。");
         }
         catch (Exception ex)
         {
-            if (launchedPid is int failedPid) backend.StopWorkbench(launchFeature, failedPid);
+            StopNewEngine();
             if (ReferenceEquals(workbenchStartupCancellation, startup)) ShowWorkbenchFailure("工作台界面加载失败：" + ex.Message);
         }
         finally
@@ -244,7 +254,7 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private async Task NavigateWorkbenchAsync(string url, CancellationToken cancellationToken)
+    private async Task NavigateWorkbenchAsync(string url, string readyScript, CancellationToken cancellationToken)
     {
         Workbench.Opacity = 0;
         Workbench.IsHitTestVisible = false;
@@ -277,6 +287,15 @@ public sealed partial class MainPage : Page
             Workbench.NavigationCompleted -= NavigationCompleted;
         }
 
+        using var ready = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        ready.CancelAfter(TimeSpan.FromSeconds(30));
+        try
+        {
+            while (await Workbench.CoreWebView2!.ExecuteScriptAsync(readyScript).AsTask().WaitAsync(ready.Token) != "true")
+                await Task.Delay(250, ready.Token);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested) { throw new TimeoutException(); }
+        cancellationToken.ThrowIfCancellationRequested();
         Workbench.Opacity = 1;
         Workbench.IsHitTestVisible = true;
         await LocalizeWorkbenchAsync();
@@ -487,7 +506,16 @@ public sealed partial class MainPage : Page
         await AddSourcesAsync(items.OfType<StorageFile>());
     }
 
-    private void UtilityModelPicker_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateUtilityRunState();
+    private void UtilityModelPicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (feature == "separation" && UtilityModelPicker.SelectedItem is ComboBoxItem { Tag: string id } && UtilityTrackModePicker is not null)
+        {
+            syncingTrackMode = true;
+            try { SelectTag(UtilityTrackModePicker, id == "roformer-vocals" ? "two-stem" : "multi-stem"); }
+            finally { syncingTrackMode = false; }
+        }
+        UpdateUtilityRunState();
+    }
 
     private void UpdateUtilityRunState()
     {
@@ -569,7 +597,7 @@ public sealed partial class MainPage : Page
 
     private void UtilityTrackModePicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (IsLoaded) ApplyUtilityPreset();
+        if (IsLoaded && !syncingTrackMode) ApplyUtilityPreset();
     }
 
     private void ApplyUtilityPreset()
@@ -635,7 +663,7 @@ public sealed partial class MainPage : Page
                 cancellation.Token.ThrowIfCancellationRequested();
                 var entry = batch[index];
                 if (feature == submittedFeature) UtilityStatusText.Text = localization.Format("batchProcessing", index + 1, batch.Count, Path.GetFileName(entry.Task.InputPath));
-                var result = await taskQueue.RunAsync(entry.Task, (progress, token) => backend.RunUtilityAsync(entry.Task.Feature, entry.Task.InputPath, entry.Task.ModelId, entry.Task.SourceLanguage, progress, token));
+                var result = await taskQueue.RunAsync(entry.Task, (progress, token) => backend.RunUtilityAsync(entry.Task.Feature, entry.Task.InputPath, entry.Task.ModelId, entry.Task.SourceLanguage, progress, token, entry.Task.TrackMode));
                 await projects.CompleteTaskAsync(entry.Project.Id, entry.Task);
                 if (result.Success) catalog.RecordSuccessfulRun(entry.Task.ModelId, entry.Task.Device);
                 AppendUtilityLog(localization.Format(result.Success ? "batchItemCompleted" : "batchItemFailed", Path.GetFileName(entry.Task.InputPath)));
@@ -793,6 +821,7 @@ public sealed partial class MainPage : Page
 
     private async void CheckAllModelsButton_Click(object sender, RoutedEventArgs e)
     {
+        if (modelBatchUpdating || !await TryBeginMaintenanceAsync()) { SetStatus("已有维护操作正在进行，请等待完成或取消后再试。"); return; }
         CheckAllModelsButton.IsEnabled = false;
         UpdateAllModelsButton.IsEnabled = false;
         using var cancellation = new CancellationTokenSource();
@@ -800,29 +829,31 @@ public sealed partial class MainPage : Page
         try
         {
             SetStatus("正在检查模型更新…");
+            ResetGlobalUpdate();
             ShowGlobalUpdate(0, "正在检查模型更新…", false, true);
-            var checkProgress = new Progress<ModelCheckProgress>(value =>
+            using var checkProgress = new OperationProgress<ModelCheckProgress>(value =>
             {
                 var percentage = value.Total == 0 ? 0 : value.Completed * 100d / value.Total;
                 ShowGlobalUpdate(percentage, $"正在检查模型更新 {value.Completed}/{value.Total}", false, true);
                 UpdateActivityText.Text = value.ModelName;
-            });
+            }, action => DispatcherQueue.TryEnqueue(() => action()), cancellation.Token);
             var results = await modelUpdater.CheckAllAsync(checkProgress, cancellation.Token);
             modelUpdateChecks.Clear();
             foreach (var result in results) modelUpdateChecks[result.Key] = result.Value;
             var available = results.Count(x => x.Value.Path == "available");
             var currentCount = results.Count(x => x.Value.Path == "current");
-            var unavailable = results.Count - available - currentCount;
-            SetStatus(available == 0
-                ? $"检查完成：{currentCount} 个已安装组件为最新，{unavailable} 个未安装或暂时无法检查。"
-                : $"发现 {available} 个可自动安装的更新；{currentCount} 个已是最新，{unavailable} 个未安装或暂时无法检查。");
+            var absent = results.Count(x => x.Value.Path == "not-installed");
+            var failed = results.Count - available - currentCount - absent;
+            SetStatus(localization.Format("maintenanceCheckSummary", available, currentCount, absent, failed));
             RefreshModels();
         }
         catch (OperationCanceledException) { SetStatus("模型更新检查已取消。"); }
+        catch (Exception ex) { SetStatus(localization.Translate("检查未完成：") + ex.Message); }
         finally
         {
             if (ReferenceEquals(modelCheckCancellation, cancellation)) modelCheckCancellation = null;
             HideGlobalUpdate();
+            updateFlow.End();
             CheckAllModelsButton.IsEnabled = true;
             UpdateAllModelsButton.IsEnabled = true;
         }
@@ -831,25 +862,46 @@ public sealed partial class MainPage : Page
     private async void ModelUpdateButton_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as Button)?.Tag is not string id || catalog.Find(id) is not { } model) return;
-        var check = await modelUpdater.CheckAsync(model);
+        if (modelBatchUpdating || !await TryBeginMaintenanceAsync()) { SetStatus("已有维护操作正在进行，请等待完成或取消后再试。"); return; }
+        OperationResult check;
+        using (var cancellation = new CancellationTokenSource())
+        {
+            modelCheckCancellation = cancellation;
+            try
+            {
+                ResetGlobalUpdate();
+                ShowGlobalUpdate(0, catalog.DisplayName(model), true, true);
+                check = await modelUpdater.CheckAsync(model, cancellation.Token);
+            }
+            catch (OperationCanceledException) { SetStatus("模型更新检查已取消。"); return; }
+            finally { modelCheckCancellation = null; HideGlobalUpdate(); updateFlow.End(); }
+        }
         modelUpdateChecks[id] = check;
         RefreshModels();
         var isUpdate = check.Path == "available";
-        if (isUpdate && modelUpdater.FindRunningProcess(model) is { } runningProcess)
+        if (modelUpdater.FindRunningProcess(model) is { } runningProcess)
         {
             await ShowModelInUseDialogAsync(runningProcess);
             SetStatus(string.Format(localization.Translate("请先保存并关闭 {0}，然后重新点击更新。Aurora 不会强制关闭它，以免丢失未保存内容。"), runningProcess));
             return;
         }
-        if (!catalog.IsInstalled(model) || isUpdate)
+        var installed = catalog.IsInstalled(model);
+        var repair = installed && !isUpdate;
+        var dialog = new ContentDialog
         {
-            var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = model.Name, Content = catalog.IsInstalled(model) ? "发现新版本。Aurora 会保留可恢复的版本信息，是否现在更新？" : "此模型尚未安装。Aurora 将从官方来源下载并校验文件，是否继续？", PrimaryButtonText = localization.Translate(catalog.IsInstalled(model) ? "更新" : "安装"), CloseButtonText = localization.Translate("稍后") };
-            if (await ShowDialogAsync(dialog) == ContentDialogResult.Primary)
-            {
-                check = await RunModelInstallAsync(model);
-                modelUpdateChecks[id] = check.Success ? new OperationResult(true, check.Message, "current")
-                    : isUpdate ? new OperationResult(false, check.Message, "available") : check;
-            }
+            XamlRoot = XamlRoot,
+            Title = catalog.DisplayName(model),
+            Content = repair ? "将重新校验并部署此模型的运行环境，可能重新下载文件。是否继续修复？"
+                : installed ? "发现新版本。Aurora 会保留可恢复的版本信息，是否现在更新？"
+                : "此模型尚未安装。Aurora 将从官方来源下载并校验文件，是否继续？",
+            PrimaryButtonText = localization.Translate(repair ? "修复" : installed ? "更新" : "安装"),
+            CloseButtonText = localization.Translate("稍后")
+        };
+        if (await ShowDialogAsync(dialog) == ContentDialogResult.Primary)
+        {
+            check = await RunModelInstallAsync(model);
+            modelUpdateChecks[id] = check.Success ? new OperationResult(true, check.Message, "current")
+                : isUpdate ? new OperationResult(false, check.Message, "available") : check;
         }
         SetStatus(model.Name + "：" + check.Message); RefreshModels();
     }
@@ -868,6 +920,8 @@ public sealed partial class MainPage : Page
 
     private async void UpdateAllModelsButton_Click(object sender, RoutedEventArgs e)
     {
+        await CancelSilentModelCheckAsync();
+        if (modelBatchUpdating || updateFlow.IsRunning) { SetStatus("已有维护操作正在进行，请等待完成或取消后再试。"); return; }
         var pending = modelUpdateChecks.Where(x => x.Value.Path == "available").Select(x => x.Key).ToList();
         if (pending.Count == 0) { RefreshModels(); return; }
         var blockers = new List<string>();
@@ -898,17 +952,21 @@ public sealed partial class MainPage : Page
         };
         if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
 
+        if (modelBatchUpdating || updateFlow.IsRunning) { SetStatus("已有维护操作正在进行，请等待完成或取消后再试。"); return; }
         CheckAllModelsButton.IsEnabled = false;
         UpdateAllModelsButton.IsEnabled = false;
+        modelBatchUpdating = true;
         var succeeded = 0;
         var failed = 0;
+        var canceled = false;
         try
         {
             foreach (var id in pending)
             {
                 if (catalog.Find(id) is not { } model) continue;
                 SetStatus($"正在更新 {model.Name}…");
-                var result = await RunModelInstallAsync(model);
+                var result = await RunModelInstallAsync(model, fromBatch: true);
+                if (result.Path == "canceled") { canceled = true; break; }
                 if (result.Success)
                 {
                     succeeded++;
@@ -921,10 +979,11 @@ public sealed partial class MainPage : Page
                 }
                 RefreshModels();
             }
-            SetStatus(failed == 0 ? $"已更新 {succeeded} 个组件。" : $"已更新 {succeeded} 个组件，{failed} 个未完成。可再次检查后重试。");
+            SetStatus(canceled ? localization.Format("maintenanceBatchCanceled", succeeded) : failed == 0 ? $"已更新 {succeeded} 个组件。" : $"已更新 {succeeded} 个组件，{failed} 个未完成。可再次检查后重试。");
         }
         finally
         {
+            modelBatchUpdating = false;
             CheckAllModelsButton.IsEnabled = true;
             UpdateAllModelsButton.IsEnabled = true;
             RefreshModels();
@@ -934,21 +993,31 @@ public sealed partial class MainPage : Page
     private async void ModelRollbackButton_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as Button)?.Tag is not string id || catalog.Find(id) is not { } model) return;
-        var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = "恢复模型版本", Content = $"将 {model.Name} 恢复到上一个已记录版本。处理记录和成品不会受影响。", PrimaryButtonText = "恢复", CloseButtonText = "取消" };
-        if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
-        var result = await modelUpdater.RollbackAsync(model); SetStatus(result.Message); RefreshModels();
+        if (modelBatchUpdating || !await TryBeginMaintenanceAsync()) { SetStatus("已有维护操作正在进行，请等待完成或取消后再试。"); return; }
+        try
+        {
+            var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = "恢复模型版本", Content = $"将 {model.Name} 恢复到上一个已记录版本。处理记录和成品不会受影响。", PrimaryButtonText = "恢复", CloseButtonText = "取消" };
+            if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
+            var result = await modelUpdater.RollbackAsync(model); SetStatus(result.Message); RefreshModels();
+        }
+        finally { updateFlow.End(); }
     }
 
     private async void ModelUninstallButton_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as Button)?.Tag is not string id || catalog.Find(id) is not { } model) return;
-        var path = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
-        if (!Directory.Exists(path)) { SetStatus("此模型当前未安装。 "); return; }
-        var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = "卸载模型", Content = $"将 {model.Name} 移到 Windows 回收站。Aurora、处理记录和成品会保留。", PrimaryButtonText = "移到回收站", CloseButtonText = "取消", DefaultButton = ContentDialogButton.Close };
-        if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
-        try { Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(path, Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin); SetStatus(model.Name + " 已移到回收站。 "); }
-        catch (Exception ex) { SetStatus("卸载未完成：" + ex.Message); }
-        RefreshModels();
+        if (modelBatchUpdating || !await TryBeginMaintenanceAsync()) { SetStatus("已有维护操作正在进行，请等待完成或取消后再试。"); return; }
+        try
+        {
+            var path = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
+            if (!Directory.Exists(path)) { SetStatus("此模型当前未安装。 "); return; }
+            var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = "卸载模型", Content = $"将 {model.Name} 移到 Windows 回收站。Aurora、处理记录和成品会保留。", PrimaryButtonText = "移到回收站", CloseButtonText = "取消", DefaultButton = ContentDialogButton.Close };
+            if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
+            try { Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(path, Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin); SetStatus(model.Name + " 已移到回收站。 "); }
+            catch (Exception ex) { SetStatus("卸载未完成：" + ex.Message); }
+            RefreshModels();
+        }
+        finally { updateFlow.End(); }
     }
 
     private async void CheckAppUpdateButton_Click(object sender, RoutedEventArgs e) => await RunAppUpdateFlowAsync(true);
@@ -997,7 +1066,7 @@ public sealed partial class MainPage : Page
 
     private async Task RunAppUpdateFlowAsync(bool showCurrent)
     {
-        if (!updateFlow.TryBegin())
+        if (modelBatchUpdating || !await TryBeginMaintenanceAsync())
         {
             if (showCurrent) ShowUpdateInfo(InfoBarSeverity.Informational, localization.Get("updateAlreadyRunning"));
             return;
@@ -1008,6 +1077,7 @@ public sealed partial class MainPage : Page
         try
         {
             SetStatus(localization.Get("updateChecking"));
+            ResetGlobalUpdate();
             ShowGlobalUpdate(0, localization.Get("updateChecking"), true);
             var update = await updater.CheckAsync();
             if (!update.UpdateAvailable)
@@ -1034,8 +1104,9 @@ public sealed partial class MainPage : Page
             };
             if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
 
-            var progress = new Progress<AppUpdateProgress>(value => ShowGlobalUpdate(value.Percentage, value.Message, value.IsIndeterminate));
+            using var progress = new OperationProgress<AppUpdateProgress>(value => ShowGlobalUpdate(value.Percentage, value.Message, value.IsIndeterminate), action => DispatcherQueue.TryEnqueue(() => action()));
             var result = await updater.DownloadAndInstallAsync(update, progress);
+            progress.Dispose();
             ShowUpdateInfo(result.Success ? InfoBarSeverity.Success : InfoBarSeverity.Error, result.Message);
             if (!result.Success)
             {
@@ -1058,6 +1129,7 @@ public sealed partial class MainPage : Page
             updateFlow.End();
             if (!handingOff)
             {
+                HideGlobalUpdate();
                 AppUpdateButton.IsEnabled = true;
                 SetStatus(localization.Get("ready"));
             }
@@ -1090,56 +1162,65 @@ public sealed partial class MainPage : Page
         else if (element is ScrollViewer scroll && scroll.Content is UIElement content) LocalizeDialogContent(content);
     }
 
-    private async Task<OperationResult> RunModelInstallAsync(ModelDefinition model)
+    private async Task<OperationResult> RunModelInstallAsync(ModelDefinition model, bool fromBatch = false)
     {
-        if (!modelInstallFlow.TryBegin())
-            return new OperationResult(false, "已有模型正在安装，请等待当前任务完成或取消后再试。");
+        if ((modelBatchUpdating && !fromBatch) || !await TryBeginMaintenanceAsync())
+            return new OperationResult(false, "已有维护操作正在进行，请等待完成或取消后再试。");
         using var cancellation = new CancellationTokenSource();
         modelInstallCancellation = cancellation;
         try
         {
-            modelInstallLog.Clear();
-            UpdateLogText.Text = "";
-            var progress = new Progress<ModelInstallProgress>(value =>
+            ResetGlobalUpdate();
+            using var progress = new OperationProgress<ModelInstallProgress>(value =>
             {
                 if (!string.IsNullOrWhiteSpace(value.LogLine))
                 {
                     modelInstallLog.Enqueue(value.LogLine);
                     while (modelInstallLog.Count > 20) modelInstallLog.Dequeue();
                     UpdateLogText.Text = string.Join(Environment.NewLine, modelInstallLog);
+                    UpdateLogExpander.Visibility = Visibility.Visible;
                     UpdateActivityText.Text = value.LogLine;
                     return;
                 }
                 var displayProgress = value with { Stage = localization.Translate(value.Stage) };
                 ShowGlobalUpdate(value.Percentage ?? 0, $"{catalog.DisplayName(model)} · {displayProgress.Detail}", value.Percentage is null, true);
-            });
+            }, action => DispatcherQueue.TryEnqueue(() => action()), cancellation.Token);
             ShowGlobalUpdate(0, $"正在准备 {model.Name}", true, true);
             var result = await modelUpdater.UpdateAsync(model, progress, cancellation.Token);
-            HideGlobalUpdate();
             return result;
         }
         catch (OperationCanceledException)
         {
-            HideGlobalUpdate();
-            return new OperationResult(false, "模型安装已暂停。已下载的临时文件会保留，下次可继续。");
+            return new OperationResult(false, "模型安装已暂停。已下载的临时文件会保留，下次可继续。", "canceled");
         }
         catch (Exception ex)
         {
-            HideGlobalUpdate();
             return new OperationResult(false, "模型安装未完成：" + ex.Message);
         }
         finally
         {
             if (ReferenceEquals(modelInstallCancellation, cancellation)) modelInstallCancellation = null;
-            modelInstallFlow.End();
+            HideGlobalUpdate();
+            updateFlow.End();
         }
+    }
+
+    private void OpenModelLogsButton_Click(object sender, RoutedEventArgs e) => backend.OpenFolder(settings.LogsRoot);
+
+    private void ResetGlobalUpdate()
+    {
+        modelInstallLog.Clear();
+        UpdateLogText.Text = "";
+        UpdateActivityText.Text = "";
+        UpdateLogExpander.IsExpanded = false;
+        UpdateLogExpander.Visibility = Visibility.Collapsed;
     }
 
     private void ShowGlobalUpdate(double percentage, string message, bool isIndeterminate = false, bool canCancel = false)
     {
         GlobalUpdatePanel.Visibility = Visibility.Visible;
         UpdateStageText.Text = localization.Translate(message);
-        UpdateActivityText.Text = isIndeterminate ? localization.Translate("正在等待安装进程返回最新活动…") : localization.Format("percentCompleted", Math.Round(percentage));
+        UpdateActivityText.Text = isIndeterminate ? localization.Translate("正在执行，请稍候…") : localization.Format("percentCompleted", Math.Round(percentage));
         UpdateProgress.IsIndeterminate = isIndeterminate;
         UpdateProgress.Value = Math.Clamp(percentage, 0, 100);
         UpdatePercentText.Text = isIndeterminate ? "…" : $"{Math.Round(UpdateProgress.Value):0}%";
@@ -1153,6 +1234,7 @@ public sealed partial class MainPage : Page
         CancelGlobalOperationButton.Visibility = Visibility.Collapsed;
         CancelGlobalOperationButton.IsEnabled = true;
         GlobalUpdatePanel.Visibility = Visibility.Collapsed;
+        ResetGlobalUpdate();
     }
 
     private void CancelGlobalOperationButton_Click(object sender, RoutedEventArgs e)
@@ -1172,7 +1254,8 @@ public sealed partial class MainPage : Page
 
     private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
     {
-        if ((utilitySubmissionBusy || backend.HasActiveOperations) &&
+        if ((utilitySubmissionBusy || backend.HasActiveOperations || workbenchStartupCancellation is not null
+             || updateFlow.IsRunning || modelBatchUpdating || taskQueue.HasPendingOperations || taskQueue.Items.Any(x => x.CanCancel)) &&
             (ModelRootBox.Text.Trim() != settings.Current.LocalAiRoot || OutputRootBox.Text.Trim() != settings.Current.OutputRoot || ProjectsRootBox.Text.Trim() != settings.Current.ProjectsRoot))
         {
             FooterStatus.Text = localization.Translate("请先结束运行中的任务与引擎，再更改保存目录。"); return;
@@ -1185,7 +1268,7 @@ public sealed partial class MainPage : Page
             AutoCheckAppUpdates = AppAutoUpdateToggle.IsOn, LastAppUpdateCheckDate = settings.Current.LastAppUpdateCheckDate,
             AppUpdateChannel = (AppUpdateChannelPicker.SelectedItem as ComboBoxItem)?.Tag as string ?? "stable",
             AutoCheckModelUpdates = ModelAutoUpdateToggle.IsOn, ConfirmLargeModelDownloads = ConfirmLargeToggle.IsOn,
-            AutoReleaseVram = AutoReleaseSettingsToggle.IsOn, SafeMode = settings.Current.SafeMode, TaskHistoryLimit = settings.Current.TaskHistoryLimit
+            AutoReleaseVram = settings.Current.AutoReleaseVram, SafeMode = settings.Current.SafeMode, TaskHistoryLimit = settings.Current.TaskHistoryLimit
         };
         if (candidate.AppUpdateChannel != settings.Current.AppUpdateChannel) candidate.LastAppUpdateCheckDate = null;
         if (!settings.TrySave(candidate, out var error)) { ShowUtility(false, error); SetStatus(error); return; }
@@ -1224,7 +1307,7 @@ public sealed partial class MainPage : Page
         ModelRootBox.Text = settings.Current.LocalAiRoot; OutputRootBox.Text = settings.Current.OutputRoot; ProjectsRootBox.Text = settings.Current.ProjectsRoot;
         AppAutoUpdateToggle.IsOn = settings.Current.AutoCheckAppUpdates; ModelAutoUpdateToggle.IsOn = settings.Current.AutoCheckModelUpdates; ConfirmLargeToggle.IsOn = settings.Current.ConfirmLargeModelDownloads;
         AppUpdateChannelPicker.SelectedIndex = settings.Current.AppUpdateChannel == "beta" ? 1 : 0;
-        AutoReleaseSettingsToggle.IsOn = settings.Current.AutoReleaseVram; AutoReleaseToggle.IsOn = settings.Current.AutoReleaseVram; SafeModeToggle.IsOn = settings.Current.SafeMode; ApplyTheme();
+        AutoReleaseSettingsToggle.IsOn = false; AutoReleaseToggle.IsOn = false; SafeModeToggle.IsOn = settings.Current.SafeMode; ApplyTheme();
     }
 
     private void RefreshCurrentPageHeading()
@@ -1349,25 +1432,22 @@ public sealed partial class MainPage : Page
         GpuSummaryText.Text = localization.Translate("正在读取 GPU 信息…");
         GpuSummaryText.Text = await maintenance.GpuSummaryAsync();
         SafeModeToggle.IsOn = settings.Current.SafeMode;
-        AutoReleaseToggle.IsOn = settings.Current.AutoReleaseVram;
+        AutoReleaseToggle.IsOn = false;
     }
     private void SafeModeToggle_Toggled(object sender, RoutedEventArgs e)
     {
-        if (!IsLoaded) return;
-        settings.Current.SafeMode = SafeModeToggle.IsOn;
-        settings.Current.AutoReleaseVram = AutoReleaseToggle.IsOn;
-        AutoReleaseSettingsToggle.IsOn = settings.Current.AutoReleaseVram;
-        settings.Save(settings.Current);
+        if (!IsLoaded || syncingSafeMode || settings.Current.SafeMode == SafeModeToggle.IsOn) return;
+        if (!settings.TrySetSafeMode(SafeModeToggle.IsOn, out var error))
+        {
+            syncingSafeMode = true;
+            try { SafeModeToggle.IsOn = settings.Current.SafeMode; }
+            finally { syncingSafeMode = false; }
+            SetStatus(error);
+            return;
+        }
         if (settings.Current.SafeMode) { utilityBatchCancellation?.Cancel(); taskQueue.CancelAll(); workbenchStartupCancellation?.Cancel(); backend.StopAll(); }
         UpdateUtilityRunState();
         SetStatus(settings.Current.SafeMode ? "安全模式已启用。" : "安全模式已关闭，创作引擎可以启动。 ");
-    }
-    private void AutoReleaseToggle_Toggled(object sender, RoutedEventArgs e)
-    {
-        if (!IsLoaded) return;
-        settings.Current.AutoReleaseVram = AutoReleaseToggle.IsOn;
-        AutoReleaseSettingsToggle.IsOn = settings.Current.AutoReleaseVram;
-        settings.Save(settings.Current);
     }
 
     private void TemplateButton_Click(object sender, RoutedEventArgs e)
@@ -1411,7 +1491,7 @@ public sealed partial class MainPage : Page
         try
         {
             // Resume the retained record: a double click cannot create duplicate jobs.
-            var result = await taskQueue.RunAsync(old, (progress, token) => backend.RunUtilityAsync(old.Feature, old.InputPath, old.ModelId, old.SourceLanguage, progress, token));
+            var result = await taskQueue.RunAsync(old, (progress, token) => backend.RunUtilityAsync(old.Feature, old.InputPath, old.ModelId, old.SourceLanguage, progress, token, old.TrackMode));
             await projects.CompleteTaskAsync(old.ProjectId, old);
             if (result.Success) catalog.RecordSuccessfulRun(old.ModelId, old.Device);
             FooterStatus.Text = localization.Translate(result.Message);
@@ -1450,6 +1530,7 @@ public sealed partial class MainPage : Page
     private void OpenArtifactButton_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as Button)?.Tag is not string path || string.IsNullOrWhiteSpace(path)) return;
+        if (!File.Exists(path) && !Directory.Exists(path)) { SetStatus("成品文件已移动或删除，请检查原保存位置。"); return; }
         var folder = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
         backend.OpenFolder(folder);
     }
@@ -1558,16 +1639,34 @@ public sealed partial class MainPage : Page
     }
     private void ClearUtilityLogButton_Click(object sender, RoutedEventArgs e) { utilityLogs.Clear(); AppendUtilityLog("活动记录已清空。"); }
     private void AppendUtilityLog(string message) => utilityLogs.Add($"{DateTime.Now:HH:mm:ss}  {localization.Translate(message)}");
+    private async Task CancelSilentModelCheckAsync()
+    {
+        var check = silentModelCheck;
+        silentModelCheckCancellation?.Cancel();
+        if (check is not null) await check;
+    }
+
+    private async Task<bool> TryBeginMaintenanceAsync()
+    {
+        await CancelSilentModelCheckAsync();
+        return updateFlow.TryBegin();
+    }
+
     private async Task CheckModelsSilentlyAsync()
     {
+        if (modelBatchUpdating || !updateFlow.TryBegin()) return;
+        using var cancellation = new CancellationTokenSource();
+        silentModelCheckCancellation = cancellation;
         try
         {
-            var results = await modelUpdater.CheckAllAsync(null, CancellationToken.None);
+            var results = await modelUpdater.CheckAllAsync(null, cancellation.Token);
+            cancellation.Token.ThrowIfCancellationRequested();
             modelUpdateChecks.Clear();
             foreach (var result in results) modelUpdateChecks[result.Key] = result.Value;
             RefreshModels();
         }
         catch { }
+        finally { silentModelCheckCancellation = null; updateFlow.End(); }
     }
     private void ShowUtility(bool success, string message) { UtilityInfo.Severity = success ? InfoBarSeverity.Success : InfoBarSeverity.Error; UtilityInfo.Message = localization.Translate(message); UtilityInfo.IsOpen = true; SetStatus(message); }
     private void SetStatus(string value) { var translated = localization.Translate(value); FooterStatus.Text = translated; TaskStatusText.Text = translated; }

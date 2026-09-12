@@ -3,9 +3,15 @@ using System.Text.Json;
 using AuroraAudioStudio.Models;
 using AuroraAudioStudio.Services;
 
+if (args.FirstOrDefault() == "--maintenance") { await MaintenanceRegression.RunAsync(); return; }
 if (args.FirstOrDefault() == "--engine") { await EngineIntegration.RunAsync(args.Skip(1).ToArray()); return; }
 if (args.FirstOrDefault() == "--catalog") { CatalogExport.Run(args[1], args.Contains("--check")); return; }
 if (args.FirstOrDefault() == "--strings") { LocalizationAudit.Run(args[1]); return; }
+if (args.FirstOrDefault() == "--workbench-config")
+{
+    if (!WorkbenchReadiness.IsReady(File.ReadAllText(args[1]), "this-launch")) throw new Exception("Real Gradio config rejected");
+    Console.WriteLine("PASS real Gradio config consumed by C# readiness policy"); return;
+}
 if (args.FirstOrDefault() == "--provision") { await ProvisionIntegration.RunAsync(args[1], args[2], args[3]); return; }
 
 var root = Path.Combine(Path.GetTempPath(), "Aurora-BehaviorTests-" + Guid.NewGuid().ToString("N"));
@@ -23,8 +29,12 @@ settings.Current.TaskHistoryLimit = 20;
 for (var i = 0; i < 25; i++) queue.Create("project", "queued " + i, "subtitles", "sample.wav", "whisper-small");
 Check(queue.Items.Count == 26 && queue.Items.Any(x => x.Id == waiting.Id), "active tasks never trimmed by history limit");
 var complete = new AuroraTaskRecord { Status = AuroraTaskStates.Completed, Progress = 1, Stage = "complete" };
-typeof(TaskQueueService).GetMethod("Report", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(queue, [complete, new TaskExecutionProgress(.7, "stale")]);
+using var reportAttempt = new CancellationTokenSource();
+var attempts = (Dictionary<string, CancellationTokenSource>)typeof(TaskQueueService).GetField("cancellations", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(queue)!;
+attempts[complete.Id] = reportAttempt;
+typeof(TaskQueueService).GetMethod("Report", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(queue, [complete, reportAttempt, new TaskExecutionProgress(.7, "stale")]);
 Check(complete.Progress == 1 && complete.Stage == "complete", "late progress cannot mutate a completed task");
+attempts.Remove(complete.Id);
 settings.Current.SafeMode = true;
 var called = false;
 var safeTask = queue.Create("p", "safe retry", "subtitles", "sample.wav", "whisper-small");
@@ -90,8 +100,10 @@ var rejectedTimeline = false; try { ArtifactValidator.Validate(Path.Combine(root
 Check(rejectedTimeline, "subtitle edits reject reversed timestamps");
 var progressTask = new AuroraTaskRecord { Status = AuroraTaskStates.Running };
 var changes = 0; queue.Changed += (_, _) => changes++;
-for (var i = 0; i < 1000; i++) typeof(TaskQueueService).GetMethod("Report", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(queue, [progressTask, new TaskExecutionProgress(.3, "progress")]);
-Check(changes == 0, "frequent progress does not rebuild the task and project lists");
+attempts[progressTask.Id] = reportAttempt;
+for (var i = 0; i < 1000; i++) typeof(TaskQueueService).GetMethod("Report", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(queue, [progressTask, reportAttempt, new TaskExecutionProgress(.3, "progress")]);
+Check(changes == 0 && progressTask.Stage == "progress", "frequent progress does not rebuild the task and project lists");
+attempts.Remove(progressTask.Id);
 Check(!RuntimeEnvironment.CanRollback(Path.Combine(root, "no-backup")), "rollback unavailable without a retained version");
 settings.Current.Language = "en-US";
 var catalog = new ModelCatalogService(settings);
@@ -123,3 +135,5 @@ var ffmpeg = Path.Combine(settings.Current.LocalAiRoot, "Faster-Whisper-XXL", "F
 Fixture(ffmpeg);
 Check(AudioRuntime.FindFfmpeg(settings.Current.LocalAiRoot) == ffmpeg, "bundled FFmpeg has deterministic precedence over PATH");
 Console.WriteLine($"Behavior checks passed: {passed}. Isolated evidence: {root}");
+await MaintenanceRegression.RunAsync();
+await FunctionRegression.RunAsync();

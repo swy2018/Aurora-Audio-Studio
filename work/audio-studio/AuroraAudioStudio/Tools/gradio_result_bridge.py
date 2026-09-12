@@ -16,8 +16,25 @@ def is_result_audio(label, streaming=False):
     return any(word in label for word in ("output audio", "generated", "synthesized", "生成音乐", "生成音樂", "生成的音乐", "生成的音樂", "生成音频", "生成結果", "生成结果", "合成结果", "完整输出"))
 
 
+def install_identity_bridge(gr):
+    instance = os.environ.get("AURORA_WORKBENCH_INSTANCE")
+    if not instance:
+        return
+    # Gradio 5/6 constructs both /config and window.gradio_config through this method.
+    # https://github.com/gradio-app/gradio/blob/gradio%405.49.1/gradio/blocks.py
+    original = gr.Blocks.get_config_file
+
+    def config(blocks, *args, **kwargs):
+        value = original(blocks, *args, **kwargs)
+        value["aurora_instance"] = instance
+        return value
+
+    gr.Blocks.get_config_file = config
+
+
 def install_bridge():
     import gradio as gr
+    install_identity_bridge(gr)
     import soundfile as sf
     import torch
     original = gr.Audio.postprocess

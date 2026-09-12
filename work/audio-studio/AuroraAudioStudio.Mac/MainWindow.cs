@@ -277,9 +277,8 @@ public sealed partial class MainWindow : Window
         theme.SelectionChanged += (_, _) => { if (theme.SelectedIndex >= 0) settingsDraft.Theme = themeKeys[theme.SelectedIndex]; };
         content.Children.Add(Field(L("主题"), theme));
         var confirmLarge = new CheckBox { Content = L("下载大型模型前始终确认"), IsChecked = settingsDraft.ConfirmLargeModelDownloads };
-        var autoRelease = new CheckBox { Content = L("任务完成后释放显存"), IsChecked = settingsDraft.AutoReleaseVram };
+        var autoRelease = new CheckBox { Content = L("自动释放暂不支持，请手动结束引擎"), IsChecked = false, IsEnabled = false };
         confirmLarge.IsCheckedChanged += (_, _) => settingsDraft.ConfirmLargeModelDownloads = confirmLarge.IsChecked == true;
-        autoRelease.IsCheckedChanged += (_, _) => settingsDraft.AutoReleaseVram = autoRelease.IsChecked == true;
         content.Children.Add(confirmLarge); content.Children.Add(autoRelease);
         var autoModels = new CheckBox { Content = L("启动时检查模型更新"), IsChecked = settingsDraft.AutoCheckModelUpdates };
         autoModels.IsCheckedChanged += (_, _) => settingsDraft.AutoCheckModelUpdates = autoModels.IsChecked == true;

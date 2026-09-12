@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>Aurora</AssemblyName>
-    <Version>2.0.0-beta.1</Version>
+    <Version>2.0.0-beta.2</Version>
     <PublishTrimmed>false</PublishTrimmed>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>

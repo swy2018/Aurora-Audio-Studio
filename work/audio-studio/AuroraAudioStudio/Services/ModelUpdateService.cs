@@ -9,11 +9,12 @@ using AuroraAudioStudio.Models;
 
 namespace AuroraAudioStudio.Services;
 
-public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsService settings)
+public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsService settings,
+    HttpClient? downloadClient = null, HttpClient? metadataTransport = null)
 {
     private const string ManifestUrl = "https://raw.githubusercontent.com/swy2018/Aurora-Audio-Studio/main/model-manifest.json";
-    private readonly HttpClient client = CreateClient();
-    private readonly HttpClient metadataClient = CreateMetadataClient();
+    private readonly HttpClient client = downloadClient ?? CreateClient();
+    private readonly HttpClient metadataClient = metadataTransport ?? CreateMetadataClient();
     public string? FindRunningProcess(ModelDefinition model)
     {
         var root = Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot);
@@ -28,11 +29,26 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
 
     public async Task<OperationResult> CheckAsync(ModelDefinition model, CancellationToken cancellationToken = default)
     {
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(TimeSpan.FromSeconds(45));
+        try
+        {
+            var result = await CheckCoreAsync(model, deadline.Token);
+            deadline.Token.ThrowIfCancellationRequested();
+            return result;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }
+        catch (OperationCanceledException) { return new(false, "检查超时，请检查网络后重试。", "timeout"); }
+        catch (Exception ex) { return new(false, "检查未完成：" + ex.Message, "failed"); }
+    }
+
+    private async Task<OperationResult> CheckCoreAsync(ModelDefinition model, CancellationToken cancellationToken)
+    {
         cancellationToken.ThrowIfCancellationRequested();
         var root = ResolveExistingModelRoot(model, Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot));
-        if (!catalog.IsInstalled(model)) return new(false, "尚未安装");
+        if (!catalog.IsInstalled(model)) return new(false, "尚未安装或运行环境不完整", "not-installed");
         if (model.UpdateKind.Equals("fixed-file", StringComparison.OrdinalIgnoreCase))
-            return await CheckFixedFileAsync(model, root);
+            return await CheckFixedFileAsync(model, root, cancellationToken);
         if (model.UpdateKind.Equals("roformer-registry", StringComparison.OrdinalIgnoreCase))
             return new(true, "已安装；模型校验由 BS-RoFormer 官方注册表管理", "current");
         if (model.UpdateKind.Equals("github-release", StringComparison.OrdinalIgnoreCase))
@@ -76,6 +92,32 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
 
     public async Task<OperationResult> UpdateAsync(ModelDefinition model, IProgress<ModelInstallProgress>? progress = null, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+        Directory.CreateDirectory(settings.LogsRoot);
+        var logPath = Path.Combine(settings.LogsRoot, $"model-maintenance-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.log");
+        using var log = TextWriter.Synchronized(new StreamWriter(logPath) { AutoFlush = true });
+        log.WriteLine($"{DateTimeOffset.Now:O} {model.Id} ({model.Name})");
+        using var recorded = new OperationProgress<ModelInstallProgress>(value =>
+        {
+            log.WriteLine($"{DateTimeOffset.Now:O} {value.Stage} {value.LogLine}");
+            progress?.Report(value);
+        }, action => action(), cancellationToken);
+        try
+        {
+            var result = await UpdateCoreAsync(model, recorded, cancellationToken);
+            log.WriteLine($"Success={result.Success}: {result.Message}");
+            return result;
+        }
+        catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            log.WriteLine(ex.ToString());
+            return new(false, "安装请求超时，请检查网络后重试；详情见维护日志。", "timeout");
+        }
+        catch (Exception ex) { log.WriteLine(ex.ToString()); throw; }
+    }
+
+    private async Task<OperationResult> UpdateCoreAsync(ModelDefinition model, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    {
         if (FindRunningProcess(model) is { } running) return new(false, $"{running} 正在使用此模型，请保存工作并结束引擎后再更新。", "available");
         if (model.IsRunnable)
         {
@@ -110,17 +152,18 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
 
     private const string PianoCheckpointSha256 = "C3FA9730725BF4A762F1C14BC80CD5986EACDA01B026F5A4A2525CD607876141";
 
-    private async Task<OperationResult> CheckFixedFileAsync(ModelDefinition model, string root)
+    private async Task<OperationResult> CheckFixedFileAsync(ModelDefinition model, string root, CancellationToken cancellationToken)
     {
         var path = Path.Combine(root, model.Marker);
         try
         {
             await using var stream = File.OpenRead(path);
-            var actual = Convert.ToHexString(await SHA256.HashDataAsync(stream));
+            var actual = Convert.ToHexString(await SHA256.HashDataAsync(stream, cancellationToken));
             return actual.Equals(PianoCheckpointSha256, StringComparison.OrdinalIgnoreCase)
                 ? new(true, "已是上游固定版本，校验通过", "current")
                 : new(true, "文件校验异常，可自动修复", "available");
         }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex) { return new(false, $"无法校验固定模型：{ex.Message}", "available"); }
     }
 
@@ -1146,6 +1189,8 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             }
             response.EnsureSuccessStatusCode();
             var resumed = response.StatusCode == System.Net.HttpStatusCode.PartialContent;
+            if (resumed && response.Content.Headers.ContentRange?.From != existing)
+                throw new IOException("服务器返回了不匹配的断点范围，临时文件已保留。");
             if (!resumed) existing = 0;
             long? total = response.Content.Headers.ContentLength is { } length ? length + existing : null;
             await using var input = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -1166,6 +1211,11 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
                 progress?.Report(new(total is > 0 ? received * 100d / total.Value : null, "正在下载模型包", received, total, speed));
             }
             await output.FlushAsync(cancellationToken);
+            // Windows does not allow renaming this FileShare.Read handle while it is open.
+            await output.DisposeAsync();
+            cancellationToken.ThrowIfCancellationRequested();
+            if ((total.HasValue && received != total.Value) || (expectedLength.HasValue && received != expectedLength.Value))
+                throw new IOException("下载尚未完整，临时文件已保留，请重试。");
             File.Move(partial, destination, true);
             return;
         }

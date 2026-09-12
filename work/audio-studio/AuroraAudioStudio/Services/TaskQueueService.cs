@@ -17,6 +17,7 @@ public sealed class TaskQueueService
     public event EventHandler<AuroraTaskRecord>? ProgressChanged;
     private DateTimeOffset lastProgressNotification = DateTimeOffset.MinValue;
     public bool IsPaused { get; private set; }
+    public bool HasPendingOperations { get { lock (stateGate) return cancellations.Count != 0; } }
     private string StatePath => Path.Combine(settings.AppDataRoot, "tasks.json");
 
     public TaskQueueService(SettingsService settings)
@@ -69,7 +70,7 @@ public sealed class TaskQueueService
             task.Status = AuroraTaskStates.Preparing; task.Stage = "正在准备模型与工作区"; task.StartedAt = DateTimeOffset.Now; task.Progress = .02; SaveChanged();
             cancellation.Token.ThrowIfCancellationRequested();
             task.Status = AuroraTaskStates.Running; task.Stage = "正在本机处理"; task.Progress = .03; SaveChanged();
-            var progress = new Progress<TaskExecutionProgress>(value => Report(task, value));
+            var progress = new Progress<TaskExecutionProgress>(value => Report(task, cancellation, value));
             var result = await work(progress, cancellation.Token);
             cancellation.Token.ThrowIfCancellationRequested();
             lock (stateGate)
@@ -126,10 +127,11 @@ public sealed class TaskQueueService
         while (IsPaused) await pauseSignal.Task.WaitAsync(token);
     }
 
-    private void Report(AuroraTaskRecord task, TaskExecutionProgress value)
+    private void Report(AuroraTaskRecord task, CancellationTokenSource attempt, TaskExecutionProgress value)
     {
         lock (stateGate)
         {
+        if (!cancellations.TryGetValue(task.Id, out var current) || !ReferenceEquals(current, attempt) || attempt.IsCancellationRequested) return;
         if (task.Status is not (AuroraTaskStates.Running or AuroraTaskStates.Preparing)) return;
         if (value.Percentage is { } percentage) task.Progress = Math.Clamp(percentage, Math.Min(task.Progress, .99), .99);
         if (!string.IsNullOrWhiteSpace(value.Stage)) task.Stage = value.Stage;

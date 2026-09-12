@@ -36,7 +36,11 @@ public sealed partial class MainWindow
             if (modelOperation is not null || utilityRunning.Count > 0 || workspace.Queue.Items.Any(t => t.CanCancel)
                 || modelStudios.Values.Any(s => s.Connection is not null || s.Startup is not null))
                 throw new InvalidOperationException(L("请先结束正在运行的任务和模型工作台，再安装更新。"));
-            var dmg = await updater.DownloadAsync(update, new Progress<AppUpdateProgress>(p => status.Text = p.Message + (p.IsIndeterminate ? "" : $" {p.Percentage:0}%")), cancellation.Token);
+            string dmg;
+            using (var progress = new OperationProgress<AppUpdateProgress>(
+                p => status.Text = p.Message + (p.IsIndeterminate ? "" : $" {p.Percentage:0}%"),
+                action => Avalonia.Threading.Dispatcher.UIThread.Post(action), cancellation.Token))
+                dmg = await updater.DownloadAsync(update, progress, cancellation.Token);
             // Prevent operations begun while the download was in progress from being interrupted.
             if (modelOperation is not null || utilityRunning.Count > 0 || workspace.Queue.Items.Any(t => t.CanCancel)
                 || modelStudios.Values.Any(s => s.Connection is not null || s.Startup is not null))
