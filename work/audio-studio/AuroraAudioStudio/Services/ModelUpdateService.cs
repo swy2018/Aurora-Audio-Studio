@@ -9,7 +9,7 @@ using AuroraAudioStudio.Models;
 
 namespace AuroraAudioStudio.Services;
 
-public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsService settings,
+public sealed partial class ModelUpdateService(ModelCatalogService catalog, SettingsService settings,
     HttpClient? downloadClient = null, HttpClient? metadataTransport = null)
 {
     private const string ManifestUrl = "https://raw.githubusercontent.com/swy2018/Aurora-Audio-Studio/main/model-manifest.json";
@@ -644,7 +644,7 @@ public sealed class ModelUpdateService(ModelCatalogService catalog, SettingsServ
             var assetResult = await RunProcessAsync(assets, cancellationToken, progress);
             if (assetResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(assetResult.Error) ? "BS-RoFormer-SW 权重下载失败。" : assetResult.Error);
         }
-        if (model.Id.Equals("yourmt3", StringComparison.OrdinalIgnoreCase))
+        if (includeWeights && model.Id.Equals("yourmt3", StringComparison.OrdinalIgnoreCase))
         {
             var downloader = Path.Combine(root, "Scripts", "mt3-infer.exe");
             var modelsRoot = Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "mt3-models");

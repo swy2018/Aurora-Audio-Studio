@@ -18,7 +18,7 @@
 
 Aurora 提供正式版与 Beta 两个更新通道，支持 Windows 与 macOS。下方为 Mac 客户端实机截图；不同平台保留各自的系统控件。
 
-Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离、MIDI 扒谱和视频字幕集中到同一个本地入口。六个功能互相独立，可直接开始当前任务，不再需要手动管理多个启动器、端口和结果目录。
+Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、MIDI 扒谱和字幕制作整合到一个本地工作台。选择所需功能即可开始，素材、任务与成品集中管理。
 
 ## 选择你的平台
 
@@ -31,33 +31,38 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 | 加速 | NVIDIA RTX 推荐，依模型要求 | Apple Silicon 的 MPS / MLX 或 CPU，依模型实现 |
 | 指南 | [Windows 使用说明](work/audio-studio/README-给音乐人的使用说明.md) | [Mac 使用说明](docs/macOS-user-guide.md) |
 
-两端源码使用同一版本体系，分别下载实际已发布的平台安装包和同名 `.sha256`。Beta 2 已提供 Windows x64 与 macOS Apple Silicon 安装包。Mac 版已完成 Developer ID 签名与 Apple 公证。模型单独按需安装，不随安装包捆绑。Windows 签名状态与 Mac 公证状态分别说明，见[代码签名政策](CODE_SIGNING_POLICY.md)。
+请选择与你的系统匹配的安装包；同名 `.sha256` 文件用于校验下载完整性。Windows 最新测试版为 Beta 3；Mac 当前为 Beta 2，已完成 Developer ID 签名与 Apple 公证。Mac Beta 3 将单独构建。模型按需安装，不随安装包捆绑。各平台签名说明见[代码签名政策](CODE_SIGNING_POLICY.md)。
 
-Mac beta.2 构建：[源码交接与验收说明](docs/beta.2-mac-handoff.md)。上面的 1.9.9 下载属于稳定版，不会被本次 beta 替换。
+正式版与 Beta 分别提供下载。Mac Beta 3 开发与构建信息见[构建交接](docs/beta.3-mac-handoff.md)。
 
 ### 正式版与测试版更新
 
 在设置中选择“应用更新通道”，保存后生效。默认“正式版”；主动选择“测试版（含正式版）”才会收到 Beta。检查到更新并经你确认后，Aurora 会下载、校验并启动对应平台的安装流程；系统权限确认仍需你处理。
 
-日常使用推荐选择正式版；如需体验预发布版本，可在设置中选择 Beta 通道。Beta 可能存在兼容性或稳定性问题，升级前请备份重要配置。切回正式通道不会自动降级；如需回退，请恢复旧版应用及对应配置备份。
+日常使用推荐选择正式版；如需体验预发布版本，可选择 Beta 通道。切换通道不会自动降级。使用“回退到上一个正式版”可确认并安装适用于当前平台的较早正式版，正式版和 Beta 均可使用。回退保留模型与成品，但旧版可能无法读取新版配置或记录，请先备份重要数据。
+
+应用更新成功后不再保留旧应用副本；安装失败时仍保留必要的恢复保护。历史备份不会自动删除，模型自身的备份与回退机制不变。
 
 ## 当前版本更新
 
 <!-- current-packages:start -->
-当前源码构建 / Current source builds: `Aurora-Audio-Studio-2.0.0-beta.2-Setup-x64.exe` · `Aurora-Audio-Studio-2.0.0-beta.2-arm64.dmg`
+当前源码构建 / Current source builds: `Aurora-Audio-Studio-2.0.0-beta.3-Setup-x64.exe` · `Aurora-Audio-Studio-2.0.0-beta.3-arm64.dmg`
 <!-- current-packages:end -->
 
 <!-- release-notes-zh:start -->
-- 2.0 Beta 2 提供 Windows x64 与 macOS Apple Silicon 安装包；Mac 版已完成 Developer ID 签名与 Apple 公证。
-- 修复模型检查或安装结束后进度面板不关闭、空日志下拉、下载文件占用、超时误判及批量取消后继续安装。
-- 工作台校验本次引擎身份与操作控件；切换模型不再静默结束其他引擎，失败重连保留原有引擎。
-- 修复重试进度串线、分轨模式不一致、维护期间路径变更及丢失成品误建目录；增强诊断凭据脱敏与设置保存失败处理。
-- 自动释放显存尚未支持，已禁用无效开关并提示手动结束引擎。模型支持范围因平台而异，完整六功能推理与自动升级安装流程仍待进一步验证。
+- Windows 2.0 Beta 3：改进工作台连接、任务管理和模型维护。Mac 当前仍为 Beta 2，Beta 3 将由 Mac 端单独构建。
+- 修复部分 Gradio 工作台已连接但操作区空白的问题，以及 ACE-Step 启动兼容问题。
+- Windows 分轨、MIDI 扒谱和字幕工作区自动保存素材与处理设置，切换页面或重启后可继续使用。
+- 支持的工作台生成任务可在任务中心跟踪，并与最终成品关联；改进取消和重复结果处理。
+- 模型维护区分缺失文件、运行环境和完整重装，仅在可确认的范围内执行局部修复。
+- 新增“回退到上一个正式版”，正式版和 Beta 均可使用；回退前显示目标版本与数据兼容提醒。
+- 统一自有四语言文案，修正设置页更新通道对齐。模型、素材和成品不会因应用回退被删除。
+- 本轮 Windows 六类功能已完成短样本测试；未覆盖所有可选模型和设备。Mac 安装与回退仍需单独验收。
 <!-- release-notes-zh:end -->
 
-“文件齐全”不代表已完成推理。模型中心在真实任务成功后记录当前模型版本、时间和设备。未接入工作台的模型明确标为“仅模型管理”，MiniMax 等未在本机验收的可选模型不承诺实测通过。
+模型中心分别显示文件状态和运行记录。成功完成任务后，会记录模型版本、时间及计算设备。“仅模型管理”表示支持下载与维护，但不能在 Aurora 内生成内容。可选模型的兼容性与运行表现取决于具体设备，请先使用短素材确认。
 
-队列恢复指保留素材与参数后重新执行，不是从中间推理步骤继续；断点下载限同一修订及支持续传的上游。升级在候选目录完成检查，保留旧文件/环境供回退，不自动删除旧模型。
+恢复任务时会使用保留的素材与参数重新处理，不会从中断步骤继续计算。模型下载在版本未变且来源支持续传时可继续；模型更新保留原文件与运行环境，以便回退，不自动删除旧模型。
 
 音频可在成品库试听和导出；MIDI 显示音符信息并交给默认音乐软件编辑，Aurora 不内置 MIDI 合成器；SRT 可编辑后保存副本，已安装 Subtitle Edit 时也可直接交给它校对。
 
@@ -72,7 +77,7 @@ Mac beta.2 构建：[源码交接与验收说明](docs/beta.2-mac-handoff.md)。
 | AI 扒谱 | TransKun V2 | YourMT3+、ByteDance Piano、Basic Pitch | 标准 MIDI |
 | 视频 AI 字幕 | Windows：Faster-Whisper XXL；Mac：原生 Whisper | Small、Large v3 Turbo、Large v3 | SRT 与转写数据 |
 
-模型与第三方工具保留各自上游许可。模型大小、显存建议、语言能力和来源会在模型中心逐项显示。下表是共同模型目录：MiniMax-Music3 的当前 CUDA 后端及 Faster-Whisper XXL 二进制不支持 Mac；其余“仅下载管理”项目在 Windows 中也没有推理入口，不应视作可运行模型。
+模型与第三方工具保留各自上游许可。模型大小、显存建议、语言能力和来源会在模型中心逐项显示。下表是共同模型目录：MiniMax-Music3 的当前 CUDA 后端及 Faster-Whisper XXL 二进制不支持 Mac；标注为“仅下载管理”的模型在 Windows 和 Mac 上均不支持生成内容。
 
 <!-- model-capabilities:start -->
 <details>
@@ -138,7 +143,7 @@ Mac beta.2 构建：[源码交接与验收说明](docs/beta.2-mac-handoff.md)。
 
 ## 数据与隐私
 
-Aurora 本身不提供云端生成服务。素材与生成结果留在用户指定的本地目录。应用更新和模型部署会连接 GitHub、Hugging Face 或模型注明的官方来源。
+Aurora 不提供云端生成服务，素材与结果保存在你指定的本地目录。下载应用更新或安装模型时，会连接 GitHub、Hugging Face 或模型列明的官方来源。
 
 - [隐私说明](PRIVACY.md)
 - [代码签名政策](CODE_SIGNING_POLICY.md)
@@ -185,18 +190,25 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 ## English
 
-Aurora Audio Studio is a local AI audio production workspace for Windows and macOS. Both platforms provide six independent entry points for music, voice, singing, stems, MIDI, and subtitles. Beta 2 is available for Windows x64 and macOS Apple Silicon; the Mac app is Developer ID signed and notarized by Apple. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [beta.2 source handoff](docs/beta.2-mac-handoff.md).
+Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows offers Beta 3. Mac remains on the signed and notarized Beta 2 until its Beta 3 build is ready. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Beta 3 build handoff](docs/beta.3-mac-handoff.md).
 
 Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Beta releases are intended for users who want early access; back up important settings before upgrading.
+
+Use “Revert to previous stable release” to review and install the latest stable version older than your current app, for your platform. This is available from both Stable and Beta and does not change your update channel. Models and results are preserved, but older versions may not read newer settings or records. Back up important data first.
+
+Successful app installation no longer retains an old app copy. Replacement failures retain recovery protection. Existing backups and model-specific backup and rollback behavior are unchanged.
 
 ### Current release notes
 
 <!-- release-notes-en:start -->
-- Beta 2 is available for Windows x64 and macOS Apple Silicon. The Mac app is Developer ID signed and notarized by Apple.
-- Fix maintenance panels surviving completion, empty log expanders, download file locks, timeout classification, and batch installs continuing after cancellation.
-- Verify the launched engine identity and workbench controls. Switching models no longer silently stops another engine; failed reconnection preserves existing engines.
-- Fix stale retry progress, inconsistent stem modes, storage changes during maintenance, and missing results creating folders. Improve credential redaction and failed settings saves.
-- Automatic VRAM release remains unsupported; use the manual engine controls. Model support varies by platform. Full six-workflow inference and automatic update installation still need further validation.
+- Windows 2.0 Beta 3 improves workbench connections, task tracking, and model maintenance. Mac remains on Beta 2 until Beta 3 is built and verified on Mac.
+- Fix blank controls in some connected Gradio workbenches and an ACE-Step startup compatibility issue.
+- Windows stem separation, MIDI transcription, and subtitle workspaces retain sources and settings across navigation and restarts.
+- Track supported workbench generation tasks in Task Center and associate them with final results. Improve cancellation and duplicate-result handling.
+- Model maintenance distinguishes missing files, runtime repair, and full reinstallation; partial repairs run only when their scope can be verified.
+- Add Revert to previous stable release for both Stable and Beta, with target-version confirmation and a data-compatibility warning.
+- Refine Aurora-authored copy in four languages and align the update-channel control. App rollback does not delete models, source media, or results.
+- Short samples passed for all six Windows workflow categories. Not every optional model or device was tested. Mac installation and rollback require separate acceptance.
 <!-- release-notes-en:end -->
 
 Read the [capability matrix](docs/capabilities.json) and [Mac verification scope](docs/beta.2-mac-handoff.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. MIDI editing/playback requires your own music application; audio playback and subtitle-copy editing are available in Results.

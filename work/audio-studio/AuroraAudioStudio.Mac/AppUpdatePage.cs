@@ -15,7 +15,7 @@ public sealed partial class MainWindow
     private CancellationTokenSource? appUpdateCancellation;
     private static string CurrentMacVersion => typeof(MainWindow).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0];
 
-    private async Task CheckAppUpdateAsync(bool manual)
+    private async Task CheckAppUpdateAsync(bool manual, bool rollback = false)
     {
         if (!appUpdateFlow.TryBegin()) { status.Text = workspace.Localization.Get("updateAlreadyRunning"); return; }
         using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(30));
@@ -24,15 +24,16 @@ public sealed partial class MainWindow
         {
             status.Text = workspace.Localization.Get("updateChecking");
             var updater = new MacAppUpdater(appUpdateClient, workspace.Settings.UpdatesRoot, CurrentMacVersion, L, workspace.Settings.Current.AppUpdateChannel);
-            var update = await updater.CheckAsync(cancellation.Token);
+            var update = await updater.CheckAsync(cancellation.Token, rollback);
             status.Text = update.Message;
             if (!update.UpdateAvailable || update.InstallerUrl is null || update.ChecksumUrl is null)
             {
                 if (manual) await MessageAsync(L("检查更新"), update.Message);
                 return;
             }
-            if (!await ConfirmModelChangeAsync(workspace.Localization.Get("updateDialogTitle"),
-                workspace.Localization.Format("updateDialogBody", update.CurrentVersion, update.LatestVersion) + "\n\n" + L("将保留旧应用备份，模型、设置和作品不动。"))) return;
+            if (!await ConfirmModelChangeAsync(workspace.Localization.Get(rollback ? "rollbackApp" : "updateDialogTitle"),
+                workspace.Localization.Format(rollback ? "rollbackDialogBody" : "updateDialogBody", update.CurrentVersion, update.LatestVersion)
+                + "\n\n" + workspace.Localization.Get("appReplaceNotice"))) return;
             if (modelOperation is not null || utilityRunning.Count > 0 || workspace.Queue.Items.Any(t => t.CanCancel)
                 || modelStudios.Values.Any(s => s.Connection is not null || s.Startup is not null))
                 throw new InvalidOperationException(L("请先结束正在运行的任务和模型工作台，再安装更新。"));
@@ -51,6 +52,7 @@ public sealed partial class MainWindow
             var report = Path.Combine(Path.GetDirectoryName(dmg)!, "install-" + Guid.NewGuid().ToString("N") + ".json");
             var info = new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "Runtime", "install-update")) { UseShellExecute = false };
             foreach (var argument in new[] { dmg, bundle, Environment.ProcessId.ToString(), report }) info.ArgumentList.Add(argument);
+            if (rollback) { info.ArgumentList.Add("--rollback-to"); info.ArgumentList.Add(update.LatestVersion); }
             using var installer = Process.Start(info) ?? throw new IOException("无法启动 Mac 更新助手。");
             try
             {
@@ -109,7 +111,7 @@ public sealed partial class MainWindow
         if (state == "ready") return;
         File.Move(pointer, pointer + ".handled-" + Guid.NewGuid().ToString("N"));
         await MessageAsync(L("程序更新"), state == "installed"
-            ? L("更新已完成，旧版备份位于：") + "\n" + result.RootElement.GetProperty("backup").GetString()
+            ? workspace.Localization.Get("appInstallComplete") + (result.RootElement.TryGetProperty("cleanupWarning", out var warning) ? "\n" + warning.GetString() : "")
             : L("更新未完成：") + result.RootElement.GetProperty("message").GetString());
     }
 }

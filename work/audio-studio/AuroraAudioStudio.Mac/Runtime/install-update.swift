@@ -1,7 +1,7 @@
 import Foundation
 import Darwin
 
-// Foundation file moves preserve the old bundle; nothing in model/project storage is touched.
+// Keep the old bundle only until replacement validates; never touch model/project storage.
 // https://developer.apple.com/documentation/foundation/filemanager/moveitem(at:to:)
 let manager = FileManager.default
 func fail(_ message: String) -> NSError { NSError(domain: "AuroraUpdate", code: 1, userInfo: [NSLocalizedDescriptionKey: message]) }
@@ -30,7 +30,8 @@ func status(_ url: URL, _ value: [String: String]) throws {
     try JSONSerialization.data(withJSONObject: value).write(to: url, options: .atomic)
 }
 
-func replaceBundle(staged: URL, target: URL, backup: URL, validate: (URL) throws -> Void) throws {
+@discardableResult
+func replaceBundle(staged: URL, target: URL, backup: URL, validate: (URL) throws -> Void) throws -> String? {
     try manager.moveItem(at: target, to: backup)
     do {
         try manager.moveItem(at: staged, to: target)
@@ -42,6 +43,23 @@ func replaceBundle(staged: URL, target: URL, backup: URL, validate: (URL) throws
         try manager.moveItem(at: backup, to: target)
         throw error
     }
+    do {
+        try manager.removeItem(at: backup)
+        return nil
+    } catch {
+        return "应用已安装，但临时旧应用未能清理：\(backup.path)。\(error.localizedDescription)"
+    }
+}
+
+func stableBuild(_ version: String) throws -> Int {
+    guard version.range(of: #"^\d+\.\d+\.\d+$"#, options: .regularExpression) != nil else {
+        throw fail("回退目标必须是正式版。")
+    }
+    let parts = version.split(separator: ".").compactMap { Int($0) }
+    guard parts.count == 3, parts[0] < 1000, parts[1] < 100, parts[2] < 100 else {
+        throw fail("回退版本号无效。")
+    }
+    return parts[0] * 1000000 + parts[1] * 10000 + parts[2] * 100 + 99
 }
 
 #if UPDATE_REPLACEMENT_TESTS
@@ -58,10 +76,12 @@ for failure in [false, true] {
     } catch { assert(failure) }
     let actual = try String(contentsOf: old, encoding: .utf8)
     assert(actual == (failure ? "old" : "new"))
-    let retained = failure ? root.appendingPathComponent("failed.app") : backup
-    let retainedContent = try String(contentsOf: retained, encoding: .utf8)
-    assert(retainedContent == (failure ? "new" : "old"))
-    print("PASS: \(failure ? "failed replacement restores old app and retains rejected candidate" : "successful replacement keeps old app backup")")
+    assert(!manager.fileExists(atPath: backup.path))
+    if failure {
+        let rejected = try String(contentsOf: root.appendingPathComponent("failed.app"), encoding: .utf8)
+        assert(rejected == "new")
+    }
+    print("PASS: \(failure ? "failed replacement restores old app" : "successful replacement removes temporary old app")")
 }
 print("Replacement test files retained: \(fixtureRoot.path)")
 #else
@@ -75,7 +95,10 @@ do {
         print("Verified notarized Aurora build \(try verify(URL(fileURLWithPath: args[2])))")
         exit(0)
     }
-    guard args.count == 5, let pid = Int32(args[3]), pid > 1 else { throw fail("更新参数无效。") }
+    guard args.count == 5 || (args.count == 7 && args[5] == "--rollback-to"),
+          let pid = Int32(args[3]), pid > 1 else { throw fail("更新参数无效。") }
+    var rollbackBuild: Int? = nil
+    if args.count == 7 { rollbackBuild = try stableBuild(args[6]) }
     let dmg = URL(fileURLWithPath: args[1]).standardizedFileURL
     let target = URL(fileURLWithPath: args[2]).standardizedFileURL
     let result = URL(fileURLWithPath: args[4]).standardizedFileURL
@@ -89,13 +112,18 @@ do {
     let transaction = parent.appendingPathComponent(".Aurora-updates/\(identity)", isDirectory: true)
     try manager.createDirectory(at: transaction, withIntermediateDirectories: true)
     let staged = transaction.appendingPathComponent(target.lastPathComponent)
-    let backup = parent.appendingPathComponent(".Aurora-backups/\(identity)/\(target.lastPathComponent)")
+    let backup = transaction.appendingPathComponent("previous.app")
     let mount = dmg.deletingLastPathComponent().appendingPathComponent("mount-\(identity)", isDirectory: true)
     try manager.createDirectory(at: mount, withIntermediateDirectories: true)
     try run("/usr/bin/hdiutil", ["attach", "-readonly", "-nobrowse", "-mountpoint", mount.path, dmg.path])
     do {
         let source = mount.appendingPathComponent("Aurora Audio Studio.app")
-        guard try verify(source) > oldBuild else { throw fail("安装包不是更新的 Aurora 版本。") }
+        let sourceBuild = try verify(source)
+        if let rollbackBuild {
+            guard sourceBuild == rollbackBuild && sourceBuild < oldBuild else { throw fail("安装包与所选正式版不匹配。") }
+        } else {
+            guard sourceBuild > oldBuild else { throw fail("安装包不是更新的 Aurora 版本。") }
+        }
         try run("/usr/bin/ditto", [source.path, staged.path])
         _ = try verify(staged)
     } catch {
@@ -104,7 +132,7 @@ do {
     }
     try run("/usr/bin/hdiutil", ["detach", mount.path])
     try manager.createDirectory(at: backup.deletingLastPathComponent(), withIntermediateDirectories: true)
-    try status(result, ["state": "ready", "backup": backup.path])
+    try status(result, ["state": "ready"])
     let deadline = Date().addingTimeInterval(120)
     while kill(pid, 0) == 0 {
         guard Date() < deadline else { throw fail("当前 Aurora 未退出，更新已停止，旧版保持不变。") }
@@ -112,8 +140,10 @@ do {
     }
     // Recheck after waiting; do not overwrite an app changed by another installer.
     guard try verify(target) == oldBuild else { throw fail("安装期间应用发生变化，已停止替换。") }
-    try replaceBundle(staged: staged, target: target, backup: backup) { _ = try verify($0) }
-    try status(result, ["state": "installed", "backup": backup.path])
+    let cleanupWarning = try replaceBundle(staged: staged, target: target, backup: backup) { _ = try verify($0) }
+    var installedStatus = ["state": "installed"]
+    if let cleanupWarning { installedStatus["cleanupWarning"] = cleanupWarning }
+    try status(result, installedStatus)
     try run("/usr/bin/open", [target.path])
 } catch {
     if let report { try? status(report, ["state": "failed", "message": error.localizedDescription]) }

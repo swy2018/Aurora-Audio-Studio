@@ -29,6 +29,8 @@ public sealed partial class MainPage : Page
     private readonly MaintenanceService maintenance;
     private readonly WorkbenchResultService workbenchResults;
     private readonly FileSystemWatcher resultWatcher;
+    private readonly FileSystemWatcher activityWatcher;
+    private readonly WorkbenchActivityService workbenchActivities;
     private bool utilitySubmissionBusy;
     private bool syncingTrackMode;
     private bool syncingSafeMode;
@@ -60,8 +62,17 @@ public sealed partial class MainPage : Page
         modelUpdater = new(catalog, settings);
         projects = new(settings, catalog);
         taskQueue = new(settings);
+        InitializeUtilityDrafts();
         maintenance = new(settings, catalog, projects, localization);
         workbenchResults = new(settings, projects, taskQueue, catalog);
+        workbenchActivities = new(settings, taskQueue, catalog, backend.WorkbenchInstanceId);
+        var activityRoot = Path.Combine(settings.AppDataRoot, "WorkbenchTasks");
+        Directory.CreateDirectory(activityRoot);
+        activityWatcher = new FileSystemWatcher(activityRoot, "*.json") { NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite, EnableRaisingEvents = true };
+        FileSystemEventHandler activityChanged = (_, _) => DispatcherQueue.TryEnqueue(async () => await ImportWorkbenchResultsAsync());
+        activityWatcher.Created += activityChanged;
+        activityWatcher.Changed += activityChanged;
+        activityWatcher.Renamed += (_, _) => DispatcherQueue.TryEnqueue(async () => await ImportWorkbenchResultsAsync());
         var receiptsRoot = Path.Combine(settings.AppDataRoot, "WorkbenchReceipts");
         Directory.CreateDirectory(receiptsRoot);
         resultWatcher = new FileSystemWatcher(receiptsRoot, "*.json") { NotifyFilter = NotifyFilters.FileName, EnableRaisingEvents = true };
@@ -104,6 +115,7 @@ public sealed partial class MainPage : Page
     private void Shell_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (args.SelectedItemContainer?.Tag is not string tag) return;
+        SaveUtilityDraft();
         if (WorkbenchProgress.IsActive)
         {
             workbenchStartupCancellation?.Cancel();
@@ -151,6 +163,9 @@ public sealed partial class MainPage : Page
 
     private void ConfigureUtility(string tag)
     {
+        restoringUtilityDraft = true;
+        try
+        {
         PageTitle.Text = localization.Get(tag);
         var copy = tag switch
         {
@@ -182,7 +197,10 @@ public sealed partial class MainPage : Page
         SourceLanguagePicker.SelectedIndex = 0;
         UtilityPresetPicker.SelectedIndex = 1;
         ApplyUtilityPreset();
+        RestoreUtilityDraft(tag);
         UpdateUtilityRunState();
+        }
+        finally { restoringUtilityDraft = false; }
     }
 
     private async void OpenWorkbenchButton_Click(object sender, RoutedEventArgs e)
@@ -424,6 +442,7 @@ public sealed partial class MainPage : Page
         var picker = new FileOpenPicker(App.MainWindow.AppWindow.Id);
         foreach (var extension in MediaInputPolicy.Extensions(feature)) picker.FileTypeFilter.Add(extension);
         var files = await picker.PickMultipleFilesAsync();
+        if (files.Count == 0) return;
         var storageFiles = new List<StorageFile>();
         foreach (var file in files)
         {
@@ -436,11 +455,12 @@ public sealed partial class MainPage : Page
     private async Task AddSourcesAsync(IEnumerable<StorageFile> files)
     {
         var added = 0;
+        var alreadyAdded = false;
         StorageFile? first = null;
         foreach (var file in files)
         {
             if (!MediaInputPolicy.IsSupported(feature, file.Path)) continue;
-            if (utilitySources.Any(x => x.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase))) continue;
+            if (utilitySources.Any(x => x.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase))) { alreadyAdded = true; continue; }
             utilitySources.Add(new MediaSourceItem { Path = file.Path });
             first ??= file;
             added++;
@@ -455,6 +475,7 @@ public sealed partial class MainPage : Page
         RunUtilityButton.Content = utilitySources.Count > 1 ? localization.Format("processSources", utilitySources.Count) : localization.Translate("开始处理");
         UpdateUtilityRunState();
         if (added > 0) AppendUtilityLog($"已添加 {added} 个素材。可继续添加或直接开始处理。");
+        else if (alreadyAdded) SetStatus("所选素材已在列表中，无需重复添加。");
         else ShowUtility(false, "没有可用于当前功能的受支持音频或视频文件。");
     }
 
@@ -477,7 +498,13 @@ public sealed partial class MainPage : Page
     private async void UtilitySourcesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (UtilitySourcesList.SelectedItem is not MediaSourceItem item || !File.Exists(item.Path)) return;
-        try { await ShowPreviewAsync(await StorageFile.GetFileFromPathAsync(item.Path)); } catch { }
+        var selectedFeature = feature;
+        try
+        {
+            var file = await StorageFile.GetFileFromPathAsync(item.Path);
+            if (feature == selectedFeature && ReferenceEquals(UtilitySourcesList.SelectedItem, item)) await ShowPreviewAsync(file);
+        }
+        catch { }
     }
 
     private void ClearSourcesButton_Click(object sender, RoutedEventArgs e)
@@ -759,7 +786,7 @@ public sealed partial class MainPage : Page
                 AuroraTaskStates.Interrupted => "taskInterrupted",
                 _ => "taskInterrupted"
             });
-            task.DisplayProgress = task.Progress <= 0 ? localization.Translate("等待") : $"{Math.Round(task.Progress * 100):0}%";
+            task.DisplayProgress = task.IsIndeterminate ? "" : task.Progress <= 0 ? localization.Translate("等待") : $"{Math.Round(task.Progress * 100):0}%";
             task.DisplayStage = localization.Translate(task.Stage);
             task.DisplayMessage = localization.Translate(task.Message);
         }
@@ -772,7 +799,8 @@ public sealed partial class MainPage : Page
         ResultsList.ItemsSource = artifacts;
         ResultsEmpty.Visibility = artifacts.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         PauseQueueButton.Content = localization.Translate(taskQueue.IsPaused ? "继续队列" : "暂停队列");
-        var current = active.FirstOrDefault(x => x.Status == AuroraTaskStates.Running);
+        var current = active.FirstOrDefault(x => x.Status == AuroraTaskStates.Running && x.Feature == feature && x.WorkbenchInstance.Length == 0);
+        UtilityProgress.Visibility = current is null ? Visibility.Collapsed : Visibility.Visible;
         if (current is not null)
         {
             UtilityProgress.Visibility = Visibility.Visible;
@@ -797,7 +825,7 @@ public sealed partial class MainPage : Page
 
     private void RefreshTaskProgress(AuroraTaskRecord task)
     {
-        task.DisplayProgress = $"{Math.Round(task.Progress * 100):0}%";
+        task.DisplayProgress = task.IsIndeterminate ? "" : $"{Math.Round(task.Progress * 100):0}%";
         task.DisplayStage = localization.Translate(task.Stage);
         task.DisplayMessage = localization.Translate(task.Message);
         task.NotifyDisplayChanged();
@@ -812,9 +840,11 @@ public sealed partial class MainPage : Page
     {
         try
         {
-            if (await workbenchResults.ImportAsync() == 0) return;
-            RefreshWorkspace(); RefreshModels();
-            FooterStatus.Text = localization.Translate("成品已自动加入成品库。");
+            var changed = workbenchActivities.Import();
+            var imported = await workbenchResults.ImportAsync();
+            if (changed > 0 || imported > 0) RefreshWorkspace();
+            if (imported > 0) RefreshModels();
+            if (imported > 0) FooterStatus.Text = localization.Translate("成品已自动加入成品库。");
         }
         catch (Exception ex) { FooterStatus.Text = localization.Format("resultImportFailed", ex.Message); }
     }
@@ -864,6 +894,7 @@ public sealed partial class MainPage : Page
         if ((sender as Button)?.Tag is not string id || catalog.Find(id) is not { } model) return;
         if (modelBatchUpdating || !await TryBeginMaintenanceAsync()) { SetStatus("已有维护操作正在进行，请等待完成或取消后再试。"); return; }
         OperationResult check;
+        ModelRepairPlan? repairPlan = null;
         using (var cancellation = new CancellationTokenSource())
         {
             modelCheckCancellation = cancellation;
@@ -872,8 +903,10 @@ public sealed partial class MainPage : Page
                 ResetGlobalUpdate();
                 ShowGlobalUpdate(0, catalog.DisplayName(model), true, true);
                 check = await modelUpdater.CheckAsync(model, cancellation.Token);
+                if (check.Path != "available") repairPlan = await modelUpdater.InspectRepairAsync(model, cancellation.Token);
             }
             catch (OperationCanceledException) { SetStatus("模型更新检查已取消。"); return; }
+            catch (Exception ex) { SetStatus(localization.Translate("检查未完成：") + ex.Message); return; }
             finally { modelCheckCancellation = null; HideGlobalUpdate(); updateFlow.End(); }
         }
         modelUpdateChecks[id] = check;
@@ -887,19 +920,41 @@ public sealed partial class MainPage : Page
         }
         var installed = catalog.IsInstalled(model);
         var repair = installed && !isUpdate;
+        if (repairPlan?.Kind == ModelRepairKind.Blocked) { SetStatus(repairPlan.Detail); return; }
+        var repairText = repairPlan is null ? "" : localization.Translate(repairPlan.Detail) + "\n\n" + localization.Translate(repairPlan.Kind switch
+        {
+            ModelRepairKind.Healthy => "文件校验通过；不会重新下载或重装。",
+            ModelRepairKind.RuntimeOnly => "仅修复运行环境，保留模型权重。依赖包可能重新下载，旧环境保留供回退。",
+            ModelRepairKind.MissingFiles => "只补齐当前版本缺失的权重，不更换运行环境。",
+            _ => "无法安全执行局部修复，将使用完整部署流程，并保留可回退版本。"
+        });
+        if (repairPlan?.Kind == ModelRepairKind.MissingFiles)
+            repairText += "\n" + localization.Format("repairDownloadSize", repairPlan.DownloadBytes / 1048576d)
+                + "\n" + string.Join("\n", repairPlan.Files.Select(x => x.RelativePath));
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
             Title = catalog.DisplayName(model),
-            Content = repair ? "将重新校验并部署此模型的运行环境，可能重新下载文件。是否继续修复？"
+            Content = repairPlan is not null ? repairText : repair ? "将重新校验并部署此模型的运行环境，可能重新下载文件。是否继续修复？"
                 : installed ? "发现新版本。Aurora 会保留可恢复的版本信息，是否现在更新？"
                 : "此模型尚未安装。Aurora 将从官方来源下载并校验文件，是否继续？",
-            PrimaryButtonText = localization.Translate(repair ? "修复" : installed ? "更新" : "安装"),
+            PrimaryButtonText = repairPlan?.Kind == ModelRepairKind.Healthy ? "" : localization.Translate(repairPlan is not null && Directory.Exists(repairPlan.Root) ? "修复" : installed ? "更新" : "安装"),
+            SecondaryButtonText = repairPlan?.Kind == ModelRepairKind.Healthy && (model.UpdateKind == "uv-package" || model.Id.StartsWith("qwen3-tts-")) ? localization.Get("repairRuntime") : "",
             CloseButtonText = localization.Translate("稍后")
         };
-        if (await ShowDialogAsync(dialog) == ContentDialogResult.Primary)
+        var choice = await ShowDialogAsync(dialog);
+        if (choice == ContentDialogResult.Secondary && repairPlan is not null)
         {
-            check = await RunModelInstallAsync(model);
+            var confirm = new ContentDialog { XamlRoot = XamlRoot, Title = localization.Get("repairRuntime"),
+                Content = localization.Translate("仅修复运行环境，保留模型权重。依赖包可能重新下载，旧环境保留供回退。"),
+                PrimaryButtonText = localization.Translate("修复"), CloseButtonText = localization.Get("close") };
+            if (await ShowDialogAsync(confirm) != ContentDialogResult.Primary) return;
+            repairPlan = repairPlan with { Kind = ModelRepairKind.RuntimeOnly };
+            choice = ContentDialogResult.Primary;
+        }
+        if (choice == ContentDialogResult.Primary)
+        {
+            check = await RunModelInstallAsync(model, repairPlan: repairPlan);
             modelUpdateChecks[id] = check.Success ? new OperationResult(true, check.Message, "current")
                 : isUpdate ? new OperationResult(false, check.Message, "available") : check;
         }
@@ -1021,6 +1076,7 @@ public sealed partial class MainPage : Page
     }
 
     private async void CheckAppUpdateButton_Click(object sender, RoutedEventArgs e) => await RunAppUpdateFlowAsync(true);
+    private async void RollbackAppButton_Click(object sender, RoutedEventArgs e) => await RunAppUpdateFlowAsync(true, rollback: true);
 
     private void FeedbackButton_Click(object sender, RoutedEventArgs e)
     {
@@ -1064,7 +1120,7 @@ public sealed partial class MainPage : Page
         await ShowDialogAsync(dialog);
     }
 
-    private async Task RunAppUpdateFlowAsync(bool showCurrent)
+    private async Task RunAppUpdateFlowAsync(bool showCurrent, bool rollback = false)
     {
         if (modelBatchUpdating || !await TryBeginMaintenanceAsync())
         {
@@ -1074,12 +1130,13 @@ public sealed partial class MainPage : Page
 
         var handingOff = false;
         AppUpdateButton.IsEnabled = false;
+        AppRollbackButton.IsEnabled = false;
         try
         {
             SetStatus(localization.Get("updateChecking"));
             ResetGlobalUpdate();
             ShowGlobalUpdate(0, localization.Get("updateChecking"), true);
-            var update = await updater.CheckAsync();
+            var update = await updater.CheckAsync(rollback: rollback);
             if (!update.UpdateAvailable)
             {
                 HideGlobalUpdate();
@@ -1097,15 +1154,21 @@ public sealed partial class MainPage : Page
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Title = localization.Get("updateDialogTitle"),
-                Content = localization.Format("updateDialogBody", update.CurrentVersion, update.LatestVersion),
-                PrimaryButtonText = localization.Get("updateInstall"),
+                Title = localization.Get(rollback ? "rollbackApp" : "updateDialogTitle"),
+                Content = localization.Format(rollback ? "rollbackDialogBody" : "updateDialogBody", update.CurrentVersion, update.LatestVersion),
+                PrimaryButtonText = localization.Get(rollback ? "rollbackInstall" : "updateInstall"),
                 CloseButtonText = localization.Get("later")
             };
             if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
 
+            if (backend.HasActiveOperations || taskQueue.Items.Any(t => t.CanCancel))
+            {
+                ShowUpdateInfo(InfoBarSeverity.Warning, localization.Get("appInstallBusy"));
+                return;
+            }
             using var progress = new OperationProgress<AppUpdateProgress>(value => ShowGlobalUpdate(value.Percentage, value.Message, value.IsIndeterminate), action => DispatcherQueue.TryEnqueue(() => action()));
-            var result = await updater.DownloadAndInstallAsync(update, progress);
+            var result = await updater.DownloadAndInstallAsync(update, progress,
+                canInstall: () => !backend.HasActiveOperations && !taskQueue.Items.Any(t => t.CanCancel));
             progress.Dispose();
             ShowUpdateInfo(result.Success ? InfoBarSeverity.Success : InfoBarSeverity.Error, result.Message);
             if (!result.Success)
@@ -1131,6 +1194,7 @@ public sealed partial class MainPage : Page
             {
                 HideGlobalUpdate();
                 AppUpdateButton.IsEnabled = true;
+                AppRollbackButton.IsEnabled = true;
                 SetStatus(localization.Get("ready"));
             }
         }
@@ -1162,7 +1226,7 @@ public sealed partial class MainPage : Page
         else if (element is ScrollViewer scroll && scroll.Content is UIElement content) LocalizeDialogContent(content);
     }
 
-    private async Task<OperationResult> RunModelInstallAsync(ModelDefinition model, bool fromBatch = false)
+    private async Task<OperationResult> RunModelInstallAsync(ModelDefinition model, bool fromBatch = false, ModelRepairPlan? repairPlan = null)
     {
         if ((modelBatchUpdating && !fromBatch) || !await TryBeginMaintenanceAsync())
             return new OperationResult(false, "已有维护操作正在进行，请等待完成或取消后再试。");
@@ -1186,7 +1250,9 @@ public sealed partial class MainPage : Page
                 ShowGlobalUpdate(value.Percentage ?? 0, $"{catalog.DisplayName(model)} · {displayProgress.Detail}", value.Percentage is null, true);
             }, action => DispatcherQueue.TryEnqueue(() => action()), cancellation.Token);
             ShowGlobalUpdate(0, $"正在准备 {model.Name}", true, true);
-            var result = await modelUpdater.UpdateAsync(model, progress, cancellation.Token);
+            var result = repairPlan is null
+                ? await modelUpdater.UpdateAsync(model, progress, cancellation.Token)
+                : await modelUpdater.RepairAsync(model, repairPlan, progress, cancellation.Token);
             return result;
         }
         catch (OperationCanceledException)
@@ -1406,6 +1472,7 @@ public sealed partial class MainPage : Page
     {
         if (feature is not ("music" or "voice" or "singing")) return;
         workbenchStartupCancellation?.Cancel();
+        if (backend.WorkbenchProcessId(feature) is int pid) taskQueue.CancelWorkbench(pid, backend.WorkbenchInstanceId(feature));
         backend.StopWorkbench(feature);
         ResetWorkbenchStartupUi("当前创作引擎已安全结束。");
     }
@@ -1500,9 +1567,20 @@ public sealed partial class MainPage : Page
         finally { RefreshWorkspace(); RefreshModels(); }
     }
 
-    private void CancelTaskButton_Click(object sender, RoutedEventArgs e)
+    private async void CancelTaskButton_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as Button)?.Tag is not string id) return;
+        if (taskQueue.Items.FirstOrDefault(x => x.Id == id) is { WorkbenchInstance.Length: > 0 } workbenchTask)
+        {
+            var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = localization.Get("cancelWorkbenchTask"),
+                Content = localization.Get("cancelWorkbenchTaskBody"), PrimaryButtonText = localization.Get("cancelWorkbenchTask"),
+                CloseButtonText = localization.Get("close") };
+            if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
+            if (backend.WorkbenchInstanceId(workbenchTask.Feature) == workbenchTask.WorkbenchInstance)
+                backend.StopWorkbench(workbenchTask.Feature, workbenchTask.WorkbenchPid);
+            taskQueue.CancelWorkbench(workbenchTask.WorkbenchPid, workbenchTask.WorkbenchInstance);
+            return;
+        }
         taskQueue.Cancel(id);
         SetStatus("已请求安全取消任务。 ");
     }
@@ -1702,6 +1780,8 @@ public sealed partial class MainPage : Page
     }
     public void Shutdown()
     {
+        SaveUtilityDraft();
+        activityWatcher.Dispose();
         resultWatcher.Dispose();
         utilityBatchCancellation?.Cancel();
         workbenchStartupCancellation?.Cancel();

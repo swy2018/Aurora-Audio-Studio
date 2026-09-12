@@ -1,6 +1,7 @@
 """Run an upstream Gradio entry point and persist completed audio with an explicit receipt."""
 import argparse
 import importlib.metadata
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -25,6 +26,11 @@ def install_identity_bridge(gr):
     original = gr.Blocks.get_config_file
 
     def config(blocks, *args, **kwargs):
+        # Gradio 6 no longer supplies implicit component-N DOM IDs. Use its public
+        # elem_id property, preserving IDs explicitly chosen by the upstream app.
+        for component in getattr(blocks, "blocks", {}).values():
+            if component.get_block_name() in {"button", "audio"} and not component.elem_id:
+                component.elem_id = "aurora-component-" + str(component._id)
         value = original(blocks, *args, **kwargs)
         value["aurora_instance"] = instance
         return value
@@ -35,10 +41,23 @@ def install_identity_bridge(gr):
 def install_bridge():
     import gradio as gr
     install_identity_bridge(gr)
+    task_bridge = None
+    if os.environ.get("AURORA_TASK_EVENTS"):
+        spec = importlib.util.spec_from_file_location("aurora_task_bridge", Path(__file__).with_name("gradio_task_bridge.py"))
+        task_bridge = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(task_bridge)
+        task_bridge.install(gr)
     import soundfile as sf
     import torch
     original = gr.Audio.postprocess
-    seen = set()
+    seen = {}
+
+    def save_receipt(receipt):
+        receipts = Path(os.environ["AURORA_RESULT_RECEIPTS"])
+        receipts.mkdir(parents=True, exist_ok=True)
+        pending = receipts / (receipt["id"] + ".tmp")
+        pending.write_text(json.dumps(receipt, ensure_ascii=False), encoding="utf-8")
+        pending.replace(receipts / (receipt["id"] + ".json"))
     if os.environ.get("AURORA_MODEL_ID") == "seed-vc":
         original_interface = gr.Interface.__init__
 
@@ -57,11 +76,20 @@ def install_bridge():
         if not path or not Path(path).is_file():
             return result
         signature = (str(Path(path).resolve()), Path(path).stat().st_mtime_ns)
-        if signature in seen:
+        if signature in seen and Path(seen[signature]["path"]).is_file():
+            task = task_bridge.active_task.get() if task_bridge is not None else None
+            previous = seen[signature]
+            if task is not None and previous.get("taskId") != task["id"]:
+                try:
+                    receipt = dict(previous, id=uuid.uuid4().hex, taskId=task["id"])
+                    save_receipt(receipt)
+                    seen[signature] = receipt
+                    task["has_output"] = True
+                except Exception as error:
+                    print("AURORA_RESULT_ERROR " + str(error), file=sys.stderr, flush=True)
             return result
         try:
             output = Path(os.environ["AURORA_OUTPUT_ROOT"])
-            receipts = Path(os.environ["AURORA_RESULT_RECEIPTS"])
             identity = uuid.uuid4().hex
             directory = output / ("generated-" + identity)
             directory.mkdir(parents=True, exist_ok=False)
@@ -72,15 +100,19 @@ def install_bridge():
             sf.write(destination, audio, rate, subtype="PCM_16")
             receipt = dict(id=identity, feature=os.environ["AURORA_FEATURE"], modelId=os.environ["AURORA_MODEL_ID"], path=str(destination.resolve()),
                            device=os.environ.get("AURORA_DEVICE") or ("cuda" if torch.cuda.is_available() else "cpu"))
+            task = None
+            if task_bridge is not None:
+                task = task_bridge.active_task.get()
+                if task is not None:
+                    receipt["taskId"] = task["id"]
             if os.environ.get("AURORA_MODEL_VERSION"):
                 receipt["modelVersion"] = os.environ["AURORA_MODEL_VERSION"]
             if os.environ.get("AURORA_RUNTIME_SIGNATURE"):
                 receipt["runtimeSignature"] = os.environ["AURORA_RUNTIME_SIGNATURE"]
-            receipts.mkdir(parents=True, exist_ok=True)
-            pending = receipts / (identity + ".tmp")
-            pending.write_text(json.dumps(receipt, ensure_ascii=False), encoding="utf-8")
-            pending.replace(receipts / (identity + ".json"))
-            seen.add(signature)
+            save_receipt(receipt)
+            if task is not None:
+                task["has_output"] = True
+            seen[signature] = receipt
             print("AURORA_RESULT " + str(destination), flush=True)
         except Exception as error:
             # The upstream result remains downloadable even if Aurora's library is unavailable.

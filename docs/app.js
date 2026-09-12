@@ -37,10 +37,10 @@ status.textContent = (selected.beta ? 'Beta · ' : t('正式版 · ','Stable · 
 }
 function renderModels() {
 const body = $('#models-body'); body.replaceChildren();
-const mode = value => ({'embedded-workbench':t('内嵌工作台','Workbench'),'native-task':t('原生任务','Native task'),'download-only':t('仅模型管理','Management only'),'shared-runtime':t('共享组件','Runtime'),'external-editor':t('外部编辑器','External editor')})[value] || value;
+const mode = value => ({'embedded-workbench':t('内嵌工作台','Workbench'),'native-task':t('内置处理工具','Built-in tools'),'download-only':t('仅模型管理','Management only'),'shared-runtime':t('运行组件','Runtime component'),'external-editor':t('外部编辑器','External editor')})[value] || value;
 for (const model of models) {
 const row = document.createElement('tr');
-const macMode = ['minimax-music3','faster-whisper'].includes(model.id) ? t('当前后端不支持','Backend unsupported') : mode(model.mode);
+const macMode = ['minimax-music3','faster-whisper'].includes(model.id) ? t('暂不支持 Mac','Not available on Mac') : mode(model.mode);
 for (const text of [language === 'en' ? model.nameEn : model.name, mode(model.mode), macMode, model.license]) { const cell = document.createElement('td'); cell.textContent = text; row.append(cell); }
 body.append(row);
 }

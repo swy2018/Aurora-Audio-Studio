@@ -107,14 +107,18 @@ public sealed class AuroraTaskRecord : System.ComponentModel.INotifyPropertyChan
     public string Device { get; set; } = "";
     public List<string> OutputFiles { get; set; } = [];
     public int QueueOrder { get; set; }
+    public string WorkbenchInstance { get; set; } = "";
+    public int WorkbenchPid { get; set; }
+    public long WorkbenchSequence { get; set; }
     [JsonIgnore] public bool CanCancel => Status is AuroraTaskStates.Waiting or AuroraTaskStates.Preparing or AuroraTaskStates.Running or AuroraTaskStates.Interrupted;
-    [JsonIgnore] public bool CanRetry => Status is AuroraTaskStates.Failed or AuroraTaskStates.Canceled or AuroraTaskStates.Interrupted;
+    [JsonIgnore] public bool CanRetry => WorkbenchInstance.Length == 0 && Status is AuroraTaskStates.Failed or AuroraTaskStates.Canceled or AuroraTaskStates.Interrupted;
     [JsonIgnore] public string DisplayStatus { get; set; } = "";
     [JsonIgnore] public string DisplayProgress { get; set; } = "";
     [JsonIgnore] public string DisplayStage { get; set; } = "";
     [JsonIgnore] public string DisplayMessage { get; set; } = "";
     [JsonIgnore] public string CreatedDisplay => CreatedAt.LocalDateTime.ToString("MM-dd HH:mm");
-    [JsonIgnore] public string InputDisplay => string.IsNullOrWhiteSpace(InputPath) ? "-" : Path.GetFileName(InputPath);
+    [JsonIgnore] public bool IsIndeterminate => WorkbenchInstance.Length > 0 && Status is AuroraTaskStates.Running or AuroraTaskStates.Preparing;
+    [JsonIgnore] public string InputDisplay => WorkbenchInstance.Length > 0 ? Title : string.IsNullOrWhiteSpace(InputPath) ? "-" : Path.GetFileName(InputPath);
     [JsonIgnore] public string ProgressDisplay => Progress <= 0 ? "等待" : $"{Math.Round(Progress * 100):0}%";
     [JsonIgnore] public double ProgressPercent => Math.Clamp(Progress * 100, 0, 100);
     [JsonIgnore]
@@ -247,7 +251,8 @@ public sealed record AppUpdateInfo(
     string? InstallerUrl,
     string? ChecksumUrl,
     string Message,
-    bool CheckSucceeded = true);
+    bool CheckSucceeded = true,
+    bool IsRollback = false);
 
 public sealed record OperationResult(bool Success, string Message, string? Path = null, string? Url = null,
     IReadOnlyList<string>? Outputs = null, string? Device = null);

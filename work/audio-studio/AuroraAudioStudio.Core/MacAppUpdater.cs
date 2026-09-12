@@ -19,13 +19,14 @@ public sealed class MacAppUpdater(HttpClient client, string updatesRoot, string 
         return AppReleaseVersion.Parse(value);
     }
 
-    public static AppUpdateInfo SelectRelease(string json, string current, string channel = "stable")
+    public static AppUpdateInfo SelectRelease(string json, string current, string channel = "stable", bool rollback = false)
     {
         var installed = ParseVersion(current) ?? throw new InvalidDataException("当前 Mac 版本号无效。");
         using var doc = JsonDocument.Parse(json);
         var releases = doc.RootElement.EnumerateArray().Where(r => !r.GetProperty("draft").GetBoolean()
                 && AppReleaseVersion.Allowed(r.GetProperty("tag_name").GetString() ?? "", r.GetProperty("prerelease").GetBoolean(), channel))
             .Select(r => (Release: r, Version: ParseVersion(r.GetProperty("tag_name").GetString() ?? "")))
+            .Where(r => !rollback || AppReleaseVersion.IsPreviousStable(r.Release.GetProperty("tag_name").GetString() ?? "", r.Release.GetProperty("prerelease").GetBoolean(), current))
             .Where(r => r.Version is not null).OrderByDescending(r => r.Version).ToArray();
         foreach (var item in releases)
         {
@@ -37,23 +38,23 @@ public sealed class MacAppUpdater(HttpClient client, string updatesRoot, string 
             if (installer.ValueKind == JsonValueKind.Undefined) continue;
             var checksum = assets.FirstOrDefault(a => a.GetProperty("name").GetString() == name + ".sha256");
             if (checksum.ValueKind == JsonValueKind.Undefined) checksum = assets.FirstOrDefault(a => a.GetProperty("name").GetString() == "SHA256SUMS.txt");
-            var newer = item.Version! > installed;
+            var newer = rollback || item.Version! > installed;
             return new(newer, current, tag, ReleasesUrl,
                 installer.GetProperty("browser_download_url").GetString(),
                 checksum.ValueKind == JsonValueKind.Undefined ? null : checksum.GetProperty("browser_download_url").GetString(),
-                !newer ? "当前已是最新 Mac 版本。" : checksum.ValueKind == JsonValueKind.Undefined ? "发现 Mac 新版，但缺少校验文件，暂不能安装。" : "发现可安装的 Mac 新版。");
+                !newer ? "当前已是最新 Mac 版本。" : checksum.ValueKind == JsonValueKind.Undefined ? "发现 Mac 新版，但缺少校验文件，暂不能安装。" : rollback ? "rollbackAvailable" : "发现可安装的 Mac 新版。", IsRollback: rollback);
         }
-        return new(false, current, current, ReleasesUrl, null, null, "官方发布页暂未提供 Mac 安装包；不能将 Windows 版本当作 Mac 更新。");
+        return new(false, current, current, ReleasesUrl, null, null, rollback ? "rollbackUnavailable" : "官方发布页暂未提供 Mac 安装包；不能将 Windows 版本当作 Mac 更新。");
     }
 
-    public async Task<AppUpdateInfo> CheckAsync(CancellationToken token = default)
+    public async Task<AppUpdateInfo> CheckAsync(CancellationToken token = default, bool rollback = false)
     {
         try
         {
             using var request = Request(ReleasesApi);
             using var response = await client.SendAsync(request, token);
             response.EnsureSuccessStatusCode();
-            var result = SelectRelease(await response.Content.ReadAsStringAsync(token), currentVersion, channel);
+            var result = SelectRelease(await response.Content.ReadAsStringAsync(token), currentVersion, rollback ? "stable" : channel, rollback);
             return result with { Message = T(result.Message) };
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested) { throw; }
@@ -73,7 +74,8 @@ public sealed class MacAppUpdater(HttpClient client, string updatesRoot, string 
 
     public async Task<string> DownloadAsync(AppUpdateInfo update, IProgress<AppUpdateProgress>? progress, CancellationToken token)
     {
-        if (!update.UpdateAvailable || ParseVersion(update.LatestVersion) is not { } latest || latest <= ParseVersion(currentVersion)
+        if (!update.UpdateAvailable || ParseVersion(update.LatestVersion) is not { } latest
+            || (update.IsRollback ? !AppReleaseVersion.IsPreviousStable(update.LatestVersion, false, currentVersion) : latest <= ParseVersion(currentVersion))
             || update.InstallerUrl is null || update.ChecksumUrl is null) throw new InvalidOperationException("没有可安装的 Mac 更新。");
         var name = $"Aurora-Audio-Studio-{update.LatestVersion}-arm64.dmg";
         ValidateAssetUrl(update.InstallerUrl, name);

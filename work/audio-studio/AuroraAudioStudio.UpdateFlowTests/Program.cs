@@ -116,6 +116,19 @@ Require(installerScript.Contains("Result := HasCommandLineParam('/UPDATE')", Str
 
 var audioStudioRoot = Path.GetDirectoryName(args[0])!;
 var mainPageXaml = File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "MainPage.xaml"));
+var settingsMarkup = System.Xml.Linq.XDocument.Parse(mainPageXaml);
+System.Xml.Linq.XNamespace xamlNamespace = "http://schemas.microsoft.com/winfx/2006/xaml";
+var settingsPickers = new[] { "LanguagePicker", "ThemePicker", "AppUpdateChannelPicker" }
+    .Select(name => settingsMarkup.Descendants().Single(e => (string?)e.Attribute(xamlNamespace + "Name") == name)).ToArray();
+Require(settingsPickers.All(e => (string?)e.Attribute("HorizontalAlignment") == "Left" && (string?)e.Attribute("Width") == "320"),
+    "Settings language, theme, and update channel must share their left edge and width.");
+foreach (var toggleName in new[] { "AppAutoUpdateToggle", "ModelAutoUpdateToggle", "ConfirmLargeToggle" })
+{
+    var toggle = settingsMarkup.Descendants().Single(e => (string?)e.Attribute(xamlNamespace + "Name") == toggleName);
+    Require(toggle.Attributes().Any(a => a.Name.LocalName == "LocalizedText.OnKey" && a.Value == "toggleOn")
+        && toggle.Attributes().Any(a => a.Name.LocalName == "LocalizedText.OffKey" && a.Value == "toggleOff"),
+        "Settings switches must localize their visible On and Off captions.");
+}
 Require(Regex.Matches(mainPageXaml, "AccessKey=\\\"").Count >= 6, "All six Home workflows must expose keyboard access keys.");
 Require(mainPageXaml.Contains("AutomationProperties.LiveSetting=\"Polite\"", StringComparison.Ordinal), "Progress and status changes must be announced to assistive technologies.");
 Require(mainPageXaml.Contains("AutomationProperties.Name=\"本地 AI 创作工作台\"", StringComparison.Ordinal), "The embedded workbench must have a screen-reader name.");
@@ -223,7 +236,7 @@ Require(modelUpdateSource.Contains("PyTorch 组件较大，请耐心等待", Str
 Require(modelUpdateSource.Contains("IsProgressNoise", StringComparison.Ordinal)
     && modelUpdateSource.Contains("Using Python", StringComparison.Ordinal), "uv environment headers must not replace the active installation stage in the progress UI.");
 Require(taskQueueSource.Contains("if (task.Status == AuroraTaskStates.Canceled)", StringComparison.Ordinal), "A queued task canceled before execution must never be reset to waiting and run later.");
-var cancelHandler = Regex.Match(mainPageSource, @"private void CancelTaskButton_Click[\s\S]*?\n    }").Value;
+var cancelHandler = Regex.Match(mainPageSource, @"private (?:async )?void CancelTaskButton_Click[\s\S]*?\n    }").Value;
 Require(!cancelHandler.Contains("backend.StopAll()", StringComparison.Ordinal), "Canceling one task must not stop an unrelated workbench or another queued task.");
 Require(mainPageSource.Contains("entry.Task.Feature, entry.Task.InputPath, entry.Task.ModelId", StringComparison.Ordinal), "Queued work must execute its immutable task feature and model even after navigation changes.");
 Require(mainPageXaml.Contains("IsEnabled=\"{Binding CanCancel}\"", StringComparison.Ordinal)

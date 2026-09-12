@@ -26,12 +26,13 @@ public sealed class TaskQueueService
         Load();
     }
 
-    public AuroraTaskRecord Create(string projectId, string title, string feature, string inputPath, string modelId, string preset = "recommended", string sourceLanguage = "auto", string trackMode = "two-stem")
+    public AuroraTaskRecord Create(string projectId, string title, string feature, string inputPath, string modelId, string preset = "recommended", string sourceLanguage = "auto", string trackMode = "two-stem", string? id = null)
     {
         var logFolder = Path.Combine(settings.AppDataRoot, "TaskLogs");
         Directory.CreateDirectory(logFolder);
         var task = new AuroraTaskRecord
         {
+            Id = id ?? Guid.NewGuid().ToString("N"),
             ProjectId = projectId,
             Title = title,
             Feature = feature,
@@ -159,7 +160,7 @@ public sealed class TaskQueueService
         {
         if (cancellations.TryGetValue(id, out var cancellation)) cancellation.Cancel();
         var task = Items.FirstOrDefault(x => x.Id == id);
-        if (task is not null && task.Status is AuroraTaskStates.Waiting or AuroraTaskStates.Interrupted)
+        if (task is not null && task.CanCancel && (task.WorkbenchInstance.Length > 0 || task.Status is AuroraTaskStates.Waiting or AuroraTaskStates.Interrupted))
         {
             task.Status = AuroraTaskStates.Canceled; task.Stage = "已安全取消"; task.Message = "任务已取消。"; task.CompletedAt = DateTimeOffset.Now; SaveChanged();
         }
@@ -173,10 +174,48 @@ public sealed class TaskQueueService
 
     public void RegisterCompleted(AuroraTaskRecord task, IReadOnlyList<string> outputs)
     {
+        if (task.WorkbenchInstance.Length > 0 && task.Status == AuroraTaskStates.Canceled) return;
         task.Status = AuroraTaskStates.Completed; task.Progress = 1; task.Stage = "处理完成";
         task.OutputFiles = outputs.ToList(); task.OutputPath = outputs.FirstOrDefault() ?? "";
         task.StartedAt = task.CreatedAt; task.CompletedAt = DateTimeOffset.Now;
         SaveChanged();
+    }
+
+    public bool ObserveWorkbench(string id, string feature, string model, int pid, string instance, long sequence, string status, string message)
+    {
+        lock (stateGate)
+        {
+            var task = Items.FirstOrDefault(x => x.Id == id);
+            if (task is null)
+            {
+                task = new AuroraTaskRecord { Id = id, Feature = feature, ModelId = model, Title = model,
+                    WorkbenchPid = pid, WorkbenchInstance = instance, StartedAt = DateTimeOffset.Now,
+                    LogPath = Path.Combine(settings.LogsRoot, feature + ".log") };
+                Items.Insert(0, task);
+            }
+            if (task.WorkbenchInstance != instance || sequence <= task.WorkbenchSequence
+                || task.Status is AuroraTaskStates.Completed or AuroraTaskStates.Canceled or AuroraTaskStates.Interrupted) return false;
+            task.WorkbenchSequence = sequence;
+            task.Status = status == "failed" ? AuroraTaskStates.Failed : AuroraTaskStates.Running;
+            task.Stage = status == "saving" ? "正在收录成品" : status == "failed" ? "需要处理" : "正在本机处理";
+            task.Message = message;
+            if (status == "failed") task.CompletedAt = DateTimeOffset.Now;
+            SaveChanged();
+            return true;
+        }
+    }
+
+    public void CancelWorkbench(int pid, string? instance = null)
+    {
+        lock (stateGate)
+        {
+            foreach (var task in Items.Where(x => x.WorkbenchPid == pid && x.WorkbenchInstance.Length > 0 && x.CanCancel
+                && (instance is null || x.WorkbenchInstance == instance)))
+            {
+                task.Status = AuroraTaskStates.Canceled; task.Stage = "已安全取消"; task.CompletedAt = DateTimeOffset.Now;
+            }
+            SaveChanged();
+        }
     }
 
     private static TaskCompletionSource CompletedSignal()

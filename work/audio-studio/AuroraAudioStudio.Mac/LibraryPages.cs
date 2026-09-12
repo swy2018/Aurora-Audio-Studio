@@ -196,6 +196,8 @@ public sealed partial class MainWindow
     private Control AboutPage() => Scroll(Panel(VStack(Txt("Aurora Audio Studio", 30, true), Txt(CurrentMacVersion + " · Apple Silicon", 14),
         Txt(text["aboutBody"]), Rule(), Txt(text["aboutScope"]), Txt("GPL-3.0-only · Noto Sans JP / SIL OFL 1.1", 12),
         ActionButton(L("检查程序更新"), () => CheckAppUpdateAsync(true)),
+        ActionButton(L("rollbackApp"), () => CheckAppUpdateAsync(true, rollback: true), "rollback-app"),
+        Txt(L("rollbackHint"), 12),
         ActionButton(text["openFolder"] + " · Licenses", () => OpenPathAsync(Path.Combine(AppContext.BaseDirectory, "Licenses"))))));
 
     private void ShowWorkbench()

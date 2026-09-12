@@ -9,13 +9,14 @@ public static class WindowsReleasePolicy
 
     // GitHub's releases list includes assets for every platform; select the exact Windows asset.
     // https://docs.github.com/en/rest/releases/releases#list-releases
-    public static Models.GitHubRelease? Select(string json, string channel = "stable")
+    public static Models.GitHubRelease? Select(string json, string channel = "stable", string? rollbackFrom = null)
     {
         using var document = JsonDocument.Parse(json);
         var entries = document.RootElement.ValueKind == JsonValueKind.Array
             ? document.RootElement.EnumerateArray().ToArray() : [document.RootElement];
         return entries.Where(r => !r.GetProperty("draft").GetBoolean()
-                && AppReleaseVersion.Allowed(r.GetProperty("tag_name").GetString() ?? "", r.GetProperty("prerelease").GetBoolean(), channel))
+                && AppReleaseVersion.Allowed(r.GetProperty("tag_name").GetString() ?? "", r.GetProperty("prerelease").GetBoolean(), channel)
+                && (rollbackFrom is null || AppReleaseVersion.IsPreviousStable(r.GetProperty("tag_name").GetString() ?? "", r.GetProperty("prerelease").GetBoolean(), rollbackFrom)))
             .Select(r => JsonSerializer.Deserialize<Models.GitHubRelease>(r.GetRawText())!)
             .Where(r => r.Assets.Any(a => a.Name == InstallerName(r.TagName)))
             .OrderByDescending(r => AppReleaseVersion.Parse(r.TagName)).FirstOrDefault();

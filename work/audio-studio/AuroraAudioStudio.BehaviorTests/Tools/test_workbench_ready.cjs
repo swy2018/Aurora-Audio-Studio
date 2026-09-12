@@ -14,7 +14,7 @@ function fixture({ identity = 'this-launch', button = true, disabled = false, in
   return {
     window: { gradio_config: { aurora_instance: identity,
       components: [{ id: 2, type: 'button' }, { id: 3, type: 'audio' }],
-      dependencies: [{ backend_fn: true, targets: [[2, 'click']] }] } },
+      dependencies: [{ backend_fn: true, inputs: [1], outputs: [3], targets: [[2, 'click']] }] } },
     document: root, getComputedStyle: () => ({ visibility: 'visible' })
   };
 }

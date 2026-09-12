@@ -97,8 +97,8 @@ public sealed class ModelCatalogService(SettingsService settings)
         var verification = ReadVerification(model.Id, version);
         var stateText = model.Id == "subtitle-edit" ? Pick("外部字幕编辑器", "外部字幕編輯器", "External subtitle editor", "外部字幕エディター")
             : model.Id == "faster-whisper" ? Pick("字幕共享运行组件", "字幕共用執行元件", "Shared subtitle runtime", "字幕用共通ランタイム")
-            : !model.IsRunnable ? Pick("仅模型管理 · 尚未接入工作台", "僅模型管理 · 尚未接入工作台", "Model management only · no workbench", "モデル管理のみ・操作画面未対応")
-            : installed ? verification is not null ? Pick("短任务已验证", "短任務已驗證", "Short task verified", "短いタスクで検証済み") : Pick("文件齐全 · 待运行验证", "檔案齊全 · 待執行驗證", "Files present · not yet verified", "ファイル確認済み・実行未検証")
+            : !model.IsRunnable ? Pick("仅下载与管理 · 不支持生成", "僅下載與管理 · 不支援生成", "Download and manage only · no generation", "ダウンロード・管理のみ・生成非対応")
+            : installed ? verification is not null ? Pick("短样本运行成功", "短樣本執行成功", "Short sample completed", "短いサンプルで実行済み") : Pick("文件齐全 · 尚未验证运行", "檔案齊全 · 尚未驗證執行", "Files present · execution not yet verified", "ファイルあり・実行は未確認")
             : Directory.Exists(path) ? Pick("需要修复", "需要修復", "Repair needed", "修復が必要") : Pick("未安装", "未安裝", "Not installed", "未インストール");
         return new ModelState(model.Id, DisplayName(model), model.Feature, installed,
             stateText,

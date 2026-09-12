@@ -40,7 +40,9 @@ public static class WorkbenchReadiness
             (() => { const e = element(c); const b = e?.matches('button') ? e : e?.querySelector('button'); return shown(b) && !b.disabled; })());
           const inputReady = [...root.querySelectorAll('textarea,input:not([type=hidden]),[contenteditable=true]')]
             .some(e => shown(e) && !e.disabled);
-          const outputReady = components.some(c => c.type === 'audio' && shown(element(c)));
+          const outputs = new Set((c.dependencies || []).filter(d => d.backend_fn && d.inputs?.length)
+            .flatMap(d => d.outputs || []));
+          const outputReady = components.some(c => c.type === 'audio' && outputs.has(c.id) && shown(element(c)));
           return buttonReady && inputReady && outputReady;
         })()
         """.Replace("__INSTANCE__", JsonSerializer.Serialize(instance));

@@ -107,7 +107,7 @@ attempts.Remove(progressTask.Id);
 Check(!RuntimeEnvironment.CanRollback(Path.Combine(root, "no-backup")), "rollback unavailable without a retained version");
 settings.Current.Language = "en-US";
 var catalog = new ModelCatalogService(settings);
-Check(catalog.Definitions.Where(x => !x.IsRunnable).All(x => catalog.GetStates().First(s => s.Id == x.Id).Status.Contains("workbench", StringComparison.OrdinalIgnoreCase) || x.Id is "subtitle-edit" or "faster-whisper"), "download-only components cannot advertise a workbench");
+Check(catalog.Definitions.Where(x => !x.IsRunnable).All(x => catalog.GetStates().First(s => s.Id == x.Id).Status == "Download and manage only · no generation" || x.Id is "subtitle-edit" or "faster-whisper"), "download-only components explicitly disclose that generation is unavailable");
 var localization = new LocalizationService(settings);
 var originalOutput = settings.Current.OutputRoot;
 Check(settings.TrySetLanguage("ja-JP", out _) && new SettingsService(settings.AppDataRoot).Current.Language == "ja-JP", "language selection persists immediately without the full settings form");
@@ -125,9 +125,9 @@ Check(!catalog.IsInstalled(piano), "piano weights alone cannot advertise a runna
 var pianoRuntime = Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "piano-env");
 Fixture(Path.Combine(pianoRuntime, "Scripts", "python.exe"));
 catalog.RecordSuccessfulRun("piano", "cuda");
-Check(catalog.GetStates().Single(x => x.Id == "piano").Status == "Short task verified", "successful run records its runtime identity");
+Check(catalog.GetStates().Single(x => x.Id == "piano").Status == "Short sample completed", "successful run records its runtime identity");
 Directory.CreateDirectory(Path.Combine(pianoRuntime, "Lib", "site-packages", "torch-2.8.0.dist-info"));
-Check(catalog.GetStates().Single(x => x.Id == "piano").Status == "Files present · not yet verified", "changing a shared runtime invalidates prior execution verification");
+Check(catalog.GetStates().Single(x => x.Id == "piano").Status == "Files present · execution not yet verified", "changing a shared runtime invalidates prior execution verification");
 var vocals = catalog.Find("roformer-vocals")!;
 Fixture(Path.Combine(settings.Current.LocalAiRoot, vocals.RelativeRoot, vocals.Marker));
 Check(!catalog.IsInstalled(vocals), "vocals weights require the shared separation launcher");
@@ -137,3 +137,5 @@ Check(AudioRuntime.FindFfmpeg(settings.Current.LocalAiRoot) == ffmpeg, "bundled 
 Console.WriteLine($"Behavior checks passed: {passed}. Isolated evidence: {root}");
 await MaintenanceRegression.RunAsync();
 await FunctionRegression.RunAsync();
+await FirstBatchRegression.RunAsync();
+await AppRollbackRegression.RunAsync();

@@ -380,7 +380,7 @@
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"><Button ui:LocalizedText.Key="打开" Tag="{Binding Id}" Click="OpenTaskButton_Click"/><Button ui:LocalizedText.Key="日志" Tag="{Binding Id}" Click="TaskLogButton_Click"/><Button ui:LocalizedText.Key="重试" Tag="{Binding Id}" Click="RetryTaskButton_Click" IsEnabled="{Binding CanRetry}"/><Button ui:LocalizedText.Key="取消" Tag="{Binding Id}" Click="CancelTaskButton_Click" IsEnabled="{Binding CanCancel}"/></StackPanel>
                                 </Grid>
                                 <TextBlock Text="{Binding DisplayStage}" TextWrapping="Wrap"/>
-                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressPercent}" AutomationProperties.Name="{Binding DisplayStage}" AutomationProperties.LiveSetting="Polite"/>
+                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressPercent}" IsIndeterminate="{Binding IsIndeterminate}" AutomationProperties.Name="{Binding DisplayStage}" AutomationProperties.LiveSetting="Polite"/>
                                 <TextBlock Text="{Binding DisplayMessage}" TextWrapping="Wrap" MaxLines="2" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
                             </StackPanel>
                         </DataTemplate></ListView.ItemTemplate></ListView>
@@ -428,14 +428,14 @@
                         <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="ModelRootBox" ui:LocalizedText.HeaderKey="模型目录"/><Button x:Name="BrowseModelRootButton" Grid.Column="1" ui:LocalizedText.Key="浏览…" Tag="models" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
                         <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="OutputRootBox" ui:LocalizedText.HeaderKey="成品目录"/><Button x:Name="BrowseOutputRootButton" Grid.Column="1" ui:LocalizedText.Key="浏览…" Tag="output" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
                         <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="ProjectsRootBox" ui:LocalizedText.HeaderKey="处理记录目录"/><Button x:Name="BrowseProjectsRootButton" Grid.Column="1" ui:LocalizedText.Key="浏览…" Tag="projects" Click="BrowseSettingsFolderButton_Click" VerticalAlignment="Bottom"/></Grid>
-                        <ToggleSwitch x:Name="AppAutoUpdateToggle" ui:LocalizedText.HeaderKey="每天首次启动时检查应用更新"/>
-                        <ComboBox x:Name="AppUpdateChannelPicker" ui:LocalizedText.HeaderKey="updateChannel" MaxWidth="420" HorizontalAlignment="Stretch">
+                        <ToggleSwitch x:Name="AppAutoUpdateToggle" ui:LocalizedText.HeaderKey="每天首次启动时检查应用更新" ui:LocalizedText.OnKey="toggleOn" ui:LocalizedText.OffKey="toggleOff"/>
+                        <ComboBox x:Name="AppUpdateChannelPicker" ui:LocalizedText.HeaderKey="updateChannel" Width="320" HorizontalAlignment="Left">
                             <ComboBoxItem ui:LocalizedText.Key="updateStable" Tag="stable"/>
                             <ComboBoxItem ui:LocalizedText.Key="updateBeta" Tag="beta"/>
                         </ComboBox>
                         <TextBlock ui:LocalizedText.Key="updateChannelHint" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
-                        <ToggleSwitch x:Name="ModelAutoUpdateToggle" ui:LocalizedText.HeaderKey="启动时检查模型更新"/>
-                        <ToggleSwitch x:Name="ConfirmLargeToggle" ui:LocalizedText.HeaderKey="下载大型模型前始终确认"/>
+                        <ToggleSwitch x:Name="ModelAutoUpdateToggle" ui:LocalizedText.HeaderKey="启动时检查模型更新" ui:LocalizedText.OnKey="toggleOn" ui:LocalizedText.OffKey="toggleOff"/>
+                        <ToggleSwitch x:Name="ConfirmLargeToggle" ui:LocalizedText.HeaderKey="下载大型模型前始终确认" ui:LocalizedText.OnKey="toggleOn" ui:LocalizedText.OffKey="toggleOff"/>
                         <ToggleSwitch x:Name="AutoReleaseSettingsToggle" IsEnabled="False" ui:LocalizedText.OffKey="自动释放暂不支持，请手动结束引擎" ui:LocalizedText.HeaderKey="任务完成后自动释放显存"/>
                         <Button x:Name="SaveSettingsButton" ui:LocalizedText.Key="保存设置" Click="SaveSettingsButton_Click" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Left"/>
                     </StackPanel></ScrollViewer>
@@ -458,6 +458,8 @@
                                 <StackPanel Orientation="Horizontal" Spacing="7"><FontIcon Glyph="&#xE939;" FontSize="15"/><TextBlock ui:LocalizedText.Key="反馈问题 / 建议"/></StackPanel>
                             </Button>
                         </StackPanel>
+                        <Button x:Name="AppRollbackButton" ui:LocalizedText.Key="rollbackApp" Click="RollbackAppButton_Click"/>
+                        <TextBlock ui:LocalizedText.Key="rollbackHint" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}"/>
                         <InfoBar x:Name="UpdateInfo" IsOpen="False" IsClosable="True"/>
                         <TextBlock Text="Copyright © 2026 Aurora Contributors. Licensed under GNU GPL v3.0." Foreground="{ThemeResource AuroraMutedBrush}" Margin="0,18,0,0"/>
                     </StackPanel></ScrollViewer>

@@ -572,6 +572,7 @@ public sealed class BackendService(SettingsService settings)
     }
 
     public int? WorkbenchProcessId(string feature) => processes.TryGetValue(feature, out var process) && !process.HasExited ? process.Id : null;
+    public string? WorkbenchInstanceId(string feature) => IsRunning(feature) ? workbenchInstances.GetValueOrDefault(feature) : null;
 
     public void StopWorkbench(string feature, int? expectedPid = null)
     {
@@ -696,6 +697,7 @@ public sealed class BackendService(SettingsService settings)
         if (environment is not null)
             foreach (var item in environment) process.StartInfo.Environment[item.Key] = item.Value;
         process.StartInfo.Environment["AURORA_RESULT_RECEIPTS"] = Path.Combine(settings.AppDataRoot, "WorkbenchReceipts");
+        process.StartInfo.Environment["AURORA_TASK_EVENTS"] = Path.Combine(settings.AppDataRoot, "WorkbenchTasks");
         process.StartInfo.Environment["AURORA_OUTPUT_ROOT"] = OutputFolder(key == "music" ? "AI音乐" : key == "voice" ? "AI配音" : "AI歌声克隆");
         process.StartInfo.Environment["AURORA_FEATURE"] = key;
         process.StartInfo.Environment["AURORA_MODEL_ID"] = launchModel;

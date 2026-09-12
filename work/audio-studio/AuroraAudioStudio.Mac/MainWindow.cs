@@ -292,6 +292,8 @@ public sealed partial class MainWindow : Window
         content.Children.Add(Field(L("updateChannel"), channel));
         content.Children.Add(Txt(L("updateChannelHint"), 13));
         content.Children.Add(Row(ActionButton(L("检查程序更新"), () => CheckAppUpdateAsync(true)), ActionButton(L("取消更新"), () => { appUpdateCancellation?.Cancel(); return Task.CompletedTask; })));
+        content.Children.Add(ActionButton(L("rollbackApp"), () => CheckAppUpdateAsync(true, rollback: true), "rollback-app"));
+        content.Children.Add(Txt(L("rollbackHint"), 12));
         var safe = new CheckBox { Content = L("安全模式"), IsChecked = settingsDraft.SafeMode };
         var history = new NumericUpDown { Minimum = 20, Maximum = 500, Increment = 20, Value = settingsDraft.TaskHistoryLimit, Width = 180, HorizontalAlignment = HorizontalAlignment.Left };
         safe.IsCheckedChanged += (_, _) => settingsDraft.SafeMode = safe.IsChecked == true;

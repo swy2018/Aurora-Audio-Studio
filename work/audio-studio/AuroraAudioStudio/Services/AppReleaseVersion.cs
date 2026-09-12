@@ -21,4 +21,8 @@ public static class AppReleaseVersion
 
     public static bool Allowed(string tag, bool prerelease, string channel) => Parse(tag) is not null
         && (channel == "beta" || !prerelease && !tag.Contains("-beta.", StringComparison.Ordinal));
+
+    public static bool IsPreviousStable(string tag, bool prerelease, string current) =>
+        !prerelease && Regex.IsMatch(tag, @"^[vV]?\d+\.\d+\.\d+$", RegexOptions.CultureInvariant)
+        && Parse(tag) is { } target && Parse(current) is { } installed && target < installed;
 }

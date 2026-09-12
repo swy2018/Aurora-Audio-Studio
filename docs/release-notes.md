@@ -1,13 +1,19 @@
-## 2.0.0-beta.2 — 2026-09-12
+## 2.0.0-beta.3 — 2026-09-13
 
-- 2.0 Beta 2 提供 Windows x64 与 macOS Apple Silicon 安装包；Mac 版已完成 Developer ID 签名与 Apple 公证。
-- 修复模型检查或安装结束后进度面板不关闭、空日志下拉、下载文件占用、超时误判及批量取消后继续安装。
-- 工作台校验本次引擎身份与操作控件；切换模型不再静默结束其他引擎，失败重连保留原有引擎。
-- 修复重试进度串线、分轨模式不一致、维护期间路径变更及丢失成品误建目录；增强诊断凭据脱敏与设置保存失败处理。
-- 自动释放显存尚未支持，已禁用无效开关并提示手动结束引擎。模型支持范围因平台而异，完整六功能推理与自动升级安装流程仍待进一步验证。
+- Windows 2.0 Beta 3：改进工作台连接、任务管理和模型维护。Mac 当前仍为 Beta 2，Beta 3 将由 Mac 端单独构建。
+- 修复部分 Gradio 工作台已连接但操作区空白的问题，以及 ACE-Step 启动兼容问题。
+- Windows 分轨、MIDI 扒谱和字幕工作区自动保存素材与处理设置，切换页面或重启后可继续使用。
+- 支持的工作台生成任务可在任务中心跟踪，并与最终成品关联；改进取消和重复结果处理。
+- 模型维护区分缺失文件、运行环境和完整重装，仅在可确认的范围内执行局部修复。
+- 新增“回退到上一个正式版”，正式版和 Beta 均可使用；回退前显示目标版本与数据兼容提醒。
+- 统一自有四语言文案，修正设置页更新通道对齐。模型、素材和成品不会因应用回退被删除。
+- 本轮 Windows 六类功能已完成短样本测试；未覆盖所有可选模型和设备。Mac 安装与回退仍需单独验收。
 
-- Beta 2 is available for Windows x64 and macOS Apple Silicon. The Mac app is Developer ID signed and notarized by Apple.
-- Fix maintenance panels surviving completion, empty log expanders, download file locks, timeout classification, and batch installs continuing after cancellation.
-- Verify the launched engine identity and workbench controls. Switching models no longer silently stops another engine; failed reconnection preserves existing engines.
-- Fix stale retry progress, inconsistent stem modes, storage changes during maintenance, and missing results creating folders. Improve credential redaction and failed settings saves.
-- Automatic VRAM release remains unsupported; use the manual engine controls. Model support varies by platform. Full six-workflow inference and automatic update installation still need further validation.
+- Windows 2.0 Beta 3 improves workbench connections, task tracking, and model maintenance. Mac remains on Beta 2 until Beta 3 is built and verified on Mac.
+- Fix blank controls in some connected Gradio workbenches and an ACE-Step startup compatibility issue.
+- Windows stem separation, MIDI transcription, and subtitle workspaces retain sources and settings across navigation and restarts.
+- Track supported workbench generation tasks in Task Center and associate them with final results. Improve cancellation and duplicate-result handling.
+- Model maintenance distinguishes missing files, runtime repair, and full reinstallation; partial repairs run only when their scope can be verified.
+- Add Revert to previous stable release for both Stable and Beta, with target-version confirmation and a data-compatibility warning.
+- Refine Aurora-authored copy in four languages and align the update-channel control. App rollback does not delete models, source media, or results.
+- Short samples passed for all six Windows workflow categories. Not every optional model or device was tested. Mac installation and rollback require separate acceptance.

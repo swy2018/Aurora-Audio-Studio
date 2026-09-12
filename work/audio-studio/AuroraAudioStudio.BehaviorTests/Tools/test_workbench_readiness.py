@@ -30,6 +30,19 @@ class IdentityTests(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True):
             bridge.install_identity_bridge(types.SimpleNamespace())
 
+    def test_gradio6_missing_ids_and_upstream_explicit_ids(self):
+        button = types.SimpleNamespace(_id=13, elem_id=None, get_block_name=lambda: "button")
+        audio = types.SimpleNamespace(_id=16, elem_id="upstream-audio", get_block_name=lambda: "audio")
+        class Blocks:
+            blocks = {13: button, 16: audio}
+            def get_config_file(self):
+                return {}
+        with patch.dict(os.environ, {"AURORA_WORKBENCH_INSTANCE": "this-launch"}):
+            bridge.install_identity_bridge(types.SimpleNamespace(Blocks=Blocks))
+            Blocks().get_config_file()
+        self.assertEqual(button.elem_id, "aurora-component-13")
+        self.assertEqual(audio.elem_id, "upstream-audio")
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "--gradio-config":

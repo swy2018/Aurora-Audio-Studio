@@ -17,24 +17,27 @@ public sealed class UpdateService(SettingsService settings, LocalizationService 
 #endif
     private readonly HttpClient client = CreateClient();
 
-    public async Task<AppUpdateInfo> CheckAsync(CancellationToken cancellationToken = default)
+    public async Task<AppUpdateInfo> CheckAsync(CancellationToken cancellationToken = default, bool rollback = false)
     {
         var current = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0];
         try
         {
             using var response = await client.GetAsync(LatestReleaseApi, cancellationToken);
             response.EnsureSuccessStatusCode();
-            var release = WindowsReleasePolicy.Select(await response.Content.ReadAsStringAsync(cancellationToken), settings.Current.AppUpdateChannel)
-                ?? throw new InvalidDataException("No stable Windows installer is available in GitHub Releases.");
+            var release = WindowsReleasePolicy.Select(await response.Content.ReadAsStringAsync(cancellationToken),
+                rollback ? "stable" : settings.Current.AppUpdateChannel, rollback ? current : null);
+            if (release is null) return new(false, current, current, "https://github.com/swy2018/Aurora-Audio-Studio/releases",
+                null, null, localization.Get(rollback ? "rollbackUnavailable" : "updateUnavailable"));
             var latestText = release.TagName.Trim().TrimStart('v', 'V');
-            var available = AppReleaseVersion.Parse(latestText) is { } latest && AppReleaseVersion.Parse(current) is { } installed && latest > installed;
+            var available = rollback || AppReleaseVersion.Parse(latestText) is { } latest && AppReleaseVersion.Parse(current) is { } installed && latest > installed;
             var installer = release.Assets.First(a => a.Name == WindowsReleasePolicy.InstallerName(release.TagName));
             var checksum = release.Assets.FirstOrDefault(a => a.Name == installer.Name + ".sha256")
                 ?? release.Assets.FirstOrDefault(a => a.Name == "SHA256SUMS.txt");
             var message = available
                 ? installer is null || checksum is null ? localization.Get("updateAssetsIncomplete") : localization.Get("updateReady")
                 : localization.Get("updateUpToDate");
-            return new(available, current, latestText, release.HtmlUrl, installer?.BrowserDownloadUrl, checksum?.BrowserDownloadUrl, message);
+            return new(available, current, latestText, release.HtmlUrl, installer?.BrowserDownloadUrl, checksum?.BrowserDownloadUrl,
+                rollback && checksum is not null ? localization.Get("rollbackAvailable") : message, IsRollback: rollback);
         }
         catch (Exception ex)
         {
@@ -42,10 +45,12 @@ public sealed class UpdateService(SettingsService settings, LocalizationService 
         }
     }
 
-    public async Task<OperationResult> DownloadAndInstallAsync(AppUpdateInfo update, IProgress<AppUpdateProgress>? progress = null, CancellationToken cancellationToken = default)
+    public async Task<OperationResult> DownloadAndInstallAsync(AppUpdateInfo update, IProgress<AppUpdateProgress>? progress = null, CancellationToken cancellationToken = default, Func<bool>? canInstall = null)
     {
         if (!update.UpdateAvailable || update.InstallerUrl is null || update.ChecksumUrl is null)
             return new(false, localization.Get("updateUnavailable"));
+        if (update.IsRollback && !AppReleaseVersion.IsPreviousStable(update.LatestVersion, false, update.CurrentVersion))
+            return new(false, localization.Get("rollbackUnavailable"));
         string? clientLogPath = null;
         try
         {
@@ -75,6 +80,7 @@ public sealed class UpdateService(SettingsService settings, LocalizationService 
             }
             DeleteIfExists(installerPath + ".partial.sha256");
             WriteLog(clientLogPath, $"Verification succeeded: sha256={actual}");
+            if (canInstall is not null && !canInstall()) return new(false, localization.Get("appInstallBusy"));
             var logPath = Path.Combine(settings.LogsRoot, $"update-{DateTime.Now:yyyyMMdd-HHmmss}.log");
             progress?.Report(new(95, localization.Get("updatePreparingInstall"), true));
             var arguments = UpdateFlowGuard.BuildInstallerArguments(Environment.ProcessId, logPath);
