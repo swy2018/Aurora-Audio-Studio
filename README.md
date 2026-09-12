@@ -31,7 +31,7 @@ Aurora 把音乐生成、AI 配音、声音克隆、歌声转换、音轨分离�
 | 加速 | NVIDIA RTX 推荐，依模型要求 | Apple Silicon 的 MPS / MLX 或 CPU，依模型实现 |
 | 指南 | [Windows 使用说明](work/audio-studio/README-给音乐人的使用说明.md) | [Mac 使用说明](docs/macOS-user-guide.md) |
 
-两端源码使用同一版本体系，分别下载实际已发布的平台安装包和同名 `.sha256`。本次 beta.2 先发布 Windows，Mac 仍提供 beta.1；Mac beta.2 待构建与验收后补入同一 Release。模型单独按需安装，不随安装包捆绑。Windows 签名状态与 Mac 公证状态分别说明，见[代码签名政策](CODE_SIGNING_POLICY.md)。
+两端源码使用同一版本体系，分别下载实际已发布的平台安装包和同名 `.sha256`。Beta 2 已提供 Windows x64 与 macOS Apple Silicon 安装包。Mac 版已完成 Developer ID 签名与 Apple 公证。模型单独按需安装，不随安装包捆绑。Windows 签名状态与 Mac 公证状态分别说明，见[代码签名政策](CODE_SIGNING_POLICY.md)。
 
 Mac beta.2 构建：[源码交接与验收说明](docs/beta.2-mac-handoff.md)。上面的 1.9.9 下载属于稳定版，不会被本次 beta 替换。
 
@@ -48,11 +48,11 @@ Mac beta.2 构建：[源码交接与验收说明](docs/beta.2-mac-handoff.md)。
 <!-- current-packages:end -->
 
 <!-- release-notes-zh:start -->
-- 2.0 Beta 2 本次提供 Windows 安装包；Mac 源码已同步，安装包待 Mac 构建、签名、公证及验收。
+- 2.0 Beta 2 提供 Windows x64 与 macOS Apple Silicon 安装包；Mac 版已完成 Developer ID 签名与 Apple 公证。
 - 修复模型检查或安装结束后进度面板不关闭、空日志下拉、下载文件占用、超时误判及批量取消后继续安装。
 - 工作台校验本次引擎身份与操作控件；切换模型不再静默结束其他引擎，失败重连保留原有引擎。
 - 修复重试进度串线、分轨模式不一致、维护期间路径变更及丢失成品误建目录；增强诊断凭据脱敏与设置保存失败处理。
-- 自动释放显存尚未支持，已禁用无效开关并提示手动结束引擎。85 项后台回归通过；六功能真实推理和可见 UI 全流程仍待实测，不承诺所有模型已验收。
+- 自动释放显存尚未支持，已禁用无效开关并提示手动结束引擎。模型支持范围因平台而异，完整六功能推理与自动升级安装流程仍待进一步验证。
 <!-- release-notes-zh:end -->
 
 “文件齐全”不代表已完成推理。模型中心在真实任务成功后记录当前模型版本、时间和设备。未接入工作台的模型明确标为“仅模型管理”，MiniMax 等未在本机验收的可选模型不承诺实测通过。
@@ -185,21 +185,21 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 ## English
 
-Aurora Audio Studio is a local AI audio production workspace for Windows and macOS. Both platforms provide six independent entry points for music, voice, singing, stems, MIDI, and subtitles. Windows beta.2 ships first; Mac beta.1 remains available until the beta.2 Mac build is signed, notarized, and accepted. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [beta.2 source handoff](docs/beta.2-mac-handoff.md).
+Aurora Audio Studio is a local AI audio production workspace for Windows and macOS. Both platforms provide six independent entry points for music, voice, singing, stems, MIDI, and subtitles. Beta 2 is available for Windows x64 and macOS Apple Silicon; the Mac app is Developer ID signed and notarized by Apple. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [beta.2 source handoff](docs/beta.2-mac-handoff.md).
 
 Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Beta releases are intended for users who want early access; back up important settings before upgrading.
 
 ### Current release notes
 
 <!-- release-notes-en:start -->
-- Beta 2 provides a Windows installer. Mac source is synchronized; its package awaits a Mac build, signing, notarization, and acceptance.
+- Beta 2 is available for Windows x64 and macOS Apple Silicon. The Mac app is Developer ID signed and notarized by Apple.
 - Fix maintenance panels surviving completion, empty log expanders, download file locks, timeout classification, and batch installs continuing after cancellation.
 - Verify the launched engine identity and workbench controls. Switching models no longer silently stops another engine; failed reconnection preserves existing engines.
 - Fix stale retry progress, inconsistent stem modes, storage changes during maintenance, and missing results creating folders. Improve credential redaction and failed settings saves.
-- Automatic VRAM release remains unsupported: the ineffective switch is disabled with manual-release guidance. 85 background regressions passed; real inference and full visible UI workflows still need testing. Not all models are claimed as verified.
+- Automatic VRAM release remains unsupported; use the manual engine controls. Model support varies by platform. Full six-workflow inference and automatic update installation still need further validation.
 <!-- release-notes-en:end -->
 
-Read the [capability matrix](docs/capabilities.json) and [acceptance report](docs/validation-1.9.9.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. MIDI editing/playback requires your own music application; audio playback and subtitle-copy editing are available in Results.
+Read the [capability matrix](docs/capabilities.json) and [Mac verification scope](docs/beta.2-mac-handoff.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. MIDI editing/playback requires your own music application; audio playback and subtitle-copy editing are available in Results.
 
 ### Local by design
 

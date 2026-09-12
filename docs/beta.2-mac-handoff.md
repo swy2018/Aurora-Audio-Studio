@@ -1,6 +1,10 @@
 # 2.0.0-beta.2 Mac 构建交接
 
-Windows beta.2 先发布，Mac 包尚未在本轮构建、签名、公证或实机验证。Mac beta.1 继续可下载。不要重命名 beta.1 的 DMG 冒充 beta.2。
+Mac Beta 2 已从标签提交 `8ee0dda50d1eecca19d8b90fcb9a5afaf9860e63` 构建，完成 Developer ID 签名、Apple 公证、票据装订及 Gatekeeper 验证。Windows 与 Mac 使用同一 Release，历史标签和已有 Windows/源码附件保持原样。
+
+本次验证：105 项 Mac 自动检查、33 项 Python 离线测试、六功能入口与模型中心、英文切换及恢复中文、正式 DMG 内应用启动，以及正式应用脚本的 Whisper Small 短样本字幕推理。完整六功能真实推理、全部 WebView 操作和跨版本自动安装接管仍未完成，不将入口可用或文件齐全视作全部推理通过。
+
+以下保留构建方法与后续验收要求。
 
 ## 获取精确源码
 
