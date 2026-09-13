@@ -16,7 +16,9 @@
 
 ![Aurora Mac 实机首页](docs/assets/mac-2.0-home.png)
 
-Aurora 提供正式版与 Beta 两个更新通道，支持 Windows 与 macOS。下方为 Mac 客户端界面示例（截图版本 1.9.9）；当前可下载版本见平台说明，不同平台保留各自的系统控件。
+Aurora 2.0 面向 Windows 与 macOS 的本地音频创作。上图为 Mac 2.0.0 实机界面；各平台可下载版本见下表。
+
+[六个功能界面](https://swy2018.github.io/Aurora-Audio-Studio/#workflows) · [设置界面](docs/assets/mac-2.0-settings.png) · [关于界面](docs/assets/mac-2.0-about.png)
 
 Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、MIDI 扒谱和字幕制作整合到一个本地工作台。选择所需功能即可开始，素材、任务与成品集中管理。
 
@@ -31,9 +33,9 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 | 加速 | NVIDIA RTX 推荐，依模型要求 | Apple Silicon 的 MPS / MLX 或 CPU，依模型实现 |
 | 指南 | [Windows 使用说明](work/audio-studio/README-给音乐人的使用说明.md) | [Mac 使用说明](docs/macOS-user-guide.md) |
 
-请选择与你的系统匹配的安装包；同名 `.sha256` 文件用于校验下载完整性。Windows 当前正式版为 2.0.0，Mac 当前正式版为 1.9.9；两端仍可选择 Beta 4。Mac 2.0 正式安装包待 Mac 端构建与验收。模型按需安装，不随安装包捆绑。各平台签名说明见[代码签名政策](CODE_SIGNING_POLICY.md)。
+请选择与你的系统匹配的安装包；同名 `.sha256` 文件用于校验下载完整性。Windows 当前正式版为 2.0.0，Mac 当前正式安装包为 1.9.9。模型按需安装，不随安装包捆绑。各平台签名说明见[代码签名政策](CODE_SIGNING_POLICY.md)。
 
-正式版与 Beta 分别提供下载。Mac 2.0 构建与验收见[正式版交接](docs/2.0.0-mac-handoff.md)，签名与分发要求见[Mac 发布说明](docs/macOS-release.md)。
+日常使用推荐下载正式版。如需体验预发布功能，可在更新设置中选择 Beta 通道。
 
 ### 正式版与测试版更新
 
@@ -50,12 +52,12 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 <!-- current-packages:end -->
 
 <!-- release-notes-zh:start -->
-- Windows 2.0 正式版现已提供。Mac 2.0 源码同步提供，正式安装包待 Mac 端构建与验收；Mac 当前正式版仍为 1.9.9。
-- 统一引擎启动、任务完成、失败、取消及模型维护阶段的自有提示，并补齐简体中文、繁体中文、英文和日文。
-- 新写入的自有运行日志使用当前设置语言，并与引擎及安装工具的原始输出分开标记；保留退出码、错误详情和文件路径，不重写历史日志。
-- 延续 2.0 Beta 的工作台连接修复、处理设置保存、任务与成品关联、模型局部修复及正式版回退。
-- 本轮通过既有回归及 61 项日志文案检查，覆盖真实子进程的成功、失败、取消和原始输出保留；不代表所有模型、设备与长任务均已验证。
-- 正式版与 Beta 通道继续独立提供。Windows 安装包未代码签名；升级或回退前请备份重要配置与作品。
+- Windows 2.0.0 正式版现已提供。Mac 当前正式安装包为 1.9.9；各平台可下载版本以发布页为准。
+- 音乐创作、配音与声音克隆、歌声转换、分轨、MIDI 扒谱和字幕制作，集中在本地工作台完成。
+- 完善工作台连接、处理设置保存、任务与成品关联，以及模型局部修复和应用版本回退。
+- Aurora 的任务状态与运行提示支持简体中文、繁体中文、英文和日文，并随界面语言切换。
+- 运行日志区分 Aurora 提示与引擎原始输出，保留错误详情、退出码和文件路径，便于排查问题。
+- 正式版适合日常使用，Beta 通道可选。Windows 安装包未代码签名；升级或回退前请备份重要配置与作品。
 <!-- release-notes-zh:end -->
 
 模型中心分别显示文件状态和运行记录。成功完成任务后，会记录模型版本、时间及计算设备。“仅模型管理”表示支持下载与维护，但不能在 Aurora 内生成内容。可选模型的兼容性与运行表现取决于具体设备，请先使用短素材确认。
@@ -188,7 +190,7 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 ## English
 
-Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows Stable is 2.0.0; Mac Stable remains 1.9.9 until its 2.0 build is ready. Beta 4 remains available on both platforms. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Mac build and distribution guide](docs/macOS-release.md).
+Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows Stable is 2.0.0; the current Mac stable installer is 1.9.9. Screenshots show the Mac 2.0.0 interface. See the release page for available downloads. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Mac build and distribution guide](docs/macOS-release.md).
 
 Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Beta releases are intended for users who want early access; back up important settings before upgrading.
 
@@ -199,12 +201,12 @@ Successful app installation no longer retains an old app copy. Replacement failu
 ### Current release notes
 
 <!-- release-notes-en:start -->
-- Windows 2.0 Stable is available. Mac 2.0 source is included for a separate Mac build and acceptance; the current Mac stable release remains 1.9.9.
-- Refine Aurora-authored engine startup, task completion, failure, cancellation, and model-maintenance messages in Simplified Chinese, Traditional Chinese, English, and Japanese.
-- New Aurora-authored log entries use the selected language and are distinguished from original engine and installer output. Exit codes, error details, and paths are retained; historical logs are not rewritten.
-- Retain the 2.0 Beta workbench connection fixes, saved processing settings, task-to-result links, targeted model repair, and stable-release rollback.
-- Existing regressions and 61 runtime-copy checks passed, including real subprocess success, failure, cancellation, and original-output preservation. Not every model, device, or long-running task was tested.
-- Stable and Beta remain separate download channels. The Windows installer is unsigned. Back up important settings and work before upgrading or reverting.
+- Windows 2.0.0 Stable is available. The current Mac stable installer is 1.9.9. See the release page for available downloads on each platform.
+- Create music, voiceovers, voice clones, converted vocals, stems, MIDI, and subtitles in one local workspace.
+- Improve workbench connections, saved processing settings, task-to-result links, targeted model repair, and application rollback.
+- Aurora task status and runtime messages follow the interface language: Simplified Chinese, Traditional Chinese, English, or Japanese.
+- Logs distinguish Aurora messages from original engine output and retain error details, exit codes, and file paths for troubleshooting.
+- Stable is recommended for everyday use; Beta is optional. The Windows installer is unsigned. Back up important settings and work before upgrading or reverting.
 <!-- release-notes-en:end -->
 
 Read the [capability matrix](docs/capabilities.json) and [Mac release requirements](docs/macOS-release.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. MIDI editing/playback requires your own music application; audio playback and subtitle-copy editing are available in Results.

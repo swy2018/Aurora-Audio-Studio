@@ -322,7 +322,7 @@ public sealed class LocalizationService(SettingsService settings)
             "0.9.8 · Localized update results, richer Model Center details, and three additional multilingual Faster-Whisper models.",
             "0.9.8 · 更新結果の完全なローカライズ、モデルセンターの情報拡充、3 種類の多言語 Faster-Whisper モデルを追加。"],
         ["0.9.8 · 本地 AI 音频创作工作台"] = ["0.9.8 · 本地 AI 音频创作工作台", "0.9.8 · 本機 AI 音訊創作工作台", "0.9.8 · Local AI audio production workbench", "0.9.8 · ローカル AI オーディオ制作ワークベンチ"],
-        ["为音乐、声音与影像创作者打造的一站式本地工作台。灵感、素材与成品，始终由你掌控。"] = ["为音乐、声音与影像创作者打造的一站式本地工作台。灵感、素材与成品，始终由你掌控。", "為音樂、聲音與影像創作者打造的一站式本機工作台。靈感、素材與成品，始終由你掌控。", "A unified local workbench for music, voice, and video creators. Your ideas, source files, and finished work remain under your control.", "音楽・音声・映像クリエイターのための統合ローカルワークベンチ。アイデア、素材、完成作品は常に自分で管理できます。"],
+        ["productAbout"] = ["面向 Windows 与 macOS 的本地音频创作工作台。音乐创作、配音与声音克隆、歌声转换、分轨、MIDI 扒谱和字幕制作，集中完成。", "面向 Windows 與 macOS 的本機音訊創作工作台。音樂創作、配音與聲音複製、歌聲轉換、分軌、MIDI 採譜和字幕製作，集中完成。", "A local audio workspace for Windows and macOS. Create music, voiceovers, voice clones, converted vocals, stems, MIDI, and subtitles in one place.", "Windows と macOS のローカル音声制作ワークスペース。音楽制作、ナレーションと音声クローン、歌声変換、音源分離、MIDI 採譜、字幕制作を一か所で行えます。"],
         ["更新日志"] = ["更新日志", "更新記錄", "Release notes", "更新履歴"],
         ["Copyright © 2026 Aurora Contributors. Licensed under GNU GPL v3.0."] = ["版权所有 © 2026 Aurora Contributors。采用 GNU GPL v3.0 许可。", "版權所有 © 2026 Aurora Contributors。採用 GNU GPL v3.0 授權。", "Copyright © 2026 Aurora Contributors. Licensed under GNU GPL v3.0.", "Copyright © 2026 Aurora Contributors。GNU GPL v3.0 に基づき提供。"],
         ["0.9.7 · 模型选择更完整：新增轻量配音、声音克隆、通用分轨与轻量扒谱引擎，均由用户按需安装。"] = [

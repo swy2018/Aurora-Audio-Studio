@@ -123,7 +123,7 @@ public sealed class StudioText(MacWorkspace workspace)
         ["sendHost"] = ["发送到 Aurora", "傳送到 Aurora", "Send to Aurora", "Aurora に送信"],
         ["webAudio"] = ["选择本地音频试听", "選擇本機音訊試聽", "Choose local audio to preview", "ローカル音声を選んで試聴"],
         ["received"] = ["Aurora 已收到：", "Aurora 已收到：", "Aurora received: ", "Aurora が受信："],
-        ["aboutBody"] = ["为 Windows 与 Mac 的本地音频创作而设计。六类工作流、四种界面语言，模型与作品由你掌控。", "為 Windows 與 Mac 的本機音訊創作而設計。六類工作流程、四種介面語言，模型與作品由你掌控。", "Local audio creation for Windows and Mac. Six workflows, four interface languages, and control over your models and results.", "Windows と Mac のローカル音声制作。6つのワークフロー、4言語の UI。モデルと成果は自分で管理できます。"],
+        ["aboutBody"] = ["面向 Windows 与 macOS 的本地音频创作工作台。音乐创作、配音与声音克隆、歌声转换、分轨、MIDI 扒谱和字幕制作，集中完成。", "面向 Windows 與 macOS 的本機音訊創作工作台。音樂創作、配音與聲音複製、歌聲轉換、分軌、MIDI 採譜和字幕製作，集中完成。", "A local audio workspace for Windows and macOS. Create music, voiceovers, voice clones, converted vocals, stems, MIDI, and subtitles in one place.", "Windows と macOS のローカル音声制作ワークスペース。音楽制作、ナレーションと音声クローン、歌声変換、音源分離、MIDI 採譜、字幕制作を一か所で行えます。"],
         ["aboutScope"] = ["模型与运行环境在本机管理。各模型的平台支持情况请查看模型中心。", "模型與執行環境在本機管理。各模型的平台支援情況請查看模型中心。", "Models and runtimes are managed locally. See Model Center for platform support.", "モデルと実行環境はローカルで管理します。対応環境はモデルセンターで確認できます。"],
         ["error"] = ["操作未完成", "操作未完成", "Action not completed", "操作を完了できませんでした"],
         ["retryWeb"] = ["重新加载页面", "重新載入頁面", "Reload page", "ページを再読み込み"],

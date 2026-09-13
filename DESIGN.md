@@ -83,7 +83,7 @@ components:
 
 Aurora uses calm white working surfaces, pale mint surroundings, forest text, and deep-green actions. Windows and Mac share that identity while retaining their own desktop typography, controls, and platform behavior. The approved dark rounded A-wave icon remains the application mark.
 
-This refresh records the implemented website in docs/index.html, docs/styles.css, and docs/app.js. Its selected direction is workflow-first, candidate 5, seed 3bf050c7, as recorded in the page's direction contract. The website presents Aurora 2.0 with equal Windows and Mac visibility. Actual Mac 1.9.9 captures, labeled with their capture version, provide product evidence. Version branding does not imply that 2.0 final has shipped; release truth remains in PRODUCT.md and the release data.
+This refresh records the implemented website in docs/index.html, docs/styles.css, and docs/app.js. Its selected direction is workflow-first, candidate 5, seed 3bf050c7, as recorded in the page's direction contract. The website presents Aurora 2.0 with equal Windows and Mac visibility. Actual Mac 2.0.0 captures, labeled with their capture version, show the current interface. The download section separately identifies available installers; release availability comes from GitHub release assets.
 
 The frontmatter records website tokens, not replacement native-app tokens. The native rules below preserve application-specific behavior. The rendered references are .impeccable/review/desktop.png, mobile.png, and hero-repro.png; these visual records do not assert model inference success or release verification.
 

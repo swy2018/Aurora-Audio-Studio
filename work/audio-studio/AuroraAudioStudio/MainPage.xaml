@@ -444,7 +444,7 @@
                         <TextBlock Text="Aurora Audio Studio" FontSize="30" FontWeight="SemiBold"/>
                         <TextBlock x:Name="AboutVersionText" TextWrapping="Wrap" FontSize="16" Foreground="{ThemeResource AuroraMutedBrush}"/>
                         <TextBlock ui:LocalizedText.Key="苏晚颜 · Aurora Studio" FontSize="18" FontWeight="SemiBold" Margin="0,12,0,0"/>
-                        <TextBlock ui:LocalizedText.Key="为音乐、声音与影像创作者打造的一站式本地工作台。灵感、素材与成品，始终由你掌控。" TextWrapping="Wrap"/>
+                        <TextBlock ui:LocalizedText.Key="productAbout" TextWrapping="Wrap"/>
                         <Rectangle Height="1" Fill="{ThemeResource AuroraStrokeBrush}" Margin="0,10"/>
                         <TextBlock ui:LocalizedText.Key="更新日志" FontSize="20" FontWeight="SemiBold"/>
                         <TextBlock x:Name="AboutReleaseSummary" TextWrapping="Wrap"/>
