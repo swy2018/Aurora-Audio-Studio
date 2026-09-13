@@ -31,7 +31,7 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 | 加速 | NVIDIA RTX 推荐，依模型要求 | Apple Silicon 的 MPS / MLX 或 CPU，依模型实现 |
 | 指南 | [Windows 使用说明](work/audio-studio/README-给音乐人的使用说明.md) | [Mac 使用说明](docs/macOS-user-guide.md) |
 
-请选择与你的系统匹配的安装包；同名 `.sha256` 文件用于校验下载完整性。Windows 最新测试版为 Beta 3；Mac Beta 4 提供正式版回退及旧版启动提示兼容修复。模型按需安装，不随安装包捆绑。各平台签名说明见[代码签名政策](CODE_SIGNING_POLICY.md)。
+请选择与你的系统匹配的安装包；同名 `.sha256` 文件用于校验下载完整性。Windows 最新测试版为 Beta 4；Mac Beta 4 提供正式版回退及旧版启动提示兼容修复。模型按需安装，不随安装包捆绑。各平台签名说明见[代码签名政策](CODE_SIGNING_POLICY.md)。
 
 正式版与 Beta 分别提供下载。Mac 构建与分发要求见[Mac 发布说明](docs/macOS-release.md)。
 
@@ -50,7 +50,7 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 <!-- current-packages:end -->
 
 <!-- release-notes-zh:start -->
-- Mac 2.0 Beta 4 修复回退到 1.9.9 后的启动提示兼容问题；Windows 继续提供 Beta 3。
+- Mac 2.0 Beta 4 修复回退到 1.9.9 后的启动提示兼容问题；Windows 同步提供 Beta 4，功能与 Beta 3 保持一致。
 - 可在设置或关于页选择“回退到上一个正式版”，确认目标版本和数据兼容提醒后执行。
 - 应用替换期间临时保留旧应用，验证成功后清除；失败时尝试恢复。无法清理时明确提示，不影响模型自身的备份。
 - 优化 Aurora 自有四语言文案。模型、配置、素材和成品独立保留。
@@ -187,7 +187,7 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 ## English
 
-Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows offers Beta 3. Mac Beta 4 adds stable-release rollback and fixes the startup notification in older versions. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Mac build and distribution guide](docs/macOS-release.md).
+Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows offers Beta 4. Mac Beta 4 adds stable-release rollback and fixes the startup notification in older versions. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Mac build and distribution guide](docs/macOS-release.md).
 
 Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Beta releases are intended for users who want early access; back up important settings before upgrading.
 
@@ -198,7 +198,7 @@ Successful app installation no longer retains an old app copy. Replacement failu
 ### Current release notes
 
 <!-- release-notes-en:start -->
-- Mac 2.0 Beta 4 fixes the startup notification after reverting to 1.9.9. Windows continues to offer Beta 3.
+- Mac 2.0 Beta 4 fixes the startup notification after reverting to 1.9.9. Windows also offers Beta 4, with the same functionality as Beta 3.
 - Choose Revert to previous stable release in Settings or About, then confirm the target version and data-compatibility warning.
 - The old app is kept temporarily during replacement and removed after validation; failures attempt restoration. Cleanup failures are reported, and model backups remain independent.
 - Refine Aurora-authored copy in four languages. Models, settings, source media, and results remain separate.
