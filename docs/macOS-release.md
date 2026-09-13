@@ -11,7 +11,7 @@ Mac 版沿用现有 Avalonia/.NET 实现，输出在源码根目录的 `dist` �
 依赖收集同时覆盖 Homebrew 版 .NET 自带原生库（包括压缩库的 Brotli 依赖），而不只扫描四个音频/环境工具；库自身的 install ID 与实际加载依赖分开判断。
 
 ```bash
-export AURORA_BUILD_ROOT="$PWD/dist/macos-1.9.0-mac.5-arm64"
+export AURORA_BUILD_ROOT="$PWD/dist/release-2.0.0-arm64"
 export AURORA_SIGN_IDENTITY='Developer ID Application: YOUR NAME (TEAMID)'
 bash work/audio-studio/tools/package-macos.sh
 ```

@@ -27,13 +27,13 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 | | Windows | macOS |
 |---|---|---|
 | 系统 | Windows 10 / 11 x64 | macOS 26+ · Apple Silicon |
-| 安装包 | `Aurora-Audio-Studio-2.0.0-Setup-x64.exe` | `Aurora-Audio-Studio-1.9.9-arm64.dmg` |
-| 获取 | [正式版下载](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest) | [Mac 1.9.9 正式版](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v1.9.9) |
+| 安装包 | `Aurora-Audio-Studio-2.0.0-Setup-x64.exe` | `Aurora-Audio-Studio-2.0.0-arm64.dmg` |
+| 获取 | [正式版下载](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest) | [Mac 2.0.0 正式版](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.0) |
 | 安装 | 运行标准安装程序 | 打开 DMG，拖入 Applications |
 | 加速 | NVIDIA RTX 推荐，依模型要求 | Apple Silicon 的 MPS / MLX 或 CPU，依模型实现 |
 | 指南 | [Windows 使用说明](work/audio-studio/README-给音乐人的使用说明.md) | [Mac 使用说明](docs/macOS-user-guide.md) |
 
-请选择与你的系统匹配的安装包；同名 `.sha256` 文件用于校验下载完整性。Windows 当前正式版为 2.0.0，Mac 当前正式安装包为 1.9.9。模型按需安装，不随安装包捆绑。各平台签名说明见[代码签名政策](CODE_SIGNING_POLICY.md)。
+请选择与你的系统匹配的安装包；同名 `.sha256` 文件用于校验下载完整性。Windows 与 Mac 当前正式版均为 2.0.0。模型按需安装，不随安装包捆绑。各平台签名说明见[代码签名政策](CODE_SIGNING_POLICY.md)。
 
 日常使用推荐下载正式版。如需体验预发布功能，可在更新设置中选择 Beta 通道。
 
@@ -52,11 +52,12 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 <!-- current-packages:end -->
 
 <!-- release-notes-zh:start -->
-- Windows 2.0.0 正式版现已提供。Mac 当前正式安装包为 1.9.9；各平台可下载版本以发布页为准。
+- Windows 与 Mac 2.0.0 正式版现已提供。Mac 安装包使用 Developer ID 签名并通过 Apple 公证。
 - 音乐创作、配音与声音克隆、歌声转换、分轨、MIDI 扒谱和字幕制作，集中在本地工作台完成。
 - 完善工作台连接、处理设置保存、任务与成品关联，以及模型局部修复和应用版本回退。
 - Aurora 的任务状态与运行提示支持简体中文、繁体中文、英文和日文，并随界面语言切换。
 - 运行日志区分 Aurora 提示与引擎原始输出，保留错误详情、退出码和文件路径，便于排查问题。
+- 修复 Mac 模型维护日志无法写入时意外退出的问题，检查与维护操作可正常结束并恢复界面状态。
 - 正式版适合日常使用，Beta 通道可选。Windows 安装包未代码签名；升级或回退前请备份重要配置与作品。
 <!-- release-notes-zh:end -->
 
@@ -190,7 +191,7 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 ## English
 
-Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows Stable is 2.0.0; the current Mac stable installer is 1.9.9. Screenshots show the Mac 2.0.0 interface. See the release page for available downloads. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Mac build and distribution guide](docs/macOS-release.md).
+Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows and Mac Stable are both 2.0.0. Screenshots show the Mac 2.0.0 interface. See the release page for available downloads. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Mac build and distribution guide](docs/macOS-release.md).
 
 Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Beta releases are intended for users who want early access; back up important settings before upgrading.
 
@@ -201,11 +202,12 @@ Successful app installation no longer retains an old app copy. Replacement failu
 ### Current release notes
 
 <!-- release-notes-en:start -->
-- Windows 2.0.0 Stable is available. The current Mac stable installer is 1.9.9. See the release page for available downloads on each platform.
+- Windows and Mac 2.0.0 Stable are available. The Mac installer is Developer ID signed and Apple notarized.
 - Create music, voiceovers, voice clones, converted vocals, stems, MIDI, and subtitles in one local workspace.
 - Improve workbench connections, saved processing settings, task-to-result links, targeted model repair, and application rollback.
 - Aurora task status and runtime messages follow the interface language: Simplified Chinese, Traditional Chinese, English, or Japanese.
 - Logs distinguish Aurora messages from original engine output and retain error details, exit codes, and file paths for troubleshooting.
+- Fix a Mac crash when model-maintenance logs cannot be written, allowing checks and maintenance to finish and restore the interface state.
 - Stable is recommended for everyday use; Beta is optional. The Windows installer is unsigned. Back up important settings and work before upgrading or reverting.
 <!-- release-notes-en:end -->
 
