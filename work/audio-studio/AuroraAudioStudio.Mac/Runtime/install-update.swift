@@ -51,6 +51,14 @@ func replaceBundle(staged: URL, target: URL, backup: URL, validate: (URL) throws
     }
 }
 
+func installedResult(rollback: Bool, cleanupWarning: String?) -> [String: String] {
+    var result = ["state": "installed"]
+    // Published 1.9.9 requires this display field after rollback, even without a backup.
+    if rollback { result["backup"] = cleanupWarning ?? "无（临时旧应用已清除）" }
+    if let cleanupWarning { result["cleanupWarning"] = cleanupWarning }
+    return result
+}
+
 func stableBuild(_ version: String) throws -> Int {
     guard version.range(of: #"^\d+\.\d+\.\d+$"#, options: .regularExpression) != nil else {
         throw fail("回退目标必须是正式版。")
@@ -83,6 +91,16 @@ for failure in [false, true] {
     }
     print("PASS: \(failure ? "failed replacement restores old app" : "successful replacement removes temporary old app")")
 }
+let rollbackData = try JSONSerialization.data(withJSONObject: installedResult(rollback: true, cleanupWarning: nil))
+let legacyResult = try JSONSerialization.jsonObject(with: rollbackData) as! [String: String]
+assert(legacyResult["state"] == "installed" && legacyResult["backup"] == "无（临时旧应用已清除）")
+print("PASS: legacy 1.9.9 can read a successful rollback without a retained backup")
+let warning = "临时旧应用未能清理：/fixture/previous.app"
+let warnedResult = installedResult(rollback: true, cleanupWarning: warning)
+assert(warnedResult["backup"] == warning && warnedResult["cleanupWarning"] == warning)
+print("PASS: legacy and current readers both receive cleanup failures")
+assert(installedResult(rollback: false, cleanupWarning: nil) == ["state": "installed"])
+print("PASS: normal upgrades retain the current result contract")
 print("Replacement test files retained: \(fixtureRoot.path)")
 #else
 
@@ -141,9 +159,7 @@ do {
     // Recheck after waiting; do not overwrite an app changed by another installer.
     guard try verify(target) == oldBuild else { throw fail("安装期间应用发生变化，已停止替换。") }
     let cleanupWarning = try replaceBundle(staged: staged, target: target, backup: backup) { _ = try verify($0) }
-    var installedStatus = ["state": "installed"]
-    if let cleanupWarning { installedStatus["cleanupWarning"] = cleanupWarning }
-    try status(result, installedStatus)
+    try status(result, installedResult(rollback: rollbackBuild != nil, cleanupWarning: cleanupWarning))
     try run("/usr/bin/open", [target.path])
 } catch {
     if let report { try? status(report, ["state": "failed", "message": error.localizedDescription]) }
