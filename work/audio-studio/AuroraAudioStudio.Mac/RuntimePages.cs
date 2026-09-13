@@ -157,13 +157,14 @@ public sealed partial class MainWindow
         modelCompleted = 0; modelTotal = ids.Count; modelLog = "正在准备…";
         var failures = new List<string>(); var canceled = false;
         var label = action == "updates" ? "检查模型更新" : action == "check" ? "校验模型" : action == "update" ? "更新模型" : "维护模型";
-        var logRoot = Path.Combine(workspace.Settings.AppDataRoot, "EngineLogs"); Directory.CreateDirectory(logRoot);
+        var logRoot = Path.Combine(workspace.Settings.AppDataRoot, "EngineLogs");
         var logPath = Path.Combine(logRoot, "maintenance-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff") + ".log");
-        void RecordStatus(string message)
+        void WriteLog(string message)
         {
-            try { File.AppendAllText(logPath, $"[Aurora] {DateTimeOffset.Now:O} {message}\n"); }
+            try { Directory.CreateDirectory(logRoot); File.AppendAllText(logPath, message); }
             catch (Exception ex) { workspace.Runtime.Report(workspace.Localization.Format("logWriteFailed", ex.Message)); }
         }
+        void RecordStatus(string message) => WriteLog($"[Aurora] {DateTimeOffset.Now:O} {message}\n");
         RecordStatus(workspace.Localization.Translate(label));
         RecordStatus(workspace.Localization.Get("logEngineOutput"));
         var lastRender = DateTimeOffset.MinValue;
@@ -178,7 +179,7 @@ public sealed partial class MainWindow
                 {
                     await workspace.Runtime.ManageAsync(id, action, new Progress<string>(line =>
                     {
-                        File.AppendAllText(logPath, id + " " + line + Environment.NewLine);
+                        WriteLog(id + " " + line + Environment.NewLine);
                         try
                         {
                             if (line.StartsWith('{'))
@@ -200,7 +201,7 @@ public sealed partial class MainWindow
                     }), cancellation.Token);
                 }
                 catch (OperationCanceledException) { throw; }
-                catch (Exception ex) { failures.Add(id + "：" + ex.Message); File.AppendAllText(logPath, ex + Environment.NewLine); }
+                catch (Exception ex) { failures.Add(id + "：" + ex.Message); WriteLog(ex + Environment.NewLine); }
                 modelCompleted++;
             }
         }
