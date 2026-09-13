@@ -1,13 +1,15 @@
-## 2.0.0-beta.4 — 2026-09-13
+## 2.0.0 — 2026-09-13
 
-- Mac 2.0 Beta 4 修复回退到 1.9.9 后的启动提示兼容问题；Windows 同步提供 Beta 4，功能与 Beta 3 保持一致。
-- 可在设置或关于页选择“回退到上一个正式版”，确认目标版本和数据兼容提醒后执行。
-- 应用替换期间临时保留旧应用，验证成功后清除；失败时尝试恢复。无法清理时明确提示，不影响模型自身的备份。
-- 优化 Aurora 自有四语言文案。模型、配置、素材和成品独立保留。
-- Beta 需主动选择，正式版仍为 1.9.9。升级或回退前请备份重要配置与作品；不同模型、设备及长任务仍需分别验证。
+- Windows 2.0 正式版现已提供。Mac 2.0 源码同步提供，正式安装包待 Mac 端构建与验收；Mac 当前正式版仍为 1.9.9。
+- 统一引擎启动、任务完成、失败、取消及模型维护阶段的自有提示，并补齐简体中文、繁体中文、英文和日文。
+- 新写入的自有运行日志使用当前设置语言，并与引擎及安装工具的原始输出分开标记；保留退出码、错误详情和文件路径，不重写历史日志。
+- 延续 2.0 Beta 的工作台连接修复、处理设置保存、任务与成品关联、模型局部修复及正式版回退。
+- 本轮通过既有回归及 61 项日志文案检查，覆盖真实子进程的成功、失败、取消和原始输出保留；不代表所有模型、设备与长任务均已验证。
+- 正式版与 Beta 通道继续独立提供。Windows 安装包未代码签名；升级或回退前请备份重要配置与作品。
 
-- Mac 2.0 Beta 4 fixes the startup notification after reverting to 1.9.9. Windows also offers Beta 4, with the same functionality as Beta 3.
-- Choose Revert to previous stable release in Settings or About, then confirm the target version and data-compatibility warning.
-- The old app is kept temporarily during replacement and removed after validation; failures attempt restoration. Cleanup failures are reported, and model backups remain independent.
-- Refine Aurora-authored copy in four languages. Models, settings, source media, and results remain separate.
-- Beta is opt-in; Stable remains 1.9.9. Back up important settings and work before upgrading or reverting. Other models, devices, and long-running tasks require separate validation.
+- Windows 2.0 Stable is available. Mac 2.0 source is included for a separate Mac build and acceptance; the current Mac stable release remains 1.9.9.
+- Refine Aurora-authored engine startup, task completion, failure, cancellation, and model-maintenance messages in Simplified Chinese, Traditional Chinese, English, and Japanese.
+- New Aurora-authored log entries use the selected language and are distinguished from original engine and installer output. Exit codes, error details, and paths are retained; historical logs are not rewritten.
+- Retain the 2.0 Beta workbench connection fixes, saved processing settings, task-to-result links, targeted model repair, and stable-release rollback.
+- Existing regressions and 61 runtime-copy checks passed, including real subprocess success, failure, cancellation, and original-output preservation. Not every model, device, or long-running task was tested.
+- Stable and Beta remain separate download channels. The Windows installer is unsigned. Back up important settings and work before upgrading or reverting.

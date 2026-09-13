@@ -96,24 +96,35 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         Directory.CreateDirectory(settings.LogsRoot);
         var logPath = Path.Combine(settings.LogsRoot, $"model-maintenance-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.log");
         using var log = TextWriter.Synchronized(new StreamWriter(logPath) { AutoFlush = true });
-        log.WriteLine($"{DateTimeOffset.Now:O} {model.Id} ({model.Name})");
+        var localization = new LocalizationService(settings);
+        log.WriteLine($"[Aurora] {DateTimeOffset.Now:O} {localization.Format("logMaintenanceStarting", model.Name)} ({model.Id})");
+        log.WriteLine($"[Aurora] {localization.Get("logEngineOutput")}");
         using var recorded = new OperationProgress<ModelInstallProgress>(value =>
         {
-            log.WriteLine($"{DateTimeOffset.Now:O} {value.Stage} {value.LogLine}");
-            progress?.Report(value);
+            var stage = localization.Translate(value.Stage);
+            if (!string.IsNullOrWhiteSpace(stage)) log.WriteLine($"[Aurora] {DateTimeOffset.Now:O} {stage}");
+            if (value.LogLine is not null) log.WriteLine(value.LogLine);
+            progress?.Report(value with { Stage = stage });
         }, action => action(), cancellationToken);
         try
         {
             var result = await UpdateCoreAsync(model, recorded, cancellationToken);
-            log.WriteLine($"Success={result.Success}: {result.Message}");
-            return result;
+            var message = localization.Translate(result.Message);
+            log.WriteLine($"[Aurora] {DateTimeOffset.Now:O} {localization.Get(result.Success ? "logOperationComplete" : "logOperationFailed")} {message}");
+            return result with { Message = message };
         }
         catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
+            log.WriteLine($"[Aurora] {localization.Get("logOperationFailed")}");
             log.WriteLine(ex.ToString());
-            return new(false, "安装请求超时，请检查网络后重试；详情见维护日志。", "timeout");
+            return new(false, localization.Translate("安装请求超时，请检查网络后重试；详情见维护日志。"), "timeout");
         }
-        catch (Exception ex) { log.WriteLine(ex.ToString()); throw; }
+        catch (OperationCanceledException)
+        {
+            log.WriteLine($"[Aurora] {DateTimeOffset.Now:O} {localization.Get("logTaskCanceled")}");
+            throw;
+        }
+        catch (Exception ex) { log.WriteLine($"[Aurora] {localization.Get("logOperationFailed")}"); log.WriteLine(ex.ToString()); throw; }
     }
 
     private async Task<OperationResult> UpdateCoreAsync(ModelDefinition model, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
@@ -144,7 +155,7 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             return await InstallGitHubRepositoryReleaseAsync(model, root, progress, cancellationToken);
         var entry = await FindManifestEntryAsync(model.Id, cancellationToken);
         if (entry is not null) return await InstallManifestEntryAsync(model, entry, root, progress, cancellationToken);
-        if (!catalog.IsInstalled(model)) return new(false, "此引擎需要通过 Aurora 安装程序添加运行环境。 ");
+        if (!catalog.IsInstalled(model)) return new(false, "此引擎需要通过 Aurora 安装程序添加运行环境。");
         if (model.UpdateKind.StartsWith("git", StringComparison.OrdinalIgnoreCase) && Directory.Exists(Path.Combine(root, ".git")))
             return await RunGitAsync(root, "pull --ff-only", cancellationToken);
         return new(false, "当前没有可安装的新版本。");
@@ -250,7 +261,7 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             if (!string.IsNullOrWhiteSpace(dirty.Path)) return new(false, $"{model.Name} 存在本地代码修改，为避免覆盖，已停止更新。", "available");
         }
 
-        progress?.Report(new(null, $"正在准备 {model.Name} 官方代码"));
+        progress?.Report(new(null, new LocalizationService(settings).Format("maintenanceCode", model.Name)));
         ModelInstallTransaction.Prepare(root, model.Id + ":" + release.Tag + release.Commit);
         var staging = ModelInstallTransaction.StagingPath(root);
         if (!Directory.Exists(Path.Combine(staging, ".git")))
@@ -626,7 +637,7 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         if (installResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(installResult.Error) ? $"{model.Name} 部署失败。" : installResult.Error);
         if (model.Id is "transkun" or "roformer" or "yourmt3" or "demucs" or "f5-tts" or "piano-runtime")
         {
-            progress?.Report(new(null, $"正在配置 {model.Name} 的配套 CUDA 运行环境"));
+            progress?.Report(new(null, new LocalizationService(settings).Format("maintenanceCuda", model.Name)));
             var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
             foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "torch==2.8.0", "torchaudio==2.8.0", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
             var torchResult = await RunProcessAsync(torch, cancellationToken, progress);

@@ -134,6 +134,12 @@ Require(mainPageXaml.Contains("AutomationProperties.LiveSetting=\"Polite\"", Str
 Require(mainPageXaml.Contains("AutomationProperties.Name=\"本地 AI 创作工作台\"", StringComparison.Ordinal), "The embedded workbench must have a screen-reader name.");
 
 var repositoryRoot = Path.GetFullPath(Path.Combine(audioStudioRoot, "..", ".."));
+var releaseSyncSource = File.ReadAllText(Path.Combine(audioStudioRoot, "tools", "sync-release.ps1"));
+const string historyBoundary = @"(?=\s|$).*?(?=^## |\z)";
+Require(releaseSyncSource.Contains("'" + historyBoundary + "'", StringComparison.Ordinal), "Release synchronization must use an exact version boundary.");
+var historyFixture = "## 2.0.0-beta.4\nKeep beta history\n## 2.0.0\nCurrent stable\n## 1.9.9\nKeep stable history\n";
+var historyMatches = Regex.Matches(historyFixture, @"(?ms)^## " + Regex.Escape("2.0.0") + historyBoundary);
+Require(historyMatches.Count == 1 && historyMatches[0].Value == "## 2.0.0\nCurrent stable\n", "Stable promotion must not rewrite beta or older stable changelog entries.");
 var workflow = File.ReadAllText(Path.Combine(repositoryRoot, ".github", "workflows", "build.yml"));
 Require(workflow.Contains("AuroraAudioStudio.UpdateFlowTests", StringComparison.Ordinal), "CI must run the regression program before packaging.");
 using var releaseMetadata = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "release.json")));
@@ -327,8 +333,12 @@ Require(!backendSource.Contains("_ => \"medium\"", StringComparison.Ordinal), "U
 Require(modelUpdateSource.Contains("setuptools", StringComparison.Ordinal), "TransKun installation must include pkg_resources through setuptools.");
 Require(backendSource.Contains("DetectTorchDeviceAsync", StringComparison.Ordinal)
     && backendSource.Contains("transkunInfo.ArgumentList.Add(device)", StringComparison.Ordinal), "TransKun must detect CUDA availability at runtime and fall back to CPU instead of blindly requesting CUDA.");
-var transkunPackageInstall = modelUpdateSource.IndexOf("正在部署 {model.Name}", StringComparison.Ordinal);
-var transkunCudaInstall = modelUpdateSource.IndexOf("正在配置 {model.Name} 的配套 CUDA 运行环境", StringComparison.Ordinal);
+var transkunSetupStart = modelUpdateSource.IndexOf("private async Task<OperationResult> InstallUvPackageAsync(", StringComparison.Ordinal);
+Require(transkunSetupStart >= 0, "Model package installation method must exist.");
+var transkunSetupEnd = modelUpdateSource.IndexOf("\n    private ", transkunSetupStart + 1, StringComparison.Ordinal);
+var transkunSetup = transkunSetupEnd > transkunSetupStart ? modelUpdateSource[transkunSetupStart..transkunSetupEnd] : modelUpdateSource[transkunSetupStart..];
+var transkunPackageInstall = transkunSetup.IndexOf("var installResult = await RunProcessAsync(install, cancellationToken, progress)", StringComparison.Ordinal);
+var transkunCudaInstall = transkunSetup.IndexOf("var torchResult = await RunProcessAsync(torch, cancellationToken, progress)", StringComparison.Ordinal);
 Require(transkunPackageInstall >= 0 && transkunCudaInstall > transkunPackageInstall, "TransKun must install its package first and apply the matching CUDA torch/torchaudio pair last.");
 Require(modelUpdateSource.Contains("正在下载 ACE-Step 基础权重", StringComparison.Ordinal) && modelUpdateSource.Contains("acestep-v15-xl-turbo", StringComparison.Ordinal), "ACE-Step installation must download both the official base components and XL checkpoint.");
 Require(catalogSource.Contains("\"faster-whisper\"", StringComparison.Ordinal) && catalogSource.Contains("\"subtitle-edit\"", StringComparison.Ordinal)

@@ -18,6 +18,7 @@ public sealed class BackendService(SettingsService settings)
     private string launchModel = "";
     public event EventHandler<string>? StatusChanged;
 
+    private readonly LocalizationService localization = new(settings);
     private string Root => settings.Current.LocalAiRoot;
     private string Logs => settings.LogsRoot;
     private string MusicRoot => Path.Combine(Root, "ACE-Step-1.5");
@@ -51,7 +52,7 @@ public sealed class BackendService(SettingsService settings)
                 "voice" when model.StartsWith("qwen3-tts-", StringComparison.OrdinalIgnoreCase) => await StartTtsAsync(model),
                 "voice" when model.Equals("f5-tts", StringComparison.OrdinalIgnoreCase) => await StartF5TtsAsync(),
                 "singing" => await StartSeedVcAsync(),
-                _ => new OperationResult(false, "The selected model does not expose an embedded workbench yet.")
+                _ => new OperationResult(false, localization.Get("workbenchNotSupported"))
             };
         }
         catch (OperationCanceledException) { throw; }
@@ -78,7 +79,7 @@ public sealed class BackendService(SettingsService settings)
         if (missing.Count > 0) return new OperationResult(false, "ACE-Step 安装不完整：" + string.Join("、", missing) + "。请在模型管理中执行检查 / 修复。");
         if (!File.Exists(python) || !File.Exists(script)) return Missing("ACE-Step 1.5 XL Turbo");
         if (!HasXlLoadHeadroom(out var ram, out var commit))
-            return new OperationResult(false, $"ACE-Step needs more memory headroom. Available RAM: {ram:F1} GB, commit headroom: {commit:F1} GB.");
+            return new OperationResult(false, localization.Format("engineMemoryRequired", "ACE-Step", ram.ToString("F1"), commit.ToString("F1")));
         if (!IsRunning("music") || !activeModels.TryGetValue("music", out var current) || !current.Equals("ace-step", StringComparison.OrdinalIgnoreCase))
         {
             Stop("music");
@@ -92,7 +93,7 @@ public sealed class BackendService(SettingsService settings)
                 });
             activeModels["music"] = "ace-step";
         }
-        return await WaitForUrlAsync("music", "http://127.0.0.1:7860", "Starting ACE-Step 1.5 XL Turbo");
+        return await WaitForUrlAsync("music", "http://127.0.0.1:7860", localization.Format("logEngineStarting", "ACE-Step 1.5 XL Turbo"));
     }
 
     private async Task<OperationResult> StartMiniMaxMusic3Async(string language)
@@ -103,7 +104,7 @@ public sealed class BackendService(SettingsService settings)
         var script = Path.Combine(AppContext.BaseDirectory, "Tools", "minimax_music3_webui.py");
         if (!File.Exists(python) || !File.Exists(Path.Combine(modelRoot, "modular_model_index.json")) || !File.Exists(script)) return Missing("MiniMax-Music3");
         if (!HasXlLoadHeadroom(out var ram, out var commit))
-            return new OperationResult(false, $"MiniMax-Music3 needs more memory headroom. Available RAM: {ram:F1} GB, commit headroom: {commit:F1} GB.");
+            return new OperationResult(false, localization.Format("engineMemoryRequired", "MiniMax-Music3", ram.ToString("F1"), commit.ToString("F1")));
         if (!IsRunning("music") || !activeModels.TryGetValue("music", out var current) || !current.Equals("minimax-music3", StringComparison.OrdinalIgnoreCase))
         {
             Stop("music");
@@ -112,7 +113,7 @@ public sealed class BackendService(SettingsService settings)
                 new Dictionary<string, string> { ["GRADIO_TEMP_DIR"] = output, ["PYTHONUTF8"] = "1", ["HF_HUB_OFFLINE"] = "1" });
             activeModels["music"] = "minimax-music3";
         }
-        return await WaitForUrlAsync("music", "http://127.0.0.1:7860", "正在启动 MiniMax-Music3");
+        return await WaitForUrlAsync("music", "http://127.0.0.1:7860", localization.Format("logEngineStarting", "MiniMax-Music3"));
     }
 
     private async Task<OperationResult> StartTtsAsync(string modelId)
@@ -145,7 +146,7 @@ public sealed class BackendService(SettingsService settings)
                 });
             activeModels["voice"] = modelId;
         }
-        return await WaitForUrlAsync("voice", "http://127.0.0.1:7861", "正在启动 Qwen3-TTS 1.7B");
+        return await WaitForUrlAsync("voice", "http://127.0.0.1:7861", localization.Format("logEngineStarting", "Qwen3-TTS 1.7B"));
     }
 
     private async Task<OperationResult> StartF5TtsAsync()
@@ -160,7 +161,7 @@ public sealed class BackendService(SettingsService settings)
                 new Dictionary<string, string> { ["GRADIO_TEMP_DIR"] = OutputFolder("AI配音"), ["PYTHONUTF8"] = "1" });
             activeModels["voice"] = "f5-tts";
         }
-        return await WaitForUrlAsync("voice", "http://127.0.0.1:7861", "正在启动 F5-TTS");
+        return await WaitForUrlAsync("voice", "http://127.0.0.1:7861", localization.Format("logEngineStarting", "F5-TTS"));
     }
 
     private async Task<OperationResult> StartSeedVcAsync()
@@ -194,7 +195,7 @@ public sealed class BackendService(SettingsService settings)
             processes["singing"] = StartHidden("singing", python, $"\"{script}\" --checkpoint \"{checkpoint}\" --config \"{config}\" --fp16 True", SeedRoot, environment);
             activeModels["singing"] = "seed-vc";
         }
-        return await WaitForUrlAsync("singing", "http://127.0.0.1:7862", "Starting Seed-VC 44.1k");
+        return await WaitForUrlAsync("singing", "http://127.0.0.1:7862", localization.Format("logEngineStarting", "Seed-VC 44.1k"));
     }
 
     public async Task<OperationResult> RunUtilityAsync(string feature, string inputPath, string modelId, string language, IProgress<TaskExecutionProgress>? progress = null, CancellationToken cancellationToken = default, string? trackMode = null)
@@ -207,13 +208,13 @@ public sealed class BackendService(SettingsService settings)
         if (catalog.Find(modelId) is not { IsRunnable: true } definition || definition.Feature != feature) return new(false, "此模型尚未接入当前功能。");
         if (!catalog.IsInstalled(definition)) return new(false, "引擎所需文件不完整，请在模型中心执行检查 / 修复。");
         cancellationToken.ThrowIfCancellationRequested();
-        if (IsRunning("utility")) return new OperationResult(false, "Another local task is already running.");
+        if (IsRunning("utility")) return new OperationResult(false, localization.Get("taskAlreadyRunning"));
         return feature switch
         {
             "separation" => await SeparateAsync(inputPath, modelId, progress, cancellationToken),
             "transcription" => await TranscribeAsync(inputPath, modelId, progress, cancellationToken),
             "subtitles" => await SubtitleAsync(inputPath, modelId, language, progress, cancellationToken),
-            _ => new OperationResult(false, "Unsupported local task.")
+            _ => new OperationResult(false, localization.Get("taskNotSupported"))
         };
     }
 
@@ -350,7 +351,7 @@ public sealed class BackendService(SettingsService settings)
         if (modelName is null) return new OperationResult(false, $"不支持的字幕模型：{modelId}。请在视频 AI 字幕中选择可运行的 Whisper 模型。");
         var modelsRoot = Path.Combine(Root, "Faster-Whisper-XXL", "Models");
         var layout = EnsureWhisperModelLayout(modelsRoot, modelName);
-        if (!layout.Success) return layout;
+        if (!layout.Success) return layout with { Message = localization.Translate(layout.Message) };
 
         ProcessStartInfo BuildInfo(string device, string computeType)
         {
@@ -389,7 +390,7 @@ public sealed class BackendService(SettingsService settings)
         var canonical = Path.Combine(modelsRoot, "faster-whisper-" + modelName);
         if (File.Exists(Path.Combine(canonical, "model.bin"))) return new OperationResult(true, "Whisper 模型目录已就绪。", canonical);
         var legacy = Path.Combine(modelsRoot, modelName);
-        if (!File.Exists(Path.Combine(legacy, "model.bin"))) return Missing("Faster-Whisper " + modelName);
+        if (!File.Exists(Path.Combine(legacy, "model.bin"))) return new(false, $"尚未安装 Faster-Whisper {modelName}，请前往模型中心安装。");
         try
         {
             Directory.Move(legacy, canonical);
@@ -466,6 +467,8 @@ public sealed class BackendService(SettingsService settings)
             process.Start();
             using var cancellation = cancellationToken.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
             await using var writer = new StreamWriter(logPath, false);
+            await writer.WriteLineAsync($"[Aurora] {DateTimeOffset.Now:O} {localization.Format("logTaskStarting", logPrefix)}");
+            await writer.WriteLineAsync($"[Aurora] {localization.Get("logEngineOutput")}");
             using var logGate = new SemaphoreSlim(1, 1);
             async Task CaptureAsync(StreamReader reader)
             {
@@ -487,10 +490,27 @@ public sealed class BackendService(SettingsService settings)
             {
                 var feature = logPrefix.StartsWith("subtitles") ? "subtitles" : logPrefix is "transkun" or "yourmt3" or "piano" or "basic-pitch" ? "transcription" : "separation";
                 try { outputs = ArtifactValidator.Collect(feature, output); }
-                catch (Exception ex) { return new(false, ex.Message, logPath); }
+                catch (Exception ex)
+                {
+                    await writer.WriteLineAsync($"[Aurora] {localization.Get("logOperationFailed")}");
+                    await writer.WriteLineAsync(ex.ToString());
+                    return new(false, localization.Format("taskOutputInvalid", ex.Message), logPath);
+                }
             }
             StatusChanged?.Invoke(this, success ? "completed:" + logPrefix : "failed:" + logPrefix);
-            return new OperationResult(success, success ? "Task completed." : $"Task failed with code {process.ExitCode}.", success ? output : logPath, Outputs: outputs);
+            var message = success ? localization.Get("logTaskComplete") : localization.Format("logTaskExit", process.ExitCode);
+            await writer.WriteLineAsync($"[Aurora] {DateTimeOffset.Now:O} {message}");
+            return new OperationResult(success, message, success ? output : logPath, Outputs: outputs);
+        }
+        catch (OperationCanceledException)
+        {
+            AppendLog(logPath, $"[Aurora] {DateTimeOffset.Now:O} {localization.Get("logTaskCanceled")}");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            AppendLog(logPath, $"[Aurora] {localization.Get("logOperationFailed")}\n{ex}");
+            throw;
         }
         finally
         {
@@ -617,9 +637,9 @@ public sealed class BackendService(SettingsService settings)
             {
                 if (!processes.TryGetValue(key, out var process) || process.HasExited)
                 {
-                    var exitCode = process is null ? "unknown" : process.ExitCode.ToString();
+                    var exitCode = process is null ? localization.Get("logUnknownExit") : process.ExitCode.ToString();
                     var detail = ReadLogTail(key);
-                    return new OperationResult(false, $"本地引擎启动失败（退出码 {exitCode}）。{detail} 请查看 Aurora 日志或在模型管理中执行检查 / 修复。");
+                    return new OperationResult(false, localization.Format("engineStartFailed", exitCode, detail));
                 }
                 try
                 {
@@ -629,7 +649,7 @@ public sealed class BackendService(SettingsService settings)
                         var config = await response.Content.ReadAsStringAsync(token);
                         if (!workbenchInstances.TryGetValue(key, out var instance) || !WorkbenchReadiness.IsReady(config, instance))
                             return new(false, "本地端口未提供本次引擎的完整工作台，请检查端口占用或修复引擎。");
-                        return new OperationResult(true, "Connected to the local model.", Url: url);
+                        return new OperationResult(true, localization.Get("engineConnected"), Url: url);
                     }
                 }
                 catch when (!token.IsCancellationRequested) { }
@@ -637,7 +657,7 @@ public sealed class BackendService(SettingsService settings)
             }
             return token.IsCancellationRequested
                 ? new OperationResult(false, "创作引擎启动已取消。")
-                : new OperationResult(false, "模型启动等待超过 5 分钟。请查看 Aurora 日志或在模型管理中执行检查 / 修复。");
+                : new OperationResult(false, localization.Get("engineTimeout"));
         }
         catch (OperationCanceledException)
         {
@@ -653,25 +673,25 @@ public sealed class BackendService(SettingsService settings)
     private string ReadLogTail(string key)
     {
         var path = Path.Combine(Logs, key + ".log");
-        if (!File.Exists(path)) return "未生成启动日志。";
+        if (!File.Exists(path)) return localization.Get("logMissing");
         try
         {
             var tail = string.Join(" | ", File.ReadLines(path).Where(line => !string.IsNullOrWhiteSpace(line)).TakeLast(6));
             if (tail.Length > 900) tail = tail[^900..];
-            return string.IsNullOrWhiteSpace(tail) ? "启动日志为空。" : "最近日志：" + tail;
+            return string.IsNullOrWhiteSpace(tail) ? localization.Get("logEmpty") : localization.Format("logTail", tail);
         }
-        catch { return "无法读取启动日志。"; }
+        catch { return localization.Get("logUnreadable"); }
     }
 
     private Process StartHidden(string key, string fileName, string arguments, string workingDirectory, IReadOnlyDictionary<string, string>? environment = null)
     {
         Directory.CreateDirectory(Logs);
         var bridge = Path.Combine(AppContext.BaseDirectory, "Tools", "gradio_result_bridge.py");
-        if (!File.Exists(bridge)) throw new FileNotFoundException("Aurora 工作台结果适配器缺失，请修复应用安装。", bridge);
+        if (!File.Exists(bridge)) throw new FileNotFoundException(localization.Get("applicationBridgeMissing"), bridge);
         if (Path.GetFileName(fileName).Equals("python.exe", StringComparison.OrdinalIgnoreCase))
         {
             var script = Regex.Match(arguments, "^\"(?<path>[^\"]+)\"(?<rest>.*)$");
-            if (!script.Success) throw new InvalidOperationException("工作台启动参数无效。");
+            if (!script.Success) throw new InvalidOperationException(localization.Get("engineLaunchInvalid"));
             arguments = $"\"{bridge}\" --script \"{script.Groups["path"].Value}\" --{script.Groups["rest"].Value}";
         }
         else
@@ -683,7 +703,8 @@ public sealed class BackendService(SettingsService settings)
             arguments = $"\"{bridge}\" --console-script {name} -- {arguments}";
         }
         var logPath = Path.Combine(Logs, key + ".log");
-        AppendLog(logPath, $"[{DateTimeOffset.Now:O}] Starting {launchModel}");
+        AppendLog(logPath, $"[Aurora] {DateTimeOffset.Now:O} {localization.Format("logEngineStarting", launchModel)}");
+        AppendLog(logPath, $"[Aurora] {localization.Get("logEngineOutput")}");
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -733,7 +754,7 @@ public sealed class BackendService(SettingsService settings)
         return (process.ExitCode, await output, await error);
     }
 
-    private static OperationResult Missing(string name) => new(false, $"{name} is not installed. Open Model Management to install it.");
+    private OperationResult Missing(string name) => new(false, localization.Format("modelInstallRequired", name));
     private void WriteLog(string name, string text) { Directory.CreateDirectory(Logs); File.AppendAllText(Path.Combine(Logs, name), text + Environment.NewLine); }
     private static void AppendLog(string path, string text) { try { File.AppendAllText(path, text + Environment.NewLine); } catch { } }
 

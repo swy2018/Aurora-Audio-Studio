@@ -25,15 +25,15 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 | | Windows | macOS |
 |---|---|---|
 | 系统 | Windows 10 / 11 x64 | macOS 26+ · Apple Silicon |
-| 安装包 | `Aurora-Audio-Studio-1.9.9-Setup-x64.exe` | `Aurora-Audio-Studio-1.9.9-arm64.dmg` |
-| 获取 | [正式版下载](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest) | [正式版下载](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest) |
+| 安装包 | `Aurora-Audio-Studio-2.0.0-Setup-x64.exe` | `Aurora-Audio-Studio-1.9.9-arm64.dmg` |
+| 获取 | [正式版下载](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest) | [Mac 1.9.9 正式版](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v1.9.9) |
 | 安装 | 运行标准安装程序 | 打开 DMG，拖入 Applications |
 | 加速 | NVIDIA RTX 推荐，依模型要求 | Apple Silicon 的 MPS / MLX 或 CPU，依模型实现 |
 | 指南 | [Windows 使用说明](work/audio-studio/README-给音乐人的使用说明.md) | [Mac 使用说明](docs/macOS-user-guide.md) |
 
-请选择与你的系统匹配的安装包；同名 `.sha256` 文件用于校验下载完整性。Windows 最新测试版为 Beta 4；Mac Beta 4 提供正式版回退及旧版启动提示兼容修复。模型按需安装，不随安装包捆绑。各平台签名说明见[代码签名政策](CODE_SIGNING_POLICY.md)。
+请选择与你的系统匹配的安装包；同名 `.sha256` 文件用于校验下载完整性。Windows 当前正式版为 2.0.0，Mac 当前正式版为 1.9.9；两端仍可选择 Beta 4。Mac 2.0 正式安装包待 Mac 端构建与验收。模型按需安装，不随安装包捆绑。各平台签名说明见[代码签名政策](CODE_SIGNING_POLICY.md)。
 
-正式版与 Beta 分别提供下载。Mac 构建与分发要求见[Mac 发布说明](docs/macOS-release.md)。
+正式版与 Beta 分别提供下载。Mac 2.0 构建与验收见[正式版交接](docs/2.0.0-mac-handoff.md)，签名与分发要求见[Mac 发布说明](docs/macOS-release.md)。
 
 ### 正式版与测试版更新
 
@@ -46,15 +46,16 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 ## 当前版本更新
 
 <!-- current-packages:start -->
-当前源码构建 / Current source builds: `Aurora-Audio-Studio-2.0.0-beta.4-Setup-x64.exe` · `Aurora-Audio-Studio-2.0.0-beta.4-arm64.dmg`
+当前源码构建 / Current source builds: `Aurora-Audio-Studio-2.0.0-Setup-x64.exe` · `Aurora-Audio-Studio-2.0.0-arm64.dmg`
 <!-- current-packages:end -->
 
 <!-- release-notes-zh:start -->
-- Mac 2.0 Beta 4 修复回退到 1.9.9 后的启动提示兼容问题；Windows 同步提供 Beta 4，功能与 Beta 3 保持一致。
-- 可在设置或关于页选择“回退到上一个正式版”，确认目标版本和数据兼容提醒后执行。
-- 应用替换期间临时保留旧应用，验证成功后清除；失败时尝试恢复。无法清理时明确提示，不影响模型自身的备份。
-- 优化 Aurora 自有四语言文案。模型、配置、素材和成品独立保留。
-- Beta 需主动选择，正式版仍为 1.9.9。升级或回退前请备份重要配置与作品；不同模型、设备及长任务仍需分别验证。
+- Windows 2.0 正式版现已提供。Mac 2.0 源码同步提供，正式安装包待 Mac 端构建与验收；Mac 当前正式版仍为 1.9.9。
+- 统一引擎启动、任务完成、失败、取消及模型维护阶段的自有提示，并补齐简体中文、繁体中文、英文和日文。
+- 新写入的自有运行日志使用当前设置语言，并与引擎及安装工具的原始输出分开标记；保留退出码、错误详情和文件路径，不重写历史日志。
+- 延续 2.0 Beta 的工作台连接修复、处理设置保存、任务与成品关联、模型局部修复及正式版回退。
+- 本轮通过既有回归及 61 项日志文案检查，覆盖真实子进程的成功、失败、取消和原始输出保留；不代表所有模型、设备与长任务均已验证。
+- 正式版与 Beta 通道继续独立提供。Windows 安装包未代码签名；升级或回退前请备份重要配置与作品。
 <!-- release-notes-zh:end -->
 
 模型中心分别显示文件状态和运行记录。成功完成任务后，会记录模型版本、时间及计算设备。“仅模型管理”表示支持下载与维护，但不能在 Aurora 内生成内容。可选模型的兼容性与运行表现取决于具体设备，请先使用短素材确认。
@@ -187,7 +188,7 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 ## English
 
-Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows offers Beta 4. Mac Beta 4 adds stable-release rollback and fixes the startup notification in older versions. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Mac build and distribution guide](docs/macOS-release.md).
+Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows Stable is 2.0.0; Mac Stable remains 1.9.9 until its 2.0 build is ready. Beta 4 remains available on both platforms. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Mac build and distribution guide](docs/macOS-release.md).
 
 Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Beta releases are intended for users who want early access; back up important settings before upgrading.
 
@@ -198,11 +199,12 @@ Successful app installation no longer retains an old app copy. Replacement failu
 ### Current release notes
 
 <!-- release-notes-en:start -->
-- Mac 2.0 Beta 4 fixes the startup notification after reverting to 1.9.9. Windows also offers Beta 4, with the same functionality as Beta 3.
-- Choose Revert to previous stable release in Settings or About, then confirm the target version and data-compatibility warning.
-- The old app is kept temporarily during replacement and removed after validation; failures attempt restoration. Cleanup failures are reported, and model backups remain independent.
-- Refine Aurora-authored copy in four languages. Models, settings, source media, and results remain separate.
-- Beta is opt-in; Stable remains 1.9.9. Back up important settings and work before upgrading or reverting. Other models, devices, and long-running tasks require separate validation.
+- Windows 2.0 Stable is available. Mac 2.0 source is included for a separate Mac build and acceptance; the current Mac stable release remains 1.9.9.
+- Refine Aurora-authored engine startup, task completion, failure, cancellation, and model-maintenance messages in Simplified Chinese, Traditional Chinese, English, and Japanese.
+- New Aurora-authored log entries use the selected language and are distinguished from original engine and installer output. Exit codes, error details, and paths are retained; historical logs are not rewritten.
+- Retain the 2.0 Beta workbench connection fixes, saved processing settings, task-to-result links, targeted model repair, and stable-release rollback.
+- Existing regressions and 61 runtime-copy checks passed, including real subprocess success, failure, cancellation, and original-output preservation. Not every model, device, or long-running task was tested.
+- Stable and Beta remain separate download channels. The Windows installer is unsigned. Back up important settings and work before upgrading or reverting.
 <!-- release-notes-en:end -->
 
 Read the [capability matrix](docs/capabilities.json) and [Mac release requirements](docs/macOS-release.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. MIDI editing/playback requires your own music application; audio playback and subtitle-copy editing are available in Results.

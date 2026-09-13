@@ -214,6 +214,9 @@ public sealed class MacRuntime : IDisposable
             });
         var logDir = Path.Combine(settings.AppDataRoot, "EngineLogs"); Directory.CreateDirectory(logDir);
         var logfile = Path.Combine(logDir, id + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".log");
+        var localization = new LocalizationService(settings);
+        try { File.AppendAllText(logfile, $"[Aurora] {DateTimeOffset.Now:O} {localization.Format("logEngineStarting", id)}\n[Aurora] {localization.Get("logEngineOutput")}\n"); }
+        catch (Exception ex) { Report(localization.Format("logWriteFailed", ex.Message)); }
         var logGate = new object();
         async Task Read(StreamReader reader)
         {
@@ -236,7 +239,7 @@ public sealed class MacRuntime : IDisposable
             while (true)
             {
                 token.ThrowIfCancellationRequested();
-                if (process.HasExited) throw new IOException("引擎启动失败。日志：" + logfile + "\n" + LastMessage);
+                if (process.HasExited) throw new IOException(localization.Format("engineLogFailure", logfile, LastMessage));
                 try { using var response = await client.GetAsync(uri, token); if (response.IsSuccessStatusCode) break; }
                 catch (HttpRequestException) { }
                 catch (TaskCanceledException) when (!token.IsCancellationRequested) { }

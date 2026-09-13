@@ -3,6 +3,17 @@ using System.Text.Json;
 using AuroraAudioStudio.Models;
 using AuroraAudioStudio.Services;
 
+if (args.FirstOrDefault() == "--log-fixture")
+{
+    Console.OutputEncoding = System.Text.Encoding.UTF8;
+    Console.WriteLine("Starting upstream fixture Ω {0}");
+    Console.Error.WriteLine(@"Traceback fixture C:\源音频\voice.wav");
+    if (args[1] == "wait") await Task.Delay(TimeSpan.FromSeconds(30));
+    Environment.ExitCode = args[1] == "fail" ? 23 : 0;
+    return;
+}
+if (args.FirstOrDefault() == "--runtime-copy") { await RuntimeCopyRegression.RunAsync(); return; }
+
 if (args.FirstOrDefault() == "--maintenance") { await MaintenanceRegression.RunAsync(); return; }
 if (args.FirstOrDefault() == "--engine") { await EngineIntegration.RunAsync(args.Skip(1).ToArray()); return; }
 if (args.FirstOrDefault() == "--catalog") { CatalogExport.Run(args[1], args.Contains("--check")); return; }
@@ -139,3 +150,4 @@ await MaintenanceRegression.RunAsync();
 await FunctionRegression.RunAsync();
 await FirstBatchRegression.RunAsync();
 await AppRollbackRegression.RunAsync();
+await RuntimeCopyRegression.RunAsync();

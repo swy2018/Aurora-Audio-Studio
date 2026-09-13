@@ -60,7 +60,7 @@ $note = "## $version — $($metadata.date)`n`n" + (($metadata.notes[0] -split "`
 Sync-Text 'docs/release-notes.md' $note
 $changelog = [IO.File]::ReadAllText((Join-Path $repo 'CHANGELOG.md')).Replace("`r`n", "`n")
 # Keep historical release text intact; regenerate only the current entry.
-$pattern = '(?ms)^## ' + [regex]::Escape($version) + '.*?(?=^## |\z)'
+$pattern = '(?ms)^## ' + [regex]::Escape($version) + '(?=\s|$).*?(?=^## |\z)'
 if ([regex]::IsMatch($changelog, $pattern)) { $changelog = [regex]::Replace($changelog, $pattern, [Text.RegularExpressions.MatchEvaluator]{ param($m) $note + "`n" }) }
 else { $changelog = [regex]::Replace($changelog, '\A(# [^\n]+)\n+', [Text.RegularExpressions.MatchEvaluator]{ param($m) $m.Groups[1].Value + "`n`n" + $note + "`n" }, 1) }
 Sync-Text 'CHANGELOG.md' $changelog

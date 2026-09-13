@@ -25,3 +25,9 @@ assert.equal(chooseDownload(partialBeta,'windows','beta').version,'2.0.0-beta.2'
 assert.equal(chooseDownload(partialBeta,'mac','beta').version,'2.0.0-beta.1');
 assert.equal(chooseDownload(partialBeta,'windows','stable').version,'1.9.9');
 console.log('Website release-policy checks passed, including staggered Windows/Mac beta packages and unchanged Stable.');
+const stagedStable = [release('2.0.0',false,false,['windows']),release('2.0.0-beta.4',true),release('1.9.9')];
+assert.equal(chooseDownload(stagedStable,'windows','stable').version,'2.0.0');
+assert.equal(chooseDownload(stagedStable,'mac','stable').version,'1.9.9');
+assert.equal(chooseDownload(stagedStable,'windows','beta').version,'2.0.0-beta.4');
+assert.equal(chooseDownload(stagedStable,'mac','beta').version,'2.0.0-beta.4');
+console.log('Platform-specific 2.0.0 stable promotion checks passed.');

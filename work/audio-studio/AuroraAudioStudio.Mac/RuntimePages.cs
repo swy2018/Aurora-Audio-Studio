@@ -159,6 +159,13 @@ public sealed partial class MainWindow
         var label = action == "updates" ? "检查模型更新" : action == "check" ? "校验模型" : action == "update" ? "更新模型" : "维护模型";
         var logRoot = Path.Combine(workspace.Settings.AppDataRoot, "EngineLogs"); Directory.CreateDirectory(logRoot);
         var logPath = Path.Combine(logRoot, "maintenance-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff") + ".log");
+        void RecordStatus(string message)
+        {
+            try { File.AppendAllText(logPath, $"[Aurora] {DateTimeOffset.Now:O} {message}\n"); }
+            catch (Exception ex) { workspace.Runtime.Report(workspace.Localization.Format("logWriteFailed", ex.Message)); }
+        }
+        RecordStatus(workspace.Localization.Translate(label));
+        RecordStatus(workspace.Localization.Get("logEngineOutput"));
         var lastRender = DateTimeOffset.MinValue;
         try
         {
@@ -200,6 +207,7 @@ public sealed partial class MainWindow
         catch (OperationCanceledException) { canceled = true; }
         finally
         {
+            RecordStatus(workspace.Localization.Get(canceled ? "logTaskCanceled" : failures.Count == 0 ? "logOperationComplete" : "logOperationFailed"));
             modelOperation = null;
             var updates = workspace.Runtime.Models.Keys.Count(id => workspace.Runtime.ModelStatus(id).HasUpdate);
             modelLog = canceled ? $"已取消，完成 {modelCompleted}/{modelTotal} 项；已完成检查结果和下载文件保留。"
