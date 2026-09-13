@@ -103,11 +103,11 @@ public sealed partial class MainWindow
     private async Task ModelBatchAsync(string action)
     {
         var ids = workspace.Runtime.Models.Keys.Where(workspace.Runtime.IsInstalled).ToArray();
-        if (ids.Length == 0) { modelLog = "没有可检查的已安装模型。"; RenderPage(); return; }
+        if (ids.Length == 0) { modelLog = L("macModelNone"); RenderPage(); return; }
         await RunModelActionsAsync(ids, action);
         if (action == "updates")
         {
-            modelLog += $" 另有 {workspace.Catalog.Definitions.Count - ids.Length} 个组件未安装或未适配。";
+            modelLog += " " + workspace.Localization.Format("macModelSkipped", workspace.Catalog.Definitions.Count - ids.Length);
             if (current is "models" or "maintenance") RenderPage();
             status.Text = modelLog;
         }
@@ -154,9 +154,9 @@ public sealed partial class MainWindow
         if (!readOnly && (utilityRunning.Count > 0 || workspace.Queue.Items.Any(t => t.Status is "running" or "preparing" or "waiting") || modelStudios.Values.Any(s => s.Connection is not null || s.Startup is not null)))
             throw new InvalidOperationException("组件正在使用。请先保存工作、结束当前引擎或取消处理任务，再执行模型维护；Aurora 不会强制关闭工作台。");
         using var cancellation = new CancellationTokenSource(); modelOperation = cancellation;
-        modelCompleted = 0; modelTotal = ids.Count; modelLog = "正在准备…";
+        modelCompleted = 0; modelTotal = ids.Count; modelLog = L("正在准备…");
         var failures = new List<string>(); var canceled = false;
-        var label = action == "updates" ? "检查模型更新" : action == "check" ? "校验模型" : action == "update" ? "更新模型" : "维护模型";
+        var label = L(action == "updates" ? "macModelCheckUpdates" : action == "check" ? "macModelCheck" : action == "update" ? "macModelUpdate" : "macModelMaintain");
         var logRoot = Path.Combine(workspace.Settings.AppDataRoot, "EngineLogs");
         var logPath = Path.Combine(logRoot, "maintenance-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff") + ".log");
         void WriteLog(string message)
@@ -173,7 +173,7 @@ public sealed partial class MainWindow
             foreach (var id in ids)
             {
                 cancellation.Token.ThrowIfCancellationRequested();
-                modelActivity = $"{label} {modelCompleted}/{modelTotal} · {workspace.Catalog.Find(id)!.Name}";
+                modelActivity = $"{label} {modelCompleted}/{modelTotal} · {L(workspace.Catalog.Find(id)!.Name)}";
                 if (current is "models" or "maintenance") RenderPage();
                 try
                 {
@@ -196,7 +196,7 @@ public sealed partial class MainWindow
                         }
                         catch (JsonException) { }
                         if (modelOperation != cancellation) return;
-                        modelLog = line; status.Text = line;
+                        modelLog = workspace.Localization.Translate(line); status.Text = modelLog;
                         if (DateTimeOffset.Now - lastRender > TimeSpan.FromSeconds(1) && current is "models" or "maintenance") { lastRender = DateTimeOffset.Now; RenderPage(); }
                     }), cancellation.Token);
                 }
@@ -211,9 +211,9 @@ public sealed partial class MainWindow
             RecordStatus(workspace.Localization.Get(canceled ? "logTaskCanceled" : failures.Count == 0 ? "logOperationComplete" : "logOperationFailed"));
             modelOperation = null;
             var updates = workspace.Runtime.Models.Keys.Count(id => workspace.Runtime.ModelStatus(id).HasUpdate);
-            modelLog = canceled ? $"已取消，完成 {modelCompleted}/{modelTotal} 项；已完成检查结果和下载文件保留。"
-                : failures.Count > 0 ? $"完成 {modelCompleted - failures.Count}/{modelTotal} 项，{failures.Count} 项失败；可重试。\n" + string.Join("\n", failures.Select(f => f.Split('\n')[0]))
-                : action == "updates" ? $"检查完成：{modelCompleted} 项已检查，发现 {updates} 个可更新模型。" : $"完成：{modelCompleted}/{modelTotal} 项。";
+            modelLog = canceled ? workspace.Localization.Format("macModelCanceled", modelCompleted, modelTotal)
+                : failures.Count > 0 ? workspace.Localization.Format("macModelFailed", modelCompleted - failures.Count, modelTotal, failures.Count) + "\n" + string.Join("\n", failures.Select(f => f.Split('\n')[0]))
+                : action == "updates" ? workspace.Localization.Format("macModelChecked", modelCompleted, updates) : workspace.Localization.Format("macModelCompleted", modelCompleted, modelTotal);
             if (current is "models" or "maintenance") RenderPage();
             status.Text = modelLog;
         }
