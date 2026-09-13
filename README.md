@@ -16,7 +16,7 @@
 
 ![Aurora Mac 实机首页](docs/assets/mac-2.0-home.png)
 
-Aurora 提供正式版与 Beta 两个更新通道，支持 Windows 与 macOS。下方为 Mac 客户端实机截图；不同平台保留各自的系统控件。
+Aurora 提供正式版与 Beta 两个更新通道，支持 Windows 与 macOS。下方为 Mac 客户端界面示例（截图版本 1.9.9）；当前可下载版本见平台说明，不同平台保留各自的系统控件。
 
 Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、MIDI 扒谱和字幕制作整合到一个本地工作台。选择所需功能即可开始，素材、任务与成品集中管理。
 
@@ -126,7 +126,7 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 ### 标准安装
 
 1. 打开 [Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest)。
-2. 下载 `Aurora-Audio-Studio-1.9.9-Setup-x64.exe` 和同名 `.sha256` 文件。
+2. 下载该版本的 Windows x64 安装包（文件名以 `-Setup-x64.exe` 结尾）和同名 `.sha256` 文件。
 3. 运行安装程序，阅读并接受 GNU GPL v3.0，选择安装位置和桌面快捷方式。
 4. 首次打开 Aurora，直接选择需要的功能；需要时再确认模型、处理记录和成品目录。
 
@@ -155,7 +155,7 @@ Aurora 不提供云端生成服务，素材与结果保存在你指定的本地�
 ```powershell
 dotnet restore .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj --runtime win-x64
 dotnet build .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -p:Platform=x64
-dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio-1.9.9
+dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio
 ```
 
 运行回归检查：
@@ -216,7 +216,7 @@ Aurora does not operate a cloud generation service. Media and generated output r
 ### Install
 
 1. Open the latest [Release](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest).
-2. Download `Aurora-Audio-Studio-1.9.9-Setup-x64.exe` and its `.sha256` file.
+2. Download the Windows x64 installer for that release (ending in `-Setup-x64.exe`) and its `.sha256` file.
 3. Run Setup, review GNU GPL v3.0, and choose the destination and shortcut options.
 4. Choose a feature on first launch; confirm model, processing-record, and output folders only when needed.
 
