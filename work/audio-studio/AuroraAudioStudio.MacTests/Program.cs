@@ -111,7 +111,8 @@ try
     var localizationScript = WorkbenchLocalization.Script(workspace.Localization, "ja-JP");
     Check(!localizationScript.Contains("__AURORA_TRANSLATIONS__") && !localizationScript.Contains("__AURORA_LANGUAGE_INDEX__") && localizationScript.Contains("NotoSansJP"), "original Windows workbench styling and translations are bundled");
     var model = workspace.Catalog.Find("qwen3-tts-base")!;
-    Check(!MacWorkspace.ModelPath(root, model).Contains('\\'), "Windows catalog segments resolve as Unix paths");
+    Check(MacWorkspace.ModelPath(root, model) == Path.Combine(root, "Qwen3-TTS", "models", "Qwen3-TTS-12Hz-1.7B-Base"), "catalog path segments resolve using the current host separator");
+    if (!OperatingSystem.IsWindows()) Check(!MacWorkspace.ModelPath(root, model).Contains('\\'), "Windows catalog segments resolve as Unix paths");
     var invalid = Path.Combine(root, "invalid.wav"); File.WriteAllText(invalid, "not audio");
     await Reject(() => workspace.ImportArtifactAsync(invalid), "invalid audio cannot enter results");
     var wave = Path.Combine(root, "音频 日本語.wav");
@@ -265,6 +266,8 @@ try
         Check(!runtime.ModelStatus("acceptance-model").Installed, "damaged model cannot be shown as installed");
         File.WriteAllText(Path.Combine(modelRoot, "receipt.json"), "invalid json");
         Check(runtime.ModelStatus("acceptance-model").Version == "—", "damaged receipt is displayed without crashing model center");
+        if (!OperatingSystem.IsWindows())
+        {
         string bytecodeSetting = "";
         await runtime.RunAsync("/bin/sh", ["-c", "printenv PYTHONDONTWRITEBYTECODE"], new InlineProgress<string>(line => bytecodeSetting = line), CancellationToken.None);
         Check(bytecodeSetting == "1", "model subprocesses cannot write Python bytecode into the signed app");
@@ -273,8 +276,10 @@ try
         try { await runtime.RunAsync("/bin/sh", ["-c", "sleep 30 &\nwait"], new InlineProgress<string>(_ => { }), cancellation.Token); }
         catch (OperationCanceledException) { canceled = true; }
         Check(canceled, "runtime process tree cancels promptly and drains output streams");
-        await Reject(() => runtime.ManageAsync("../../outside", "uninstall", new Progress<string>(), CancellationToken.None), "maintenance rejects models outside the catalog");
         await Reject(() => runtime.RunAsync("/bin/sh", ["-c", "exit 7"], new Progress<string>(), CancellationToken.None), "nonzero engine exits are failures");
+        }
+        else Console.WriteLine("SKIP: native Unix environment, process-tree cancellation and exit-code checks require macOS.");
+        await Reject(() => runtime.ManageAsync("../../outside", "uninstall", new Progress<string>(), CancellationToken.None), "maintenance rejects models outside the catalog");
     }
     Console.WriteLine($"{count} checks passed. No model downloads or inference were performed.");
     return 0;

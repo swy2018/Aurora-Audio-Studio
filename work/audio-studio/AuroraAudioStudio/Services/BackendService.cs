@@ -209,13 +209,17 @@ public sealed class BackendService(SettingsService settings)
         if (!catalog.IsInstalled(definition)) return new(false, "引擎所需文件不完整，请在模型中心执行检查 / 修复。");
         cancellationToken.ThrowIfCancellationRequested();
         if (IsRunning("utility")) return new OperationResult(false, localization.Get("taskAlreadyRunning"));
-        return feature switch
+        progress?.Report(new(.02, "正在检查素材音轨与解码能力"));
+        var input = await MediaInputPolicy.InspectAsync(inputPath, Root, cancellationToken);
+        progress?.Report(new(.03, "素材音轨检查通过", $"{input.Codec} · {input.SampleRate} Hz · {input.Channels} ch · {input.DurationSeconds:0.##} s"));
+        var result = feature switch
         {
             "separation" => await SeparateAsync(inputPath, modelId, progress, cancellationToken),
             "transcription" => await TranscribeAsync(inputPath, modelId, progress, cancellationToken),
             "subtitles" => await SubtitleAsync(inputPath, modelId, language, progress, cancellationToken),
             _ => new OperationResult(false, localization.Get("taskNotSupported"))
         };
+        return result with { InputInfo = input };
     }
 
     private async Task<OperationResult> SeparateAsync(string source, string modelId, IProgress<TaskExecutionProgress>? progress, CancellationToken cancellationToken)
@@ -298,6 +302,7 @@ public sealed class BackendService(SettingsService settings)
         var output = ArtifactValidator.CreateRunDirectory(settings.Current.OutputRoot, "AI扒谱", source);
         var midi = Path.Combine(output, $"{Path.GetFileNameWithoutExtension(source)}-{DateTime.Now:yyyyMMdd-HHmmss}.mid");
         ProcessStartInfo info;
+        string executionDevice;
         string? prepared = null;
         string? tempFolder = null;
         if (piano)
@@ -305,6 +310,7 @@ public sealed class BackendService(SettingsService settings)
             var python = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "piano-env")), "Scripts", "python.exe");
             var checkpoint = Path.Combine(Root, "AudioTools", "piano-models", "note_F1=0.9677_pedal_F1=0.9186.pth");
             if (!File.Exists(python) || !File.Exists(checkpoint)) return Missing("ByteDance Piano");
+            executionDevice = await DetectTorchDeviceAsync(python, cancellationToken);
             tempFolder = Path.Combine(Path.GetTempPath(), "Aurora-Piano-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(tempFolder);
             prepared = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(source) + ".wav");
@@ -312,23 +318,28 @@ public sealed class BackendService(SettingsService settings)
             await PrepareAudioAsync(source, prepared, cancellationToken);
             info = Hidden(python, output);
             info.ArgumentList.Add("-c");
-            info.ArgumentList.Add("from piano_transcription_inference import PianoTranscription,sample_rate; import soundfile as sf,numpy as np,math,sys; from scipy.signal import resample_poly; audio,sr=sf.read(sys.argv[1],dtype='float32'); audio=audio.mean(axis=1) if audio.ndim>1 else audio; g=math.gcd(sr,sample_rate); audio=resample_poly(audio,sample_rate//g,sr//g).astype(np.float32) if sr!=sample_rate else audio; PianoTranscription(device='cuda',checkpoint_path=sys.argv[3]).transcribe(audio,sys.argv[2])");
+            info.ArgumentList.Add("from piano_transcription_inference import PianoTranscription,sample_rate; import soundfile as sf,numpy as np,math,sys; from scipy.signal import resample_poly; audio,sr=sf.read(sys.argv[1],dtype='float32'); audio=audio.mean(axis=1) if audio.ndim>1 else audio; g=math.gcd(sr,sample_rate); audio=resample_poly(audio,sample_rate//g,sr//g).astype(np.float32) if sr!=sample_rate else audio; PianoTranscription(device=sys.argv[4],checkpoint_path=sys.argv[3]).transcribe(audio,sys.argv[2])");
             info.ArgumentList.Add(prepared); info.ArgumentList.Add(midi); info.ArgumentList.Add(checkpoint);
+            info.ArgumentList.Add(executionDevice);
             info.Environment["NUMBA_DISABLE_JIT"] = "1";
         }
         else
         {
             var exe = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "mt3-env")), "Scripts", "mt3-infer.exe");
             if (!File.Exists(exe)) return Missing("YourMT3+");
+            executionDevice = await DetectTorchDeviceAsync(Path.Combine(Path.GetDirectoryName(exe)!, "python.exe"), cancellationToken);
             info = Hidden(exe, output);
             info.ArgumentList.Add("transcribe"); info.ArgumentList.Add(source);
             info.ArgumentList.Add("-o"); info.ArgumentList.Add(midi);
             info.ArgumentList.Add("-m"); info.ArgumentList.Add("yourmt3");
-            info.ArgumentList.Add("--device"); info.ArgumentList.Add("cuda");
+            info.ArgumentList.Add("--device"); info.ArgumentList.Add(executionDevice);
+            info.ArgumentList.Add("--no-download");
             info.Environment["MT3_CHECKPOINT_DIR"] = Path.Combine(Root, "AudioTools", "mt3-models");
         }
         info.Environment["PYTHONUTF8"] = "1";
-        try { return await RunCapturedAsync("utility", info, piano ? "piano" : "yourmt3", output, progress, cancellationToken); }
+        info.Environment["HF_HUB_OFFLINE"] = "1";
+        progress?.Report(new(.05, localization.Format("executionDevice", executionDevice.ToUpperInvariant())));
+        try { return (await RunCapturedAsync("utility", info, piano ? "piano" : "yourmt3", output, progress, cancellationToken)) with { Device = executionDevice }; }
         finally
         {
             if (prepared is not null && File.Exists(prepared)) File.Delete(prepared);

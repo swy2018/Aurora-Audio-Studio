@@ -31,12 +31,15 @@ $installer = [IO.File]::ReadAllText((Join-Path $repo $installerPath))
 Sync-Text $installerPath ([regex]::Replace($installer, '(?m)^(\s*#define MyAppVersion )"[^"]+"', "`$1`"$version`""))
 foreach ($button in @('download','changelog')) {
     $label = if ($button -eq 'download') { '下载' } else { '更新日志' }
+    $width = [Math]::Max(174, 106 + $version.Length * 9)
+    $versionCenter = 92 + ($width - 92) / 2
+    $rightWidth = $width - 92
     Sync-Text "docs/assets/readme-button-$button.svg" @"
-<svg xmlns="http://www.w3.org/2000/svg" width="174" height="36" role="img" aria-label="$label $version"><rect width="174" height="36" rx="3" fill="#4b5150"/><path fill="#0abfa9" d="M92 0h79a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H92z"/><g font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="600" text-anchor="middle"><text x="46" y="23" fill="white">$label</text><text x="133" y="23" fill="#082a25">$version</text></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="$width" height="36" role="img" aria-label="$label $version"><rect width="$width" height="36" rx="3" fill="#4b5150"/><rect x="92" width="$rightWidth" height="36" rx="3" fill="#0abfa9"/><g font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="600" text-anchor="middle"><text x="46" y="23" fill="white">$label</text><text x="$versionCenter" y="23" fill="#082a25">$version</text></g></svg>
 "@
 }
 $readme = [IO.File]::ReadAllText((Join-Path $repo 'README.md'))
-$packages = "<!-- current-packages:start -->`n当前源码构建 / Current source builds: ``Aurora-Audio-Studio-$version-Setup-x64.exe`` · ``Aurora-Audio-Studio-$version-arm64.dmg```n<!-- current-packages:end -->"
+$packages = "<!-- current-packages:start -->`n当前源码版本 / Source version: ``$version``。实际可下载的平台安装包请以[官网](https://swy2018.github.io/Aurora-Audio-Studio/#download)和 [GitHub Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases) 为准。 / See the website or Releases for available platform packages.`n<!-- current-packages:end -->"
 $readme = [regex]::Replace($readme, '(?s)<!-- current-packages:start -->.*?<!-- current-packages:end -->', [Text.RegularExpressions.MatchEvaluator]{ param($m) $packages })
 foreach ($language in @('zh','en')) {
     $index = if ($language -eq 'zh') { 0 } else { 2 }

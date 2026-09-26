@@ -34,7 +34,9 @@ public sealed partial class MainWindow : Window
     private LocalWorkbenchServer? webServer;
     private string modelSearch = "";
     private readonly DispatcherTimer saveTimer;
-    private readonly FileSystemWatcher receiptWatcher;
+    private FileSystemWatcher? receiptWatcher;
+    private string? receiptStorageWarning;
+    private readonly StackPanel storageBanner = new() { Spacing = 8, IsVisible = false };
     private static readonly SolidColorBrush Muted = new(Color.Parse("#5C6D67"));
     private static readonly SolidColorBrush Accent = new(Color.Parse("#267D63"));
     private static readonly SolidColorBrush Line = new(Color.Parse("#D9E6DF"));
@@ -72,6 +74,7 @@ public sealed partial class MainWindow : Window
         title.FontSize = 28; title.FontWeight = FontWeight.SemiBold;
         subtitle.Foreground = Muted; subtitle.Margin = new Thickness(0, 6, 0, 0);
         var heading = new StackPanel { Spacing = 0, Children = { title, subtitle } };
+        heading.Children.Add(storageBanner);
         var header = new Border { Background = Surface, BorderBrush = Line, BorderThickness = new Thickness(0, 0, 0, 1), Padding = new Thickness(28, 24), Child = heading };
         main.Children.Add(header);
         Grid.SetRow(body, 1); main.Children.Add(body); body.Children.Add(page);
@@ -93,13 +96,8 @@ public sealed partial class MainWindow : Window
             if (e.KeyModifiers.HasFlag(Avalonia.Input.KeyModifiers.Meta) && e.Key == Avalonia.Input.Key.S && MacWorkspace.Features.Contains(current) && !IsModelStudio(current))
             { e.Handled = true; _ = SafeAsync(async () => { await workspace.SaveProjectAsync(workspace.Drafts[current]); status.Text = text["saved"]; }); }
         };
-        var receipts = Path.Combine(workspace.Settings.AppDataRoot, "WorkbenchReceipts");
-        Directory.CreateDirectory(receipts);
-        receiptWatcher = new FileSystemWatcher(receipts, "*.json");
-        receiptWatcher.Created += (_, _) => Dispatcher.UIThread.Post(() => _ = SafeAsync(ImportWorkbenchResultsAsync));
-        receiptWatcher.Renamed += (_, _) => Dispatcher.UIThread.Post(() => _ = SafeAsync(ImportWorkbenchResultsAsync));
-        receiptWatcher.EnableRaisingEvents = true;
-        Closed += (_, _) => { saveTimer.Stop(); receiptWatcher.Dispose(); workspace.Queue.CancelAll(); modelOperation?.Cancel(); workspace.Runtime.Dispose(); webServer?.Dispose(); utilityPreviewServer?.Dispose(); foreach (var studio in modelStudios.Values) studio.Dispose(); modelFontServer?.Dispose(); };
+        InitializeReceiptWatcher();
+        Closed += (_, _) => { saveTimer.Stop(); receiptWatcher?.Dispose(); workspace.Queue.CancelAll(); modelOperation?.Cancel(); workspace.Runtime.Dispose(); webServer?.Dispose(); utilityPreviewServer?.Dispose(); foreach (var studio in modelStudios.Values) studio.Dispose(); modelFontServer?.Dispose(); };
         workspace.Queue.Changed += (_, _) => Dispatcher.UIThread.Post(() => { if (current is "tasks" or "home") RenderPage(); });
         workspace.Queue.ProgressChanged += (_, task) => Dispatcher.UIThread.Post(() => { status.Text = task.Title + " · " + task.Stage + " · " + task.ProgressDisplay; if (current == "tasks") RenderPage(); });
         ApplyLanguage();
@@ -155,6 +153,7 @@ public sealed partial class MainWindow : Window
 
     private void RenderPage()
     {
+        RefreshStorageBanner();
         title.Text = current == "workbench" ? text["workbenchCheck"] : text[current];
         subtitle.Text = IsModelStudio(current) ? L("从灵感到成品，一站完成生成、编辑与导出。") : MacWorkspace.Features.Contains(current) ? text[current + "Desc"]
             : current == "workbench" ? text["checkHint"] : current == "home" ? text["homeSubtitle"] : text[current + "Subtitle"];
@@ -170,6 +169,37 @@ public sealed partial class MainWindow : Window
             "home" => HomePage(), "settings" => SettingsPage(), "models" => ModelsPage(),
             "tasks" => TasksPage(), "results" => ResultsPage(), "maintenance" => MaintenancePage(), _ => AboutPage()
         };
+    }
+
+    private void InitializeReceiptWatcher()
+    {
+        try
+        {
+            receiptWatcher?.Dispose(); receiptWatcher = null;
+            var root = Path.Combine(workspace.Settings.AppDataRoot, "WorkbenchReceipts");
+            Directory.CreateDirectory(root);
+            receiptWatcher = new FileSystemWatcher(root, "*.json");
+            receiptWatcher.Created += (_, _) => Dispatcher.UIThread.Post(() => _ = SafeAsync(ImportWorkbenchResultsAsync));
+            receiptWatcher.Renamed += (_, _) => Dispatcher.UIThread.Post(() => _ = SafeAsync(ImportWorkbenchResultsAsync));
+            receiptWatcher.Error += (_, _) => Dispatcher.UIThread.Post(() => { receiptStorageWarning = L("resultWatchUnavailable"); RefreshStorageBanner(); });
+            receiptWatcher.EnableRaisingEvents = true;
+            receiptStorageWarning = null;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { receiptStorageWarning = ex.Message; }
+    }
+
+    private void RefreshStorageBanner()
+    {
+        var warning = workspace.StorageWarning ?? receiptStorageWarning;
+        storageBanner.IsVisible = warning is not null;
+        storageBanner.Children.Clear();
+        if (warning is null) return;
+        storageBanner.Children.Add(Txt(L("storageUnavailableBody") + "\n" + L(warning), 12));
+        storageBanner.Children.Add(ActionButton(L("retryStorage"), async () =>
+        {
+            workspace.Settings.Load(); workspace.Queue.TryRestoreStorage(); InitializeReceiptWatcher();
+            await ImportWorkbenchResultsAsync(); RenderPage();
+        }));
     }
 
     private Control HomePage()

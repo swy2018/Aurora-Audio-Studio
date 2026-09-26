@@ -60,6 +60,7 @@ public sealed partial class MainWindow
 
     private async Task RunUtilityAsync(string feature)
     {
+        if (workspace.StorageWarning is not null) throw new IOException(workspace.StorageWarning);
         if (!workspace.Engines.IsAvailable(workspace.Drafts[feature].ModelId)
             && !await InstallFromFeatureAsync(workspace.Drafts[feature].ModelId)) return;
         if (!utilityRunning.Add(feature)) return;
@@ -86,7 +87,8 @@ public sealed partial class MainWindow
         async Task RunOne(AuroraTaskRecord task, StudioDraft item)
         {
             var result = await workspace.Queue.RunAsync(task, (progress, token) => workspace.Engines.ExecuteAsync(item, progress, token));
-            logs.Add(DateTime.Now.ToString("HH:mm:ss") + "  " + task.Title + " · " + result.Message);
+            logs.Add((DateTime.Now, result.Success ? "batchItemCompleted" : "batchItemFailed", [task.Title]));
+            if (logs.Count > 200) logs.RemoveAt(0);
             if (result.Success) await workspace.Projects.CompleteTaskAsync(task.ProjectId, task);
             status.Text = result.Message;
         }

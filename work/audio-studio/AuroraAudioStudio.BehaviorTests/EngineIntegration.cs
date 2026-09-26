@@ -27,7 +27,7 @@ internal static class EngineIntegration
                 result = await backend.StartWorkbenchAsync(feature, model, "en-US", timeout.Token);
                 Console.WriteLine(JsonSerializer.Serialize(result));
                 if (!result.Success) throw new Exception(result.Message);
-                var python = feature == "singing" ? @"C:\LocalAI\Seed-VC\.venv\Scripts\python.exe" : @"C:\LocalAI\Qwen3-TTS\Python312\python.exe";
+                var python = feature == "singing" ? RuntimeEnvironment.PythonPath(RuntimeEnvironment.Resolve(@"C:\LocalAI\Seed-VC\.venv")) : RuntimeEnvironment.PythonPath(RuntimeEnvironment.Resolve(@"C:\LocalAI\Qwen3-TTS\Python312"));
                 var info = new ProcessStartInfo(python) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
                 foreach (var value in new[] { "-u", Path.Combine(AppContext.BaseDirectory, "Tools", "exercise_workbench.py"), feature, model, result.Url!, Path.Combine(evidence, model), source }) info.ArgumentList.Add(value);
                 info.Environment["PYTHONUTF8"] = "1";

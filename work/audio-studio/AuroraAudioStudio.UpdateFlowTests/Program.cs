@@ -146,7 +146,9 @@ using var releaseMetadata = System.Text.Json.JsonDocument.Parse(File.ReadAllText
 var currentVersion = releaseMetadata.RootElement.GetProperty("version").GetString()!;
 Require(File.ReadAllText(Path.Combine(audioStudioRoot, "AuroraAudioStudio", "AuroraAudioStudio.csproj")).Contains($"<Version>{currentVersion}</Version>", StringComparison.Ordinal), "The application version must match release metadata.");
 Require(installerScript.Contains($"MyAppVersion \"{currentVersion}\"", StringComparison.Ordinal), "The installer version must match release metadata.");
-Require(File.ReadAllText(Path.Combine(repositoryRoot, "README.md")).Contains($"Aurora-Audio-Studio-{currentVersion}-Setup-x64.exe", StringComparison.Ordinal), "README downloads must match release metadata.");
+var readme = File.ReadAllText(Path.Combine(repositoryRoot, "README.md"));
+Require(readme.Contains($"Source version: `{currentVersion}`", StringComparison.Ordinal)
+    && readme.Contains("https://swy2018.github.io/Aurora-Audio-Studio/#download", StringComparison.Ordinal), "README source version must match metadata and direct downloads to the platform asset selector.");
 var website = File.ReadAllText(Path.Combine(repositoryRoot, "docs", "index.html"));
 Require(website.Contains("id=\"download-windows\"", StringComparison.Ordinal) && website.Contains("id=\"download-mac\"", StringComparison.Ordinal)
     && website.Contains("id=\"download-channel\"", StringComparison.Ordinal), "Website must expose separate platform downloads and channel selection; the Node release-policy tests verify asset matching.");

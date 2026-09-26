@@ -82,6 +82,21 @@ internal static class FirstBatchRegression
         Check((await updater.InspectRepairAsync(model)).Kind == ModelRepairKind.Healthy, "healthy files do not trigger deployment");
         var requests = handler.Requests;
         Check((await updater.RepairAsync(model, await updater.InspectRepairAsync(model), null, CancellationToken.None)).Success && handler.Requests == requests, "healthy repair is a no-network no-write operation");
+        var weightPath = Path.Combine(modelRoot, "model.bin");
+        File.WriteAllBytes(weightPath, [3, 2, 1]);
+        var corruptPlan = await updater.InspectRepairAsync(model);
+        Check(corruptPlan.Kind == ModelRepairKind.MissingFiles && corruptPlan.Files.Single().ExistingSha256 is not null,
+            "same-size corruption is detected by pinned SHA-256 rather than nonempty-file presence");
+        Check((await updater.RepairAsync(model, corruptPlan, null, CancellationToken.None)).Success
+            && File.ReadAllBytes(weightPath).SequenceEqual(bytes)
+            && Directory.GetFiles(modelRoot, "model.bin.replaced-*").Any(), "targeted repair preserves corrupt originals and restores verified bytes");
+        var piano = catalog.Find("piano")!;
+        var pianoRoot = Path.Combine(settings.Current.LocalAiRoot, piano.RelativeRoot);
+        Directory.CreateDirectory(pianoRoot);
+        File.WriteAllBytes(Path.Combine(pianoRoot, piano.Marker), [1]);
+        var pianoPlan = await updater.InspectRepairAsync(piano);
+        Check(pianoPlan.Kind == ModelRepairKind.MissingFiles && pianoPlan.Files.Count == 1,
+            "one-byte piano checkpoint is never declared healthy and gets a fixed-source repair plan");
         var escaped = false; try { ModelUpdateService.RepairDestination(modelRoot, "../outside.bin"); } catch (InvalidDataException) { escaped = true; }
         Check(escaped, "repair destination rejects traversal");
         var brokenModel = model with { Id = "repair-bad-hash", RelativeRoot = "bad-hash" };

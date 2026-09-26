@@ -53,6 +53,8 @@ public sealed class MacWorkspace
     public string? RecoveryWarning { get; private set; }
     private string DraftsPath => Path.Combine(Settings.AppDataRoot, "mac-drafts.json");
     private string? lastSavedDrafts;
+    private bool unreadDrafts;
+    public string? StorageWarning => Settings.StorageWarning ?? Queue.StorageWarning ?? (unreadDrafts ? Localization.Get("storageUnavailableBody") : null);
 
     public MacWorkspace(string? root = null)
     {
@@ -74,9 +76,10 @@ public sealed class MacWorkspace
         if (File.Exists(DraftsPath))
         {
             try { Drafts = JsonSerializer.Deserialize<Dictionary<string, StudioDraft>>(File.ReadAllText(DraftsPath)) ?? []; }
-            catch (Exception ex) when (ex is IOException or JsonException)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
             {
-                File.Copy(DraftsPath, DraftsPath + ".recovery-" + DateTimeOffset.UtcNow.Ticks);
+                try { File.Copy(DraftsPath, DraftsPath + ".recovery-" + DateTimeOffset.UtcNow.Ticks); }
+                catch (Exception backupError) when (backupError is IOException or UnauthorizedAccessException) { unreadDrafts = true; }
                 RecoveryWarning = ex.Message;
             }
         }
@@ -102,6 +105,7 @@ public sealed class MacWorkspace
 
     public void SaveDrafts()
     {
+        if (unreadDrafts) throw new IOException(Localization.Get("storageUnavailableBody"));
         var json = JsonSerializer.Serialize(Drafts, new JsonSerializerOptions { WriteIndented = true });
         if (json == lastSavedDrafts && File.Exists(DraftsPath)) return;
         var temporary = DraftsPath + ".tmp";
@@ -126,6 +130,7 @@ public sealed class MacWorkspace
         project.Parameters["sourceLanguage"] = draft.SourceLanguage;
         project.Parameters["sources"] = JsonSerializer.Serialize(draft.Sources);
         project.Parameters["platform"] = "macOS";
+        Projects.LinkSource(project, draft.Source);
         await Projects.SaveAsync(project);
         draft.ProjectId = project.Id;
         SaveDrafts();
@@ -191,7 +196,7 @@ public sealed class MacWorkspace
         ArtifactValidator.Validate(target);
         var project = new AuroraProject { Name = Path.GetFileNameWithoutExtension(path), Feature = feature, SourcePath = path };
         project.Parameters["origin"] = "imported";
-        project.Artifacts.Add(new AuroraArtifact { Path = target, Kind = feature });
+        project.Artifacts.Add(new AuroraArtifact { Path = target, Kind = feature, Info = ArtifactValidator.Inspect(target) });
         await Projects.SaveAsync(project);
         return project;
     }

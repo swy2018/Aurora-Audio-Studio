@@ -33,7 +33,7 @@ public sealed partial class MainWindow
             };
             var item = VStack(Txt(task.Title, 16, true), Txt(text[stateKey] + "  ·  " + task.CreatedDisplay));
             if (task.Status == "running") item.Children.Add(new ProgressBar { Minimum = 0, Maximum = 1, Value = task.Progress });
-            item.Children.Add(Txt(task.Status is "running" or "preparing" or "waiting" ? task.Stage : string.Join(" · ", new[] { task.Stage, task.Message }.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct()), 12));
+            item.Children.Add(Txt(task.Status is "running" or "preparing" or "waiting" ? L(task.Stage) : string.Join(" · ", new[] { task.Stage, task.Message }.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().Select(L)), 12));
             var taskActions = Row();
             taskActions.Children.Add(ActionButton(text["openFolder"], () => OpenPathAsync(
                 Directory.Exists(task.OutputPath) ? task.OutputPath : Path.GetDirectoryName(File.Exists(task.OutputPath) ? task.OutputPath : task.InputPath)!)));
@@ -70,9 +70,23 @@ public sealed partial class MainWindow
                 ActionButton(L("复制路径"), () => CopyArtifactPathAsync(artifact.Path)),
                 ActionButton(L("打开位置"), () => OpenPathAsync(Path.GetDirectoryName(artifact.Path)!)));
             if (Path.GetExtension(artifact.Path).Equals(".srt", StringComparison.OrdinalIgnoreCase)) actions.Children.Add(ActionButton("编辑字幕", () => EditSubtitlesAsync(artifact.Path)));
-            content.Children.Add(Panel(VStack(Txt(artifact.Name, 16, true), Txt(text[artifact.Kind] + "  ·  " + artifact.ProjectName + "  ·  " + artifact.CreatedDisplay, 12), actions)));
+            if (artifact.CanTranscribe) actions.Children.Add(ActionButton(L("sendToMidi"), () => StageMidiAsync([artifact.Path])));
+            if (artifact.IsStem) actions.Children.Add(ActionButton(L("sendStemsToMidi"), () => StageMidiAsync(
+                workspace.Projects.TranscriptionSources(artifact.ProjectId))));
+            content.Children.Add(Panel(VStack(Txt(artifact.Name, 16, true), Txt(text[artifact.Kind] + "  ·  " + artifact.ProjectName + "  ·  " + artifact.CreatedDisplay, 12),
+                Txt(ArtifactPresentation.Summary(artifact.Info, workspace.Localization), 12), actions)));
         }
         return Scroll(content);
+    }
+
+    private Task StageMidiAsync(IEnumerable<string> paths)
+    {
+        var draft = workspace.Drafts["transcription"];
+        foreach (var path in paths.Where(File.Exists).Distinct(StringComparer.Ordinal))
+            if (!draft.Sources.Contains(path, StringComparer.Ordinal)) draft.Sources.Add(path);
+        if (draft.Sources.Count > 0) draft.Source = draft.Sources[0];
+        workspace.SaveDrafts(); Navigate("transcription"); status.Text = L("midiHandoffHint");
+        return Task.CompletedTask;
     }
 
     private async Task CopyArtifactPathAsync(string path)
@@ -135,7 +149,7 @@ public sealed partial class MainWindow
 
     private async Task PreviewAsync(string path, string? displayName = null)
     {
-        ArtifactValidator.Validate(path);
+        var metadata = ArtifactValidator.Inspect(path);
         if (Path.GetExtension(path).Equals(".srt", StringComparison.OrdinalIgnoreCase))
         { await EditSubtitlesAsync(path); return; }
         if (Path.GetExtension(path).ToLowerInvariant() is ".mid" or ".midi")
@@ -145,6 +159,8 @@ public sealed partial class MainWindow
             midiDialog.Content = new StackPanel { Margin = new Thickness(24), Spacing = 18, Children = {
                 Txt(Path.GetFileName(path), 20, true),
                 Txt(workspace.Localization.Format("midiPreviewHint", ArtifactValidator.MidiNoteCount(path))),
+                Txt(ArtifactPresentation.Summary(metadata, workspace.Localization), 12),
+                Txt(string.Join("\n", (metadata.Warnings ?? []).Select(L)), 12),
                 Row(ActionButton(L("用默认程序打开"), () => OpenPathAsync(path)), close)
             } };
             await midiDialog.ShowDialog(this);

@@ -37,6 +37,8 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 
 日常使用推荐下载正式版。如需体验预发布功能，可在更新设置中选择 Beta 通道。
 
+Windows 可选 [2.0.1-beta.1](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1-beta.1)。本次同时提供源码；Mac 新版待实机构建与验收，当前继续使用 2.0.0。[Mac 构建交接](docs/macOS-2.0.1-beta.1-handoff.md)。
+
 ### 正式版与测试版更新
 
 在设置中选择“应用更新通道”，保存后生效。默认“正式版”；主动选择“测试版（含正式版）”才会收到 Beta。检查到更新并经你确认后，Aurora 会下载、校验并启动对应平台的安装流程；系统权限确认仍需你处理。
@@ -48,17 +50,17 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 ## 当前版本更新
 
 <!-- current-packages:start -->
-当前源码构建 / Current source builds: `Aurora-Audio-Studio-2.0.0-Setup-x64.exe` · `Aurora-Audio-Studio-2.0.0-arm64.dmg`
+当前源码版本 / Source version: `2.0.1-beta.1`。实际可下载的平台安装包请以[官网](https://swy2018.github.io/Aurora-Audio-Studio/#download)和 [GitHub Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases) 为准。 / See the website or Releases for available platform packages.
 <!-- current-packages:end -->
 
 <!-- release-notes-zh:start -->
-- Windows 与 Mac 2.0.0 正式版现已提供。Mac 安装包使用 Developer ID 签名并通过 Apple 公证。
-- 音乐创作、配音与声音克隆、歌声转换、分轨、MIDI 扒谱和字幕制作，集中在本地工作台完成。
-- 完善工作台连接、处理设置保存、任务与成品关联，以及模型局部修复和应用版本回退。
-- Aurora 的任务状态与运行提示支持简体中文、繁体中文、英文和日文，并随界面语言切换。
-- 运行日志区分 Aurora 提示与引擎原始输出，保留错误详情、退出码和文件路径，便于排查问题。
-- 修复 Mac 模型维护日志无法写入时意外退出的问题，检查与维护操作可正常结束并恢复界面状态。
-- 正式版适合日常使用，Beta 通道可选。Windows 安装包未代码签名；升级或回退前请备份重要配置与作品。
+- Windows 2.0.1-beta.1 与源码更新。Mac 当前正式版保持 2.0.0；新版安装包将在 Mac 构建与验收后补充。
+- 修复日语选择框字体拥挤与对齐，活动记录可随四语言界面重新显示；空白预览不再叠加播放控件。
+- 增加素材音轨和解码预检、成品时长／声道／MIDI 音符／字幕条数摘要；分轨可直接加入 MIDI 草稿并保留来源记录。MIDI 仍需人工校对。
+- 加强 WAV、MIDI、SRT 结构校验，避免缺失或损坏的结果被报告为成功。存储异常时保留旧记录，暂停新任务并提供重试入口。
+- 模型检查明确校验范围；支持固定版本缺失及损坏文件的定向修复。补充功能与状态筛选、预设说明和自定义模型状态。
+- 优化大型处理记录库刷新，官网增加已核验下载清单回退；正式版与 Beta、Windows 与 Mac 下载保持独立。
+- Windows 安装包未签名。Beta 建议先用短素材试用，升级前请备份重要配置与作品。
 <!-- release-notes-zh:end -->
 
 模型中心分别显示文件状态和运行记录。成功完成任务后，会记录模型版本、时间及计算设备。“仅模型管理”表示支持下载与维护，但不能在 Aurora 内生成内容。可选模型的兼容性与运行表现取决于具体设备，请先使用短素材确认。
@@ -202,13 +204,13 @@ Successful app installation no longer retains an old app copy. Replacement failu
 ### Current release notes
 
 <!-- release-notes-en:start -->
-- Windows and Mac 2.0.0 Stable are available. The Mac installer is Developer ID signed and Apple notarized.
-- Create music, voiceovers, voice clones, converted vocals, stems, MIDI, and subtitles in one local workspace.
-- Improve workbench connections, saved processing settings, task-to-result links, targeted model repair, and application rollback.
-- Aurora task status and runtime messages follow the interface language: Simplified Chinese, Traditional Chinese, English, or Japanese.
-- Logs distinguish Aurora messages from original engine output and retain error details, exit codes, and file paths for troubleshooting.
-- Fix a Mac crash when model-maintenance logs cannot be written, allowing checks and maintenance to finish and restore the interface state.
-- Stable is recommended for everyday use; Beta is optional. The Windows installer is unsigned. Back up important settings and work before upgrading or reverting.
+- Windows 2.0.1-beta.1 and updated source. Mac Stable remains 2.0.0; a new Mac package will follow native build and acceptance.
+- Improve Japanese picker typography and alignment, re-render activity messages when switching among four UI languages, and remove playback controls from empty previews.
+- Check input audio streams and decoding before processing. Show duration, channels, MIDI notes and subtitle counts. Send stems to a MIDI draft with source links preserved. MIDI still needs human review.
+- Strengthen WAV, MIDI and SRT validation so missing or damaged output cannot be reported as success. Preserve records, pause new work and offer retry when storage is unavailable.
+- State model verification scope clearly and repair missing or damaged files for the installed revision. Add feature/status filters, preset explanations and a Custom model state.
+- Speed up large processing libraries and add a verified website download snapshot fallback. Stable/Beta and Windows/Mac packages remain separate.
+- The Windows installer is unsigned. Test Beta with short inputs and back up important settings and work before upgrading.
 <!-- release-notes-en:end -->
 
 Read the [capability matrix](docs/capabilities.json) and [Mac release requirements](docs/macOS-release.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. MIDI editing/playback requires your own music application; audio playback and subtitle-copy editing are available in Results.

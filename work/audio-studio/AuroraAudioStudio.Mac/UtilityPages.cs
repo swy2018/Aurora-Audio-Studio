@@ -6,6 +6,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using AuroraAudioStudio.Core;
+using AuroraAudioStudio.Services;
 
 namespace AuroraAudioStudio.Mac;
 
@@ -13,7 +14,7 @@ public sealed partial class MainWindow
 {
     private LocalWorkbenchServer? utilityPreviewServer;
     private readonly Dictionary<string, string> utilitySelection = [];
-    private readonly Dictionary<string, List<string>> utilityLogs = [];
+    private readonly Dictionary<string, List<(DateTime At, string Key, object[] Args)>> utilityLogs = [];
 
     private Control UtilityPage(string feature)
     {
@@ -23,6 +24,7 @@ public sealed partial class MainWindow
         var titleKey = feature switch { "separation" => "新建分轨任务", "transcription" => "新建扒谱任务", _ => "新建字幕任务" };
         var outputHint = feature switch { "separation" => "输出为可继续混音的独立 WAV 音轨。", "transcription" => "处理结果会保存为标准 MIDI 文件。", _ => "处理结果会保存到视频字幕成品目录。" };
         var form = VStack(Txt(L(titleKey), 22, true), Txt(text[feature + "Desc"]));
+        var inputMetadata = Txt("", 12);
         var sourceList = new ListBox { MinHeight = 112, MaxHeight = 180, HorizontalAlignment = HorizontalAlignment.Stretch };
         AutomationProperties.SetAutomationId(sourceList, "utility-sources");
         sourceList.ItemsSource = draft.Sources.Select(p => Path.GetFileName(p) + (File.Exists(p) ? "  ·  " + Path.GetExtension(p).TrimStart('.').ToUpperInvariant() : "  ·  " + text["missingSource"])).ToArray();
@@ -50,10 +52,18 @@ public sealed partial class MainWindow
             view.NewWindowRequested += (_, e) => e.Handled = true;
             preview.Children.Add(view); view.Source = server.AddPage(html);
         }
-        sourceList.SelectionChanged += (_, _) =>
+        sourceList.SelectionChanged += async (_, _) =>
         {
             if (sourceList.SelectedIndex < 0 || sourceList.SelectedIndex >= draft.Sources.Count) return;
             draft.Source = draft.Sources[sourceList.SelectedIndex]; utilitySelection[feature] = draft.Source; Preview(draft.Source);
+            var path = draft.Source;
+            inputMetadata.Text = L("inputInspecting");
+            try
+            {
+                var info = await MediaInputPolicy.InspectAsync(path, workspace.Settings.Current.LocalAiRoot);
+                if (current == feature && draft.Source == path) inputMetadata.Text = workspace.Localization.Format("audioSummary", ArtifactPresentation.Duration(info.DurationSeconds), info.SampleRate, info.Channels);
+            }
+            catch (Exception ex) { if (current == feature && draft.Source == path) inputMetadata.Text = workspace.Localization.Format("inputCheckFailed", L(ex.Message)); }
         };
         var add = ActionButton(L("添加素材"), async () =>
         {
@@ -63,11 +73,11 @@ public sealed partial class MainWindow
             foreach (var file in files)
             {
                 var path = file.TryGetLocalPath();
-                if (path is null || draft.Sources.Contains(path, StringComparer.Ordinal)) continue;
+                if (path is null || !MediaInputPolicy.IsSupported(feature, path) || draft.Sources.Contains(path, StringComparer.Ordinal)) continue;
                 draft.Sources.Add(path); added++;
             }
             if (added == 0) return;
-            draft.Source = draft.Sources[0]; logs.Add(DateTime.Now.ToString("HH:mm:ss") + "  " + string.Format(text["sourcesAdded"], added));
+            draft.Source = draft.Sources[0]; logs.Add((DateTime.Now, "sourcesAddedActivity", [added]));
             workspace.SaveDrafts(); RenderPage();
         }, "utility-add-sources");
         var clear = ActionButton(L("清空"), () => { draft.Sources.Clear(); draft.Source = ""; utilitySelection.Remove(feature); workspace.SaveDrafts(); RenderPage(); return Task.CompletedTask; }, "utility-clear-sources");
@@ -81,13 +91,17 @@ public sealed partial class MainWindow
         sourceGrid.Children.Add(sources);
         var previewPanel = Panel(preview, "#EFF7F3"); previewPanel.Padding = new Thickness(10); Grid.SetColumn(previewPanel, 1); sourceGrid.Children.Add(previewPanel);
         form.Children.Add(sourceGrid);
+        form.Children.Add(inputMetadata);
         form.Children.Add(Rule()); form.Children.Add(Txt(L("处理引擎"), 15, true));
         var models = workspace.Catalog.Definitions.Where(m => m.Feature == feature && m.IsRunnable && workspace.Runtime.Models.ContainsKey(m.Id)).ToArray();
         var model = new ComboBox { ItemsSource = models.Select(workspace.Catalog.DisplayName).ToArray(), SelectedIndex = Math.Max(0, Array.FindIndex(models, m => m.Id == draft.ModelId)), HorizontalAlignment = HorizontalAlignment.Stretch };
         AutomationProperties.SetAutomationId(model, "utility-model");
-        model.SelectionChanged += (_, _) => { if (model.SelectedIndex >= 0) draft.ModelId = models[model.SelectedIndex].Id; };
-        var presetKeys = new[] { "fast", "recommended", "quality" };
-        var preset = new ComboBox { ItemsSource = new[] { L("快速草稿"), L("推荐质量"), L("高质量") }, SelectedIndex = Math.Max(0, Array.IndexOf(presetKeys, draft.Option)), HorizontalAlignment = HorizontalAlignment.Stretch };
+        var presetKeys = new[] { "fast", "recommended", "quality", "custom" };
+        var preset = new ComboBox { ItemsSource = new[] { L("快速草稿"), L("推荐质量"), L("高质量"), L("customPreset") }, SelectedIndex = Math.Max(0, Array.IndexOf(presetKeys, draft.Option)), HorizontalAlignment = HorizontalAlignment.Stretch };
+        var applyingPreset = false;
+        var suitability = Txt("", 12);
+        void DescribeModel() => suitability.Text = L(draft.ModelId switch { "transkun" or "piano" => "pianoSuitability", "yourmt3" => "multiInstrumentSuitability", "basic-pitch" => "basicPitchSuitability", _ => "presetModelOnly" }) + "\n" + L("macUtilityDevicePolicy");
+        model.SelectionChanged += (_, _) => { if (model.SelectedIndex >= 0) { draft.ModelId = models[model.SelectedIndex].Id; if (!applyingPreset) preset.SelectedIndex = 3; DescribeModel(); } };
         AutomationProperties.SetAutomationId(preset, "utility-preset");
         var track = new ComboBox { ItemsSource = new[] { L("二轨：人声 + 伴奏"), L("多轨：完整分轨") }, SelectedIndex = draft.TrackMode == "multi-stem" ? 1 : 0, HorizontalAlignment = HorizontalAlignment.Stretch };
         AutomationProperties.SetAutomationId(track, "utility-track-mode");
@@ -95,8 +109,12 @@ public sealed partial class MainWindow
         {
             if (preset.SelectedIndex < 0 || track.SelectedIndex < 0) return;
             draft.Option = presetKeys[preset.SelectedIndex]; draft.TrackMode = track.SelectedIndex == 1 ? "multi-stem" : "two-stem";
+            if (draft.Option == "custom") return;
             draft.ModelId = UtilityPresets.Model(feature, draft.TrackMode, draft.Option);
-            model.SelectedIndex = Array.FindIndex(models, m => m.Id == draft.ModelId);
+            applyingPreset = true;
+            try { model.SelectedIndex = Array.FindIndex(models, m => m.Id == draft.ModelId); }
+            finally { applyingPreset = false; }
+            DescribeModel();
         }
         preset.SelectionChanged += (_, _) => ApplyPreset(); track.SelectionChanged += (_, _) => ApplyPreset();
         var modelRow = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), ColumnSpacing = 12 };
@@ -116,11 +134,12 @@ public sealed partial class MainWindow
             form.Children.Add(Field(L("素材语言"), language));
         }
         form.Children.Add(Txt(L(outputHint), 12));
+        DescribeModel(); form.Children.Add(suitability);
         var run = ActionButton(L("开始处理"), () => RunUtilityAsync(feature)); run.Classes.Add("primary");
         var installModel = ActionButton(L("installModel"), async () => { await InstallFromFeatureAsync(draft.ModelId); if (current == feature) RenderPage(); }, "install-utility-model");
         void UpdateRun()
         {
-            run.IsEnabled = draft.Sources.Count > 0 && !utilityRunning.Contains(feature) && modelOperation is null && !workspace.Settings.Current.SafeMode;
+            run.IsEnabled = draft.Sources.Count > 0 && !utilityRunning.Contains(feature) && modelOperation is null && !workspace.Settings.Current.SafeMode && workspace.StorageWarning is null;
             installModel.IsVisible = !workspace.Engines.IsAvailable(draft.ModelId);
             installModel.IsEnabled = modelOperation is null && !workspace.Settings.Current.SafeMode;
         }
@@ -135,7 +154,7 @@ public sealed partial class MainWindow
         var logPanel = VStack(Txt(L("任务动态"), 18, true), Txt(L("当前会话的状态与处理记录"), 12),
             Panel(VStack(Txt(L("当前状态"), 12), Txt(utilityRunning.Contains(feature) ? "正在处理 · 可在任务中心查看进度或取消" : draft.Sources.Count == 0 ? L("等待添加素材") : text["waitingForModel"], 15, true))),
             Txt(L("输出位置"), 14, true), Txt(workspace.Settings.Current.OutputRoot, 12), Rule());
-        logPanel.Children.Add(Txt(logs.Count == 0 ? text["utilityReady"] : string.Join(Environment.NewLine, logs), 12));
+        logPanel.Children.Add(Txt(logs.Count == 0 ? text["utilityReady"] : string.Join(Environment.NewLine, logs.TakeLast(200).Select(entry => $"{entry.At:HH:mm:ss}  " + workspace.Localization.Format(entry.Key, entry.Args))), 12));
         logPanel.Children.Add(ActionButton(L("清空记录"), () => { logs.Clear(); RenderPage(); return Task.CompletedTask; }));
         var layout = new Grid { ColumnDefinitions = new ColumnDefinitions("3*,2*"), RowDefinitions = new RowDefinitions("Auto,Auto"), ColumnSpacing = 14, RowSpacing = 14 };
         var main = Panel(form); var side = Panel(logPanel, "#EFF7F3");

@@ -276,9 +276,12 @@ public sealed class MacUtilityAdapter(MacRuntime runtime, SettingsService settin
     {
         if (!IsReady) throw new InvalidOperationException("请先安装或修复选中的模型。");
         if (!File.Exists(draft.Source)) throw new FileNotFoundException("素材文件不存在。", draft.Source);
+        progress.Report(new(.02, "正在检查素材音轨与解码能力"));
+        var input = await MediaInputPolicy.InspectAsync(draft.Source, settings.Current.LocalAiRoot, token);
         var output = OutputPath(settings.Current.OutputRoot, draft.Feature, draft.Source);
         string[]? outputs = null;
         var message = "处理完成";
+        var device = "unknown";
         var reporter = new InlineProgress<string>(line =>
         {
             if (line.StartsWith('{'))
@@ -292,6 +295,7 @@ public sealed class MacUtilityAdapter(MacRuntime runtime, SettingsService settin
                         {
                             outputs = value.GetProperty("outputs").EnumerateArray().Select(x => x.GetString()!).ToArray();
                             if (value.TryGetProperty("message", out var resultMessage)) message = resultMessage.GetString() ?? message;
+                            if (value.TryGetProperty("device", out var resultDevice)) device = resultDevice.GetString() ?? "unknown";
                         }
                         else if (kind.GetString() == "progress") progress.Report(new(value.GetProperty("progress").GetDouble(), value.GetProperty("stage").GetString()!, line));
                         return;
@@ -304,8 +308,8 @@ public sealed class MacUtilityAdapter(MacRuntime runtime, SettingsService settin
         await runtime.RunAsync(runtime.Python(runtime.Models[id].Family), [Path.Combine(runtime.Scripts, "utility.py"), "--root", runtime.Root, "--model", id, "--source", draft.Source, "--output", output, "--language", draft.SourceLanguage], reporter, token);
         if (outputs is null || outputs.Length == 0) throw new InvalidDataException("引擎没有返回有效结果。");
         foreach (var file in outputs) ArtifactValidator.Validate(file);
-        runtime.RecordSuccessfulRun(id, "CPU");
-        return new OperationResult(true, message, output, Outputs: outputs, Device: "CPU");
+        runtime.RecordSuccessfulRun(id, device);
+        return new OperationResult(true, message, output, Outputs: outputs, Device: device, InputInfo: input);
     }
 }
 

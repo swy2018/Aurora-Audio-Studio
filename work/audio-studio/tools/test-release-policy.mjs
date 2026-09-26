@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { chooseDownload, releaseVersion, compareVersions } from '../../../docs/release-policy.mjs';
+import { loadReleaseData } from '../../../docs/release-data.mjs';
 const metadata = JSON.parse(await readFile(new URL('../../../docs/release.json',import.meta.url)));
 function release(version, beta=false, draft=false, platforms=['windows','mac']) {
   const tag_name='v'+version, prefix='https://github.com/swy2018/Aurora-Audio-Studio/releases/download/'+tag_name+'/';
@@ -28,6 +29,20 @@ console.log('Website release-policy checks passed, including staggered Windows/M
 const stagedStable = [release('2.0.0',false,false,['windows']),release('2.0.0-beta.4',true),release('1.9.9')];
 assert.equal(chooseDownload(stagedStable,'windows','stable').version,'2.0.0');
 assert.equal(chooseDownload(stagedStable,'mac','stable').version,'1.9.9');
-assert.equal(chooseDownload(stagedStable,'windows','beta').version,'2.0.0-beta.4');
+assert.equal(chooseDownload(stagedStable,'windows','beta').version,'2.0.0');
 assert.equal(chooseDownload(stagedStable,'mac','beta').version,'2.0.0-beta.4');
 console.log('Platform-specific 2.0.0 stable promotion checks passed.');
+const snapshot = {schemaVersion:1, verifiedAt:'2026-09-27', releases:[release('2.0.0'),release('2.0.1-beta.1',true,false,['windows'])]};
+for (const status of [403,429,500]) {
+  let data, source;
+  const ok = await loadReleaseData(async url => url.includes('api.github') ? {ok:false,status} : {ok:true,json:async()=>snapshot}, (value, kind) => {data=value;source=kind;});
+  assert(ok); assert.equal(source,'snapshot');
+  assert.equal(chooseDownload(data,'windows','beta').version,'2.0.1-beta.1');
+  assert.equal(chooseDownload(data,'mac','stable').version,'2.0.0');
+  assert.equal(chooseDownload(data,'mac','beta').version,'2.0.0');
+}
+let live;
+await loadReleaseData(async url => ({ok:true,json:async()=>url.includes('api.github') ? [] : snapshot}), value => live=value);
+assert.deepEqual(live,[], 'live asset removal must override a cached snapshot');
+assert.equal(await loadReleaseData(async()=>{throw new Error('offline');},()=>assert.fail()),false);
+console.log('Release snapshot checks passed: 403/429/500, Windows-only beta, live precedence, fully offline.');

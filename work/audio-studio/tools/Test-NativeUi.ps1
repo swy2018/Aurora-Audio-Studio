@@ -1,4 +1,4 @@
-param([Parameter(Mandatory)][string]$Executable, [Parameter(Mandatory)][string]$EvidenceRoot, [string]$Language = 'en-US', [switch]$LanguagesOnly)
+param([Parameter(Mandatory)][string]$Executable, [Parameter(Mandatory)][string]$EvidenceRoot, [string]$Language = 'en-US', [switch]$LanguagesOnly, [string]$ExpectedVersion = '2.0.1-beta.1')
 $ErrorActionPreference = 'Stop'
 if (Get-Process -Name 'Aurora Audio Studio' -ErrorAction SilentlyContinue) { throw 'A user Aurora session is already running.' }
 $EvidenceRoot = [IO.Path]::GetFullPath($EvidenceRoot)
@@ -44,7 +44,7 @@ try {
             [IO.File]::WriteAllText((Join-Path $EvidenceRoot ($page + '.json')), ($tree -join "`n"))
         }
     }
-    Test-Case 'About version' { Ui @('wait-for','AboutVersionText','--value','1.9.0','--contains','-t','3000') | Out-Null }
+    Test-Case 'About version' { Ui @('wait-for','AboutVersionText','--value',$ExpectedVersion,'--contains','-t','3000') | Out-Null }
     foreach ($culture in @(@('zh-CN','简体中文','音乐创作'),@('zh-TW','繁體中文','音樂創作'),@('en-US','English','Music'),@('ja-JP','日本語','音楽制作'),@('zh-CN','简体中文','音乐创作'))) {
         Test-Case ("Switch language " + $culture[0]) {
             Ui @('invoke','SettingsItem') | Out-Null

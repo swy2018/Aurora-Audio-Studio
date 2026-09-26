@@ -128,6 +128,7 @@ public sealed partial class MainWindow
         cancel.Click += (_, _) => state.Startup?.Cancel();
         open.Click += async (_, _) =>
         {
+            if (workspace.StorageWarning is not null || receiptStorageWarning is not null) { RefreshStorageBanner(); return; }
             if (state.Startup is not null) return;
             if (modelOperation is not null || workspace.Queue.Items.Any(t => t.Status is "running" or "preparing" or "waiting"))
             { await MessageAsync(text["error"], "请先等待当前处理或模型维护完成，再启动创作工作台。"); return; }

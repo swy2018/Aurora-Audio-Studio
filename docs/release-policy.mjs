@@ -8,7 +8,7 @@ export function compareVersions(a,b) {
 }
 export function chooseDownload(releases,platform,channel) {
   const candidates = releases.filter(r => !r.draft && releaseVersion(r.tag_name)
-    && (channel === 'beta' ? r.prerelease && r.tag_name.includes('-beta.') : !r.prerelease && !r.tag_name.includes('-beta.')))
+    && (channel === 'beta' ? r.prerelease === r.tag_name.includes('-beta.') : !r.prerelease && !r.tag_name.includes('-beta.')))
     .sort((a,b) => compareVersions(releaseVersion(b.tag_name),releaseVersion(a.tag_name)));
   for (const release of candidates) {
     const version = release.tag_name.replace(/^v/,'');

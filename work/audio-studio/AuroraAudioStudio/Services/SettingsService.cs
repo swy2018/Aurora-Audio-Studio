@@ -7,6 +7,7 @@ namespace AuroraAudioStudio.Services;
 public sealed class SettingsService
 {
     private readonly JsonSerializerOptions options = new() { WriteIndented = true };
+    private bool unreadSettings;
     public string AppDataRoot { get; } = PlatformDataRoot;
     public string SettingsPath => Path.Combine(AppDataRoot, "settings.json");
     public string LogsRoot => Path.Combine(AppDataRoot, "Logs");
@@ -35,6 +36,8 @@ public sealed class SettingsService
 
     public void Load()
     {
+        StorageWarning = null;
+        unreadSettings = false;
         try
         {
             if (File.Exists(SettingsPath))
@@ -42,12 +45,10 @@ public sealed class SettingsService
         }
         catch
         {
+            unreadSettings = true;
             StorageWarning = "设置文件无法读取，请检查设置。";
         }
-        Directory.CreateDirectory(AppDataRoot);
-        Directory.CreateDirectory(LogsRoot);
-        Directory.CreateDirectory(UpdatesRoot);
-        foreach (var path in new[] { Current.OutputRoot, Current.ProjectsRoot })
+        foreach (var path in new[] { AppDataRoot, LogsRoot, UpdatesRoot, Current.OutputRoot, Current.ProjectsRoot })
         {
             try { Directory.CreateDirectory(path); }
             catch (Exception ex) { StorageWarning = "保存目录暂时不可用，请到设置中修正：" + ex.Message; }
@@ -91,6 +92,7 @@ public sealed class SettingsService
 
     private bool Persist(AppSettings candidate, out string error)
     {
+        if (unreadSettings) { error = StorageWarning ?? "设置文件无法读取，请检查设置。"; return false; }
         try
         {
             Directory.CreateDirectory(AppDataRoot);

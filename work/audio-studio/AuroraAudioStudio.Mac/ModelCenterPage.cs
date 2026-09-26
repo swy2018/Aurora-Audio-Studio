@@ -31,8 +31,8 @@ public sealed partial class MainWindow
         var heading = VStack(Txt(L("创作引擎与模型"), 20, true), Txt(workspace.Catalog.FormatSummary(descriptions), 12)); heading.Spacing = 5;
         var header = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), RowDefinitions = new RowDefinitions("Auto,Auto"), ColumnSpacing = 16, RowSpacing = 12 };
         header.Children.Add(heading);
-        var filters = new[] { "all", "installed", "default", "optional" };
-        var filter = new ComboBox { Width = 150, ItemsSource = new[] { L("全部模型"), L("已安装"), L("默认组件"), L("可选模型") }, SelectedIndex = Array.IndexOf(filters, modelFilter) };
+        var filters = new[] { "all", "installed", "default", "optional", "runnable", "managed", "repair", "music", "voice", "singing", "separation", "transcription", "subtitles" };
+        var filter = new ComboBox { Width = 200, ItemsSource = new[] { L("全部模型"), L("已安装"), L("默认组件"), L("可选模型"), L("filterRunnable"), L("filterManaged"), L("filterRepair"), text["music"], text["voice"], text["singing"], text["separation"], text["transcription"], text["subtitles"] }, SelectedIndex = Array.IndexOf(filters, modelFilter) };
         AutomationProperties.SetAutomationId(filter, "model-filter");
         var checkAll = ActionButton(L("检查全部更新"), () => ModelBatchAsync("updates"), "check-all-model-updates"); checkAll.Classes.Add("primary");
         var updateAll = ActionButton(L("更新全部") + $" ({pending.Length})", UpdateAllModelsAsync, "update-all-models"); updateAll.IsVisible = pending.Length > 0;
@@ -69,7 +69,10 @@ public sealed partial class MainWindow
             foreach (var feature in MacWorkspace.Features)
             {
                 var items = definitions.Where(m => m.Feature == feature &&
-                    (modelFilter == "all" || modelFilter == "installed" && states[m.Id].Installed || modelFilter == "default" && m.IsDefault || modelFilter == "optional" && !m.IsDefault) &&
+                    (modelFilter == "all" || modelFilter == "installed" && states[m.Id].Installed || modelFilter == "default" && m.IsDefault || modelFilter == "optional" && !m.IsDefault
+                        || modelFilter == "runnable" && m.IsRunnable && runtime.Models.ContainsKey(m.Id)
+                        || modelFilter == "managed" && !m.IsRunnable || modelFilter == "repair" && (states[m.Id].Health.StartsWith("需要修复") || !states[m.Id].Installed && Directory.Exists(runtime.Current(m.Id)))
+                        || modelFilter == m.Feature) &&
                     (m.Name.Contains(modelSearch, StringComparison.OrdinalIgnoreCase) || m.Id.Contains(modelSearch, StringComparison.OrdinalIgnoreCase))).ToArray();
                 if (items.Length == 0) continue;
                 var group = Txt(text[feature], 18, true); group.Margin = new Thickness(2, 12, 0, 0); list.Children.Add(group);

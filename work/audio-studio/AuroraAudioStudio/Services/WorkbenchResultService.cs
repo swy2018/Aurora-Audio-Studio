@@ -43,10 +43,10 @@ public sealed class WorkbenchResultService(SettingsService settings, ProjectServ
                 if (task is not null && (task.Feature != receipt.Feature || task.ModelId != receipt.ModelId)) continue;
                 if (existing is not null && (existing.Feature != receipt.Feature || existing.ModelId != receipt.ModelId)) continue;
                 if (existing is not null && (taskId is null ? existing.TaskIds.Count > 0 : existing.Artifacts.Any(x => x.Path == receipt.Path))) { imported.Add(receiptPath); continue; }
-                ArtifactValidator.Validate(receipt.Path);
+                var artifactInfo = ArtifactValidator.Inspect(receipt.Path);
                 var project = existing ?? new AuroraProject { Id = projectId!, Name = catalog.DisplayName(model) + " · " + File.GetLastWriteTime(receipt.Path).ToString("yyyy-MM-dd HH:mm:ss"), Feature = receipt.Feature, ModelId = receipt.ModelId, FilePath = projectPath };
                 project.ModelVersion = receipt.ModelVersion ?? modelVersion?.Invoke(receipt.ModelId) ?? catalog.GetStates().FirstOrDefault(x => x.Id == receipt.ModelId)?.Version ?? "";
-                if (!project.Artifacts.Any(x => x.Path == receipt.Path)) project.Artifacts.Add(new AuroraArtifact { Path = receipt.Path, Kind = receipt.Feature });
+                if (!project.Artifacts.Any(x => x.Path == receipt.Path)) project.Artifacts.Add(new AuroraArtifact { Path = receipt.Path, Kind = receipt.Feature, Info = artifactInfo });
                 project.Parameters["device"] = receipt.Device;
                 await projects.SaveAsync(project);
                 task ??= queue.Create(project.Id, project.Name, receipt.Feature, "", receipt.ModelId, id: taskId);
@@ -58,10 +58,14 @@ public sealed class WorkbenchResultService(SettingsService settings, ProjectServ
                 else catalog.RecordSuccessfulRun(receipt.ModelId, receipt.Device);
                 imported.Add(receiptPath); count++;
                 }
-                catch (Exception ex) when (ex is IOException or JsonException or ArgumentException)
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or ArgumentException)
                 {
-                    Directory.CreateDirectory(settings.LogsRoot);
-                    await File.AppendAllTextAsync(Path.Combine(settings.LogsRoot, "workbench-import.log"), $"{DateTimeOffset.Now:O} {receiptPath}: {ex.Message}{Environment.NewLine}");
+                    try
+                    {
+                        Directory.CreateDirectory(settings.LogsRoot);
+                        await File.AppendAllTextAsync(Path.Combine(settings.LogsRoot, "workbench-import.log"), $"{DateTimeOffset.Now:O} {receiptPath}: {ex.Message}{Environment.NewLine}");
+                    }
+                    catch (Exception logError) when (logError is IOException or UnauthorizedAccessException) { }
                 }
             }
             } while (pending);

@@ -1,4 +1,5 @@
 import { chooseDownload } from './release-policy.mjs';
+import { loadReleaseData } from './release-data.mjs';
 const $ = selector => document.querySelector(selector);
 const featureData = {
 music: [['从文字到完整歌曲','From words to a complete song'],['输入创作描述、歌词与风格，在本地模型工作台中完成创作。','Describe the piece, add lyrics and style, and create in a local model workbench.'],['文字、歌词与风格','Text, lyrics, and style'],'ACE-Step 1.5 XL Turbo',['音频文件','Audio files']],
@@ -8,7 +9,7 @@ separation: [['把混音拆开，继续创作','Separate the mix. Keep creating.
 transcription: [['从演奏到 MIDI','From a performance to MIDI'],['选择适合钢琴、旋律或多乐器的模型，生成 MIDI，再用你的音乐软件继续编辑。','Choose piano, melody, or multi-instrument transcription, then edit the MIDI in your music software.'],['演奏录音','Recorded performance'],'TransKun / YourMT3+ / Piano / Basic Pitch',['标准 MIDI','Standard MIDI']],
 subtitles: [['把语音变成时间轴','Turn speech into a timeline'],['识别音视频里的语音，生成字幕；预览后保存副本，或交给 Subtitle Edit 校对。','Transcribe audio or video into subtitles, then save a reviewed copy or edit in Subtitle Edit.'],['音频或视频素材','Audio or video'],'Whisper / Subtitle Edit',['SRT 与转写数据','SRT and transcription data']]
 };
-let language = 'zh', feature = 'music', releases = null, releaseError = false, models = [];
+let language = 'zh', feature = 'music', releases = null, releaseError = false, releaseSource = '', models = [];
 try { language = localStorage.getItem('aurora-language') === 'en' ? 'en' : 'zh'; } catch { /* Browser storage is optional. */ }
 const t = (zh,en) => language === 'en' ? en : zh;
 function renderFeature() {
@@ -32,7 +33,8 @@ const selected = chooseDownload(releases, platform, channel);
 if (!selected) { status.textContent = t('此通道暂未提供完整的平台安装包。','No complete package is available for this platform and channel.'); continue; }
 link.href = selected.url; link.textContent = t('下载 ','Download ') + selected.version;
 checksum.href = selected.checksum; checksum.hidden = false;
-status.textContent = (selected.beta ? 'Beta · ' : t('正式版 · ','Stable · ')) + selected.name;
+status.textContent = (selected.beta ? 'Beta · ' : t('正式版 · ','Stable · ')) + selected.name
+  + (releaseSource === 'snapshot' ? t(' · 官网已核验清单',' · Verified website snapshot') : '');
 }
 }
 function renderModels() {
@@ -61,9 +63,7 @@ tab.addEventListener('keydown',event => { let next; if(event.key === 'ArrowRight
 });
 $('#download-channel').addEventListener('change',renderDownloads);
 setLanguage(language);
-fetch('https://api.github.com/repos/swy2018/Aurora-Audio-Studio/releases?per_page=100',{signal:AbortSignal.timeout(15000)})
-.then(response => {if(!response.ok) throw new Error('Release request failed');return response.json();})
-.then(data => { if(!Array.isArray(data)) throw new Error('Invalid release response'); releases=data;renderDownloads(); })
-.catch(() => {releaseError=true;renderDownloads();});
+loadReleaseData(fetch, (data, source) => { releases=data; releaseSource=source; renderDownloads(); })
+.then(available => { releaseError=!available; renderDownloads(); });
 fetch('capabilities.json').then(response => {if(!response.ok) throw new Error('Catalog request failed'); return response.json();})
 .then(data => {models=data.models;renderModels();}).catch(() => {$('#model-status').append(document.createTextNode(t(' · 读取失败，可直接打开模型数据。',' · Could not load; open the data link directly.')));});

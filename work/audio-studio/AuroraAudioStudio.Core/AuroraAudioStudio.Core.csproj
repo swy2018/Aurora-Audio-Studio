@@ -15,6 +15,9 @@
     <Compile Include="../AuroraAudioStudio/Services/ProjectDocumentMigrator.cs" Link="Services/ProjectDocumentMigrator.cs" />
     <Compile Include="../AuroraAudioStudio/Services/TaskQueueService.cs" Link="Services/TaskQueueService.cs" />
     <Compile Include="../AuroraAudioStudio/Services/ArtifactValidator.cs" Link="Services/ArtifactValidator.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/ArtifactPresentation.cs" Link="Services/ArtifactPresentation.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/AudioRuntime.cs" Link="Services/AudioRuntime.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/MediaInputPolicy.cs" Link="Services/MediaInputPolicy.cs" />
     <Compile Include="../AuroraAudioStudio/Services/ModelCatalogService.cs" Link="Services/ModelCatalogService.cs" />
     <Compile Include="../AuroraAudioStudio/Services/ModelHealthPolicy.cs" Link="Services/ModelHealthPolicy.cs" />
     <Compile Include="../AuroraAudioStudio/Services/ModelInstallPlanner.cs" Link="Services/ModelInstallPlanner.cs" />

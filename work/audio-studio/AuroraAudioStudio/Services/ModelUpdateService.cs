@@ -415,6 +415,8 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         var python = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(root, ".venv")), "Scripts", "python.exe");
         if (!File.Exists(python)) python = Path.Combine(root, "python_embeded", "python.exe");
         var probe = new ProcessStartInfo(python) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        probe.Environment["HF_HUB_OFFLINE"] = "1";
+        probe.Environment["TRANSFORMERS_OFFLINE"] = "1";
         probe.ArgumentList.Add("-B"); probe.ArgumentList.Add("-c");
         probe.ArgumentList.Add(model.Id == "seed-vc" ? "import torch,torchaudio,gradio,app_svc; print('AURORA_RUNTIME_OK')" : "import torch,gradio,acestep; print('AURORA_RUNTIME_OK')");
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -1028,6 +1030,9 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(TimeSpan.FromMinutes(2));
         var info = new ProcessStartInfo(python) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        info.Environment["HF_HUB_OFFLINE"] = "1";
+        info.Environment["TRANSFORMERS_OFFLINE"] = "1";
+        info.Environment["PYTHONUTF8"] = "1";
         foreach (var value in new[] { "-B", "-c", imports + "; print('AURORA_RUNTIME_OK')" }) info.ArgumentList.Add(value);
         var result = await RunProcessAsync(info, timeout.Token);
         return result.ExitCode == 0 ? new(true, "运行环境导入检查通过。") : new(false, "运行环境导入检查失败：" + result.Error);

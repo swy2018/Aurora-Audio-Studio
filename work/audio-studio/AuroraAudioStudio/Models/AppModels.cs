@@ -105,6 +105,7 @@ public sealed class AuroraTaskRecord : System.ComponentModel.INotifyPropertyChan
     public string SourceLanguage { get; set; } = "auto";
     public string TrackMode { get; set; } = "two-stem";
     public string Device { get; set; } = "";
+    public MediaInfo? InputInfo { get; set; }
     public List<string> OutputFiles { get; set; } = [];
     public int QueueOrder { get; set; }
     public string WorkbenchInstance { get; set; } = "";
@@ -147,6 +148,12 @@ public sealed class AuroraTaskRecord : System.ComponentModel.INotifyPropertyChan
 }
 
 public sealed record TaskExecutionProgress(double? Percentage, string Stage, string? LogLine = null);
+
+public sealed record ArtifactInfo(string Format, long Bytes = 0, double? DurationSeconds = null,
+    int SampleRate = 0, int Channels = 0, int Tracks = 0, int Notes = 0, int Subtitles = 0,
+    IReadOnlyList<string>? Warnings = null);
+
+public sealed record MediaInfo(double? DurationSeconds, int SampleRate, int Channels, string Codec, long Bytes);
 
 public sealed record ModelInstallProgress(
     double? Percentage,
@@ -201,6 +208,11 @@ public sealed class MediaSourceItem
 
 public sealed class ArtifactDisplay
 {
+    public string Summary { get; set; } = "";
+    public bool CanTranscribe => Services.MediaInputPolicy.IsSupported("transcription", Path);
+    public bool IsStem => Kind == "separation" && CanTranscribe;
+    public string ProjectId { get; init; } = "";
+    public ArtifactInfo? Info { get; init; }
     public string ProjectName { get; init; } = "";
     public string Kind { get; init; } = "";
     public string Path { get; init; } = "";
@@ -212,6 +224,7 @@ public sealed class ArtifactDisplay
 
 public sealed class AuroraArtifact
 {
+    public ArtifactInfo? Info { get; set; }
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public string Kind { get; set; } = "output";
     public string Path { get; set; } = "";
@@ -255,7 +268,7 @@ public sealed record AppUpdateInfo(
     bool IsRollback = false);
 
 public sealed record OperationResult(bool Success, string Message, string? Path = null, string? Url = null,
-    IReadOnlyList<string>? Outputs = null, string? Device = null);
+    IReadOnlyList<string>? Outputs = null, string? Device = null, MediaInfo? InputInfo = null);
 
 public sealed record AppUpdateProgress(double Percentage, string Message, bool IsIndeterminate = false);
 

@@ -72,7 +72,7 @@ public static class ModelInstallPlanner
         _ => "请参考模型来源"
     };
 
-    private static long RecommendedBytes(string id) => id switch
+    internal static long RecommendedBytes(string id) => id switch
     {
         "whisper-small" => 1L * 1024 * 1024 * 1024,
         "whisper-large-v3-turbo" => 3L * 1024 * 1024 * 1024,

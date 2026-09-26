@@ -16,7 +16,9 @@ public sealed class TaskQueueService
     public event EventHandler? Changed;
     public event EventHandler<AuroraTaskRecord>? ProgressChanged;
     private DateTimeOffset lastProgressNotification = DateTimeOffset.MinValue;
+    private bool unreadState;
     public bool IsPaused { get; private set; }
+    public string? StorageWarning { get; private set; }
     public bool HasPendingOperations { get { lock (stateGate) return cancellations.Count != 0; } }
     private string StatePath => Path.Combine(settings.AppDataRoot, "tasks.json");
 
@@ -28,8 +30,15 @@ public sealed class TaskQueueService
 
     public AuroraTaskRecord Create(string projectId, string title, string feature, string inputPath, string modelId, string preset = "recommended", string sourceLanguage = "auto", string trackMode = "two-stem", string? id = null)
     {
+        EnsureWritable();
         var logFolder = Path.Combine(settings.AppDataRoot, "TaskLogs");
-        Directory.CreateDirectory(logFolder);
+        try { Directory.CreateDirectory(logFolder); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            StorageWarning = "任务日志目录不可用，请检查保存位置后重试。";
+            Changed?.Invoke(this, EventArgs.Empty);
+            throw new IOException(StorageWarning, ex);
+        }
         var task = new AuroraTaskRecord
         {
             Id = id ?? Guid.NewGuid().ToString("N"),
@@ -44,7 +53,11 @@ public sealed class TaskQueueService
             QueueOrder = Items.Count(x => x.Status == AuroraTaskStates.Waiting),
             LogPath = Path.Combine(logFolder, $"task-{DateTime.Now:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.log")
         };
-        lock (stateGate) { Items.Insert(0, task); SaveChanged(); }
+        lock (stateGate)
+        {
+            Items.Insert(0, task);
+            if (!SaveChanged()) { Items.Remove(task); throw new IOException(StorageWarning); }
+        }
         return task;
     }
 
@@ -61,6 +74,7 @@ public sealed class TaskQueueService
         {
             if (task.Status == AuroraTaskStates.Canceled)
                 return new OperationResult(false, "任务已取消。", task.LogPath);
+            EnsureWritable();
             if (settings.Current.SafeMode) throw new InvalidOperationException("安全模式已启用，无法执行或重试任务。");
             task.Status = AuroraTaskStates.Waiting; task.Stage = IsPaused ? "队列已暂停" : "等待本地引擎"; SaveChanged();
             await WaitUntilResumedAsync(cancellation.Token);
@@ -68,9 +82,11 @@ public sealed class TaskQueueService
             acquired = true;
             await WaitUntilResumedAsync(cancellation.Token);
             if (settings.Current.SafeMode) throw new InvalidOperationException("安全模式已启用，无法执行或重试任务。");
+            EnsureWritable();
             task.Status = AuroraTaskStates.Preparing; task.Stage = "正在准备模型与工作区"; task.StartedAt = DateTimeOffset.Now; task.Progress = .02; SaveChanged();
             cancellation.Token.ThrowIfCancellationRequested();
-            task.Status = AuroraTaskStates.Running; task.Stage = "正在本机处理"; task.Progress = .03; SaveChanged();
+            task.Status = AuroraTaskStates.Running; task.Stage = "正在本机处理"; task.Progress = .03;
+            if (!SaveChanged()) throw new IOException(StorageWarning);
             var progress = new Progress<TaskExecutionProgress>(value => Report(task, cancellation, value));
             var result = await work(progress, cancellation.Token);
             cancellation.Token.ThrowIfCancellationRequested();
@@ -83,10 +99,11 @@ public sealed class TaskQueueService
                 task.OutputPath = result.Success ? result.Path ?? "" : "";
                 task.OutputFiles = result.Success ? result.Outputs?.ToList() ?? [] : [];
                 task.Device = result.Device ?? "";
+                task.InputInfo = result.InputInfo;
                 task.CompletedAt = DateTimeOffset.Now;
                 SaveChanged();
             }
-            return result;
+            return StorageWarning is null ? result : result with { Message = result.Message + "\n" + StorageWarning };
         }
         catch (OperationCanceledException)
         {
@@ -227,10 +244,22 @@ public sealed class TaskQueueService
 
     private void Load()
     {
-        try { if (File.Exists(StatePath)) Items = JsonSerializer.Deserialize<List<AuroraTaskRecord>>(File.ReadAllText(StatePath), json) ?? []; }
-        catch
+        unreadState = false;
+        try
         {
-            if (File.Exists(StatePath)) File.Copy(StatePath, StatePath + ".recovery-" + DateTime.UtcNow.Ticks, false);
+            if (File.Exists(StatePath)) Items = JsonSerializer.Deserialize<List<AuroraTaskRecord>>(File.ReadAllText(StatePath), json) ?? [];
+            if (Items.Any(task => task is null || string.IsNullOrWhiteSpace(task.Id) || task.WorkbenchInstance is null || task.OutputFiles is null))
+                throw new JsonException("Invalid task record fields.");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+        {
+            try { if (File.Exists(StatePath)) File.Copy(StatePath, StatePath + ".recovery-" + DateTime.UtcNow.Ticks, false); }
+            catch (Exception backupError) when (backupError is IOException or UnauthorizedAccessException)
+            {
+                StorageWarning = "任务记录无法读取或备份，原文件已保留。请检查保存目录的空间与权限。";
+                unreadState = true;
+                return;
+            }
             Items = [];
         }
         foreach (var task in Items.Where(x => x.Status is AuroraTaskStates.Waiting or AuroraTaskStates.Preparing or AuroraTaskStates.Running))
@@ -242,15 +271,46 @@ public sealed class TaskQueueService
         TrimAndSave();
     }
 
-    private void SaveChanged() { lock (stateGate) TrimAndSave(); Changed?.Invoke(this, EventArgs.Empty); }
-    private void TrimAndSave()
+    public bool TryRestoreStorage()
     {
+        lock (stateGate)
+        {
+            if (unreadState) Load();
+            return !unreadState && TrimAndSave();
+        }
+    }
+
+    private void EnsureWritable()
+    {
+        if (!TryRestoreStorage()) throw new IOException(StorageWarning);
+    }
+
+    private bool SaveChanged()
+    {
+        bool saved;
+        lock (stateGate) saved = TrimAndSave();
+        Changed?.Invoke(this, EventArgs.Empty);
+        return saved;
+    }
+    private bool TrimAndSave()
+    {
+        if (unreadState) return false;
         var retained = Items.Where(x => !x.CanCancel).OrderByDescending(x => x.CreatedAt)
             .Take(Math.Clamp(settings.Current.TaskHistoryLimit, 20, 500));
         Items = Items.Where(x => x.CanCancel).Concat(retained).OrderByDescending(x => x.CreatedAt).ToList();
-        Directory.CreateDirectory(settings.AppDataRoot);
-        var temp = StatePath + ".tmp";
-        File.WriteAllText(temp, JsonSerializer.Serialize(Items, json));
-        File.Move(temp, StatePath, true);
+        try
+        {
+            Directory.CreateDirectory(settings.AppDataRoot);
+            var temp = StatePath + ".tmp";
+            File.WriteAllText(temp, JsonSerializer.Serialize(Items, json));
+            File.Move(temp, StatePath, true);
+            StorageWarning = null;
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            StorageWarning = "任务记录暂时无法保存，已有成品不会被删除。请检查目录权限和磁盘空间后重试。";
+            return false;
+        }
     }
 }

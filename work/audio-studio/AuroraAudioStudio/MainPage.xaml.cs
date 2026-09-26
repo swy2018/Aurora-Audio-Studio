@@ -28,11 +28,12 @@ public sealed partial class MainPage : Page
     private readonly TaskQueueService taskQueue;
     private readonly MaintenanceService maintenance;
     private readonly WorkbenchResultService workbenchResults;
-    private readonly FileSystemWatcher resultWatcher;
-    private readonly FileSystemWatcher activityWatcher;
+    private FileSystemWatcher? resultWatcher;
+    private FileSystemWatcher? activityWatcher;
     private readonly WorkbenchActivityService workbenchActivities;
     private bool utilitySubmissionBusy;
     private bool syncingTrackMode;
+    private bool refreshingPickerText;
     private bool syncingSafeMode;
     private CancellationTokenSource? utilityBatchCancellation;
     private readonly HashSet<string> batchTaskIds = [];
@@ -60,24 +61,13 @@ public sealed partial class MainPage : Page
         backend = new(settings);
         updater = new(settings, localization);
         modelUpdater = new(catalog, settings);
-        projects = new(settings, catalog);
+        projects = new(settings, catalog, CurrentDisplayVersion());
         taskQueue = new(settings);
         InitializeUtilityDrafts();
         maintenance = new(settings, catalog, projects, localization);
         workbenchResults = new(settings, projects, taskQueue, catalog);
         workbenchActivities = new(settings, taskQueue, catalog, backend.WorkbenchInstanceId);
-        var activityRoot = Path.Combine(settings.AppDataRoot, "WorkbenchTasks");
-        Directory.CreateDirectory(activityRoot);
-        activityWatcher = new FileSystemWatcher(activityRoot, "*.json") { NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite, EnableRaisingEvents = true };
-        FileSystemEventHandler activityChanged = (_, _) => DispatcherQueue.TryEnqueue(async () => await ImportWorkbenchResultsAsync());
-        activityWatcher.Created += activityChanged;
-        activityWatcher.Changed += activityChanged;
-        activityWatcher.Renamed += (_, _) => DispatcherQueue.TryEnqueue(async () => await ImportWorkbenchResultsAsync());
-        var receiptsRoot = Path.Combine(settings.AppDataRoot, "WorkbenchReceipts");
-        Directory.CreateDirectory(receiptsRoot);
-        resultWatcher = new FileSystemWatcher(receiptsRoot, "*.json") { NotifyFilter = NotifyFilters.FileName, EnableRaisingEvents = true };
-        resultWatcher.Created += (_, _) => DispatcherQueue.TryEnqueue(async () => await ImportWorkbenchResultsAsync());
-        resultWatcher.Renamed += (_, _) => DispatcherQueue.TryEnqueue(async () => await ImportWorkbenchResultsAsync());
+        InitializeResultWatchers();
         ModelPicker.SelectionChanged += ModelPicker_SelectionChanged;
         UtilityLogList.ItemsSource = utilityLogs;
         UtilitySourcesList.ItemsSource = utilitySources;
@@ -182,11 +172,14 @@ public sealed partial class MainPage : Page
         InputPathBox.Text = string.Empty;
         utilitySources.Clear();
         MediaPreview.Source = null;
+        MediaPreview.Visibility = Visibility.Collapsed;
+        inputInspection?.Cancel();
+        InputMetadataText.Text = "";
         PreviewEmpty.Visibility = Visibility.Visible;
         UtilityInfo.IsOpen = false;
         UtilityStatusText.Text = localization.Translate("等待添加素材");
         UtilityOutputPathText.Text = settings.Current.OutputRoot;
-        utilityLogs.Clear();
+        ClearActivityHistory();
         AppendUtilityLog("工作区已准备，可以添加素材。");
         UtilityModelPicker.Items.Clear();
         foreach (var model in catalog.Definitions.Where(x => x.Feature == tag && x.IsRunnable)) UtilityModelPicker.Items.Add(new ComboBoxItem { Content = catalog.DisplayName(model), Tag = model.Id });
@@ -198,6 +191,7 @@ public sealed partial class MainPage : Page
         UtilityPresetPicker.SelectedIndex = 1;
         ApplyUtilityPreset();
         RestoreUtilityDraft(tag);
+        ApplyUtilityLayout(UtilityMainPanel.ActualWidth);
         UpdateUtilityRunState();
         }
         finally { restoringUtilityDraft = false; }
@@ -205,6 +199,7 @@ public sealed partial class MainPage : Page
 
     private async void OpenWorkbenchButton_Click(object sender, RoutedEventArgs e)
     {
+        if (!StorageAvailable) { RefreshStorageWarning(); return; }
         if (ModelPicker.SelectedItem is not ComboBoxItem item || item.Tag is not string modelId || catalog.Find(modelId) is not { } model) return;
         if (!catalog.IsInstalled(model) && !await InstallSelectedModelAsync(model)) return;
         if (settings.Current.SafeMode) { SetStatus("安全模式已启用。关闭安全模式后才能启动创作引擎。"); return; }
@@ -474,7 +469,7 @@ public sealed partial class MainPage : Page
         UtilityStatusText.Text = utilitySources.Count == 0 ? localization.Translate("等待添加素材") : localization.Format("sourcesAdded", utilitySources.Count);
         RunUtilityButton.Content = utilitySources.Count > 1 ? localization.Format("processSources", utilitySources.Count) : localization.Translate("开始处理");
         UpdateUtilityRunState();
-        if (added > 0) AppendUtilityLog($"已添加 {added} 个素材。可继续添加或直接开始处理。");
+        if (added > 0) AppendUtilityLog("sourcesAddedActivity", added);
         else if (alreadyAdded) SetStatus("所选素材已在列表中，无需重复添加。");
         else ShowUtility(false, "没有可用于当前功能的受支持音频或视频文件。");
     }
@@ -484,15 +479,17 @@ public sealed partial class MainPage : Page
         try
         {
             MediaPreview.Source = MediaSource.CreateFromStorageFile(file);
+            MediaPreview.Visibility = Visibility.Visible;
             PreviewEmpty.Visibility = Visibility.Collapsed;
             InputPathBox.Text = file.Path;
         }
         catch
         {
             MediaPreview.Source = null;
+            MediaPreview.Visibility = Visibility.Collapsed;
             PreviewEmpty.Visibility = Visibility.Visible;
         }
-        await Task.CompletedTask;
+        await InspectSelectedInputAsync(file.Path);
     }
 
     private async void UtilitySourcesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -510,6 +507,9 @@ public sealed partial class MainPage : Page
     private void ClearSourcesButton_Click(object sender, RoutedEventArgs e)
     {
         MediaPreview.Source = null;
+        MediaPreview.Visibility = Visibility.Collapsed;
+        inputInspection?.Cancel();
+        InputMetadataText.Text = "";
         utilitySources.Clear();
         InputPathBox.Text = string.Empty;
         PreviewEmpty.Visibility = Visibility.Visible;
@@ -535,6 +535,8 @@ public sealed partial class MainPage : Page
 
     private void UtilityModelPicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (refreshingPickerText) return;
+        if (IsLoaded && !applyingPreset && !restoringUtilityDraft && UtilityPresetPicker is not null) SelectTag(UtilityPresetPicker, "custom");
         if (feature == "separation" && UtilityModelPicker.SelectedItem is ComboBoxItem { Tag: string id } && UtilityTrackModePicker is not null)
         {
             syncingTrackMode = true;
@@ -542,6 +544,7 @@ public sealed partial class MainPage : Page
             finally { syncingTrackMode = false; }
         }
         UpdateUtilityRunState();
+        RefreshPresetHint();
     }
 
     private void UpdateUtilityRunState()
@@ -550,7 +553,7 @@ public sealed partial class MainPage : Page
         var hasSource = utilitySources.Any(x => File.Exists(x.Path)) || File.Exists(InputPathBox?.Text);
         var modelId = (UtilityModelPicker.SelectedItem as ComboBoxItem)?.Tag as string;
         var ready = modelId is not null && catalog.Find(modelId) is { } model && catalog.IsInstalled(model);
-        RunUtilityButton.IsEnabled = hasSource && ready && !settings.Current.SafeMode && !utilitySubmissionBusy;
+        RunUtilityButton.IsEnabled = hasSource && ready && !settings.Current.SafeMode && !utilitySubmissionBusy && StorageAvailable;
         StickyRunButton.IsEnabled = RunUtilityButton.IsEnabled;
         var help = !hasSource ? "请先添加受支持的素材。" : !ready ? "请先在模型管理中安装或修复所选引擎。" : settings.Current.SafeMode ? "请先关闭安全模式。" : "开始本地处理。";
         AutomationProperties.SetHelpText(RunUtilityButton, localization.Translate(help));
@@ -591,14 +594,20 @@ public sealed partial class MainPage : Page
         UtilityMainPanel.Margin = stacked ? new Thickness(0) : new Thickness(0, 0, 14, 0);
         UtilitySidePanel.Margin = stacked ? new Thickness(0, 14, 0, 0) : new Thickness(0);
 
-        var narrow = e.NewSize.Width < 860;
+    }
+
+    private void UtilityMainPanel_SizeChanged(object sender, SizeChangedEventArgs e) => ApplyUtilityLayout(e.NewSize.Width);
+    private void ApplyUtilityLayout(double width)
+    {
+        if (UtilitySourceColumn is null) return;
+        var narrow = width < 1100;
         UtilitySourceColumn.Width = new GridLength(narrow ? 1 : 3, GridUnitType.Star);
         UtilityPreviewColumn.Width = narrow ? new GridLength(0) : new GridLength(2, GridUnitType.Star);
         Grid.SetColumn(UtilityPreviewPanel, narrow ? 0 : 1);
         Grid.SetRow(UtilityPreviewPanel, narrow ? 1 : 0);
         UtilityPreviewPanel.Margin = narrow ? new Thickness(0, 12, 0, 0) : new Thickness(0);
         UtilityModelColumn.Width = new GridLength(1, GridUnitType.Star);
-        UtilityTrackColumn.Width = narrow ? new GridLength(0) : new GridLength(190);
+        UtilityTrackColumn.Width = narrow || feature != "separation" ? new GridLength(0) : new GridLength(190);
         UtilityPresetColumn.Width = narrow ? new GridLength(0) : new GridLength(190);
         Grid.SetColumn(UtilityTrackModePicker, narrow ? 0 : 1);
         Grid.SetRow(UtilityTrackModePicker, narrow ? 1 : 0);
@@ -629,7 +638,9 @@ public sealed partial class MainPage : Page
 
     private void ApplyUtilityPreset()
     {
+        if (refreshingPickerText) return;
         if (UtilityPresetPicker?.SelectedItem is not ComboBoxItem presetItem || presetItem.Tag is not string preset) return;
+        if (preset == "custom") { RefreshPresetHint(); return; }
         var trackMode = (UtilityTrackModePicker?.SelectedItem as ComboBoxItem)?.Tag as string ?? "two-stem";
         var modelId = (feature, trackMode, preset) switch
         {
@@ -643,13 +654,17 @@ public sealed partial class MainPage : Page
             ("subtitles", _, _) => "whisper-large-v3-turbo",
             _ => ""
         };
-        if (!string.IsNullOrWhiteSpace(modelId)) SelectTag(UtilityModelPicker, modelId);
+        applyingPreset = true;
+        try { if (!string.IsNullOrWhiteSpace(modelId)) SelectTag(UtilityModelPicker, modelId); }
+        finally { applyingPreset = false; }
         UpdateUtilityRunState();
+        RefreshPresetHint();
     }
 
     private async void RunUtilityButton_Click(object sender, RoutedEventArgs e)
     {
         if (utilitySubmissionBusy) return;
+        if (!StorageAvailable) { RefreshStorageWarning(); return; }
         if (settings.Current.SafeMode) { ShowUtility(false, "安全模式已启用。关闭安全模式后才能运行任务。"); return; }
         var sources = utilitySources.Where(x => File.Exists(x.Path)).ToList();
         if (sources.Count == 0 && File.Exists(InputPathBox.Text)) sources.Add(new MediaSourceItem { Path = InputPathBox.Text });
@@ -678,13 +693,14 @@ public sealed partial class MainPage : Page
                 project.Parameters["preset"] = preset;
                 project.Parameters["trackMode"] = trackMode;
                 project.Parameters["sourceLanguage"] = sourceLanguage;
+                projects.LinkSource(project, source.Path);
                 await projects.SaveAsync(project);
                 var task = taskQueue.Create(project.Id, $"{submittedTitle} · {source.Name}", submittedFeature, source.Path, model, preset, sourceLanguage, trackMode);
                 batchTaskIds.Add(task.Id);
                 batch.Add((project, task));
                 await projects.AddTaskAsync(project, task);
             }
-            AppendUtilityLog(localization.Format("batchSubmitted", batch.Count));
+            AppendUtilityLog("batchSubmitted", batch.Count);
             for (var index = 0; index < batch.Count; index++)
             {
                 cancellation.Token.ThrowIfCancellationRequested();
@@ -693,7 +709,7 @@ public sealed partial class MainPage : Page
                 var result = await taskQueue.RunAsync(entry.Task, (progress, token) => backend.RunUtilityAsync(entry.Task.Feature, entry.Task.InputPath, entry.Task.ModelId, entry.Task.SourceLanguage, progress, token, entry.Task.TrackMode));
                 await projects.CompleteTaskAsync(entry.Project.Id, entry.Task);
                 if (result.Success) catalog.RecordSuccessfulRun(entry.Task.ModelId, entry.Task.Device);
-                AppendUtilityLog(localization.Format(result.Success ? "batchItemCompleted" : "batchItemFailed", Path.GetFileName(entry.Task.InputPath)));
+                AppendUtilityLog(result.Success ? "batchItemCompleted" : "batchItemFailed", Path.GetFileName(entry.Task.InputPath));
             }
             var completed = batch.Count(x => x.Task.Status == AuroraTaskStates.Completed);
             if (feature == submittedFeature)
@@ -749,6 +765,10 @@ public sealed partial class MainPage : Page
             "installed" => states.Where(x => x.Installed).ToList(),
             "default" => states.Where(x => x.EditionDisplay == catalog.DefaultEditionDisplay).ToList(),
             "optional" => states.Where(x => x.EditionDisplay != catalog.DefaultEditionDisplay).ToList(),
+            "runnable" => states.Where(x => catalog.Find(x.Id)?.IsRunnable == true).ToList(),
+            "managed" => states.Where(x => catalog.Find(x.Id)?.IsRunnable == false).ToList(),
+            "repair" => states.Where(x => !x.Installed && catalog.Find(x.Id) is { } model && Directory.Exists(Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot))).ToList(),
+            _ when ModelFeatureOrder.Contains(filter) => states.Where(x => x.Feature == filter).ToList(),
             _ => states
         };
         var groups = new List<ModelGroup>();
@@ -765,12 +785,24 @@ public sealed partial class MainPage : Page
 
     private void ModelFilterPicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (IsLoaded && ModelsList is not null) RefreshModels();
+        if (IsLoaded && !refreshingPickerText && ModelsList is not null) RefreshModels();
     }
 
-    private void RefreshWorkspace()
+    private bool refreshingWorkspace;
+    private bool workspaceRefreshPending;
+    private async void RefreshWorkspace()
     {
-        var recent = projects.Recent();
+        workspaceRefreshPending = true;
+        if (refreshingWorkspace) return;
+        refreshingWorkspace = true;
+        try
+        {
+        do
+        {
+        workspaceRefreshPending = false;
+        RefreshStorageWarning();
+        var snapshot = await Task.Run(() => (Recent: projects.Recent(), Artifacts: projects.Artifacts()));
+        var recent = snapshot.Recent;
         RecentProjectsList.ItemsSource = recent;
         ProjectsEmpty.Visibility = recent.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         foreach (var task in taskQueue.Items)
@@ -795,7 +827,8 @@ public sealed partial class MainPage : Page
         TasksList.ItemsSource = taskQueue.Items.ToList();
         TasksEmpty.Visibility = taskQueue.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         QueueSummaryText.Text = active.Count == 0 ? localization.Translate("当前没有排队任务") : localization.Format("activeTaskCount", active.Count);
-        var artifacts = projects.Artifacts();
+        var artifacts = snapshot.Artifacts;
+        foreach (var artifact in artifacts) artifact.Summary = FormatArtifactInfo(artifact.Info);
         ResultsList.ItemsSource = artifacts;
         ResultsEmpty.Visibility = artifacts.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         PauseQueueButton.Content = localization.Translate(taskQueue.IsPaused ? "继续队列" : "暂停队列");
@@ -806,6 +839,11 @@ public sealed partial class MainPage : Page
             UtilityProgress.Visibility = Visibility.Visible;
             UtilityProgress.Value = current.ProgressPercent;
         }
+        } while (workspaceRefreshPending);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        { SetStatus(localization.Format("workspaceReadFailed", ex.Message)); }
+        finally { refreshingWorkspace = false; }
     }
 
     private void ModelHeader_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -902,8 +940,11 @@ public sealed partial class MainPage : Page
             {
                 ResetGlobalUpdate();
                 ShowGlobalUpdate(0, catalog.DisplayName(model), true, true);
+                using var repairProgress = new OperationProgress<ModelInstallProgress>(
+                    value => ShowGlobalUpdate(value.Percentage ?? 0, localization.Translate(value.Stage), true, true),
+                    action => DispatcherQueue.TryEnqueue(() => action()), cancellation.Token);
                 check = await modelUpdater.CheckAsync(model, cancellation.Token);
-                if (check.Path != "available") repairPlan = await modelUpdater.InspectRepairAsync(model, cancellation.Token);
+                if (check.Path != "available") repairPlan = await modelUpdater.InspectRepairAsync(model, cancellation.Token, repairProgress);
             }
             catch (OperationCanceledException) { SetStatus("模型更新检查已取消。"); return; }
             catch (Exception ex) { SetStatus(localization.Translate("检查未完成：") + ex.Message); return; }
@@ -923,13 +964,13 @@ public sealed partial class MainPage : Page
         if (repairPlan?.Kind == ModelRepairKind.Blocked) { SetStatus(repairPlan.Detail); return; }
         var repairText = repairPlan is null ? "" : localization.Translate(repairPlan.Detail) + "\n\n" + localization.Translate(repairPlan.Kind switch
         {
-            ModelRepairKind.Healthy => "文件校验通过；不会重新下载或重装。",
+            ModelRepairKind.Healthy => "repairCheckedScope",
             ModelRepairKind.RuntimeOnly => "仅修复运行环境，保留模型权重。依赖包可能重新下载，旧环境保留供回退。",
-            ModelRepairKind.MissingFiles => "只补齐当前版本缺失的权重，不更换运行环境。",
+            ModelRepairKind.MissingFiles => "repairDamagedFiles",
             _ => "无法安全执行局部修复，将使用完整部署流程，并保留可回退版本。"
         });
         if (repairPlan?.Kind == ModelRepairKind.MissingFiles)
-            repairText += "\n" + localization.Format("repairDownloadSize", repairPlan.DownloadBytes / 1048576d)
+            repairText += "\n" + (repairPlan.DownloadBytes > 0 ? localization.Format("repairDownloadSize", repairPlan.DownloadBytes / 1048576d) : localization.Get("downloadSizeUnknown"))
                 + "\n" + string.Join("\n", repairPlan.Files.Select(x => x.RelativePath));
         var dialog = new ContentDialog
         {
@@ -1343,7 +1384,7 @@ public sealed partial class MainPage : Page
 
     private void LanguagePicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (!IsLoaded || LanguagePicker.SelectedItem is not ComboBoxItem { Tag: string language } || language == settings.Current.Language) return;
+        if (!IsLoaded || refreshingPickerText || LanguagePicker.SelectedItem is not ComboBoxItem { Tag: string language } || language == settings.Current.Language) return;
         LanguagePicker.IsDropDownOpen = false;
         if (!settings.TrySetLanguage(language, out var error))
         {
@@ -1435,7 +1476,59 @@ public sealed partial class MainPage : Page
         if (ModelPicker.SelectedItem is ComboBoxItem selected) CurrentModelName.Text = selected.Content?.ToString() ?? "";
         if (!utilitySubmissionBusy) RunUtilityButton.Content = utilitySources.Count > 1 ? localization.Format("processSources", utilitySources.Count) : localization.Translate("开始处理");
         LocalizeTree(this);
+        refreshingPickerText = true;
+        try { ApplyPickerTypography(); }
+        finally { refreshingPickerText = false; }
+        RenderActivityHistory();
+        RefreshPresetHint();
+        RefreshStorageWarning();
         _ = LocalizeWorkbenchAsync();
+    }
+
+    private void ApplyPickerTypography()
+    {
+        // Native picker font setters override the page's inherited Japanese font.
+        // https://learn.microsoft.com/windows/apps/develop/ui/controls/item-containers-templates
+        Style? itemStyle = null;
+        if (Language == "ja-JP")
+        {
+            itemStyle = new Style(typeof(ComboBoxItem)) { BasedOn = (Style)Application.Current.Resources["DefaultComboBoxItemStyle"] };
+            itemStyle.Setters.Add(new Setter(Control.FontFamilyProperty, FontFamily));
+            itemStyle.Setters.Add(new Setter(Control.FontSizeProperty, 14d));
+            itemStyle.Setters.Add(new Setter(Control.FontWeightProperty, Microsoft.UI.Text.FontWeights.Normal));
+            itemStyle.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(12, 8, 12, 8)));
+            itemStyle.Setters.Add(new Setter(FrameworkElement.MinHeightProperty, 44d));
+            itemStyle.Setters.Add(new Setter(Control.VerticalContentAlignmentProperty, VerticalAlignment.Center));
+        }
+        foreach (var picker in new[] { ModelPicker, UtilityModelPicker, UtilityTrackModePicker, UtilityPresetPicker,
+            SourceLanguagePicker, ModelFilterPicker, LanguagePicker, ThemePicker, AppUpdateChannelPicker })
+        {
+            if (itemStyle is not null)
+            {
+                picker.FontFamily = FontFamily;
+                picker.FontSize = 14;
+                picker.FontWeight = Microsoft.UI.Text.FontWeights.Normal;
+                picker.Padding = new Thickness(12, 8, 0, 8);
+                picker.MinHeight = 44;
+                picker.VerticalContentAlignment = VerticalAlignment.Center;
+                picker.ItemContainerStyle = itemStyle;
+            }
+            else
+            {
+                foreach (var property in new[] { Control.FontFamilyProperty, Control.FontSizeProperty, Control.FontWeightProperty,
+                    Control.PaddingProperty, FrameworkElement.MinHeightProperty, Control.VerticalContentAlignmentProperty, ItemsControl.ItemContainerStyleProperty })
+                    picker.ClearValue(property);
+            }
+            // Refresh WinUI's cached closed selection text without applying a preset
+            // or changing the selected engine, source language, or update channel.
+            var selectedIndex = picker.SelectedIndex;
+            // Language autonyms do not change; never re-enter its active selection event.
+            if (picker != LanguagePicker && selectedIndex >= 0)
+            {
+                picker.SelectedIndex = -1;
+                picker.SelectedIndex = selectedIndex;
+            }
+        }
     }
 
     private static string CurrentDisplayVersion()
@@ -1451,7 +1544,9 @@ public sealed partial class MainPage : Page
     private void ApplyTheme() => RequestedTheme = settings.Current.Theme switch { "dark" => ElementTheme.Dark, "system" => ElementTheme.Default, _ => ElementTheme.Light };
     private static void SelectTag(ComboBox box, string tag) { foreach (var value in box.Items.OfType<ComboBoxItem>()) if ((value.Tag as string) == tag) { box.SelectedItem = value; break; } }
     private void ModelPicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        => UpdateSelectedModelState();
+    {
+        if (!refreshingPickerText) UpdateSelectedModelState();
+    }
 
     private void UpdateSelectedModelState()
     {
@@ -1463,7 +1558,7 @@ public sealed partial class MainPage : Page
         OpenWorkbenchButton.Visibility = installed ? Visibility.Visible : Visibility.Collapsed;
         InstallWorkbenchModelButton.Content = localization.Get("installModel");
         InstallWorkbenchModelButton.Visibility = installed ? Visibility.Collapsed : Visibility.Visible;
-        OpenWorkbenchButton.IsEnabled = true;
+        OpenWorkbenchButton.IsEnabled = StorageAvailable;
         InstallWorkbenchModelButton.IsEnabled = true;
     }
     private void OpenOutputButton_Click(object sender, RoutedEventArgs e) => backend.OpenFolder(settings.Current.OutputRoot);
@@ -1654,7 +1749,7 @@ public sealed partial class MainPage : Page
         Microsoft.UI.Xaml.Controls.MediaPlayerElement? player = null;
         try
         {
-            ArtifactValidator.Validate(path);
+            var metadata = ArtifactValidator.Inspect(path);
             var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = Path.GetFileName(path), CloseButtonText = localization.Get("close") };
             TextBox? editor = null;
             var extension = Path.GetExtension(path).ToLowerInvariant();
@@ -1678,6 +1773,11 @@ public sealed partial class MainPage : Page
                 dialog.Content = new TextBlock { Text = localization.Format("midiPreviewHint", ArtifactValidator.MidiNoteCount(path)), TextWrapping = TextWrapping.Wrap, MaxWidth = 420 };
                 dialog.PrimaryButtonText = localization.Translate("用默认程序打开");
             }
+            var previewBody = new StackPanel { Spacing = 12 };
+            previewBody.Children.Add(new TextBlock { Text = FormatArtifactInfo(metadata), TextWrapping = TextWrapping.Wrap });
+            foreach (var warning in metadata.Warnings ?? []) previewBody.Children.Add(new TextBlock { Text = localization.Translate(warning), TextWrapping = TextWrapping.Wrap });
+            if (dialog.Content is UIElement previewContent) previewBody.Children.Add(previewContent);
+            dialog.Content = previewBody;
             var choice = await ShowDialogAsync(dialog);
             if (choice == ContentDialogResult.Secondary && extension == ".srt")
             {
@@ -1715,8 +1815,7 @@ public sealed partial class MainPage : Page
             .FirstOrDefault(x => (x.Tag as string) == tag);
         if (target is not null) Shell.SelectedItem = target;
     }
-    private void ClearUtilityLogButton_Click(object sender, RoutedEventArgs e) { utilityLogs.Clear(); AppendUtilityLog("活动记录已清空。"); }
-    private void AppendUtilityLog(string message) => utilityLogs.Add($"{DateTime.Now:HH:mm:ss}  {localization.Translate(message)}");
+    private void ClearUtilityLogButton_Click(object sender, RoutedEventArgs e) { ClearActivityHistory(); AppendUtilityLog("活动记录已清空。"); }
     private async Task CancelSilentModelCheckAsync()
     {
         var check = silentModelCheck;
@@ -1781,8 +1880,9 @@ public sealed partial class MainPage : Page
     public void Shutdown()
     {
         SaveUtilityDraft();
-        activityWatcher.Dispose();
-        resultWatcher.Dispose();
+        activityWatcher?.Dispose();
+        resultWatcher?.Dispose();
+        inputInspection?.Cancel();
         utilityBatchCancellation?.Cancel();
         workbenchStartupCancellation?.Cancel();
         taskQueue.CancelAll();
