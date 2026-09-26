@@ -1,7 +1,38 @@
 {
   "schemaVersion": 1,
-  "verifiedAt": "2026-09-26T19:46:23.4607702+00:00",
+  "verifiedAt": "2026-09-26T20:54:45.7237898+00:00",
   "releases": [
+    {
+      "tag_name": "v2.0.1-beta.1",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        {
+          "name": "Aurora-Audio-Studio-2.0.1-beta.1-Setup-x64.exe",
+          "browser_download_url": "https://github.com/swy2018/Aurora-Audio-Studio/releases/download/v2.0.1-beta.1/Aurora-Audio-Studio-2.0.1-beta.1-Setup-x64.exe",
+          "size": 79330453,
+          "digest": "sha256:7e40775beafd3e05a80cde9801f50dd4ca78b3eb94da9bf8fefc3d797b59923b"
+        },
+        {
+          "name": "Aurora-Audio-Studio-2.0.1-beta.1-Setup-x64.exe.sha256",
+          "browser_download_url": "https://github.com/swy2018/Aurora-Audio-Studio/releases/download/v2.0.1-beta.1/Aurora-Audio-Studio-2.0.1-beta.1-Setup-x64.exe.sha256",
+          "size": 114,
+          "digest": "sha256:b191fc0612c0b09768d4c6f935a75dafa2a5424b1d8f6f8be2e011ed70311f74"
+        },
+        {
+          "name": "Aurora-Audio-Studio-2.0.1-beta.1-Source.zip",
+          "browser_download_url": "https://github.com/swy2018/Aurora-Audio-Studio/releases/download/v2.0.1-beta.1/Aurora-Audio-Studio-2.0.1-beta.1-Source.zip",
+          "size": 11937667,
+          "digest": "sha256:64b5dd35a31ec0db34c2dcb1ee4b671ff97451cb33edbc5e5ce8dcf140c46a8e"
+        },
+        {
+          "name": "Aurora-Audio-Studio-2.0.1-beta.1-Source.zip.sha256",
+          "browser_download_url": "https://github.com/swy2018/Aurora-Audio-Studio/releases/download/v2.0.1-beta.1/Aurora-Audio-Studio-2.0.1-beta.1-Source.zip.sha256",
+          "size": 110,
+          "digest": "sha256:863b644c7ca6d49274521c6e395108dd0c55d20c8b62158a5b7ee82d34197b5e"
+        }
+      ]
+    },
     {
       "tag_name": "v2.0.0",
       "draft": false,
