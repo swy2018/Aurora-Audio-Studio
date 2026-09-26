@@ -567,7 +567,16 @@ public sealed partial class MainPage : Page
         StudioActions.Orientation = e.NewSize.Width < 760 ? Orientation.Vertical : Orientation.Horizontal;
         ModelPicker.Width = e.NewSize.Width < 760 ? double.NaN : 280;
         StudioIllustration.Visibility = e.NewSize.Height < 330 ? Visibility.Collapsed : Visibility.Visible;
-        EmptyTitle.Visibility = e.NewSize.Height < 250 ? Visibility.Collapsed : Visibility.Visible;
+        EmptyTitle.Visibility = e.NewSize.Height < 160 ? Visibility.Collapsed : Visibility.Visible;
+        EmptyBody.Visibility = e.NewSize.Height < 270 ? Visibility.Collapsed : Visibility.Visible;
+        StudioEmptyContent.VerticalAlignment = e.NewSize.Height < 400 ? VerticalAlignment.Top : VerticalAlignment.Center;
+    }
+
+    private void TasksView_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (TasksEmptyIcon is null || TasksEmptyHint is null) return;
+        TasksEmptyIcon.Visibility = e.NewSize.Height < 280 ? Visibility.Collapsed : Visibility.Visible;
+        TasksEmptyHint.Visibility = e.NewSize.Height < 350 ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private void Shell_SizeChanged(object sender, SizeChangedEventArgs e)
