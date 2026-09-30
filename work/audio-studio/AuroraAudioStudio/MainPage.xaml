@@ -131,8 +131,8 @@
                                 <Button x:Name="OpenWorkbenchButton" Content="进入工作台" Click="OpenWorkbenchButton_Click" Style="{StaticResource AccentButtonStyle}" />
                             </StackPanel>
                             <Grid Grid.Row="1" Margin="0,20,22,0">
-                                <ScrollViewer x:Name="StudioEmpty" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                <StackPanel x:Name="StudioEmptyContent" HorizontalAlignment="Stretch" VerticalAlignment="Center" MaxWidth="460" Spacing="14" Padding="0,12">
+                                <ScrollViewer x:Name="StudioEmpty" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" SizeChanged="StudioEmpty_SizeChanged">
+                                <StackPanel x:Name="StudioEmptyContent" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="460" Spacing="14" Padding="0,12">
                                     <FontIcon x:Name="StudioIllustration" Glyph="&#xE8D6;" FontSize="44" Foreground="{ThemeResource AuroraAccentBrush}" />
                                     <TextBlock x:Name="EmptyTitle" Text="开启你的下一次创作" FontSize="22" FontWeight="SemiBold" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" />
                                     <TextBlock x:Name="EmptyBody" Text="选择创作引擎，即刻在 Aurora 中开始。所有处理均在本机完成。" TextWrapping="Wrap" TextAlignment="Center" Foreground="{ThemeResource AuroraMutedBrush}" />

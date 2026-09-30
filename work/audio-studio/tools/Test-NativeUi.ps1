@@ -1,4 +1,4 @@
-param([Parameter(Mandatory)][string]$Executable, [Parameter(Mandatory)][string]$EvidenceRoot, [string]$Language = 'en-US', [switch]$LanguagesOnly, [string]$ExpectedVersion = '2.0.1-beta.1')
+param([Parameter(Mandatory)][string]$Executable, [Parameter(Mandatory)][string]$EvidenceRoot, [string]$Language = 'en-US', [switch]$LanguagesOnly, [string]$ExpectedVersion = '2.0.1-beta.1', [ValidateRange(960,3840)][int]$WindowWidth = 960, [ValidateRange(640,2160)][int]$WindowHeight = 640)
 $ErrorActionPreference = 'Stop'
 if (Get-Process -Name 'Aurora Audio Studio' -ErrorAction SilentlyContinue) { throw 'A user Aurora session is already running.' }
 $EvidenceRoot = [IO.Path]::GetFullPath($EvidenceRoot)
@@ -6,7 +6,7 @@ $state = Join-Path $EvidenceRoot 'state'
 [IO.Directory]::CreateDirectory($state) | Out-Null
 $settings = @{ LocalAiRoot='C:\LocalAI'; OutputRoot=(Join-Path $EvidenceRoot 'Output'); ProjectsRoot=(Join-Path $state 'Projects'); Language=$Language; Theme='light'; AutoCheckAppUpdates=$false; AutoCheckModelUpdates=$false; SafeMode=$false }
 [IO.File]::WriteAllText((Join-Path $state 'settings.json'), ($settings | ConvertTo-Json))
-[IO.File]::WriteAllText((Join-Path $state 'window-state.json'), '{"Width":960,"Height":640,"IsMaximized":false}')
+[IO.File]::WriteAllText((Join-Path $state 'window-state.json'), (@{Width=$WindowWidth;Height=$WindowHeight;IsMaximized=$false} | ConvertTo-Json))
 $start = [Diagnostics.ProcessStartInfo]::new([IO.Path]::GetFullPath($Executable))
 $start.UseShellExecute = $false
 $start.EnvironmentVariables['AURORA_DATA_ROOT'] = $state

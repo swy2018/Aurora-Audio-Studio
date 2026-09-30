@@ -566,10 +566,16 @@ public sealed partial class MainPage : Page
         StudioSidePanel.Visibility = narrow ? Visibility.Collapsed : Visibility.Visible;
         StudioActions.Orientation = e.NewSize.Width < 760 ? Orientation.Vertical : Orientation.Horizontal;
         ModelPicker.Width = e.NewSize.Width < 760 ? double.NaN : 280;
-        StudioIllustration.Visibility = e.NewSize.Height < 330 ? Visibility.Collapsed : Visibility.Visible;
-        EmptyTitle.Visibility = e.NewSize.Height < 160 ? Visibility.Collapsed : Visibility.Visible;
-        EmptyBody.Visibility = e.NewSize.Height < 270 ? Visibility.Collapsed : Visibility.Visible;
-        StudioEmptyContent.VerticalAlignment = e.NewSize.Height < 400 ? VerticalAlignment.Top : VerticalAlignment.Center;
+    }
+
+    private void StudioEmpty_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        // Use the remaining viewport after the picker/buttons, not the whole studio height.
+        // Japanese picker metrics and stacked controls can consume substantially more space.
+        StudioIllustration.Visibility = e.NewSize.Height < 240 ? Visibility.Collapsed : Visibility.Visible;
+        EmptyTitle.Visibility = e.NewSize.Height < 80 ? Visibility.Collapsed : Visibility.Visible;
+        EmptyBody.Visibility = e.NewSize.Height < 170 ? Visibility.Collapsed : Visibility.Visible;
+        StudioEmptyContent.VerticalAlignment = e.NewSize.Height < 240 ? VerticalAlignment.Top : VerticalAlignment.Center;
     }
 
     private void TasksView_SizeChanged(object sender, SizeChangedEventArgs e)

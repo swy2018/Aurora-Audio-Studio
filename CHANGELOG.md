@@ -8,6 +8,7 @@
 - 处理记录增加字段结构校验与原件保留，批量任务保存不再覆盖较新的任务和成果索引。
 - Mac 源码增加工作台忙碌保护、分轨模式一致性，以及引擎身份和可操作界面就绪检查。
 - Mac 环境修复在独立目录安装并通过检查后切换，失败保留旧环境；隔离不同版本的下载暂存，并明确权重更新检查范围。
+- 修复窄窗口下工作台空白状态的居中和日语标题裁切，布局按实际可用空间适配。
 - Windows 安装包未签名。本次回归不代表所有模型、长素材或 Mac 原生推理已经重新验收。
 
 - Windows 2.0.1-beta.2 and updated source are available. Mac Beta 2 awaits native build and acceptance; Mac Beta 1 and Stable 2.0.0 for both platforms remain available.
@@ -16,6 +17,7 @@
 - Validate processing-record fields while preserving invalid originals. Batch saves retain newer task and result indexes.
 - Mac source adds active-workbench protection, matching stem modes, and engine identity plus usable-interface readiness checks.
 - Mac environment repair installs and validates an independent candidate before activation, preserving the old environment on failure. Download staging is separated by revision and weight-update coverage is stated explicitly.
+- Fix empty-workbench alignment and clipped Japanese headings in compact windows using the actual available viewport.
 - The Windows installer is unsigned. This regression pass does not re-validate every model, long input, or native Mac inference workflow.
 
 ## 2.0.1-beta.1 — 2026-09-27
