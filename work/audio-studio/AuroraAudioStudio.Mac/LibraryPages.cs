@@ -42,7 +42,7 @@ public sealed partial class MainWindow
             if (task.CanRetry && workspace.Engines.IsAvailable(task.ModelId)) taskActions.Children.Add(ActionButton("重试", async () =>
             {
                 if (modelOperation is not null) throw new InvalidOperationException("请先等待模型维护完成。");
-                ReleaseOtherStudios();
+                RequireIdleStudios();
                 var result = await workspace.RetryTaskAsync(task);
                 if (!result.Success) status.Text = workspace.Localization.Translate(result.Message);
                 RenderPage();

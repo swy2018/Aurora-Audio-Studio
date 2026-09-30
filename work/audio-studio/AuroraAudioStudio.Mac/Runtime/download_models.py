@@ -50,6 +50,7 @@ def validate_required(folder, spec):
 
 
 def download(root, model, update=False):
+    from install_environment import environment_path
     spec = CATALOG[model]
     base = root / "models" / model
     if not base.resolve().is_relative_to(root.resolve()) or base.is_symlink():
@@ -87,7 +88,7 @@ def download(root, model, update=False):
         total = sum(s.size or 0 for _, _, s in files) + sum(u["size"] for u in urls)
         bundled = []
         for relative in spec.get("bundled", []):
-            source = root / "envs" / spec["family"] / "lib/python3.11/site-packages" / relative
+            source = environment_path(root, spec["family"]) / "lib/python3.11/site-packages" / relative
             if not source.is_file():
                 raise RuntimeError("请先安装运行环境: " + spec["family"])
             bundled.append(source)
@@ -101,6 +102,13 @@ def download(root, model, update=False):
                 return old
         if shutil.disk_usage(root).free < total + 1024**3:
             raise RuntimeError("磁盘剩余空间不足，需要为模型和下载缓存预留空间。")
+        plan = json.dumps(dict(assets=assets, paths=sorted(expected_paths)), sort_keys=True)
+        plan_file = staging / ".aurora-download-plan.json"
+        if any(staging.iterdir()) and (not plan_file.is_file() or plan_file.read_text() != plan):
+            # Keep an interrupted other-revision candidate, but never promote its removed files.
+            staging.rename(base / ("staging-abandoned-" + str(time.time_ns())))
+            staging.mkdir()
+        plan_file.write_text(plan)
         records, done = [], 0
         for asset in urls:
             relative = Path(asset["target"])
@@ -167,6 +175,8 @@ def download(root, model, update=False):
             done += dest.stat().st_size
         validate_required(staging, spec)
         receipt = dict(model=model, installed_at=time.time(), family=spec["family"], assets=assets, files=records)
+        if not spec.get("download_only"):
+            receipt["runtime"] = environment_path(root, spec["family"]).name
         (staging / "receipt.json").write_text(json.dumps(receipt, indent=2))
         previous = base / "previous"
         if current.exists():

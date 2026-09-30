@@ -11,6 +11,23 @@ permissions:
   contents: read
 
 jobs:
+  runtime-regression:
+    name: Verify Mac runtime lifecycle on POSIX
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - name: Install test dependencies only
+        run: python -m pip install filelock==4.0.7 huggingface_hub==1.33.0 tqdm==4.70.1
+      - name: Environment and model lifecycle regression
+        working-directory: work/audio-studio/AuroraAudioStudio.Mac/Runtime
+        run: python -B -m unittest test_environment test_lifecycle
+
   build:
     name: Build unsigned Windows installer
     runs-on: windows-latest
@@ -63,6 +80,9 @@ jobs:
       - name: Publish application
         run: dotnet publish work/audio-studio/AuroraAudioStudio/AuroraAudioStudio.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore -p:Platform=x64 -p:PublishSingleFile=false -p:ContinuousIntegrationBuild=true --output publish/ci-app
 
+      - name: Verify shared Mac behavior without native Mac claims
+        run: dotnet run --project work/audio-studio/AuroraAudioStudio.MacTests --configuration Release
+
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup --yes --no-progress
@@ -83,6 +103,11 @@ jobs:
         shell: pwsh
         run: |
           & ./work/audio-studio/tools/Test-InstalledApp.ps1 -Installer "publish/ci-installer/Aurora-Audio-Studio-$env:AURORA_VERSION-Setup-x64.exe" -EvidenceRoot "$env:RUNNER_TEMP/Aurora-installed-acceptance"
+
+      - name: Verify uninstall preserves nested user data
+        shell: pwsh
+        run: |
+          & ./work/audio-studio/tools/Test-UninstallRetention.ps1 -AcceptanceRoot "$env:RUNNER_TEMP/Aurora-installed-acceptance"
 
       - name: Create SHA-256 checksum
         shell: pwsh

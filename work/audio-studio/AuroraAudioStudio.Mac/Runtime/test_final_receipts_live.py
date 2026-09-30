@@ -3,6 +3,7 @@ import json
 import argparse
 import os
 from pathlib import Path
+from install_environment import environment_path
 import shutil
 import signal
 import socket
@@ -44,7 +45,7 @@ def main():
                            AURORA_RESULT_RECEIPTS=str(receipts), AURORA_MODEL_VERSION="isolated-acceptance", AURORA_RUNTIME_SIGNATURE="isolated-acceptance",
                            PYTHONPATH=str(project / "work/audio-studio/AuroraAudioStudio/Tools"))
         with (destination / (model + ".log")).open("w") as log:
-            process = subprocess.Popen([str(source / "envs" / family / "bin/python"), "-u", str(scripts / "workbench.py"),
+            process = subprocess.Popen([str(environment_path(source, family) / "bin/python"), "-u", str(scripts / "workbench.py"),
                 "--root", str(destination), "--model", model, "--output", str(destination / "outputs"), "--port", str(port)],
                 env=environment, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
             try:

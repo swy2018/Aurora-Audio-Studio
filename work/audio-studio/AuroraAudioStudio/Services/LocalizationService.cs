@@ -4,6 +4,12 @@ public sealed class LocalizationService(SettingsService settings)
 {
     private readonly Dictionary<string, string[]> values = new(StringComparer.OrdinalIgnoreCase)
     {
+        ["处理记录字段无效，原文件已保留，请检查后重新导入。"] = ["处理记录字段无效，原文件已保留，请检查后重新导入。", "處理記錄欄位無效，原檔案已保留，請檢查後重新匯入。", "This processing record contains invalid fields. The original file was preserved; review it before importing again.", "処理記録の項目が無効です。元のファイルは保持されています。確認してから再度読み込んでください。"],
+        ["处理记录中的素材列表无效，原文件已保留。"] = ["处理记录中的素材列表无效，原文件已保留。", "處理記錄中的素材清單無效，原檔案已保留。", "The processing record has an invalid source list. The original file was preserved.", "処理記録の素材一覧が無効です。元のファイルは保持されています。"],
+        ["保存的处理选项无效，原文件已保留。"] = ["保存的处理选项无效，原文件已保留。", "已儲存的處理選項無效，原檔案已保留。", "Saved processing options are invalid. The original file was preserved.", "保存済みの処理設定が無効です。元のファイルは保持されています。"],
+        ["请先结束模型工作台和当前任务，再修改运行目录或安全模式。"] = ["请先结束模型工作台和当前任务，再修改运行目录或安全模式。", "請先結束模型工作台與目前任務，再修改執行目錄或安全模式。", "Close model workbenches and finish or cancel active tasks before changing storage locations or safe mode.", "保存先またはセーフモードを変更する前に、モデルの作業画面を終了し、実行中のタスクを完了またはキャンセルしてください。"],
+        ["请先结束模型工作台，再开始或重试处理任务。"] = ["请先结束模型工作台，再开始或重试处理任务。", "請先結束模型工作台，再開始或重試處理任務。", "Close the model workbench before starting or retrying a processing task.", "処理の開始や再試行の前に、モデルの作業画面を終了してください。"],
+        ["已检查可追踪的模型权重，未发现更新。源码与运行依赖不在本次检查范围内。"] = ["已检查可追踪的模型权重，未发现更新。源码与运行依赖不在本次检查范围内。", "已檢查可追蹤的模型權重，未發現更新。原始碼與執行依賴不在此次檢查範圍內。", "No updates were found for tracked model weights. Source code and runtime dependencies are not included in this check.", "追跡対象のモデル重みに更新はありません。ソースコードと実行環境の依存関係は今回の確認対象に含まれません。"],
         ["钢琴权重校验未通过，将从官方固定版本修复。"] = ["钢琴权重校验未通过，将从官方固定版本修复。", "鋼琴模型驗證未通過，將從官方固定版本修復。", "Piano weights failed verification. Repair will use the pinned official version.", "ピアノモデルの検証に失敗しました。公式の固定バージョンから修復します。"],
         ["模型 SHA-256 校验通过。"] = ["模型 SHA-256 校验通过。", "模型 SHA-256 驗證通過。", "Model SHA-256 verification passed.", "モデルの SHA-256 検証に合格しました。"],
         ["缺少已安装模型的版本记录，无法安全确认修复清单；未更改模型。"] = ["缺少已安装模型的版本记录，无法安全确认修复清单；未更改模型。", "缺少已安裝模型的版本記錄，無法安全確認修復清單；未更改模型。", "The installed revision is unknown, so a safe repair list could not be confirmed. No model files were changed.", "導入済みモデルのバージョン記録がないため、安全な修復一覧を確認できません。モデルは変更していません。"],

@@ -8,14 +8,14 @@ using AuroraAudioStudio.Models;
 
 namespace AuroraAudioStudio.Services;
 
-public sealed class UpdateService(SettingsService settings, LocalizationService localization)
+public sealed class UpdateService(SettingsService settings, LocalizationService localization, HttpClient? clientOverride = null)
 {
 #if UPDATE_VALIDATION
     private const string LatestReleaseApi = "https://api.github.com/repos/swy2018/Aurora-Audio-Studio/releases/tags/v0.9.9";
 #else
     private const string LatestReleaseApi = WindowsReleasePolicy.ReleasesApi;
 #endif
-    private readonly HttpClient client = CreateClient();
+    private readonly HttpClient client = clientOverride ?? CreateClient();
 
     public async Task<AppUpdateInfo> CheckAsync(CancellationToken cancellationToken = default, bool rollback = false)
     {
@@ -69,8 +69,7 @@ public sealed class UpdateService(SettingsService settings, LocalizationService 
             await DownloadWithResumeAsync(update.InstallerUrl, installerPath, expected, clientLogPath, progress, update.LatestVersion, cancellationToken);
             WriteLog(clientLogPath, "Download completed.");
             progress?.Report(new(88, localization.Get("updateVerifying"), true));
-            await using var stream = File.OpenRead(installerPath);
-            var actual = Convert.ToHexString(await SHA256.HashDataAsync(stream, cancellationToken));
+            var actual = await HashFileAsync(installerPath, cancellationToken);
             if (!actual.Equals(expected, StringComparison.OrdinalIgnoreCase))
             {
                 File.Delete(installerPath);
@@ -149,8 +148,7 @@ public sealed class UpdateService(SettingsService settings, LocalizationService 
                 using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 if (response.StatusCode == HttpStatusCode.RequestedRangeNotSatisfiable && existingLength > 0)
                 {
-                    await using var completedStream = File.OpenRead(installerPath);
-                    var completedHash = Convert.ToHexString(await SHA256.HashDataAsync(completedStream, cancellationToken));
+                    var completedHash = await HashFileAsync(installerPath, cancellationToken);
                     if (completedHash.Equals(expectedSha256, StringComparison.OrdinalIgnoreCase))
                     {
                         WriteLog(logPath, $"Existing partial file is already complete: bytes={existingLength}.");
@@ -212,6 +210,14 @@ public sealed class UpdateService(SettingsService settings, LocalizationService 
         value.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Aurora-Audio-Studio", Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.8.1"));
         value.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
         return value;
+    }
+
+    private static async Task<string> HashFileAsync(string path, CancellationToken token)
+    {
+        // File.OpenRead uses FileShare.Read; close it before deleting an invalid Windows cache.
+        // https://learn.microsoft.com/dotnet/api/system.io.fileshare
+        await using var stream = File.OpenRead(path);
+        return Convert.ToHexString(await SHA256.HashDataAsync(stream, token));
     }
 
     private static void DeleteIfExists(string path)

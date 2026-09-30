@@ -11,12 +11,14 @@ public interface IModelWorkbench
 public sealed class ModelWorkbenchConnection : IDisposable
 {
     public Uri Uri { get; }
+    public string Instance { get; }
     private Action? release;
 
-    public ModelWorkbenchConnection(Uri uri, Action release)
+    public ModelWorkbenchConnection(Uri uri, Action release, string instance = "")
     {
         if (!IsLocal(uri)) throw new ArgumentException("A model workbench must use a local HTTP endpoint.", nameof(uri));
         Uri = uri;
+        Instance = instance;
         this.release = release;
     }
 

@@ -103,6 +103,9 @@ Require(!arguments.Contains("/SUPPRESSMSGBOXES", StringComparison.Ordinal), "Fat
 
 Require(args.Length == 1 && File.Exists(args[0]), "Pass the Aurora Inno Setup script to verify the restart handoff.");
 var installerScript = File.ReadAllText(args[0]);
+Require(!installerScript.Contains("DelTree(", StringComparison.OrdinalIgnoreCase), "Uninstall must never recursively remove custom output/model folders inside app data.");
+var removals = Regex.Matches(installerScript, @"DeleteFile\(ExpandConstant\('\{localappdata\}\\Aurora Audio Studio\\([^']+)'\)\);").Select(m => m.Groups[1].Value).ToArray();
+Require(removals.Order().SequenceEqual(new[] { "settings.json", "tasks.json", "utility-drafts.json", "window-state.json" }.Order()), "Personal-data cleanup is restricted to the four explicit preference/history files, with no wildcards.");
 Require(installerScript.Contains("RestartApplications=no", StringComparison.Ordinal), "Restart Manager must not race the explicit Aurora relaunch.");
 Require(installerScript.Contains("UsePreviousAppDir=yes", StringComparison.Ordinal), "Automatic updates must preserve a user-selected installation directory.");
 Require(installerScript.Contains("SetupMutex=AuroraAudioStudioInstaller", StringComparison.Ordinal), "Only one Aurora installer may run at a time.");

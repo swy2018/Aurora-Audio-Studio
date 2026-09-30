@@ -11,6 +11,7 @@ public sealed class ProjectService(SettingsService settings, ModelCatalogService
     private readonly JsonSerializerOptions json = new() { WriteIndented = true };
     private readonly HashSet<string> recoveryPaths = new(StringComparer.OrdinalIgnoreCase);
     private readonly object cacheGate = new();
+    private readonly SemaphoreSlim writeGate = new(1, 1);
     private readonly Dictionary<string, (DateTime Written, long Length, AuroraProject Project)> documentCache = new(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
     public int RecoveryCount { get { lock (cacheGate) return recoveryPaths.Count; } }
     public IReadOnlyList<AuroraTemplate> Templates { get; } =
@@ -109,13 +110,21 @@ public sealed class ProjectService(SettingsService settings, ModelCatalogService
 
     public async Task AddTaskAsync(AuroraProject project, AuroraTaskRecord task)
     {
-        if (!project.TaskIds.Contains(task.Id)) project.TaskIds.Add(task.Id);
-        project.UpdatedAt = DateTimeOffset.Now;
-        await SaveAsync(project);
+        await writeGate.WaitAsync();
+        try
+        {
+            var latest = ReadLatest(project) ?? project;
+            if (!latest.TaskIds.Contains(task.Id)) latest.TaskIds.Add(task.Id);
+            await SaveCoreAsync(latest);
+        }
+        finally { writeGate.Release(); }
     }
 
     public async Task CompleteTaskAsync(string projectId, AuroraTaskRecord task)
     {
+        await writeGate.WaitAsync();
+        try
+        {
         var project = Find(projectId);
         if (project is null) return;
         project.Parameters["preset"] = task.Preset;
@@ -127,7 +136,9 @@ public sealed class ProjectService(SettingsService settings, ModelCatalogService
         foreach (var path in ResolveArtifacts(task))
             if (!project.Artifacts.Any(x => x.Path.Equals(path, StringComparison.OrdinalIgnoreCase)))
                 project.Artifacts.Add(new AuroraArtifact { Path = path, SourceTaskId = task.Id, Kind = task.Feature, CreatedAt = task.CompletedAt ?? DateTimeOffset.Now, Info = ArtifactValidator.Inspect(path) });
-        await SaveAsync(project);
+        await SaveCoreAsync(project);
+        }
+        finally { writeGate.Release(); }
     }
 
     private static IReadOnlyList<string> ResolveArtifacts(AuroraTaskRecord task)
@@ -138,12 +149,39 @@ public sealed class ProjectService(SettingsService settings, ModelCatalogService
 
     public async Task SaveAsync(AuroraProject project)
     {
+        ProjectDocumentMigrator.Validate(project);
+        await writeGate.WaitAsync();
+        try
+        {
+            // Task/result histories are append-only. A saved UI draft must not erase newer completions.
+            if (ReadLatest(project) is { } latest)
+            {
+                foreach (var id in latest.TaskIds) if (!project.TaskIds.Contains(id)) project.TaskIds.Add(id);
+                foreach (var artifact in latest.Artifacts)
+                    if (!project.Artifacts.Any(a => a.Path.Equals(artifact.Path, StringComparison.Ordinal))) project.Artifacts.Add(artifact);
+            }
+            await SaveCoreAsync(project);
+        }
+        finally { writeGate.Release(); }
+    }
+
+    private static AuroraProject? ReadLatest(AuroraProject project)
+    {
+        if (string.IsNullOrWhiteSpace(project.FilePath) || !File.Exists(project.FilePath)) return null;
+        var latest = ProjectDocumentMigrator.Read(File.ReadAllText(project.FilePath));
+        latest.FilePath = project.FilePath;
+        return latest;
+    }
+
+    private async Task SaveCoreAsync(AuroraProject project)
+    {
+        ProjectDocumentMigrator.Validate(project);
         project.Parameters.TryAdd("appVersion", productVersion);
         project.Parameters["lastSavedAppVersion"] = productVersion;
         Directory.CreateDirectory(settings.Current.ProjectsRoot);
         if (string.IsNullOrWhiteSpace(project.FilePath)) project.FilePath = Path.Combine(settings.Current.ProjectsRoot, $"{project.Id}.arr");
         project.UpdatedAt = DateTimeOffset.Now;
-        var temp = project.FilePath + ".tmp";
+        var temp = project.FilePath + ".tmp-" + Guid.NewGuid().ToString("N");
         await File.WriteAllTextAsync(temp, JsonSerializer.Serialize(project, json));
         File.Move(temp, project.FilePath, true);
         lock (cacheGate) documentCache.Remove(project.FilePath);

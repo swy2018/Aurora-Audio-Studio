@@ -87,6 +87,12 @@ public sealed class MacWorkspace
         {
             if (!Drafts.ContainsKey(feature)) Drafts[feature] = new() { Feature = feature };
             var draft = Drafts[feature];
+            if (draft is null || draft.Sources is null || draft.Sources.Any(string.IsNullOrWhiteSpace))
+            {
+                unreadDrafts = true;
+                RecoveryWarning = "保存的处理选项无效，原文件已保留。";
+                Drafts[feature] = draft = new() { Feature = feature };
+            }
             draft.Feature = feature;
             if (draft.Sources.Count == 0 && !string.IsNullOrWhiteSpace(draft.Source)) draft.Sources.Add(draft.Source);
             if (!SupportsWorkflow(draft.ModelId, feature))
@@ -102,6 +108,20 @@ public sealed class MacWorkspace
         "voice" => "qwen3-tts-custom", "singing" => "seed-vc", "separation" => "roformer-vocals",
         "transcription" => "transkun", "subtitles" => "whisper-large-v3-turbo", _ => "ace-step"
     };
+
+    public bool TrySaveSettings(AppSettings candidate, bool workbenchActive, out string error)
+    {
+        if (!SettingsPathValidator.TryValidate(candidate.LocalAiRoot, candidate.OutputRoot, candidate.ProjectsRoot, out error)) return false;
+        var current = Settings.Current;
+        var runtimeChanged = candidate.LocalAiRoot != current.LocalAiRoot || candidate.OutputRoot != current.OutputRoot
+            || candidate.ProjectsRoot != current.ProjectsRoot || candidate.SafeMode != current.SafeMode;
+        if (runtimeChanged && (workbenchActive || Runtime.BusyModel is not null || Queue.HasPendingOperations || Queue.Items.Any(t => t.Status is AuroraTaskStates.Waiting or AuroraTaskStates.Preparing or AuroraTaskStates.Running)))
+        {
+            error = "请先结束模型工作台和当前任务，再修改运行目录或安全模式。";
+            return false;
+        }
+        return Settings.TrySave(candidate, out error);
+    }
 
     public void SaveDrafts()
     {
@@ -176,9 +196,7 @@ public sealed class MacWorkspace
         var draft = new StudioDraft { Feature = task.Feature, ModelId = task.ModelId, Source = task.InputPath,
             SourceLanguage = task.SourceLanguage, Option = task.Preset, TrackMode = task.TrackMode };
         // Retry the same record, preserving project TaskIds and the queue's ID-based deduplication.
-        // Clear a completed cancellation before re-entering the shared queue.
-        if (task.Status == AuroraTaskStates.Canceled) task.Status = AuroraTaskStates.Waiting;
-        var result = await Queue.RunAsync(task, (progress, token) => Engines.ExecuteAsync(draft, progress, token));
+        var result = await Queue.RetryAsync(task, (progress, token) => Engines.ExecuteAsync(draft, progress, token));
         await Projects.CompleteTaskAsync(task.ProjectId, task);
         return result;
     }

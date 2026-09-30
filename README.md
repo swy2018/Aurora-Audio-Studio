@@ -37,7 +37,7 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 
 日常使用推荐下载正式版。如需体验预发布功能，可在更新设置中选择 Beta 通道。
 
-Windows 与 Mac 可选 [2.0.1-beta.1](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1-beta.1)。Mac 版适用于 Apple Silicon / macOS 26+，已通过 Developer ID 签名与 Apple 公证。正式版仍为 2.0.0。[Mac 验收记录](docs/validation-mac-2.0.1-beta.1.md)。
+Windows 可选 [2.0.1-beta.2](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1-beta.2)，同时提供包含 Mac 修复的源码。Mac 当前可下载的测试版仍为 [2.0.1-beta.1](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1-beta.1)，适用于 Apple Silicon / macOS 26+，已通过 Developer ID 签名与 Apple 公证。Mac Beta 2 待原生构建与验收；双端正式版仍为 2.0.0。[Mac Beta 2 交接](docs/macOS-2.0.1-beta.2-handoff.md)。
 
 ### 正式版与测试版更新
 
@@ -50,17 +50,17 @@ Windows 与 Mac 可选 [2.0.1-beta.1](https://github.com/swy2018/Aurora-Audio-St
 ## 当前版本更新
 
 <!-- current-packages:start -->
-当前源码版本 / Source version: `2.0.1-beta.1`。实际可下载的平台安装包请以[官网](https://swy2018.github.io/Aurora-Audio-Studio/#download)和 [GitHub Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases) 为准。 / See the website or Releases for available platform packages.
+当前源码版本 / Source version: `2.0.1-beta.2`。实际可下载的平台安装包请以[官网](https://swy2018.github.io/Aurora-Audio-Studio/#download)和 [GitHub Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases) 为准。 / See the website or Releases for available platform packages.
 <!-- current-packages:end -->
 
 <!-- release-notes-zh:start -->
-- Windows 与 Mac 均提供 2.0.1-beta.1，Mac Apple Silicon 安装包已通过 Developer ID 签名与 Apple 公证；正式版保持 2.0.0。
-- 修复日语选择框字体拥挤与对齐，活动记录可随四语言界面重新显示；空白预览不再叠加播放控件。
-- 增加素材音轨和解码预检、成品时长／声道／MIDI 音符／字幕条数摘要；分轨可直接加入 MIDI 草稿并保留来源记录。MIDI 仍需人工校对。
-- 加强 WAV、MIDI、SRT 结构校验，避免缺失或损坏的结果被报告为成功。存储异常时保留旧记录，暂停新任务并提供重试入口。
-- 模型检查明确校验范围；支持固定版本缺失及损坏文件的定向修复。补充功能与状态筛选、预设说明和自定义模型状态。
-- 优化大型处理记录库刷新，官网增加已核验下载清单回退；正式版与 Beta、Windows 与 Mac 下载保持独立。
-- Windows 安装包未签名。Beta 建议先用短素材试用，升级前请备份重要配置与作品。
+- Windows 2.0.1-beta.2 与源码更新。Mac Beta 2 待实机构建与验收；Mac Beta 1 和双端正式版 2.0.0 继续提供。
+- Windows 卸载仅清除明确的设置与任务历史文件，不递归删除配置目录，保护自定义目录中的模型、素材和成品。
+- 修复取消后重试、更新失败缓存恢复，以及静音字幕连同识别记录导出；保留原有取消和完整性校验。
+- 处理记录增加字段结构校验与原件保留，批量任务保存不再覆盖较新的任务和成果索引。
+- Mac 源码增加工作台忙碌保护、分轨模式一致性，以及引擎身份和可操作界面就绪检查。
+- Mac 环境修复在独立目录安装并通过检查后切换，失败保留旧环境；隔离不同版本的下载暂存，并明确权重更新检查范围。
+- Windows 安装包未签名。本次回归不代表所有模型、长素材或 Mac 原生推理已经重新验收。
 <!-- release-notes-zh:end -->
 
 模型中心分别显示文件状态和运行记录。成功完成任务后，会记录模型版本、时间及计算设备。“仅模型管理”表示支持下载与维护，但不能在 Aurora 内生成内容。可选模型的兼容性与运行表现取决于具体设备，请先使用短素材确认。
@@ -204,13 +204,13 @@ Successful app installation no longer retains an old app copy. Replacement failu
 ### Current release notes
 
 <!-- release-notes-en:start -->
-- Windows and Mac 2.0.1-beta.1 are available. The Mac Apple Silicon package is Developer ID signed and Apple notarized; Stable remains 2.0.0.
-- Improve Japanese picker typography and alignment, re-render activity messages when switching among four UI languages, and remove playback controls from empty previews.
-- Check input audio streams and decoding before processing. Show duration, channels, MIDI notes and subtitle counts. Send stems to a MIDI draft with source links preserved. MIDI still needs human review.
-- Strengthen WAV, MIDI and SRT validation so missing or damaged output cannot be reported as success. Preserve records, pause new work and offer retry when storage is unavailable.
-- State model verification scope clearly and repair missing or damaged files for the installed revision. Add feature/status filters, preset explanations and a Custom model state.
-- Speed up large processing libraries and add a verified website download snapshot fallback. Stable/Beta and Windows/Mac packages remain separate.
-- The Windows installer is unsigned. Test Beta with short inputs and back up important settings and work before upgrading.
+- Windows 2.0.1-beta.2 and updated source are available. Mac Beta 2 awaits native build and acceptance; Mac Beta 1 and Stable 2.0.0 for both platforms remain available.
+- Windows uninstall clears only explicitly listed preference and task-history files. It no longer recursively deletes the settings directory, preserving custom model, media and output folders.
+- Fix explicit retry after cancellation, recovery from corrupt update caches, and silent-subtitle exports with recognition evidence. Cancellation and integrity protections remain in place.
+- Validate processing-record fields while preserving invalid originals. Batch saves retain newer task and result indexes.
+- Mac source adds active-workbench protection, matching stem modes, and engine identity plus usable-interface readiness checks.
+- Mac environment repair installs and validates an independent candidate before activation, preserving the old environment on failure. Download staging is separated by revision and weight-update coverage is stated explicitly.
+- The Windows installer is unsigned. This regression pass does not re-validate every model, long input, or native Mac inference workflow.
 <!-- release-notes-en:end -->
 
 Read the [capability matrix](docs/capabilities.json) and [Mac release requirements](docs/macOS-release.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. MIDI editing/playback requires your own music application; audio playback and subtitle-copy editing are available in Results.

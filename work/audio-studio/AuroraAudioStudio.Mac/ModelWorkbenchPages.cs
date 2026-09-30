@@ -110,7 +110,7 @@ public sealed partial class MainWindow
             modelName.Text = workspace.Catalog.DisplayName(selected);
             modelState.Text = workspace.Workbenches.IsAvailable(selected.Id) ? text["workbenchAvailable"]
                 : Directory.Exists(MacWorkspace.ModelPath(workspace.Settings.Current.LocalAiRoot, selected)) ? text["pendingMac"] : text["notInstalled"];
-            runningState.Text = state.Connection is not null ? text["workbenchConnected"] : state.Startup is not null ? text["workbenchStarting"] : text["idle"];
+            runningState.Text = state.Connection is not null && state.ConnectedModel is not null ? text["workbenchConnected"] : state.Startup is not null ? text["workbenchStarting"] : text["idle"];
             release.IsEnabled = state.Connection is not null;
             releaseTop.Content = release.Content; releaseTop.IsEnabled = release.IsEnabled;
             picker.IsEnabled = state.Startup is null; open.IsEnabled = state.Startup is null;
@@ -159,6 +159,15 @@ public sealed partial class MainWindow
                 view.NavigationCompleted += (_, e) => { if (e.IsSuccess) ready.TrySetResult(); else ready.TrySetException(new IOException(text["webFailure"])); };
                 view.Source = connection.Uri;
                 await ready.Task.WaitAsync(TimeSpan.FromSeconds(30), startup.Token);
+                using var interactionReady = CancellationTokenSource.CreateLinkedTokenSource(startup.Token);
+                interactionReady.CancelAfter(TimeSpan.FromSeconds(45));
+                while (true)
+                {
+                    interactionReady.Token.ThrowIfCancellationRequested();
+                    var usable = await view.InvokeScript(WorkbenchReadiness.DomScript(connection.Instance)).WaitAsync(interactionReady.Token);
+                    if (usable?.Trim('"') == "true") break;
+                    await Task.Delay(350, interactionReady.Token);
+                }
                 await LocalizeModelWorkbenchAsync(view);
                 // WKWebView can be created after its NativeControlHost was arranged.
                 // Re-arrange after navigation so it receives the final content bounds.

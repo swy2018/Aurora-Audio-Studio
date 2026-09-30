@@ -61,13 +61,29 @@ public sealed class TaskQueueService
         return task;
     }
 
-    public async Task<OperationResult> RunAsync(AuroraTaskRecord task, Func<IProgress<TaskExecutionProgress>, CancellationToken, Task<OperationResult>> work)
+    public Task<OperationResult> RunAsync(AuroraTaskRecord task, Func<IProgress<TaskExecutionProgress>, CancellationToken, Task<OperationResult>> work)
+        => RunAttemptAsync(task, work, retry: false);
+
+    public Task<OperationResult> RetryAsync(AuroraTaskRecord task, Func<IProgress<TaskExecutionProgress>, CancellationToken, Task<OperationResult>> work)
+        => RunAttemptAsync(task, work, retry: true);
+
+    private async Task<OperationResult> RunAttemptAsync(AuroraTaskRecord task, Func<IProgress<TaskExecutionProgress>, CancellationToken, Task<OperationResult>> work, bool retry)
     {
         using var cancellation = new CancellationTokenSource();
         var acquired = false;
         lock (stateGate)
         {
             if (cancellations.ContainsKey(task.Id)) return new(false, "此任务已经在队列中。");
+            if (retry)
+            {
+                if (!task.CanRetry) return new(false, "此任务已在处理或已完成。");
+                task.Status = AuroraTaskStates.Waiting;
+                task.StartedAt = null;
+                task.CompletedAt = null;
+                task.Progress = 0;
+                task.Stage = "Queued";
+                task.Message = "";
+            }
             cancellations[task.Id] = cancellation;
         }
         try

@@ -101,15 +101,46 @@ public sealed partial class MainWindow
         var applyingPreset = false;
         var suitability = Txt("", 12);
         void DescribeModel() => suitability.Text = L(draft.ModelId switch { "transkun" or "piano" => "pianoSuitability", "yourmt3" => "multiInstrumentSuitability", "basic-pitch" => "basicPitchSuitability", _ => "presetModelOnly" }) + "\n" + L("macUtilityDevicePolicy");
-        model.SelectionChanged += (_, _) => { if (model.SelectedIndex >= 0) { draft.ModelId = models[model.SelectedIndex].Id; if (!applyingPreset) preset.SelectedIndex = 3; DescribeModel(); } };
         AutomationProperties.SetAutomationId(preset, "utility-preset");
         var track = new ComboBox { ItemsSource = new[] { L("二轨：人声 + 伴奏"), L("多轨：完整分轨") }, SelectedIndex = draft.TrackMode == "multi-stem" ? 1 : 0, HorizontalAlignment = HorizontalAlignment.Stretch };
+        model.SelectionChanged += (_, _) =>
+        {
+            if (model.SelectedIndex < 0) return;
+            draft.ModelId = models[model.SelectedIndex].Id;
+            if (!applyingPreset)
+            {
+                // ComboBox events fire synchronously: update the whole selection before allowing
+                // preset reconciliation, otherwise the old track mode can undo a manual model choice.
+                applyingPreset = true;
+                try
+                {
+                    draft.Option = "custom";
+                    preset.SelectedIndex = 3;
+                    if (feature == "separation")
+                    {
+                        draft.TrackMode = draft.ModelId == "roformer-vocals" ? "two-stem" : "multi-stem";
+                        track.SelectedIndex = draft.TrackMode == "two-stem" ? 0 : 1;
+                    }
+                }
+                finally { applyingPreset = false; }
+            }
+            DescribeModel();
+        };
         AutomationProperties.SetAutomationId(track, "utility-track-mode");
         void ApplyPreset()
         {
-            if (preset.SelectedIndex < 0 || track.SelectedIndex < 0) return;
+            if (applyingPreset || preset.SelectedIndex < 0 || track.SelectedIndex < 0) return;
             draft.Option = presetKeys[preset.SelectedIndex]; draft.TrackMode = track.SelectedIndex == 1 ? "multi-stem" : "two-stem";
-            if (draft.Option == "custom") return;
+            if (draft.Option == "custom")
+            {
+                if (feature == "separation" && draft.TrackMode != (draft.ModelId == "roformer-vocals" ? "two-stem" : "multi-stem"))
+                {
+                    applyingPreset = true;
+                    try { model.SelectedIndex = Array.FindIndex(models, m => m.Id == UtilityPresets.Model(feature, draft.TrackMode, "recommended")); }
+                    finally { applyingPreset = false; }
+                }
+                return;
+            }
             draft.ModelId = UtilityPresets.Model(feature, draft.TrackMode, draft.Option);
             applyingPreset = true;
             try { model.SelectedIndex = Array.FindIndex(models, m => m.Id == draft.ModelId); }

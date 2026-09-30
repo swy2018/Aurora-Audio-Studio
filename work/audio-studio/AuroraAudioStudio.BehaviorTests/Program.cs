@@ -15,6 +15,7 @@ if (args.FirstOrDefault() == "--log-fixture")
 if (args.FirstOrDefault() == "--runtime-copy") { await RuntimeCopyRegression.RunAsync(); return; }
 if (args.FirstOrDefault() == "--output-integrity") { OutputIntegrityRegression.Run(); return; }
 if (args.FirstOrDefault() == "--storage") { await StorageRegression.RunAsync(); return; }
+if (args.FirstOrDefault() == "--review") { await ReviewRegression.RunAsync(); return; }
 if (args.FirstOrDefault() == "--workspace") { await WorkspaceRegression.RunAsync(); return; }
 if (args.FirstOrDefault() == "--library-benchmark") { await WorkspaceRegression.BenchmarkAsync(args[1]); return; }
 if (args.FirstOrDefault() == "--media-input") { await WorkspaceRegression.ProbeRealAsync(args[1]); return; }
@@ -159,3 +160,4 @@ await RuntimeCopyRegression.RunAsync();
 OutputIntegrityRegression.Run();
 await StorageRegression.RunAsync();
 await WorkspaceRegression.RunAsync();
+await ReviewRegression.RunAsync();

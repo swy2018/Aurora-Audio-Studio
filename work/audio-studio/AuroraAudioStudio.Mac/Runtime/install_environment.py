@@ -7,6 +7,8 @@ import shutil
 import subprocess
 import sys
 import time
+import uuid
+import re
 from filelock import FileLock
 
 PACKAGES = {
@@ -21,13 +23,30 @@ PACKAGES = {
     "demucs": ["demucs==4.1.0", "torch==2.8.0", "soundfile"],
 }
 
+IMPORTS = {"ace":"acestep.acestep_v15_pipeline", "seed":"torch,librosa,gradio", "qwen":"qwen_tts", "roformer":"bs_roformer", "transkun":"transkun.transcribe", "whisper":"faster_whisper", "basic":"basic_pitch", "demucs":"demucs", "mt3":"mt3_infer", "piano":"piano_transcription_inference", "f5":"f5_tts.infer.utils_infer"}
+
+
+def environment_path(root, family):
+    base = root / "envs"
+    pointer = base / (family + ".active")
+    if pointer.is_symlink(): raise ValueError("Runtime pointer must not be a symlink")
+    name = pointer.read_text(encoding="utf-8").strip() if pointer.exists() else family
+    if not re.fullmatch(re.escape(family) + r"(?:-[0-9a-f]{32})?", name):
+        raise ValueError("Invalid runtime selection")
+    env = base / name
+    if env.is_symlink() or env.resolve().parent != base.resolve(): raise ValueError("Invalid runtime directory")
+    return env
+
+
 def install(root, family, repair=False):
     uv = shutil.which("uv") or "/opt/homebrew/bin/uv"
-    env = root / "envs" / family
+    # A venv cannot safely be renamed after creation: scripts contain absolute paths.
+    # https://docs.python.org/3.11/library/venv.html
+    env = root / "envs" / (family + "-" + uuid.uuid4().hex)
     env.parent.mkdir(parents=True, exist_ok=True)
     with FileLock(str(env.parent / (family + ".lock")), timeout=0):
-        if not (env / "bin/python").exists():
-            subprocess.run([uv, "venv", "--python", "3.11", str(env)], check=True)
+        environment_path(root, family)  # Reject unsafe existing selectors before changing anything.
+        subprocess.run([uv, "venv", "--python", "3.11", str(env)], check=True)
         python = str(env / "bin/python")
         args = [uv, "pip", "install", "--python", python]
         if repair: args.append("--reinstall")
@@ -44,9 +63,14 @@ def install(root, family, repair=False):
             subprocess.run([uv, "pip", "uninstall", "--python", python, "resemblyzer", "typing"], check=True)
         subprocess.run(args, check=True)
         subprocess.run([uv, "pip", "check", "--python", python], check=True)
+        subprocess.run([python, "-c", "import " + IMPORTS[family]], check=True, timeout=180)
         frozen = subprocess.check_output([uv, "pip", "freeze", "--python", python], text=True)
         (env / "aurora-packages.txt").write_text(frozen)
         (env / "aurora-runtime.json").write_text(json.dumps(dict(family=family, at=time.time(), python=python)))
+        pointer = env.parent / (family + ".active")
+        pending = env.parent / (family + ".active-" + uuid.uuid4().hex)
+        pending.write_text(env.name, encoding="utf-8")
+        pending.replace(pointer)
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()

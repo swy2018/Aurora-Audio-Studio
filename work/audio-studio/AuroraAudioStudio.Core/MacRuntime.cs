@@ -23,7 +23,19 @@ public sealed class MacRuntime : IDisposable
     public event Action<string>? Log;
     public string Root => settings.Current.LocalAiRoot;
     public string Current(string id) => Path.Combine(Root, "models", id, "current");
-    public string Python(string family) => Path.Combine(Root, "envs", family, "bin", "python");
+    public string EnvironmentRoot(string family)
+    {
+        var basePath = Path.Combine(Root, "envs");
+        var pointer = Path.Combine(basePath, family + ".active");
+        if (File.Exists(pointer) && (File.GetAttributes(pointer) & FileAttributes.ReparsePoint) != 0) throw new InvalidDataException("Invalid runtime pointer.");
+        var name = File.Exists(pointer) ? File.ReadAllText(pointer).Trim() : family;
+        if (!System.Text.RegularExpressions.Regex.IsMatch(name, "^" + System.Text.RegularExpressions.Regex.Escape(family) + "(?:-[0-9a-f]{32})?$"))
+            throw new InvalidDataException("Invalid runtime selection.");
+        var path = Path.Combine(basePath, name);
+        if (Directory.Exists(path) && (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0) throw new InvalidDataException("Invalid runtime directory.");
+        return path;
+    }
+    public string Python(string family) => Path.Combine(EnvironmentRoot(family), "bin", "python");
 
     public MacRuntime(SettingsService settings, string? scripts = null)
     {
@@ -48,7 +60,7 @@ public sealed class MacRuntime : IDisposable
         {
             var receipt = Path.Combine(Current(id), "receipt.json");
             if (!File.Exists(receipt)) return false;
-            if (!model.DownloadOnly && (!File.Exists(Python(model.Family)) || !File.Exists(Path.Combine(Root, "envs", model.Family, "aurora-runtime.json")))) return false;
+            if (!model.DownloadOnly && (!File.Exists(Python(model.Family)) || !File.Exists(Path.Combine(EnvironmentRoot(model.Family), "aurora-runtime.json")))) return false;
             if ((model.Required ?? []).Any(name => !File.Exists(Path.Combine(Current(id), name)) || new FileInfo(Path.Combine(Current(id), name)).Length == 0)) return false;
             using var doc = JsonDocument.Parse(File.ReadAllText(receipt));
             if (doc.RootElement.GetProperty("files").GetArrayLength() == 0) return false;
@@ -112,7 +124,7 @@ public sealed class MacRuntime : IDisposable
     private string VerificationSignature(string id)
     {
         var receipt = File.ReadAllText(Path.Combine(Current(id), "receipt.json"));
-        var environment = File.ReadAllText(Path.Combine(Root, "envs", Models[id].Family, "aurora-runtime.json"));
+        var environment = File.ReadAllText(Path.Combine(EnvironmentRoot(Models[id].Family), "aurora-runtime.json"));
         return Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(receipt + environment)));
     }
 
@@ -206,8 +218,10 @@ public sealed class MacRuntime : IDisposable
         if (!IsReady(id)) throw new InvalidOperationException("模型或运行环境未完整安装，请先安装或修复。");
         var listener = new TcpListener(IPAddress.Loopback, 0); listener.Start();
         var port = ((IPEndPoint)listener.LocalEndpoint).Port; listener.Stop();
+        var instance = Guid.NewGuid().ToString("N");
         var process = Start(Python(Models[id].Family), [Path.Combine(Scripts, "workbench.py"), "--root", Root, "--model", id, "--output", settings.Current.OutputRoot, "--port", port.ToString(), "--language", language],
             new Dictionary<string, string> {
+                ["AURORA_WORKBENCH_INSTANCE"] = instance,
                 ["AURORA_RESULT_RECEIPTS"] = Path.Combine(settings.AppDataRoot, "WorkbenchReceipts"),
                 ["AURORA_MODEL_VERSION"] = ModelStatus(id).Version,
                 ["AURORA_RUNTIME_SIGNATURE"] = VerificationSignature(id)
@@ -240,12 +254,12 @@ public sealed class MacRuntime : IDisposable
             {
                 token.ThrowIfCancellationRequested();
                 if (process.HasExited) throw new IOException(localization.Format("engineLogFailure", logfile, LastMessage));
-                try { using var response = await client.GetAsync(uri, token); if (response.IsSuccessStatusCode) break; }
+                try { using var response = await client.GetAsync(new Uri(uri, "config"), token); if (response.IsSuccessStatusCode && WorkbenchReadiness.IsReady(await response.Content.ReadAsStringAsync(token), instance)) break; }
                 catch (HttpRequestException) { }
                 catch (TaskCanceledException) when (!token.IsCancellationRequested) { }
                 await Task.Delay(700, token);
             }
-            return new ModelWorkbenchConnection(uri, () => Stop(process));
+            return new ModelWorkbenchConnection(uri, () => Stop(process), instance);
         }
         catch { Stop(process); throw; }
     }
@@ -274,6 +288,8 @@ public sealed class MacUtilityAdapter(MacRuntime runtime, SettingsService settin
     }
     public async Task<OperationResult> ExecuteAsync(StudioDraft draft, IProgress<TaskExecutionProgress> progress, CancellationToken token)
     {
+        if (draft.Feature == "separation" && draft.TrackMode != (id == "roformer-vocals" ? "two-stem" : "multi-stem"))
+            throw new InvalidOperationException("分轨模式与引擎不匹配，请重新选择后提交任务。");
         if (!IsReady) throw new InvalidOperationException("请先安装或修复选中的模型。");
         if (!File.Exists(draft.Source)) throw new FileNotFoundException("素材文件不存在。", draft.Source);
         progress.Report(new(.02, "正在检查素材音轨与解码能力"));

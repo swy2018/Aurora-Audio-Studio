@@ -58,13 +58,19 @@ public sealed partial class MainWindow
         }
     }
 
+    private bool HasActiveStudios => modelStudios.Values.Any(s => s.Connection is not null || s.Startup is not null);
+    private void RequireIdleStudios()
+    {
+        if (HasActiveStudios) throw new InvalidOperationException(L("请先结束模型工作台，再开始或重试处理任务。"));
+    }
+
     private async Task RunUtilityAsync(string feature)
     {
+        RequireIdleStudios();
         if (workspace.StorageWarning is not null) throw new IOException(workspace.StorageWarning);
         if (!workspace.Engines.IsAvailable(workspace.Drafts[feature].ModelId)
             && !await InstallFromFeatureAsync(workspace.Drafts[feature].ModelId)) return;
         if (!utilityRunning.Add(feature)) return;
-        ReleaseOtherStudios();
         var draft = JsonSerializer.Deserialize<StudioDraft>(JsonSerializer.Serialize(workspace.Drafts[feature]))!;
         var logs = utilityLogs[feature];
         try

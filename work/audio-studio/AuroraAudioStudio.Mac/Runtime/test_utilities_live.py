@@ -2,6 +2,7 @@
 import json
 import os
 from pathlib import Path
+from install_environment import environment_path
 import shutil
 import subprocess
 import time
@@ -34,7 +35,7 @@ def main():
         print("Starting:", model, flush=True)
         try:
             with (root / (model + ".log")).open("w") as log:
-                subprocess.run([str(installed / "envs" / spec["family"] / "bin/python"), str(scripts / "utility.py"),
+                subprocess.run([str(environment_path(installed, spec["family"]) / "bin/python"), str(scripts / "utility.py"),
                     "--root", str(root), "--model", model, "--source", str(source), "--output", str(output), "--language", "en"],
                     env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1", AURORA_KEEP_TEST_FILES="1", HF_HUB_OFFLINE="1", OMP_NUM_THREADS="4"),
                     stdout=log, stderr=subprocess.STDOUT, check=True, timeout=600)

@@ -39,6 +39,7 @@ try
 {
     await AppUpdaterTests.RunAsync(root, Check, Reject);
     var workspace = new MacWorkspace(Path.Combine(root, "工作区 日本語"));
+    await ReviewTests.RunAsync(root, Check, Reject);
     Check(workspace.Catalog.Definitions.Count == 27, "original 27-component catalog preserved");
     var managedIds = new[] { "heartmula-3b", "indextts-2-5", "soulx-singer-svc", "qwen3-asr-06b", "qwen3-asr-17b", "qwen3-forced-aligner" };
     Check(managedIds.All(id => workspace.Runtime.Models[id].DownloadOnly && !workspace.Catalog.Find(id)!.IsRunnable),

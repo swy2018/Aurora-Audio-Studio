@@ -41,7 +41,12 @@ public sealed class SettingsService
         try
         {
             if (File.Exists(SettingsPath))
-                Current = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsPath), options) ?? new AppSettings();
+            {
+                var candidate = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsPath), options) ?? throw new InvalidDataException("Invalid settings.");
+                if (candidate.Language is null || candidate.Theme is null || candidate.LocalAiRoot is null || candidate.OutputRoot is null || candidate.ProjectsRoot is null)
+                    throw new InvalidDataException("Invalid settings fields.");
+                Current = candidate;
+            }
         }
         catch
         {
@@ -57,6 +62,7 @@ public sealed class SettingsService
 
     public bool TrySave(AppSettings settings, out string error)
     {
+        if (settings.Language is null || settings.Theme is null) { error = "设置文件无法读取，请检查设置。"; return false; }
         if (!SettingsPathValidator.TryValidate(settings.LocalAiRoot, settings.OutputRoot, settings.ProjectsRoot, out error)) return false;
         try
         {

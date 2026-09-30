@@ -9,7 +9,7 @@ import sys
 import time
 from filelock import FileLock
 from download_models import CATALOG, digest, download, emit, validate_required
-from install_environment import install
+from install_environment import install, environment_path
 
 SOURCES = {"ace": ("ace-step", "https://github.com/ace-step/ACE-Step-1.5.git"), "seed": ("seed-vc", "https://github.com/Plachtaa/seed-vc.git")}
 IMPORTS = {"ace":"acestep.acestep_v15_pipeline", "seed":"torch,librosa,gradio", "qwen":"qwen_tts", "roformer":"bs_roformer", "transkun":"transkun.transcribe", "whisper":"faster_whisper", "basic":"basic_pitch", "demucs":"demucs"}
@@ -29,7 +29,7 @@ def environment(root, family, repair=False):
         source.parent.mkdir(parents=True, exist_ok=True)
         if not (source / ".git").exists():
             subprocess.run(["git", "clone", "--depth", "1", url, str(source)], check=True)
-    marker = root / "envs" / family / "aurora-runtime.json"
+    marker = environment_path(root, family) / "aurora-runtime.json"
     if repair or not marker.exists():
         emit("progress", stage="安装 Mac 运行环境", model=family)
         install(root, family, repair=repair)
@@ -60,7 +60,7 @@ def _check(root, model, deep=True):
         (current / "health.json").write_text(json.dumps(dict(at=time.time(), files=True, imports=False, inference=False)))
         emit("completed", model=model, message="模型文件校验通过；与 Windows 原版相同，此组件仅提供模型管理。")
         return
-    python = root / "envs" / family / "bin/python"
+    python = environment_path(root, family) / "bin/python"
     subprocess.run([str(python), "-c", "import " + IMPORTS[family]], check=True, timeout=180)
     if family == "transkun":
         subprocess.run([str(python), "-c", "from importlib.resources import files; p=files('transkun')/'pretrained/2.0.pt'; assert p.is_file() and p.stat().st_size>50000000"],check=True)
@@ -94,9 +94,9 @@ def action(root, model, command):
         from subtitle_edit import require_closed
         require_closed(base)
     if command in ("install", "repair", "update"):
-        if not CATALOG[model].get("download_only"):
-            environment(root, family, repair=command=="repair")
         try:
+            if not CATALOG[model].get("download_only"):
+                environment(root, family, repair=command=="repair")
             if family == "subtitle-edit":
                 from subtitle_edit import install as install_editor
                 with FileLock(str(base / ".lock"), timeout=0):
@@ -122,7 +122,7 @@ def action(root, model, command):
         receipt = json.loads((base / "current/receipt.json").read_text())
         changes = [a["repo"] for a in receipt["assets"] if "repo" in a and
             (HfApi().space_info if a.get("repo_type") == "space" else HfApi().model_info)(a["repo"]).sha != a["revision"]]
-        message = "发现更新：" + ", ".join(changes) if changes else "模型权重已是当前版本。"
+        message = "发现更新：" + ", ".join(changes) if changes else "已检查可追踪的模型权重，未发现更新。源码与运行依赖不在本次检查范围内。"
         result = dict(at=time.time(), available=bool(changes), message=message, updates=changes)
         (base / "current/update-status.json").write_text(json.dumps(result, ensure_ascii=False))
         emit("completed", model=model, message=message, updates=changes)

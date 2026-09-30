@@ -352,13 +352,10 @@ public sealed partial class MainWindow : Window
         content.Children.Add(Txt(text["storageHint"], 13));
         var save = ActionButton(L("保存设置"), () =>
         {
-            if (modelOperation is not null || workspace.Queue.Items.Any(t => t.Status is "running" or "preparing" or "waiting"))
-                throw new InvalidOperationException("请先完成或取消当前任务，再修改运行设置。");
-            ReleaseOtherStudios();
             var candidate = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(settingsDraft))!;
             candidate.Language = workspace.Settings.Current.Language;
             candidate.LastAppUpdateCheckDate = candidate.AppUpdateChannel == workspace.Settings.Current.AppUpdateChannel ? workspace.Settings.Current.LastAppUpdateCheckDate : null;
-            if (!workspace.Settings.TrySave(candidate, out var error)) throw new IOException(error);
+            if (!workspace.TrySaveSettings(candidate, modelOperation is not null || HasActiveStudios, out var error)) throw new IOException(L(error));
             settingsDraft.LocalAiRoot = candidate.LocalAiRoot; settingsDraft.OutputRoot = candidate.OutputRoot; settingsDraft.ProjectsRoot = candidate.ProjectsRoot;
             ApplyTheme(); status.Text = text["settingsSaved"]; return Task.CompletedTask;
         }, "save-settings"); save.Classes.Add("primary"); content.Children.Add(save);

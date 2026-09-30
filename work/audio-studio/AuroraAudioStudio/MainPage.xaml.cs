@@ -1662,7 +1662,7 @@ public sealed partial class MainPage : Page
         try
         {
             // Resume the retained record: a double click cannot create duplicate jobs.
-            var result = await taskQueue.RunAsync(old, (progress, token) => backend.RunUtilityAsync(old.Feature, old.InputPath, old.ModelId, old.SourceLanguage, progress, token, old.TrackMode));
+            var result = await taskQueue.RetryAsync(old, (progress, token) => backend.RunUtilityAsync(old.Feature, old.InputPath, old.ModelId, old.SourceLanguage, progress, token, old.TrackMode));
             await projects.CompleteTaskAsync(old.ProjectId, old);
             if (result.Success) catalog.RecordSuccessfulRun(old.ModelId, old.Device);
             FooterStatus.Text = localization.Translate(result.Message);
@@ -1738,17 +1738,7 @@ public sealed partial class MainPage : Page
         var picker = new FolderPicker(App.MainWindow.AppWindow.Id) { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
         var folder = await picker.PickSingleFolderAsync();
         if (folder is null) return;
-        var name = Path.GetFileNameWithoutExtension(path) + (subtitleText is null ? "" : "-edited");
-        var extension = Path.GetExtension(path);
-        var destination = Path.Combine(folder.Path, name + extension);
-        for (var index = 1; File.Exists(destination); index++) destination = Path.Combine(folder.Path, $"{name}-{index}{extension}");
-        if (subtitleText is not null) await File.WriteAllTextAsync(destination, subtitleText);
-        else
-        {
-            await using var source = File.OpenRead(path);
-            await using var output = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.None, 81920, true);
-            await source.CopyToAsync(output);
-        }
+        var destination = await AuroraAudioStudio.Core.ArtifactExport.CopyAsync(path, folder.Path, subtitleText);
         FooterStatus.Text = localization.Format("artifactExported", destination);
     }
 

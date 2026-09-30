@@ -172,6 +172,7 @@ class LifecycleTests(unittest.TestCase):
         partial = self.base / "staging/weights/model.bin.partial"
         partial.parent.mkdir(parents=True)
         partial.write_bytes(self.data[:4])
+        (self.base / "staging/.aurora-download-plan.json").write_text(json.dumps(dict(assets=[dict(url=spec["urls"][0]["url"], revision=spec["urls"][0]["md5"])], paths=["weights/model.bin"]), sort_keys=True))
         response = io.BytesIO(self.data[4:]); response.status = 206
         with patch.object(d.urllib.request,"urlopen",return_value=response) as fetch:
             receipt = d.download(self.root,"unit-model")
@@ -195,6 +196,20 @@ class LifecycleTests(unittest.TestCase):
             manage.action(self.root,"unit-model","uninstall")
         self.assertFalse((self.base/"current").exists())
         self.assertEqual(result.read_bytes(),b"user result")
+
+    def test_other_revision_staging_does_not_promote_removed_files(self):
+        leftover = self.base / "staging/weights/removed-old-config.json"
+        leftover.parent.mkdir(parents=True)
+        leftover.write_text("old revision")
+        d.download(self.root, "unit-model")
+        self.assertFalse((self.base / "current/weights/removed-old-config.json").exists())
+        self.assertEqual(len(list(self.base.glob("staging-abandoned-*/weights/removed-old-config.json"))), 1)
+
+    def test_environment_update_failure_retains_retry_status(self):
+        d.download(self.root, "unit-model")
+        with patch.object(manage, "environment", side_effect=RuntimeError("environment failure")):
+            with self.assertRaises(RuntimeError): manage.action(self.root, "unit-model", "update")
+        self.assertTrue(json.loads((self.base / "current/update-status.json").read_text())["available"])
 
     def test_uninstall_rejects_symlink(self):
         outside = self.root/"user-data"; outside.mkdir()
