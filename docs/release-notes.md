@@ -1,6 +1,6 @@
 ## 2.0.1-beta.1 — 2026-09-27
 
-- Windows 2.0.1-beta.1 与源码更新。Mac 当前正式版保持 2.0.0；新版安装包将在 Mac 构建与验收后补充。
+- Windows 与 Mac 均提供 2.0.1-beta.1，Mac Apple Silicon 安装包已通过 Developer ID 签名与 Apple 公证；正式版保持 2.0.0。
 - 修复日语选择框字体拥挤与对齐，活动记录可随四语言界面重新显示；空白预览不再叠加播放控件。
 - 增加素材音轨和解码预检、成品时长／声道／MIDI 音符／字幕条数摘要；分轨可直接加入 MIDI 草稿并保留来源记录。MIDI 仍需人工校对。
 - 加强 WAV、MIDI、SRT 结构校验，避免缺失或损坏的结果被报告为成功。存储异常时保留旧记录，暂停新任务并提供重试入口。
@@ -8,7 +8,7 @@
 - 优化大型处理记录库刷新，官网增加已核验下载清单回退；正式版与 Beta、Windows 与 Mac 下载保持独立。
 - Windows 安装包未签名。Beta 建议先用短素材试用，升级前请备份重要配置与作品。
 
-- Windows 2.0.1-beta.1 and updated source. Mac Stable remains 2.0.0; a new Mac package will follow native build and acceptance.
+- Windows and Mac 2.0.1-beta.1 are available. The Mac Apple Silicon package is Developer ID signed and Apple notarized; Stable remains 2.0.0.
 - Improve Japanese picker typography and alignment, re-render activity messages when switching among four UI languages, and remove playback controls from empty previews.
 - Check input audio streams and decoding before processing. Show duration, channels, MIDI notes and subtitle counts. Send stems to a MIDI draft with source links preserved. MIDI still needs human review.
 - Strengthen WAV, MIDI and SRT validation so missing or damaged output cannot be reported as success. Preserve records, pause new work and offer retry when storage is unavailable.
