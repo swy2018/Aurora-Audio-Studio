@@ -1,5 +1,7 @@
 # Mac 2.0.1-beta.2 构建与验收交接
 
+2026-10-01：Mac 补包已完成，见 [Mac 原生验收记录](validation-mac-2.0.1-beta.2.md)。以下保留最初交接要求。
+
 基线为 `7b61bbd` 之后的 Beta 2 修复提交；以 v2.0.1-beta.2 标签为准。Windows 侧不提供未经 Mac 原生验收的 DMG，现有 Mac Beta 1 与正式版 2.0.0 继续可用。
 
 ## 已修改的 Mac 路径
