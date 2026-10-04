@@ -37,7 +37,7 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 
 日常使用推荐下载正式版。如需体验预发布功能，可在更新设置中选择 Beta 通道。
 
-当前下载区保留正式版；已被 2.0.1 正式版替代的 Beta 发布包和云端标签已清理，Stable 与 Beta 通道目前均提供 2.0.1。完整 Git 提交历史保留。详见[版本保留说明](docs/release-retention.md)。
+当前下载区保留正式版；已被 2.0.1 正式版替代的 Beta 发布包和云端标签已清理，Stable 与 Beta 通道目前均提供 2.0.1。以后每次正式版发布并验证后均清理所有更旧 Beta；本地交付产物只留最新安装包，开发源码、本地 Git、工具链与凭据保留。完整云端 Git 提交历史保留。详见[版本保留说明](docs/release-retention.md)。
 
 Windows 与 Mac 均推荐 [2.0.1 正式版](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1)。Mac 适用于 Apple Silicon / macOS 26+，已完成实机验收、Developer ID 签名与 Apple 公证。[Windows 验收范围](docs/validation-2.0.1.md) · [Mac 验收记录](docs/validation-mac-2.0.1.md)。
 
