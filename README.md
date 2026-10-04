@@ -14,9 +14,9 @@
   </p>
 </div>
 
-![Aurora Mac 实机首页](docs/assets/mac-2.0-home.png)
+![Aurora Mac 实机首页](docs/assets/mac-2.0.1-home.jpg)
 
-Aurora 2.0 面向 Windows 与 macOS 的本地音频创作。上图为 Mac 2.0.0 实机界面；各平台可下载版本见下表。
+Aurora 2.0 面向 Windows 与 macOS 的本地音频创作。上图为 Mac 2.0.1 实机界面；各平台可下载版本见下表。
 
 [六个功能界面](https://swy2018.github.io/Aurora-Audio-Studio/#workflows) · [设置界面](docs/assets/mac-2.0-settings.png) · [关于界面](docs/assets/mac-2.0-about.png)
 
@@ -27,19 +27,19 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 | | Windows | macOS |
 |---|---|---|
 | 系统 | Windows 10 / 11 x64 | macOS 26+ · Apple Silicon |
-| 安装包 | `Aurora-Audio-Studio-2.0.1-Setup-x64.exe` | `Aurora-Audio-Studio-2.0.0-arm64.dmg` |
-| 获取 | [正式版下载](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest) | [Mac 2.0.0 正式版](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.0) |
+| 安装包 | `Aurora-Audio-Studio-2.0.1-Setup-x64.exe` | `Aurora-Audio-Studio-2.0.1-arm64.dmg` |
+| 获取 | [正式版下载](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest) | [Mac 2.0.1 正式版](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1) |
 | 安装 | 运行标准安装程序 | 打开 DMG，拖入 Applications |
 | 加速 | NVIDIA RTX 推荐，依模型要求 | Apple Silicon 的 MPS / MLX 或 CPU，依模型实现 |
 | 指南 | [Windows 使用说明](work/audio-studio/README-给音乐人的使用说明.md) | [Mac 使用说明](docs/macOS-user-guide.md) |
 
-请选择与你的系统匹配的安装包；同名 `.sha256` 文件用于校验下载完整性。Windows 正式版为 2.0.1，Mac 正式版为 2.0.0。模型按需安装，不随安装包捆绑。各平台签名说明见[代码签名政策](CODE_SIGNING_POLICY.md)。
+请选择与你的系统匹配的安装包；同名 `.sha256` 文件用于校验下载完整性。Windows 与 Mac 正式版均为 2.0.1。模型按需安装，不随安装包捆绑。各平台签名说明见[代码签名政策](CODE_SIGNING_POLICY.md)。
 
 日常使用推荐下载正式版。如需体验预发布功能，可在更新设置中选择 Beta 通道。
 
 当前下载区保留正式版与最新 Beta，旧测试版安装包和标签已整理；完整 Git 提交历史保留。详见[版本保留说明](docs/release-retention.md)。
 
-Windows 推荐 [2.0.1 正式版](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1)。Mac 可选 [2.0.1-beta.2](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1-beta.2)，适用于 Apple Silicon / macOS 26+，已通过实机验收、Developer ID 签名与 Apple 公证。Mac 2.0.1 正式包待 Mac 构建与验收。[Windows 2.0.1 验收范围](docs/validation-2.0.1.md) · [Mac Beta 2 验收记录](docs/validation-mac-2.0.1-beta.2.md)。
+Windows 与 Mac 均推荐 [2.0.1 正式版](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1)。Mac 适用于 Apple Silicon / macOS 26+，已完成实机验收、Developer ID 签名与 Apple 公证。[Windows 验收范围](docs/validation-2.0.1.md) · [Mac 验收记录](docs/validation-mac-2.0.1.md)。
 
 ### 正式版与测试版更新
 
@@ -56,12 +56,12 @@ Windows 推荐 [2.0.1 正式版](https://github.com/swy2018/Aurora-Audio-Studio/
 <!-- current-packages:end -->
 
 <!-- release-notes-zh:start -->
-- Windows 2.0.1 正式版发布；Mac 2.0.1 安装包待 Mac 原生构建与验收，现有 Mac 正式版 2.0.0 和 2.0.1-beta.2 继续提供。
+- Windows 与 Mac 2.0.1 正式版均已发布；Mac Apple Silicon 安装包已完成实机验收、Developer ID 签名与 Apple 公证。
 - 修复部分桌面启动环境下 Qwen 工作台报“句柄无效”的问题，统一后台引擎与维护工具的非交互输入处理。
 - 修正引擎日志中中文路径的编码；维护检查明确区分文件齐全与实际运行验证。
 - 包含 2.0.1 测试版的任务取消后重试、批量成果保存、更新缓存恢复、字幕导出及卸载数据保护修复。
 - 保留四语言界面、窄窗口和日语排版改进；旧版配置、处理记录与用户成品受到原有保护。
-- Windows 安装包未签名。验收覆盖本机已安装引擎的短样本；未安装模型、长素材与 Mac 新正式包不在本次实机验收范围内。
+- Windows 安装包未签名。Mac 已验证八个已安装模型的短样本、四语言界面及升级回退；未安装模型、长素材与 Intel Mac 不在本次实机验收范围内。
 <!-- release-notes-zh:end -->
 
 模型中心分别显示文件状态和运行记录。成功完成任务后，会记录模型版本、时间及计算设备。“仅模型管理”表示支持下载与维护，但不能在 Aurora 内生成内容。可选模型的兼容性与运行表现取决于具体设备，请先使用短素材确认。
@@ -194,7 +194,7 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 ## English
 
-Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows Stable is 2.0.1; Mac Stable remains 2.0.0, with 2.0.1-beta.2 available. Mac 2.0.1 awaits a native build and acceptance. Screenshots show the Mac 2.0.0 interface. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Mac build and distribution guide](docs/macOS-release.md).
+Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows and Mac Stable are both 2.0.1. The Mac package is Developer ID signed and notarized. Screenshots show the Mac 2.0.1 interface. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Mac build and distribution guide](docs/macOS-release.md).
 
 Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Beta releases are intended for users who want early access; back up important settings before upgrading.
 
@@ -205,12 +205,12 @@ Successful app installation no longer retains an old app copy. Replacement failu
 ### Current release notes
 
 <!-- release-notes-en:start -->
-- Windows 2.0.1 Stable is available. Mac 2.0.1 requires a native Mac build and acceptance; Mac Stable 2.0.0 and 2.0.1-beta.2 remain available.
+- Windows and Mac 2.0.1 Stable are available. The Apple Silicon package has passed native Mac acceptance, Developer ID signing and Apple notarization.
 - Fix Qwen workbench startup failing with an invalid handle in some desktop launch environments. Background engines and maintenance tools now receive valid non-interactive input.
 - Preserve Unicode paths in engine logs and distinguish file completeness from verified operation in maintenance results.
 - Includes the 2.0.1 Beta fixes for retry after cancellation, batch result preservation, update-cache recovery, subtitle export and uninstall data protection.
 - Retains four-language, compact-window and Japanese typography improvements, with existing safeguards for settings, processing records and user outputs.
-- The Windows installer is unsigned. Acceptance covers short samples on locally installed engines, not missing models, long inputs or a new native Mac release.
+- The Windows installer is unsigned. Mac acceptance covers short samples on eight installed models, four UI languages, update and rollback. Missing models, long inputs and Intel Macs were not tested.
 <!-- release-notes-en:end -->
 
 Read the [capability matrix](docs/capabilities.json) and [Mac release requirements](docs/macOS-release.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. MIDI editing/playback requires your own music application; audio playback and subtitle-copy editing are available in Results.

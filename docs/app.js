@@ -16,7 +16,7 @@ function renderFeature() {
 const row = featureData[feature], index = language === 'en' ? 1 : 0;
 $('#workflow-title').textContent = row[0][index]; $('#workflow-description').textContent = row[1][index];
 $('#workflow-input').textContent = row[2][index]; $('#workflow-engine').textContent = row[3]; $('#workflow-output').textContent = row[4][index];
-$('#workflow-image').src = 'assets/mac-2.0-' + feature + '.png';
+$('#workflow-image').src = 'assets/mac-2.0.1-' + feature + '.jpg';
 $('#workflow-image').alt = t('Aurora Mac 实机界面：','Real Aurora Mac screen: ') + $('#tab-' + feature).textContent;
 $('#workflow-image-link').href = $('#workflow-image').getAttribute('src');
 $('#workflow-panel').setAttribute('aria-labelledby','tab-' + feature);
