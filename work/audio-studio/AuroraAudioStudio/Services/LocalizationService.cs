@@ -272,7 +272,7 @@ public sealed class LocalizationService(SettingsService settings)
         ["healthEnabled"] = ["已启用", "已啟用", "Enabled", "有効"],
         ["healthDisabled"] = ["未启用", "未啟用", "Disabled", "無効"],
         ["healthRecover"] = ["需要恢复", "需要復原", "Recovery required", "復旧が必要"],
-        ["healthComponents"] = ["{0}/{1} 个组件可用", "{0}/{1} 個元件可用", "{0}/{1} components available", "{0}/{1} コンポーネントが利用可能"],
+        ["healthComponents"] = ["{0}/{1} 个组件文件齐全；实际运行请在工作台验证", "{0}/{1} 個元件檔案齊全；實際執行請在工作台驗證", "{0}/{1} components have all required files; verify operation in the workbench", "{0}/{1} コンポーネントの必要なファイルが揃っています。動作はワークベンチで確認してください"],
         ["healthDiskAvailable"] = ["{0} · 可用 {1:0.0} GB", "{0} · 可用 {1:0.0} GB", "{0} · {1:0.0} GB available", "{0} · 空き {1:0.0} GB"],
         ["healthTaskRecoveryDetail"] = ["异常退出后保留任务、处理记录与诊断记录", "異常結束後保留任務、處理記錄與診斷記錄", "Tasks, processing records, and diagnostics survive an unexpected exit", "異常終了後もタスク、処理履歴、診断記録を保持"],
         ["healthRecordsGood"] = ["未发现损坏或不兼容的处理记录", "未發現損壞或不相容的處理記錄", "No damaged or incompatible processing records found", "破損または非対応の処理履歴はありません"],

@@ -3,6 +3,8 @@ using System.Text.Json;
 using AuroraAudioStudio.Models;
 using AuroraAudioStudio.Services;
 
+if (args.FirstOrDefault() == "--stdin-fixture") { ProcessLaunchRegression.RunFixture(); return; }
+if (args.FirstOrDefault() == "--process-launch") { await ProcessLaunchRegression.RunAsync(); return; }
 if (args.FirstOrDefault() == "--log-fixture")
 {
     Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -161,3 +163,4 @@ OutputIntegrityRegression.Run();
 await StorageRegression.RunAsync();
 await WorkspaceRegression.RunAsync();
 await ReviewRegression.RunAsync();
+await ProcessLaunchRegression.RunAsync();

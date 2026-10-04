@@ -450,7 +450,7 @@ public sealed class BackendService(SettingsService settings)
         using var process = new Process { StartInfo = info };
         try
         {
-            process.Start();
+            BackgroundProcess.Start(process);
             using var cancellation = cancellationToken.Register(() =>
             {
                 try { if (!process.HasExited) process.Kill(true); } catch { }
@@ -475,7 +475,7 @@ public sealed class BackendService(SettingsService settings)
         try
         {
             progress?.Report(new(.04, "正在启动本地引擎"));
-            process.Start();
+            BackgroundProcess.Start(process);
             using var cancellation = cancellationToken.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
             await using var writer = new StreamWriter(logPath, false);
             await writer.WriteLineAsync($"[Aurora] {DateTimeOffset.Now:O} {localization.Format("logTaskStarting", logPrefix)}");
@@ -722,7 +722,8 @@ public sealed class BackendService(SettingsService settings)
             {
                 FileName = fileName, Arguments = arguments, WorkingDirectory = workingDirectory,
                 UseShellExecute = false, CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden,
-                RedirectStandardOutput = true, RedirectStandardError = true
+                RedirectStandardOutput = true, RedirectStandardError = true,
+                StandardOutputEncoding = System.Text.Encoding.UTF8, StandardErrorEncoding = System.Text.Encoding.UTF8
             },
             EnableRaisingEvents = true
         };
@@ -737,9 +738,10 @@ public sealed class BackendService(SettingsService settings)
         process.StartInfo.Environment["AURORA_WORKBENCH_INSTANCE"] = instance;
         process.StartInfo.Environment["GRADIO_ANALYTICS_ENABLED"] = "False";
         process.StartInfo.Environment["PYTHONUNBUFFERED"] = "1";
+        process.StartInfo.Environment["PYTHONIOENCODING"] = "utf-8";
         process.OutputDataReceived += (_, e) => { if (e.Data is not null) AppendLog(logPath, e.Data); };
         process.ErrorDataReceived += (_, e) => { if (e.Data is not null) AppendLog(logPath, e.Data); };
-        process.Start();
+        BackgroundProcess.Start(process);
         startingKey = key;
         workbenchInstances[key] = instance;
         process.BeginOutputReadLine(); process.BeginErrorReadLine();
@@ -752,12 +754,15 @@ public sealed class BackendService(SettingsService settings)
     {
         FileName = fileName, WorkingDirectory = workingDirectory, UseShellExecute = false,
         CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden,
-        RedirectStandardOutput = true, RedirectStandardError = true
+        RedirectStandardOutput = true, RedirectStandardError = true,
+        StandardOutputEncoding = System.Text.Encoding.UTF8, StandardErrorEncoding = System.Text.Encoding.UTF8,
+        Environment = { ["PYTHONIOENCODING"] = "utf-8" }
     };
 
     private static async Task<(int ExitCode, string Output, string Error)> RunProcessAsync(ProcessStartInfo info, CancellationToken cancellationToken = default)
     {
-        using var process = Process.Start(info) ?? throw new InvalidOperationException("Process could not start.");
+        using var process = new Process { StartInfo = info };
+        BackgroundProcess.Start(process);
         using var cancellation = cancellationToken.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
         var output = process.StandardOutput.ReadToEndAsync();
         var error = process.StandardError.ReadToEndAsync();

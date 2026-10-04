@@ -66,7 +66,8 @@ public static class MediaInputPolicy
         timeout.CancelAfter(TimeSpan.FromSeconds(30));
         var info = new ProcessStartInfo(tool) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
         foreach (var argument in arguments) info.ArgumentList.Add(argument);
-        using var process = Process.Start(info) ?? throw new IOException("无法启动音频预检。");
+        using var process = new Process { StartInfo = info };
+        BackgroundProcess.Start(process);
         using var cancellation = timeout.Token.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch (InvalidOperationException) { } });
         var output = process.StandardOutput.ReadToEndAsync(); var error = process.StandardError.ReadToEndAsync();
         try

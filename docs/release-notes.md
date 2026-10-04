@@ -1,19 +1,15 @@
-## 2.0.1-beta.2 — 2026-10-01
+## 2.0.1 — 2026-10-04
 
-- Windows 与 Mac 均提供 2.0.1-beta.2。Mac Apple Silicon 安装包已完成实机验收、Developer ID 签名与 Apple 公证；正式版仍为 2.0.0。
-- Windows 卸载仅清除明确的设置与任务历史文件，不递归删除配置目录，保护自定义目录中的模型、素材和成品。
-- 修复取消后重试、更新失败缓存恢复，以及静音字幕连同识别记录导出；保留原有取消和完整性校验。
-- 处理记录增加字段结构校验与原件保留，批量任务保存不再覆盖较新的任务和成果索引。
-- Mac 增加工作台忙碌保护、分轨模式一致性，以及引擎身份和可操作界面就绪检查。
-- Mac 环境修复在独立目录安装并通过检查后切换，失败保留旧环境；隔离不同版本的下载暂存，并明确权重更新检查范围。
-- 修复窄窗口下工作台空白状态的居中和日语标题裁切，布局按实际可用空间适配。
-- Windows 安装包未签名。Mac 实测覆盖代表性短样本，不代表所有模型、长素材或其他 macOS 版本均已验收。
+- Windows 2.0.1 正式版发布；Mac 2.0.1 安装包待 Mac 原生构建与验收，现有 Mac 正式版 2.0.0 和 2.0.1-beta.2 继续提供。
+- 修复部分桌面启动环境下 Qwen 工作台报“句柄无效”的问题，统一后台引擎与维护工具的非交互输入处理。
+- 修正引擎日志中中文路径的编码；维护检查明确区分文件齐全与实际运行验证。
+- 包含 2.0.1 测试版的任务取消后重试、批量成果保存、更新缓存恢复、字幕导出及卸载数据保护修复。
+- 保留四语言界面、窄窗口和日语排版改进；旧版配置、处理记录与用户成品受到原有保护。
+- Windows 安装包未签名。验收覆盖本机已安装引擎的短样本；未安装模型、长素材与 Mac 新正式包不在本次实机验收范围内。
 
-- Windows and Mac 2.0.1-beta.2 are available. The Mac Apple Silicon package has passed native acceptance, Developer ID signing and Apple notarization; Stable remains 2.0.0.
-- Windows uninstall clears only explicitly listed preference and task-history files. It no longer recursively deletes the settings directory, preserving custom model, media and output folders.
-- Fix explicit retry after cancellation, recovery from corrupt update caches, and silent-subtitle exports with recognition evidence. Cancellation and integrity protections remain in place.
-- Validate processing-record fields while preserving invalid originals. Batch saves retain newer task and result indexes.
-- Mac adds active-workbench protection, matching stem modes, and engine identity plus usable-interface readiness checks.
-- Mac environment repair installs and validates an independent candidate before activation, preserving the old environment on failure. Download staging is separated by revision and weight-update coverage is stated explicitly.
-- Fix empty-workbench alignment and clipped Japanese headings in compact windows using the actual available viewport.
-- The Windows installer is unsigned. Mac acceptance covers representative short samples, not every model, long input, or other macOS version.
+- Windows 2.0.1 Stable is available. Mac 2.0.1 requires a native Mac build and acceptance; Mac Stable 2.0.0 and 2.0.1-beta.2 remain available.
+- Fix Qwen workbench startup failing with an invalid handle in some desktop launch environments. Background engines and maintenance tools now receive valid non-interactive input.
+- Preserve Unicode paths in engine logs and distinguish file completeness from verified operation in maintenance results.
+- Includes the 2.0.1 Beta fixes for retry after cancellation, batch result preservation, update-cache recovery, subtitle export and uninstall data protection.
+- Retains four-language, compact-window and Japanese typography improvements, with existing safeguards for settings, processing records and user outputs.
+- The Windows installer is unsigned. Acceptance covers short samples on locally installed engines, not missing models, long inputs or a new native Mac release.

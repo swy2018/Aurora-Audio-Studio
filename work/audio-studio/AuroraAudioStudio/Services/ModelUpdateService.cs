@@ -1171,7 +1171,8 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             deadline.CancelAfter(timeout ?? TimeSpan.FromMinutes(2));
             var info = new ProcessStartInfo("git", arguments) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            using var process = Process.Start(info) ?? throw new InvalidOperationException("Git could not start.");
+            using var process = new Process { StartInfo = info };
+            BackgroundProcess.Start(process);
             var outputTask = process.StandardOutput.ReadToEndAsync(); var errorTask = process.StandardError.ReadToEndAsync();
             using var registration = deadline.Token.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
             await process.WaitForExitAsync(deadline.Token);
@@ -1251,7 +1252,7 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         }
         process.OutputDataReceived += (_, args) => { if (!string.IsNullOrWhiteSpace(args.Data)) RecordLine(output, args.Data); };
         process.ErrorDataReceived += (_, args) => { if (!string.IsNullOrWhiteSpace(args.Data)) RecordLine(errors, args.Data); };
-        process.Start();
+        BackgroundProcess.Start(process);
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
         using var registration = cancellationToken.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });

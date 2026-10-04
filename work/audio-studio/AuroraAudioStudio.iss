@@ -1,6 +1,6 @@
 #define MyAppName "Aurora Audio Studio"
 #ifndef MyAppVersion
-  #define MyAppVersion "2.0.1-beta.2"
+  #define MyAppVersion "2.0.1"
 #endif
 #ifndef PublishFolder
   #define PublishFolder "Aurora-Audio-Studio-" + MyAppVersion
