@@ -40,7 +40,7 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 
 Stable 通道继续提供 Windows / Mac 2.0.1；Beta 通道提供 Windows 2.0.2-beta.1，Mac 仍为 2.0.1。历史正式版和完整 Git 历史保留。旧 Beta 与本地生成产物按准确清单批准后清理，Git 标签另行确认。详见[版本保留说明](docs/release-retention.md)。
 
-本次 Beta 重点改进未预装开发环境时的模型安装、下载重试与取消收尾。已验证的引擎和未覆盖的场景见[本轮验收记录](docs/clean-install-2026-10-08.md)。Mac 源码交接见[2.0.2-beta.1 Mac 验收说明](docs/macOS-2.0.2-beta.1-handoff.md)。
+本次 Beta 重点改进未预装开发环境时的模型安装、下载重试与取消收尾。已验证的引擎、安装包来源和未覆盖的场景见[本轮验收记录](docs/validation-2.0.2-beta.1.md)。Mac 源码交接见[2.0.2-beta.1 Mac 验收说明](docs/macOS-2.0.2-beta.1-handoff.md)。
 
 Windows 与 Mac 均推荐 [2.0.1 正式版](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1)。Mac 适用于 Apple Silicon / macOS 26+，已完成实机验收、Developer ID 签名与 Apple 公证。[Windows 验收范围](docs/validation-2.0.1.md) · [Mac 验收记录](docs/validation-mac-2.0.1.md)。
 
@@ -203,7 +203,7 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows and Mac Stable are both 2.0.1. The Mac package is Developer ID signed and notarized. Screenshots show the Mac 2.0.1 interface. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Mac build and distribution guide](docs/macOS-release.md).
 
-[2.0.2-beta.1](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.2-beta.1) provides a Windows installer and source with first-install, download and cancellation fixes. No new Mac Beta package is offered yet; Mac remains on 2.0.1. See the [acceptance scope](docs/clean-install-2026-10-08.md) and [Mac handoff](docs/macOS-2.0.2-beta.1-handoff.md).
+[2.0.2-beta.1](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.2-beta.1) provides a Windows installer and source with first-install, download and cancellation fixes. No new Mac Beta package is offered yet; Mac remains on 2.0.1. See the [acceptance scope and package provenance](docs/validation-2.0.2-beta.1.md) and [Mac handoff](docs/macOS-2.0.2-beta.1-handoff.md).
 
 Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Beta releases are intended for users who want early access; back up important settings before upgrading.
 
