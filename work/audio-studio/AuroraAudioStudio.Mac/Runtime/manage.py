@@ -9,11 +9,9 @@ import sys
 import time
 from filelock import FileLock
 from download_models import CATALOG, digest, download, emit, validate_required
-from install_environment import install, environment_path
+from install_environment import install, environment_path, IMPORTS
 
 SOURCES = {"ace": ("ace-step", "https://github.com/ace-step/ACE-Step-1.5.git"), "seed": ("seed-vc", "https://github.com/Plachtaa/seed-vc.git")}
-IMPORTS = {"ace":"acestep.acestep_v15_pipeline", "seed":"torch,librosa,gradio", "qwen":"qwen_tts", "roformer":"bs_roformer", "transkun":"transkun.transcribe", "whisper":"faster_whisper", "basic":"basic_pitch", "demucs":"demucs"}
-IMPORTS.update(mt3="mt3_infer", piano="piano_transcription_inference", f5="f5_tts.infer.utils_infer")
 
 
 def trash_model(base):

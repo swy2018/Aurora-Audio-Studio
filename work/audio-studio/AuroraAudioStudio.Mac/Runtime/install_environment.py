@@ -14,16 +14,16 @@ from filelock import FileLock
 PACKAGES = {
     "mt3": ["mt3-infer==0.2.0", "torch==2.8.0", "torchaudio==2.8.0", "torchvision==0.23.0", "transformers==4.45.2", "numpy<2", "setuptools<81"],
     "piano": ["piano-transcription-inference==0.0.6", "torch==2.8.0", "librosa==0.10.2.post1", "numpy<2", "setuptools<81"],
-    "f5": ["f5-tts==1.1.22", "torch==2.10.0", "torchaudio==2.10.0", "torchcodec==0.10.0", "numpy<2", "setuptools<81", "faster-whisper==1.2.1"],
+    "f5": ["f5-tts==1.1.22", "torch==2.10.0", "torchaudio==2.10.0", "torchcodec==0.10.0", "datasets>=3", "numpy<2", "setuptools<81", "faster-whisper==1.2.1"],
     "qwen": ["qwen-tts==0.1.1", "torch==2.8.0", "torchaudio==2.8.0", "gradio==5.49.1", "numpy<2", "setuptools<81"],
     "roformer": ["bs-roformer-infer==0.1.5", "torch==2.8.0", "numpy<2"],
-    "transkun": ["transkun==2.0.1", "torch==2.8.0", "torchaudio==2.8.0", "numpy<2", "setuptools<81"],
+    "transkun": ["transkun==2.0.1", "torch==2.8.0", "torchaudio==2.8.0", "ncls==0.0.70", "--only-binary=ncls", "numpy<2", "setuptools<81"],
     "whisper": ["faster-whisper==1.2.1", "soundfile"],
     "basic": ["basic-pitch[onnx]==0.4.0", "numpy<2", "setuptools<81"],
-    "demucs": ["demucs==4.1.0", "torch==2.8.0", "soundfile"],
+    "demucs": ["demucs==4.1.0", "torch==2.8.0", "soundfile", "numpy<2"],
 }
 
-IMPORTS = {"ace":"acestep.acestep_v15_pipeline", "seed":"torch,librosa,gradio", "qwen":"qwen_tts", "roformer":"bs_roformer", "transkun":"transkun.transcribe", "whisper":"faster_whisper", "basic":"basic_pitch", "demucs":"demucs", "mt3":"mt3_infer", "piano":"piano_transcription_inference", "f5":"f5_tts.infer.utils_infer"}
+IMPORTS = {"ace":"acestep.acestep_v15_pipeline", "seed":"torch,librosa,gradio", "qwen":"qwen_tts", "roformer":"bs_roformer", "transkun":"transkun.transcribe", "whisper":"faster_whisper", "basic":"basic_pitch", "demucs":"demucs.api", "mt3":"mt3_infer.models.yourmt3.inference_loader", "piano":"piano_transcription_inference", "f5":"f5_tts.infer.utils_infer"}
 
 
 def environment_path(root, family):
@@ -39,7 +39,9 @@ def environment_path(root, family):
 
 
 def install(root, family, repair=False):
-    uv = shutil.which("uv") or "/opt/homebrew/bin/uv"
+    uv = shutil.which("uv")
+    if not uv:
+        raise RuntimeError("Aurora 缺少内置 uv 组件，请重新安装完整应用。")
     # A venv cannot safely be renamed after creation: scripts contain absolute paths.
     # https://docs.python.org/3.11/library/venv.html
     env = root / "envs" / (family + "-" + uuid.uuid4().hex)

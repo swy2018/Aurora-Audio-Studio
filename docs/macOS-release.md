@@ -7,7 +7,8 @@ Mac 版沿用现有 Avalonia/.NET 实现，输出在源码根目录的 `dist` �
 
 ## 构建
 
-需要 .NET 10 SDK、Xcode、Python 3，以及构建机的 uv、ffmpeg、ffprobe、sox。工具及依赖、许可证随包复制；运行电脑不依赖构建机的 Homebrew 路径。
+需要 .NET 10 SDK、Xcode、Python 3，以及构建机的 uv、ffmpeg、ffprobe、sox、可再分发的 Git（例如 Homebrew git，不能使用 `/usr/bin/git` 的 Xcode 启动器）。这些是构建机要求，不是最终用户要求。工具及依赖、许可证随包复制；运行电脑不依赖构建机的 Homebrew 路径。
+Git 的 HTTPS helper、模板和 CA 文件一并收集。基础工具必须在移除 Homebrew PATH 与 DYLD 变量后通过启动检查。新安装验收步骤见 [空白环境验证](clean-install-2026-10-08.md)。
 依赖收集同时覆盖 Homebrew 版 .NET 自带原生库（包括压缩库的 Brotli 依赖），而不只扫描四个音频/环境工具；库自身的 install ID 与实际加载依赖分开判断。
 
 ```bash

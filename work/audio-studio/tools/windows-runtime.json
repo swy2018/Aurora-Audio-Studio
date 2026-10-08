@@ -1,0 +1,44 @@
+{
+  "vcredist": {
+    "url": "https://download.visualstudio.microsoft.com/download/pr/ebdab8e5-1d7b-4d9f-a11b-cbb1720c3b12/843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C/VC_redist.x64.exe",
+    "sha256": "843068991daaa1f73ad9f6239bce4d0f6a07a51f18c37ea2a867e9beca71295c",
+    "format": "exe",
+    "fileName": "vc_redist.x64.exe",
+    "version": "14.51.36247.0"
+  },
+  "webview2": {
+    "url": "https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/18c66e75-0385-4019-be3f-3f4a2bb867d5/MicrosoftEdgeWebView2RuntimeInstallerX64.exe",
+    "sha256": "ac22ecdc19c5b88b87f3fa752c00da9541653a8f5c0c5fc4a3b2b6ebe6591f69",
+    "format": "exe",
+    "fileName": "MicrosoftEdgeWebView2RuntimeInstallerX64.exe",
+    "version": "1.3.275.13"
+  },
+  "uv": {
+    "url": "https://github.com/astral-sh/uv/releases/download/0.12.23/uv-x86_64-pc-windows-msvc.zip",
+    "sha256": "75d05de6762778c31ee183398de7dd15093fad0ed90b1f236d8205ea5ec00c90",
+    "prefix": "",
+    "executable": "uv.exe",
+    "licenses": [
+      { "name": "LICENSE-APACHE", "url": "https://raw.githubusercontent.com/astral-sh/uv/0.12.23/LICENSE-APACHE", "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4" },
+      { "name": "LICENSE-MIT", "url": "https://raw.githubusercontent.com/astral-sh/uv/0.12.23/LICENSE-MIT", "sha256": "860e3d7a86b84e6a7012c7a635fc64df475cebc6cce34dfeb73a5982ec58176c" }
+    ]
+  },
+  "git": {
+    "url": "https://github.com/git-for-windows/git/releases/download/v2.56.0.windows.2/MinGit-2.56.0.2-64-bit.zip",
+    "sha256": "da35e72aa21c005a5a0d298cfbae110bc1609a815730ea0dde84b01a1b3cd3be",
+    "prefix": "",
+    "executable": "cmd/git.exe"
+  },
+  "ffmpeg": {
+    "url": "https://github.com/GyanD/codexffmpeg/releases/download/9.0.2/ffmpeg-9.0.2-essentials_build.zip",
+    "sha256": "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
+    "prefix": "ffmpeg-9.0.2-essentials_build/",
+    "executable": "bin/ffmpeg.exe"
+  },
+  "sox": {
+    "url": "https://downloads.sourceforge.net/project/sox/sox/14.4.2/sox-14.4.2-win32.zip",
+    "sha256": "8072cc147cf1a3b3713b8b97d6844bb9389e211ab9e1101e432193fad6ae6662",
+    "prefix": "sox-14.4.2/",
+    "executable": "sox.exe"
+  }
+}

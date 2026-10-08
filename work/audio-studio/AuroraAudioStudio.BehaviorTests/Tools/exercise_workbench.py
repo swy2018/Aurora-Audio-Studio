@@ -11,7 +11,13 @@ client = Client(url, download_files=False)
 api = client.view_api(return_format="dict", print_info=False)
 (root / "api.json").write_text(json.dumps(api, ensure_ascii=False, indent=2), encoding="utf-8")
 print("Endpoints:", list(api["named_endpoints"]), flush=True)
-if feature == "voice":
+if model == "f5-tts":
+    endpoint = "/basic_tts"
+    print(json.dumps(api["named_endpoints"][endpoint], ensure_ascii=False), flush=True)
+    result = client.predict(handle_file(source), "Aurora audio studio. This is a short local voice test.",
+                            "The fresh installation test is complete.", False, False, 20261008, .15, 16, 1.0,
+                            api_name=endpoint)
+elif feature == "voice":
     endpoint = "/run_instruct" if model.endswith("custom") else "/run_voice_design" if model.endswith("design") else "/run_voice_clone"
     print(json.dumps(api["named_endpoints"][endpoint], ensure_ascii=False), flush=True)
     if model.endswith("custom"):

@@ -112,7 +112,21 @@ Require(installerScript.Contains("SetupMutex=AuroraAudioStudioInstaller", String
 Require(!installerScript.Contains("UpdateForm := CreateCustomForm(", StringComparison.Ordinal), "Automatic updates must not display a second custom updater window.");
 Require(!installerScript.Contains("procedure CurInstallProgressChanged", StringComparison.Ordinal), "Only Inno Setup should own installation progress.");
 Require(installerScript.Contains("AppIcon-{#MyAppVersion}.ico", StringComparison.Ordinal), "Each release must use a versioned icon path to bypass stale Windows icon caches.");
-Require(!installerScript.Contains("function PrepareToInstall", StringComparison.Ordinal), "Updates must use Inno Setup's in-place upgrade instead of launching the old uninstaller.");
+Require(Regex.Matches(installerScript, @"\bExec\(", RegexOptions.IgnoreCase).Count == 2
+    && installerScript.Contains("Exec(ExpandConstant('{tmp}\\vc_redist.x64.exe')", StringComparison.Ordinal)
+    && installerScript.Contains("Exec(ExpandConstant('{tmp}\\MicrosoftEdgeWebView2RuntimeInstallerX64.exe')", StringComparison.Ordinal),
+    "The prerequisite hook may execute only the bundled Microsoft runtime installers; application updates remain in-place.");
+Require(installerScript.Contains("if HasVCRuntime() then Exit;", StringComparison.Ordinal)
+    && installerScript.Contains("'/install /quiet /norestart /log", StringComparison.Ordinal)
+    && installerScript.Contains("Code = 3010", StringComparison.Ordinal)
+    && installerScript.Contains("NeedsRestart := True;", StringComparison.Ordinal),
+    "Visual C++ setup must preserve a current runtime, never reboot, and stop application replacement when a restart is required.");
+Require(installerScript.Contains("if HasWebView2Runtime() then Exit;", StringComparison.Ordinal)
+    && installerScript.Contains("RegQueryStringValue(HKLM32, Key, 'pv'", StringComparison.Ordinal)
+    && installerScript.Contains("RegQueryStringValue(HKCU, Key, 'pv'", StringComparison.Ordinal)
+    && installerScript.Contains("(Version > 0)", StringComparison.Ordinal)
+    && installerScript.Contains("else if (Code <> 0) or not HasWebView2Runtime() then", StringComparison.Ordinal),
+    "WebView2 must use machine/user runtime registration, skip existing installs and verify the post-install state.");
 Require(!installerScript.Contains("UninstallString", StringComparison.Ordinal), "The installer must not parse and execute a registry uninstall command during an upgrade.");
 Require(installerScript.Contains("Flags: nowait runascurrentuser; Check: IsAutomaticUpdate", StringComparison.Ordinal), "A successful automatic update must relaunch Aurora as the signed-in user.");
 Require(installerScript.Contains("Result := HasCommandLineParam('/UPDATE')", StringComparison.Ordinal), "The installer must recognize automatic update mode.");
@@ -160,8 +174,25 @@ foreach (var badge in new[] { "download", "changelog" }) Require(File.ReadAllTex
 var qwen = new ModelDefinition("qwen3-tts-06b-base", "Qwen3-TTS 0.6B", "voice", @"Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "model.safetensors", "Qwen", "huggingface", "Qwen/Qwen3-TTS-12Hz-0.6B-Base");
 var plan = ModelInstallPlanner.Create(qwen, @"D:\AuroraModels");
 Require(plan.TargetPath == @"D:\AuroraModels\Qwen3-TTS\models\Qwen3-TTS-12Hz-0.6B-Base", "The model plan must show the exact target directory.");
-Require(plan.EstimatedDownload == "≈ 1.5 GB", "The Qwen 0.6B plan must show its estimated download size.");
-Require(plan.RecommendedFreeSpace == "≈ 3 GB", "The Qwen 0.6B plan must show recommended free disk space.");
+Require(plan.EstimatedDownload == "≈ 5–7 GB", "A first Qwen 0.6B install must include its managed Python and CUDA download.");
+Require(plan.RecommendedFreeSpace == "≈ 12 GB", "A first Qwen 0.6B install must reserve space for more than the weights.");
+var bootstrapSpaceRoot = Path.Combine(Path.GetTempPath(), "aurora-space-" + Guid.NewGuid().ToString("N"));
+var whisperSmall = new ModelDefinition("whisper-small", "Whisper Small", "subtitles", @"Faster-Whisper-XXL\Models\faster-whisper-small", "model.bin", "Hugging Face", "huggingface", "Systran/faster-whisper-small");
+var whisperColdPlan = ModelInstallPlanner.Create(whisperSmall, bootstrapSpaceRoot);
+Require(whisperColdPlan.EstimatedDownload == "≈ 2 GB" && whisperColdPlan.RecommendedFreeSpace == "≈ 8 GB" && whisperColdPlan.IsLarge, "Whisper's first install must include the shared archive and extracted runtime, not only 470 MB of weights.");
+var whisperExecutable = Path.Combine(bootstrapSpaceRoot, "Faster-Whisper-XXL", "Faster-Whisper-XXL", "faster-whisper-xxl.exe");
+Directory.CreateDirectory(Path.GetDirectoryName(whisperExecutable)!);
+File.WriteAllText(whisperExecutable, "fixture, never executed");
+var whisperWarmPlan = ModelInstallPlanner.Create(whisperSmall, bootstrapSpaceRoot);
+Require(whisperWarmPlan.EstimatedDownload == "≈ 470 MB" && whisperWarmPlan.RecommendedFreeSpace == "≈ 1 GB" && !whisperWarmPlan.IsLarge, "A reusable Whisper runtime must not be budgeted as another download.");
+var qwenScripts = Path.Combine(bootstrapSpaceRoot, "Qwen3-TTS", "Python312", "Scripts");
+Directory.CreateDirectory(qwenScripts);
+File.WriteAllText(Path.Combine(qwenScripts, "python.exe"), "fixture, never executed");
+File.WriteAllText(Path.Combine(qwenScripts, "qwen-tts-demo.exe"), "fixture, never executed");
+var qwenWarmPlan = ModelInstallPlanner.Create(qwen, bootstrapSpaceRoot);
+Require(qwenWarmPlan.EstimatedDownload == "≈ 1.5 GB" && qwenWarmPlan.RecommendedFreeSpace == "≈ 3 GB", "Adding another Qwen weight set must preserve the existing shared-runtime budget.");
+var pianoDefinition = new ModelDefinition("piano", "Piano", "transcription", "piano-models", "model.pth", "Zenodo", "fixed-file");
+Require(ModelInstallPlanner.Create(pianoDefinition, bootstrapSpaceRoot).RecommendedFreeSpace == "≈ 12 GB", "Piano installation always creates a candidate Python/CUDA environment and cannot reserve only 500 MB.");
 var minimax = new ModelDefinition("minimax-music3", "MiniMax-Music3", "music", "MiniMax-Music3", "modular_model_index.json", "MiniMax", "minimax-music3", "MiniMaxAI/MiniMax-Music3");
 var minimaxPlan = ModelInstallPlanner.Create(minimax, @"D:\AuroraModels");
 Require(minimaxPlan.EstimatedDownload == "≈ 27 GB" && minimaxPlan.RecommendedFreeSpace == "≈ 55 GB", "MiniMax-Music3 must disclose its large on-demand download and staging space.");
@@ -283,6 +314,11 @@ foreach (var path in aceFiles.Take(2)) { Directory.CreateDirectory(Path.GetDirec
 foreach (var path in aceFiles.Skip(2)) Directory.CreateDirectory(Path.GetDirectoryName(path)!);
 Require(!ModelHealthPolicy.IsReady(aceModel, healthRoot), "ACE-Step folders without real checkpoint files must never be reported as ready.");
 foreach (var path in aceFiles.Skip(2)) File.WriteAllBytes(path, [1]);
+Require(!ModelHealthPolicy.IsReady(aceModel, healthRoot), "One XL shard without its index and remaining shards cannot pass installation checks.");
+var xlWeights = Path.Combine(aceRoot, "checkpoints", "acestep-v15-xl-turbo");
+File.WriteAllText(Path.Combine(xlWeights, "model.safetensors.index.json"),
+    "{\"weight_map\":{\"a\":\"model-00001-of-00004.safetensors\",\"b\":\"model-00002-of-00004.safetensors\",\"c\":\"model-00003-of-00004.safetensors\",\"d\":\"model-00004-of-00004.safetensors\"}}");
+foreach (var part in new[] { 2, 3, 4 }) File.WriteAllBytes(Path.Combine(xlWeights, $"model-{part:00000}-of-00004.safetensors"), [1]);
 Require(ModelHealthPolicy.IsReady(aceModel, healthRoot), "ACE-Step must become ready when every official runtime checkpoint is present.");
 var transkunRoot = Path.Combine(healthRoot, "AudioTools", "transkun-env");
 var transkunHealthModel = new ModelDefinition("transkun", "TransKun", "transcription", @"AudioTools\transkun-env", @"Scripts\transkun.exe", "test", "uv-package", "transkun", true);
@@ -343,8 +379,9 @@ Require(transkunSetupStart >= 0, "Model package installation method must exist."
 var transkunSetupEnd = modelUpdateSource.IndexOf("\n    private ", transkunSetupStart + 1, StringComparison.Ordinal);
 var transkunSetup = transkunSetupEnd > transkunSetupStart ? modelUpdateSource[transkunSetupStart..transkunSetupEnd] : modelUpdateSource[transkunSetupStart..];
 var transkunPackageInstall = transkunSetup.IndexOf("var installResult = await RunProcessAsync(install, cancellationToken, progress)", StringComparison.Ordinal);
-var transkunCudaInstall = transkunSetup.IndexOf("var torchResult = await RunProcessAsync(torch, cancellationToken, progress)", StringComparison.Ordinal);
-Require(transkunPackageInstall >= 0 && transkunCudaInstall > transkunPackageInstall, "TransKun must install its package first and apply the matching CUDA torch/torchaudio pair last.");
+Require(transkunPackageInstall >= 0 && transkunSetup.Contains("PackageInstallCommand(uv, model, python, packageVersion)", StringComparison.Ordinal)
+    && !transkunSetup.Contains("var torchResult = await RunProcessAsync", StringComparison.Ordinal),
+    "Model and CUDA dependencies must resolve together; the later CPU-to-CUDA replacement phase must not return. Command arguments are checked by BootstrapRegression.");
 Require(modelUpdateSource.Contains("正在下载 ACE-Step 基础权重", StringComparison.Ordinal) && modelUpdateSource.Contains("acestep-v15-xl-turbo", StringComparison.Ordinal), "ACE-Step installation must download both the official base components and XL checkpoint.");
 Require(catalogSource.Contains("\"faster-whisper\"", StringComparison.Ordinal) && catalogSource.Contains("\"subtitle-edit\"", StringComparison.Ordinal)
     && Regex.IsMatch(catalogSource, "new\\(\\\"faster-whisper\\\"[^\\n]+true, false\\)")
@@ -364,7 +401,17 @@ foreach (var dependency in new[] { "funasr/campplus", "campplus_cn_common.bin", 
 Require(modelUpdateSource.Contains("--cache-dir", StringComparison.Ordinal), "Seed-VC auxiliary dependencies must be written to the cache layout used by its upstream loaders.");
 Require(backendSource.Contains("ModelHealthPolicy.MissingRequirements", StringComparison.Ordinal)
     && backendSource.Contains("[\"TRANSFORMERS_OFFLINE\"] = \"1\"", StringComparison.Ordinal), "Seed-VC startup must validate every local dependency and enforce offline loading.");
-Require(modelUpdateSource.Contains("Distinct(StringComparer.OrdinalIgnoreCase)", StringComparison.Ordinal), "Refreshing PATH must remain idempotent instead of duplicating every entry after each model action.");
+var processPathBefore = Environment.GetEnvironmentVariable("PATH");
+var isolatedInfo = new System.Diagnostics.ProcessStartInfo("fixture");
+isolatedInfo.Environment["PATH"] = string.Join(Path.PathSeparator, new[] { "test-one", "test-one", "test-two" });
+BundledTools.ConfigureInstaller(isolatedInfo, Path.Combine(Path.GetTempPath(), "aurora-tool-isolation"));
+var childPath = isolatedInfo.Environment["PATH"];
+BundledTools.ConfigureInstaller(isolatedInfo, Path.Combine(Path.GetTempPath(), "aurora-tool-isolation"));
+Require(childPath == isolatedInfo.Environment["PATH"], "Child PATH preparation must be idempotent.");
+Require(Environment.GetEnvironmentVariable("PATH") == processPathBefore, "Model installation must not mutate the parent or system PATH.");
+Require(isolatedInfo.Environment["UV_PYTHON_PREFERENCE"] == "only-managed" && isolatedInfo.Environment["UV_PYTHON_DOWNLOADS"] == "automatic",
+    "Python must be automatically provisioned without binding to a preinstalled interpreter.");
+Require(!modelUpdateSource.Contains("new ProcessStartInfo(\"winget.exe\")", StringComparison.Ordinal), "First installation must not depend on WinGet.");
 Require(mainPageXaml.Contains("x:Name=\"UtilityScrollViewer\"", StringComparison.Ordinal), "The utility workspace must scroll instead of clipping controls at supported window sizes.");
 Require(mainPageXaml.Contains("ui:LocalizedText.NameKey=\"处理引擎选择\"", StringComparison.Ordinal)
     && mainPageXaml.Contains("ui:LocalizedText.NameKey=\"创作引擎选择\"", StringComparison.Ordinal), "Model selectors must expose localized screen-reader names.");

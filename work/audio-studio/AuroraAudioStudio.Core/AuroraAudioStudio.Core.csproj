@@ -19,6 +19,7 @@
     <Compile Include="../AuroraAudioStudio/Services/AudioRuntime.cs" Link="Services/AudioRuntime.cs" />
     <Compile Include="../AuroraAudioStudio/Services/MediaInputPolicy.cs" Link="Services/MediaInputPolicy.cs" />
     <Compile Include="../AuroraAudioStudio/Services/BackgroundProcess.cs" Link="Services/BackgroundProcess.cs" />
+    <Compile Include="../AuroraAudioStudio/Services/BundledTools.cs" Link="Services/BundledTools.cs" />
     <Compile Include="../AuroraAudioStudio/Services/ModelCatalogService.cs" Link="Services/ModelCatalogService.cs" />
     <Compile Include="../AuroraAudioStudio/Services/ModelHealthPolicy.cs" Link="Services/ModelHealthPolicy.cs" />
     <Compile Include="../AuroraAudioStudio/Services/ModelInstallPlanner.cs" Link="Services/ModelInstallPlanner.cs" />

@@ -7,6 +7,7 @@ public static class AudioRuntime
 
     private static string? FindTool(string localAiRoot, string tool)
     {
+        if (BundledTools.Find(tool) is { } packaged) return packaged;
         var executable = tool + (OperatingSystem.IsWindows() ? ".exe" : "");
         var bundled = OperatingSystem.IsWindows()
             ? Path.Combine(localAiRoot, "Faster-Whisper-XXL", "Faster-Whisper-XXL", executable)

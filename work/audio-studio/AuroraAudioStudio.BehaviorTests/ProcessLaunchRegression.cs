@@ -28,6 +28,8 @@ internal static class ProcessLaunchRegression
     {
         if (!OperatingSystem.IsWindows()) return;
         var passed = 0;
+        var settings = new SettingsService(Path.Combine(Path.GetTempPath(), "Aurora-process-test-" + Guid.NewGuid().ToString("N")));
+        var updater = new ModelUpdateService(new ModelCatalogService(settings), settings);
         var original = GetStdHandle(-10);
         foreach (var inherited in new[] { new IntPtr(0x12345678), IntPtr.Zero, original })
         foreach (var runner in new[] { typeof(BackendService), typeof(ModelUpdateService) })
@@ -46,9 +48,9 @@ internal static class ProcessLaunchRegression
             try
             {
                 if (!SetStdHandle(-10, inherited)) throw new Win32Exception(Marshal.GetLastWin32Error());
-                var method = runner.GetMethod("RunProcessAsync", BindingFlags.Static | BindingFlags.NonPublic)!;
+                var method = runner.GetMethod("RunProcessAsync", BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic)!;
                 object?[] arguments = runner == typeof(BackendService) ? [info, deadline.Token] : [info, deadline.Token, null];
-                running = (Task<(int, string, string)>)method.Invoke(null, arguments)!;
+                running = (Task<(int, string, string)>)method.Invoke(runner == typeof(ModelUpdateService) ? updater : null, arguments)!;
             }
             finally { SetStdHandle(-10, original); }
             var result = await running;

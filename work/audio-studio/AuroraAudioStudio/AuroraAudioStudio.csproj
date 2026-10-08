@@ -51,6 +51,8 @@
     <Content Include="Tools\workbench-ui.css" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Tools\workbench-i18n.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Tools\ACE-Step-Translations-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- System prerequisites are embedded by Inno, not retained in the installed application. -->
+    <Content Include="Runtime\**\*" Exclude="Runtime\prerequisites\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -70,6 +72,13 @@
     </ItemGroup>
     <Copy SourceFiles="@(_AuroraXamlResource)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(_AuroraAsset)" DestinationFiles="@(_AuroraAsset->'$(PublishDir)Assets\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="RequireBundledModelTools" BeforeTargets="Publish">
+    <Error Condition="!Exists('Runtime/bin/uv/uv.exe') Or !Exists('Runtime/bin/git/cmd/git.exe') Or !Exists('Runtime/bin/ffmpeg/bin/ffmpeg.exe') Or !Exists('Runtime/bin/ffmpeg/bin/ffprobe.exe') Or !Exists('Runtime/bin/sox/sox.exe')"
+           Text="Model tools missing. Run tools/Prepare-WindowsRuntime.ps1 before publishing; a package that requires preinstalled tools must not ship." />
+    <Error Condition="!Exists('Runtime/prerequisites/vc_redist.x64.exe')" Text="Verified Visual C++ prerequisite is missing. Run tools/Prepare-WindowsRuntime.ps1 before publishing." />
+    <Error Condition="!Exists('Runtime/prerequisites/MicrosoftEdgeWebView2RuntimeInstallerX64.exe')" Text="Verified offline WebView2 prerequisite is missing. Run tools/Prepare-WindowsRuntime.ps1 before publishing." />
   </Target>
 
   <!-- Publish Properties -->

@@ -311,8 +311,8 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         if (model.Id.Equals("ace-step", StringComparison.OrdinalIgnoreCase))
         {
             progress?.Report(new(null, "正在配置 ACE-Step 隔离运行环境"));
-            var sync = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            var runtimeRoot = ExistingOrNewGitRuntime(root, model.Id);
+            var sync = CreateInstaller(uv);
+            var runtimeRoot = ExistingOrNewGitRuntime(root);
             foreach (var value in new[] { "sync", "--project", root, "--no-editable" }) sync.ArgumentList.Add(value);
             sync.Environment["UV_PROJECT_ENVIRONMENT"] = runtimeRoot;
             var syncResult = await RunProcessAsync(sync, cancellationToken, progress);
@@ -320,14 +320,12 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             RuntimeEnvironment.Activate(Path.Combine(root, ".venv"), runtimeRoot);
             var downloader = Path.Combine(runtimeRoot, "Scripts", "acestep-download.exe");
             if (!File.Exists(downloader)) return new(false, "ACE-Step 官方模型下载器未生成，正式目录未被修改。");
-            var baseDownload = new ProcessStartInfo(downloader) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            baseDownload.ArgumentList.Add("--dir"); baseDownload.ArgumentList.Add(Path.Combine(root, "checkpoints"));
+            var baseDownload = AceDownloadCommand(downloader, root, false);
             progress?.Report(new(null, "正在下载 ACE-Step 基础权重"));
             var baseResult = await RunProcessAsync(baseDownload, cancellationToken, progress);
             if (baseResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(baseResult.Error) ? "ACE-Step 基础权重下载失败。" : baseResult.Error);
 
-            var download = new ProcessStartInfo(downloader) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var value in new[] { "--model", "acestep-v15-xl-turbo", "--dir", Path.Combine(root, "checkpoints") }) download.ArgumentList.Add(value);
+            var download = AceDownloadCommand(downloader, root, true);
             progress?.Report(new(null, "正在下载 ACE-Step 1.5 XL Turbo 官方权重"));
             var downloadResult = await RunProcessAsync(download, cancellationToken, progress);
             if (downloadResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(downloadResult.Error) ? "ACE-Step 官方权重下载失败。" : downloadResult.Error);
@@ -337,9 +335,9 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         if (model.Id.Equals("seed-vc", StringComparison.OrdinalIgnoreCase))
         {
             progress?.Report(new(null, "正在配置 Seed-VC Python 3.10 隔离环境"));
-            var runtimeRoot = ExistingOrNewGitRuntime(root, model.Id);
+            var runtimeRoot = ExistingOrNewGitRuntime(root);
             var python = Path.Combine(runtimeRoot, "Scripts", "python.exe");
-            var create = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            var create = CreateInstaller(uv);
             foreach (var value in new[] { "venv", "--python", "3.10", runtimeRoot }) create.ArgumentList.Add(value);
             if (!File.Exists(python))
             {
@@ -359,7 +357,7 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             foreach (var value in new[] { "pip", "install", "--python", python, "-r", requirements, "torch==2.8.0+cu128", "torchaudio==2.8.0+cu128", "torchvision==0.23.0+cu128", "--extra-index-url", "https://download.pytorch.org/whl/cu128" }) install.ArgumentList.Add(value);
             var installResult = await RunProcessAsync(install, cancellationToken, progress);
             if (installResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(installResult.Error) ? "Seed-VC 依赖安装失败。" : installResult.Error);
-            var dependencyCheck = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            var dependencyCheck = CreateInstaller(uv);
             foreach (var value in new[] { "pip", "check", "--python", python }) dependencyCheck.ArgumentList.Add(value);
             var checkedDependencies = await RunProcessAsync(dependencyCheck, cancellationToken, progress);
             if (checkedDependencies.ExitCode != 0) return new(false, "Seed-VC 依赖检查失败：" + checkedDependencies.Error);
@@ -368,8 +366,8 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             if (!bootstrap.Success || string.IsNullOrWhiteSpace(bootstrap.Path)) return bootstrap;
             var manual = Path.Combine(root, "checkpoints", "manual");
             Directory.CreateDirectory(manual);
-            var weights = new ProcessStartInfo(bootstrap.Path) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var value in new[] { "download", "Plachta/Seed-VC", "--local-dir", manual, "--include", "DiT_seed_v2_uvit_whisper_base_f0_44k_bigvgan_pruned_ft_ema_v2.pth", "config_dit_mel_seed_uvit_whisper_base_f0_44k.yml" }) weights.ArgumentList.Add(value);
+            var weights = HubDownloadCommand(bootstrap.Path, "Plachta/Seed-VC", manual,
+                files: ["DiT_seed_v2_uvit_whisper_base_f0_44k_bigvgan_pruned_ft_ema_v2.pth", "config_dit_mel_seed_uvit_whisper_base_f0_44k.yml"]);
             progress?.Report(new(null, "正在下载 Seed-VC 官方权重与配置"));
             var weightResult = await RunProcessAsync(weights, cancellationToken, progress);
             if (weightResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(weightResult.Error) ? "Seed-VC 官方权重下载失败。" : weightResult.Error);
@@ -383,10 +381,7 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
                 (Repository: "openai/whisper-small", CacheRoot: Path.Combine(checkpoints, "hf_cache"), Files: new[] { "model.safetensors", "config.json", "preprocessor_config.json" }, Label: "Whisper 编码器")
             })
             {
-                var dependencyInfo = new ProcessStartInfo(bootstrap.Path) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-                dependencyInfo.ArgumentList.Add("download");
-                dependencyInfo.ArgumentList.Add(dependency.Repository);
-                foreach (var file in dependency.Files) dependencyInfo.ArgumentList.Add(file);
+                var dependencyInfo = HubDownloadCommand(bootstrap.Path, dependency.Repository, files: dependency.Files);
                 dependencyInfo.ArgumentList.Add("--cache-dir");
                 dependencyInfo.ArgumentList.Add(dependency.CacheRoot);
                 dependencyInfo.Environment["HF_HUB_DISABLE_XET"] = "1";
@@ -400,12 +395,26 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         return File.Exists(Path.Combine(root, model.Marker)) ? new(true, "组件已配置", "current") : new(false, "组件完整性检查失败。");
     }
 
-    private string ExistingOrNewGitRuntime(string deploymentRoot, string modelId)
+    internal static ProcessStartInfo AceDownloadCommand(string executable, string root, bool xl)
+    {
+        var checkpoints = Path.Combine(root, "checkpoints");
+        var info = new ProcessStartInfo(executable) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        if (xl) { info.ArgumentList.Add("--model"); info.ArgumentList.Add("acestep-v15-xl-turbo"); }
+        info.ArgumentList.Add("--dir"); info.ArgumentList.Add(checkpoints);
+        var components = xl ? new[] { "acestep-v15-xl-turbo" } : new[] { "acestep-v15-turbo", "vae", "Qwen3-Embedding-0.6B", "acestep-5Hz-lm-1.7B" };
+        // Upstream otherwise treats an existing directory/index as complete. Its
+        // --force bypasses that early return; snapshot download still reuses valid cache.
+        if (components.Any(component => !ModelHealthPolicy.HasCompleteModelWeights(Path.Combine(checkpoints, component))))
+            info.ArgumentList.Add("--force");
+        return info;
+    }
+
+    private string ExistingOrNewGitRuntime(string deploymentRoot)
     {
         var markerRoot = Path.Combine(deploymentRoot, ".venv");
         var existing = RuntimeEnvironment.Resolve(markerRoot);
         return File.Exists(Path.Combine(existing, "Scripts", "python.exe")) && !existing.StartsWith(deploymentRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
-            ? existing : RuntimeEnvironment.CreateCandidate(settings.Current.LocalAiRoot, modelId);
+            ? existing : RuntimeEnvironment.CreateCandidate(settings.Current.LocalAiRoot);
     }
 
     private async Task<OperationResult> ProbeGitRuntimeAsync(ModelDefinition model, string root, CancellationToken cancellationToken)
@@ -614,37 +623,19 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
     {
         progress?.Report(new(null, "正在检查模型部署组件"));
         var uv = ResolveUvExecutable();
-        if (uv is null)
-        {
-            var installUv = new ProcessStartInfo("winget.exe") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var value in new[] { "install", "--id", "astral-sh.uv", "-e", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity" }) installUv.ArgumentList.Add(value);
-            var uvResult = await RunProcessAsync(installUv, cancellationToken, progress);
-            if (uvResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(uvResult.Error) ? "无法安装模型部署组件 uv。" : uvResult.Error);
-            uv = ResolveUvExecutable();
-            if (uv is null) return new(false, "uv 已安装，但当前 Aurora 会话尚未找到它。请重新打开 Aurora 后重试。");
-        }
+        if (uv is null) return MissingBundledTool("uv");
 
         var logicalRoot = root;
-        root = RuntimeEnvironment.CreateCandidate(settings.Current.LocalAiRoot, model.Id);
+        root = RuntimeEnvironment.CreateCandidate(settings.Current.LocalAiRoot);
         var python = Path.Combine(root, "Scripts", "python.exe");
         var environment = await EnsureUvEnvironmentAsync(uv, root, python, progress, cancellationToken);
         if (!environment.Success) return environment;
-        var install = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
         using var packageDocument = JsonDocument.Parse(await metadataClient.GetStringAsync($"https://pypi.org/pypi/{Uri.EscapeDataString(PyPiPackageName(model.Repository!))}/json", cancellationToken));
         var packageVersion = packageDocument.RootElement.GetProperty("info").GetProperty("version").GetString()!;
-        foreach (var value in new[] { "pip", "install", "--python", python, model.Repository! + "==" + packageVersion }) install.ArgumentList.Add(value);
-        if (model.Id.Equals("transkun", StringComparison.OrdinalIgnoreCase)) install.ArgumentList.Add("setuptools<81");
+        var install = PackageInstallCommand(uv, model, python, packageVersion);
         progress?.Report(new(null, $"正在部署 {model.Name}"));
         var installResult = await RunProcessAsync(install, cancellationToken, progress);
         if (installResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(installResult.Error) ? $"{model.Name} 部署失败。" : installResult.Error);
-        if (model.Id is "transkun" or "roformer" or "yourmt3" or "demucs" or "f5-tts" or "piano-runtime")
-        {
-            progress?.Report(new(null, new LocalizationService(settings).Format("maintenanceCuda", model.Name)));
-            var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "torch==2.8.0", "torchaudio==2.8.0", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
-            var torchResult = await RunProcessAsync(torch, cancellationToken, progress);
-            if (torchResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(torchResult.Error) ? "TransKun CUDA 环境配置失败。" : torchResult.Error);
-        }
         if (includeWeights && model.Id.Equals("roformer", StringComparison.OrdinalIgnoreCase))
         {
             var downloader = Path.Combine(root, "Scripts", "bs-roformer-download.exe");
@@ -657,18 +648,16 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             var assetResult = await RunProcessAsync(assets, cancellationToken, progress);
             if (assetResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(assetResult.Error) ? "BS-RoFormer-SW 权重下载失败。" : assetResult.Error);
         }
-        if (includeWeights && model.Id.Equals("yourmt3", StringComparison.OrdinalIgnoreCase))
+        if (model.Id.Equals("yourmt3", StringComparison.OrdinalIgnoreCase))
         {
-            var downloader = Path.Combine(root, "Scripts", "mt3-infer.exe");
-            var modelsRoot = Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "mt3-models");
-            Directory.CreateDirectory(modelsRoot);
-            var assets = new ProcessStartInfo(downloader) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            assets.ArgumentList.Add("download"); assets.ArgumentList.Add("yourmt3");
-            assets.Environment["MT3_CHECKPOINT_DIR"] = modelsRoot;
-            assets.Environment["PYTHONUTF8"] = "1";
-            progress?.Report(new(null, "正在下载 YourMT3+ 多乐器权重"));
-            var assetResult = await RunProcessAsync(assets, cancellationToken, progress);
-            if (assetResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(assetResult.Error) ? "YourMT3+ 权重下载失败。" : assetResult.Error);
+            // Import the actual inference module: --help does not load its T5 dependencies.
+            var inferenceProbe = await ProbePythonRuntimeAsync(python, "from mt3_infer.models.yourmt3.inference_loader import load_model_for_inference", cancellationToken);
+            if (!inferenceProbe.Success) return inferenceProbe;
+            if (includeWeights)
+            {
+                progress?.Report(new(null, "正在下载 YourMT3+ 多乐器权重"));
+                await EnsureYourMt3WeightsAsync(progress, cancellationToken);
+            }
         }
         if (includeWeights && ModelHealthPolicy.MissingRequirements(model, settings.Current.LocalAiRoot, root).Count > 0) return new(false, $"{model.Name} 的候选运行环境未通过完整性检查，现有环境已保留。");
         if (model.Id == "piano-runtime")
@@ -676,7 +665,13 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             var pianoProbe = await ProbePythonRuntimeAsync(python, "import torch, torchaudio, piano_transcription_inference", cancellationToken);
             if (!pianoProbe.Success) return pianoProbe;
         }
-        var dependencyCheck = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        if (model.Id == "transkun")
+        {
+            var nativeProbe = await ProbePythonRuntimeAsync(python,
+                "import numpy as np; from ncls import FNCLS; tree=FNCLS(np.array([0., 2.]), np.array([1., 3.]), np.array([42, 43], dtype=np.int64)); queries, hits=tree.all_overlaps_both(np.array([0.5]), np.array([0.75]), np.array([7], dtype=np.int64)); assert queries.tolist() == [7] and hits.tolist() == [42]", cancellationToken);
+            if (!nativeProbe.Success) return nativeProbe;
+        }
+        var dependencyCheck = CreateInstaller(uv);
         foreach (var value in new[] { "pip", "check", "--python", python }) dependencyCheck.ArgumentList.Add(value);
         var dependencyResult = await RunProcessAsync(dependencyCheck, cancellationToken, progress);
         if (dependencyResult.ExitCode != 0) return new(false, "候选环境存在依赖冲突，现有环境已保留：" + dependencyResult.Error);
@@ -684,7 +679,7 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         probe.ArgumentList.Add("--help");
         var probeResult = await RunProcessAsync(probe, cancellationToken, progress);
         if (probeResult.ExitCode != 0) return new(false, "候选引擎无法启动：" + probeResult.Error);
-        var freeze = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        var freeze = CreateInstaller(uv);
         foreach (var value in new[] { "pip", "freeze", "--python", python }) freeze.ArgumentList.Add(value);
         var frozen = await RunProcessAsync(freeze, cancellationToken);
         if (frozen.ExitCode != 0) return new(false, "无法记录候选环境的依赖组合。");
@@ -693,6 +688,75 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         RuntimeEnvironment.Activate(logicalRoot, root);
         WriteInstalledVersion(model.Id, packageVersion);
         return new(true, $"{model.Name} 已下载并部署完成", "current");
+    }
+
+    internal ProcessStartInfo PackageInstallCommand(string uv, ModelDefinition model, string python, string version)
+    {
+        var info = CreateInstaller(uv);
+        foreach (var value in new[] { "pip", "install", "--python", python, model.Repository! + "==" + version }) info.ArgumentList.Add(value);
+        if (model.Id == "transkun")
+        {
+            // NCLS 0.0.70 has no Windows wheel. The official 0.0.68 cp311 wheel
+            // supports TransKun's FNCLS API and uses the NumPy 1.x binary ABI.
+            // https://pypi.org/project/ncls/0.0.68/#files
+            foreach (var value in new[] { "setuptools<81", "ncls==0.0.68", "numpy<2", "--only-binary=ncls" }) info.ArgumentList.Add(value);
+        }
+        if (model.Id == "yourmt3")
+        {
+            // Its vendored T5 implementation requires the Transformers 4 API.
+            // A fresh install with unbounded 5.x fails on model_parallel_utils.
+            foreach (var value in new[] { "transformers==4.44.2", "numpy<2", "setuptools<81" }) info.ArgumentList.Add(value);
+        }
+        if (model.Id == "demucs")
+        {
+            // Demucs 4.1.0 imports NumPy but only declares it for Intel macOS.
+            // https://pypi.org/pypi/demucs/4.1.0/json
+            info.ArgumentList.Add("numpy<2");
+        }
+        if (model.Id is "transkun" or "roformer" or "yourmt3" or "demucs" or "f5-tts" or "piano-runtime")
+        {
+            // Resolve the model and matching GPU wheels together; do not install CPU torch first.
+            // https://docs.astral.sh/uv/guides/integration/pytorch/#automatic-backend-selection
+            foreach (var value in new[] { "torch==2.8.0", "torchaudio==2.8.0", "--torch-backend=cu128" }) info.ArgumentList.Add(value);
+        }
+        if (model.Id == "f5-tts")
+        {
+            // This installer creates CPython 3.11 x64 environments. TorchCodec 0.7 matches torch 2.8;
+            // its Windows audio wheel is on PyPI, not the CUDA index selected above. Inference stays CUDA.
+            // https://github.com/meta-pytorch/torchcodec/tree/v0.10.0#installing-torchcodec
+            info.ArgumentList.Add("torchcodec @ https://files.pythonhosted.org/packages/1f/80/04f23dff2c7ac406d2d6b24a52be7654a946d2fdfe158b19341a524dae20/torchcodec-0.7.0-cp311-cp311-win_amd64.whl#sha256=a68765cd29159da3cf36eb5716481c617ad9d168fe06418bcde2a9360cc7eb5e");
+            // Datasets 2.14 can resolve with current PyArrow but fails during F5's imports.
+            // https://github.com/huggingface/datasets/blob/3.0.0/src/datasets/features/features.py
+            info.ArgumentList.Add("datasets>=3");
+        }
+        return info;
+    }
+
+    internal async Task EnsureYourMt3WeightsAsync(IProgress<ModelInstallProgress>? progress, CancellationToken token)
+    {
+        // Same official checkpoint and hash as mt3-infer 0.2.0's registry. Fetch the
+        // individual file instead of invoking its Git LFS + temporary clone workflow.
+        const string revision = "5e66c1ea173a8186e0d20432b841d3180cc015b5";
+        const string sha256 = ModelHealthPolicy.YourMt3CheckpointSha256;
+        const long size = 561544628;
+        var destination = RepairDestination(settings.Current.LocalAiRoot,
+            Path.GetRelativePath(settings.Current.LocalAiRoot, ModelHealthPolicy.YourMt3CheckpointPath(settings.Current.LocalAiRoot)));
+        var existingHash = await FileHashAsync(destination, token);
+        if (string.Equals(existingHash, sha256, StringComparison.OrdinalIgnoreCase)) return;
+        var pending = destination + ".aurora-download";
+        var url = $"https://huggingface.co/spaces/mimbres/YourMT3/resolve/{revision}/amt/logs/2024/{ModelHealthPolicy.YourMt3ModelFolder}/checkpoints/last.ckpt";
+        Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+        await DownloadFileAsync(url, pending, progress, token, size);
+        if (!string.Equals(await FileHashAsync(pending, token), sha256, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("修复文件校验失败，原模型未被覆盖。");
+        token.ThrowIfCancellationRequested();
+        if (FindRunningProcess(catalog.Find("yourmt3")!) is not null)
+            throw new IOException("模型使用状态或版本已改变，修复文件已保留。");
+        RepairDestination(settings.Current.LocalAiRoot, Path.GetRelativePath(settings.Current.LocalAiRoot, destination));
+        if (!string.Equals(await FileHashAsync(destination, token), existingHash, StringComparison.OrdinalIgnoreCase))
+            throw new IOException("目标文件已改变，请重新检查。");
+        if (File.Exists(destination)) File.Move(destination, destination + ".replaced-" + Guid.NewGuid().ToString("N"));
+        File.Move(pending, destination);
     }
 
     private async Task<OperationResult> CheckPyPiPackageAsync(ModelDefinition model, string root, CancellationToken cancellationToken)
@@ -725,11 +789,11 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         return (end < 0 ? repository : repository[..end]).Trim();
     }
 
-    private static async Task<OperationResult> EnsureUvEnvironmentAsync(string uv, string root, string python, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    private async Task<OperationResult> EnsureUvEnvironmentAsync(string uv, string root, string python, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
         if (File.Exists(python)) return new(true, "隔离运行环境已就绪", "current");
         Directory.CreateDirectory(Path.GetDirectoryName(root)!);
-        var create = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        var create = CreateInstaller(uv);
         foreach (var value in new[] { "venv", "--python", "3.11", root }) create.ArgumentList.Add(value);
         progress?.Report(new(null, "正在创建隔离运行环境"));
         var result = await RunProcessAsync(create, cancellationToken, progress);
@@ -741,30 +805,15 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
     private async Task<OperationResult> InstallMiniMaxMusic3Async(ModelDefinition model, string root, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
         var uv = ResolveUvExecutable();
-        if (uv is null)
-        {
-            progress?.Report(new(null, "正在安装模型部署组件 uv"));
-            var installUv = new ProcessStartInfo("winget.exe") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var value in new[] { "install", "--id", "astral-sh.uv", "-e", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity" }) installUv.ArgumentList.Add(value);
-            var uvResult = await RunProcessAsync(installUv, cancellationToken, progress);
-            if (uvResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(uvResult.Error) ? "无法安装模型部署组件 uv。" : uvResult.Error);
-            uv = ResolveUvExecutable();
-            if (uv is null) return new(false, "uv 已安装，但当前 Aurora 会话尚未找到它。请重新打开 Aurora 后重试。");
-        }
+        if (uv is null) return MissingBundledTool("uv");
         var logicalEnvironment = Path.Combine(settings.Current.LocalAiRoot, "AudioTools", "minimax-music3-env");
-        var environmentRoot = RuntimeEnvironment.CreateCandidate(settings.Current.LocalAiRoot, model.Id);
+        var environmentRoot = RuntimeEnvironment.CreateCandidate(settings.Current.LocalAiRoot);
         var python = Path.Combine(environmentRoot, "Scripts", "python.exe");
         var environment = await EnsureUvEnvironmentAsync(uv, environmentRoot, python, progress, cancellationToken);
         if (!environment.Success) return environment;
 
         progress?.Report(new(null, "正在下载并配置 MiniMax-Music3 CUDA 运行环境（PyTorch 组件较大，请耐心等待）"));
-        var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var value in new[] { "pip", "install", "--python", python, "torch==2.8.0", "torchaudio==2.8.0", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
-        var torchResult = await RunProcessAsync(torch, cancellationToken, progress);
-        if (torchResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(torchResult.Error) ? "MiniMax-Music3 CUDA 环境配置失败。" : torchResult.Error);
-
-        var dependencies = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "git+https://github.com/huggingface/diffusers@dafe3733fcfdbf3c48915fe77be3aef65b5d6a2d", "transformers", "accelerate", "soundfile", "gradio", "huggingface_hub[hf_xet]" }) dependencies.ArgumentList.Add(value);
+        var dependencies = MiniMaxInstallCommand(uv, python);
         var dependencyResult = await RunProcessAsync(dependencies, cancellationToken, progress);
         if (dependencyResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(dependencyResult.Error) ? "MiniMax-Music3 依赖配置失败。" : dependencyResult.Error);
         var probe = await ProbePythonRuntimeAsync(python, "import torch, torchaudio, gradio; from diffusers import ModularPipeline", cancellationToken);
@@ -777,11 +826,8 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         if (!File.Exists(hf)) return new(false, "MiniMax-Music3 下载组件未正确安装。");
         ModelInstallTransaction.Prepare(root, model.Id + ":" + version.Revision);
         var staging = ModelInstallTransaction.StagingPath(root);
-        var download = new ProcessStartInfo(hf) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var value in new[] { "download", model.Repository!, "--revision", version.Revision, "--local-dir", staging }) download.ArgumentList.Add(value);
-        download.ArgumentList.Add("--include");
-        foreach (var include in new[] { "modular_model_index.json", "config.json", "condition_encoder/*", "language_model/*", "rvq_depth_decoder/*", "scheduler/*", "tokenizer/*", "transformer/*", "vocoder/*" })
-            download.ArgumentList.Add(include);
+        var download = HubDownloadCommand(hf, model.Repository!, staging, version.Revision,
+            includes: ["modular_model_index.json", "config.json", "condition_encoder/*", "language_model/*", "rvq_depth_decoder/*", "scheduler/*", "tokenizer/*", "transformer/*", "vocoder/*"]);
         download.Environment["HF_XET_HIGH_PERFORMANCE"] = "1";
         download.Environment["HF_HUB_DOWNLOAD_TIMEOUT"] = "300";
         progress?.Report(new(null, "正在下载 MiniMax-Music3 官方模型（约 27 GB）"));
@@ -797,8 +843,35 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         return new(true, "MiniMax-Music3 已安装、自动配置并可在音乐创作中启用", "current");
     }
 
+    internal ProcessStartInfo MiniMaxInstallCommand(string uv, string python)
+    {
+        var info = CreateInstaller(uv);
+        // An unconstrained second --upgrade replaced CUDA torch with the PyPI CPU build.
+        foreach (var value in new[] { "pip", "install", "--python", python, "torch==2.8.0", "torchaudio==2.8.0", "--torch-backend=cu128",
+            "git+https://github.com/huggingface/diffusers@dafe3733fcfdbf3c48915fe77be3aef65b5d6a2d", "transformers", "accelerate", "soundfile", "gradio", "huggingface_hub[hf_xet]" })
+            info.ArgumentList.Add(value);
+        return info;
+    }
+
+    internal static ProcessStartInfo HubDownloadCommand(string executable, string repository, string? destination = null,
+        string? revision = null, IReadOnlyList<string>? files = null, IReadOnlyList<string>? includes = null)
+    {
+        if (files is { Count: > 0 } && includes is { Count: > 0 }) throw new ArgumentException("Explicit filenames and patterns must not be mixed.");
+        var info = new ProcessStartInfo(executable) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        info.ArgumentList.Add("download");
+        info.ArgumentList.Add(repository);
+        foreach (var file in files ?? []) info.ArgumentList.Add(file);
+        if (revision is not null) { info.ArgumentList.Add("--revision"); info.ArgumentList.Add(revision); }
+        if (destination is not null) { info.ArgumentList.Add("--local-dir"); info.ArgumentList.Add(destination); }
+        // hf 1.x uses a repeatable single-value option; a trailing value otherwise
+        // becomes a positional filename and causes the include filter to be ignored.
+        foreach (var pattern in includes ?? []) { info.ArgumentList.Add("--include"); info.ArgumentList.Add(pattern); }
+        return info;
+    }
+
     private string? ResolveUvExecutable()
     {
+        if (BundledTools.Find("uv") is { } bundled) return bundled;
         var candidates = new[]
         {
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft", "WinGet", "Links", "uv.exe"),
@@ -813,15 +886,19 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         return null;
     }
 
-    private async Task<string?> EnsureUvExecutableAsync(IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    private Task<string?> EnsureUvExecutableAsync(IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
-        var uv = ResolveUvExecutable();
-        if (uv is not null) return uv;
-        progress?.Report(new(null, "正在安装模型部署组件 uv"));
-        var install = new ProcessStartInfo("winget.exe") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var value in new[] { "install", "--id", "astral-sh.uv", "-e", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity" }) install.ArgumentList.Add(value);
-        var result = await RunProcessAsync(install, cancellationToken, progress);
-        return result.ExitCode == 0 ? ResolveUvExecutable() : null;
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult<string?>(ResolveUvExecutable() ?? throw new IOException(MissingBundledTool("uv").Message));
+    }
+
+    private OperationResult MissingBundledTool(string tool) => new(false, new LocalizationService(settings).Format("maintenanceMissingTool", tool));
+
+    private ProcessStartInfo CreateInstaller(string executable)
+    {
+        var info = new ProcessStartInfo(executable) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        BundledTools.ConfigureInstaller(info, settings.Current.LocalAiRoot);
+        return info;
     }
 
     public async Task<IReadOnlyDictionary<string, OperationResult>> CheckAllAsync(IProgress<ModelCheckProgress>? progress = null, CancellationToken cancellationToken = default)
@@ -935,6 +1012,11 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
 
     private async Task<OperationResult> DownloadHuggingFaceRevisionAsync(ModelDefinition model, string root, string revision, IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken, string? dateVersion = null)
     {
+        if (model.Id.StartsWith("whisper-", StringComparison.OrdinalIgnoreCase))
+        {
+            var installed = await EnsureWhisperRuntimeAsync(progress, cancellationToken);
+            if (!installed.Success) return installed;
+        }
         if (model.Id.StartsWith("qwen3-tts-", StringComparison.OrdinalIgnoreCase))
         {
             var runtime = await EnsureQwenTtsRuntimeAsync(progress, cancellationToken);
@@ -942,18 +1024,10 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         }
         var bootstrap = await EnsureHuggingFaceBootstrapAsync(progress, cancellationToken);
         if (!bootstrap.Success || string.IsNullOrWhiteSpace(bootstrap.Path)) return bootstrap;
-        var launcher = bootstrap.Path;
-        var info = new ProcessStartInfo(launcher) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        info.ArgumentList.Add("download"); info.ArgumentList.Add(model.Repository!);
-        info.ArgumentList.Add("--revision"); info.ArgumentList.Add(revision);
         ModelInstallTransaction.Prepare(root, model.Id + ":" + revision);
         var staging = ModelInstallTransaction.StagingPath(root);
-        info.ArgumentList.Add("--local-dir"); info.ArgumentList.Add(staging);
-        if (model.Id.Equals("soulx-singer-svc", StringComparison.OrdinalIgnoreCase))
-        {
-            info.ArgumentList.Add("--include");
-            foreach (var include in new[] { "model-svc.pt", "config.yaml", "README.md" }) info.ArgumentList.Add(include);
-        }
+        var info = HubDownloadCommand(bootstrap.Path, model.Repository!, staging, revision,
+            files: model.Id.Equals("soulx-singer-svc", StringComparison.OrdinalIgnoreCase) ? ["model-svc.pt", "config.yaml", "README.md"] : null);
         info.Environment["HF_XET_HIGH_PERFORMANCE"] = "1";
         info.Environment["HF_HUB_DOWNLOAD_TIMEOUT"] = "300";
         File.WriteAllText(Path.Combine(staging, ".aurora-installing"), DateTimeOffset.UtcNow.ToString("O"));
@@ -981,7 +1055,7 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         if (!File.Exists(launcher))
         {
             progress?.Report(new(null, "正在配置独立模型下载组件"));
-            var install = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            var install = CreateInstaller(uv);
             foreach (var value in new[] { "pip", "install", "--upgrade", "--python", python, "huggingface_hub[hf_xet]" }) install.ArgumentList.Add(value);
             var result = await RunProcessAsync(install, cancellationToken, progress);
             if (result.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(result.Error) ? "独立模型下载组件配置失败。" : result.Error);
@@ -1002,19 +1076,19 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         }
         var uv = await EnsureUvExecutableAsync(progress, cancellationToken);
         if (uv is null) return new(false, "无法安装或找到模型部署组件 uv，无法创建 Qwen3-TTS 运行环境。");
-        var candidate = RuntimeEnvironment.CreateCandidate(settings.Current.LocalAiRoot, "qwen3-tts");
+        var candidate = RuntimeEnvironment.CreateCandidate(settings.Current.LocalAiRoot);
         var python = Path.Combine(candidate, "Scripts", "python.exe");
         var launcher = Path.Combine(candidate, "Scripts", "qwen-tts-demo.exe");
-        var create = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        var create = CreateInstaller(uv);
         foreach (var value in new[] { "venv", "--python", "3.12", candidate }) create.ArgumentList.Add(value);
         progress?.Report(new(null, "正在创建 Qwen3-TTS Python 3.12 隔离环境"));
         var createResult = await RunProcessAsync(create, cancellationToken, progress);
         if (createResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(createResult.Error) ? "Qwen3-TTS 隔离环境创建失败。" : createResult.Error);
-        var torch = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        var torch = CreateInstaller(uv);
         foreach (var value in new[] { "pip", "install", "--python", python, "torch==2.8.0", "torchaudio==2.8.0", "--index-url", "https://download.pytorch.org/whl/cu128" }) torch.ArgumentList.Add(value);
         var torchResult = await RunProcessAsync(torch, cancellationToken, progress);
         if (torchResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(torchResult.Error) ? "Qwen3-TTS CUDA 环境配置失败。" : torchResult.Error);
-        var install = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        var install = CreateInstaller(uv);
         foreach (var value in new[] { "pip", "install", "--python", python, "qwen-tts==0.1.1", "huggingface_hub[hf_xet]" }) install.ArgumentList.Add(value);
         var installResult = await RunProcessAsync(install, cancellationToken, progress);
         if (installResult.ExitCode != 0 || !File.Exists(launcher)) return new(false, string.IsNullOrWhiteSpace(installResult.Error) ? "Qwen3-TTS 运行环境配置失败。" : installResult.Error);
@@ -1025,7 +1099,7 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         return new(true, "Qwen3-TTS 运行环境已就绪", "current");
     }
 
-    private static async Task<OperationResult> ProbePythonRuntimeAsync(string python, string imports, CancellationToken cancellationToken)
+    private async Task<OperationResult> ProbePythonRuntimeAsync(string python, string imports, CancellationToken cancellationToken)
     {
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(TimeSpan.FromMinutes(2));
@@ -1038,54 +1112,34 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         return result.ExitCode == 0 ? new(true, "运行环境导入检查通过。") : new(false, "运行环境导入检查失败：" + result.Error);
     }
 
-    private static async Task FreezeRuntimeAsync(string uv, string python, string root, CancellationToken cancellationToken)
+    private async Task FreezeRuntimeAsync(string uv, string python, string root, CancellationToken cancellationToken)
     {
-        var info = new ProcessStartInfo(uv) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        var info = CreateInstaller(uv);
         foreach (var value in new[] { "pip", "freeze", "--python", python }) info.ArgumentList.Add(value);
         var result = await RunProcessAsync(info, cancellationToken);
         if (result.ExitCode != 0) throw new InvalidOperationException("无法记录候选运行环境依赖。" + result.Error);
         await File.WriteAllTextAsync(Path.Combine(root, "requirements.aurora.txt"), result.Output, cancellationToken);
     }
 
-    private async Task<OperationResult> EnsureSoxAsync(IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    private Task<OperationResult> EnsureSoxAsync(IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
-        RefreshProcessPath();
-        if (ExecutableOnPath("sox.exe")) return new(true, "SoX 音频组件已就绪", "current");
-        progress?.Report(new(null, "正在安装 Qwen3-TTS 所需的 SoX 音频组件"));
-        var install = new ProcessStartInfo("winget.exe") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var value in new[] { "install", "--id", "ChrisBagwell.SoX", "-e", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity" }) install.ArgumentList.Add(value);
-        var result = await RunProcessAsync(install, cancellationToken, progress);
-        RefreshProcessPath();
-        return result.ExitCode == 0 && ExecutableOnPath("sox.exe")
-            ? new(true, "SoX 音频组件已就绪", "current")
-            : new(false, string.IsNullOrWhiteSpace(result.Error) ? "SoX 音频组件安装失败，请在模型管理中重试。" : result.Error);
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(BundledTools.Find("sox") is not null || ExecutableOnPath("sox.exe")
+            ? new OperationResult(true, "SoX 音频组件已就绪", "current") : MissingBundledTool("SoX"));
     }
 
-    private async Task<OperationResult> EnsureFfmpegAsync(IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
+    private Task<OperationResult> EnsureWhisperRuntimeAsync(IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
-        if (AudioRuntime.FindFfmpeg(settings.Current.LocalAiRoot) is not null) return new(true, "FFmpeg 已就绪。");
-        progress?.Report(new(null, "正在安装 FFmpeg 音频组件"));
-        var install = new ProcessStartInfo("winget.exe") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var value in new[] { "install", "--id", "Gyan.FFmpeg", "-e", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity" }) install.ArgumentList.Add(value);
-        var result = await RunProcessAsync(install, cancellationToken, progress);
-        RefreshProcessPath();
-        return result.ExitCode == 0 && AudioRuntime.FindFfmpeg(settings.Current.LocalAiRoot) is not null ? new(true, "FFmpeg 已就绪。") : new(false, "FFmpeg 组件未就绪：" + result.Error);
+        var runtime = catalog.Find("faster-whisper")!;
+        return catalog.IsInstalled(runtime) ? Task.FromResult(new OperationResult(true, "字幕运行组件已就绪"))
+            : InstallGitHubReleaseAsync(runtime, Path.Combine(settings.Current.LocalAiRoot, runtime.RelativeRoot), progress, cancellationToken);
     }
 
-    private static IEnumerable<string> PathEntries(string? value)
-        => (value ?? "").Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(entry => entry.Trim('"'))
-            .Where(entry => !string.IsNullOrWhiteSpace(entry));
-
-    private static void RefreshProcessPath()
+    private Task<OperationResult> EnsureFfmpegAsync(IProgress<ModelInstallProgress>? progress, CancellationToken cancellationToken)
     {
-        var current = Environment.GetEnvironmentVariable("PATH") ?? "";
-        var user = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User) ?? "";
-        var machine = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine) ?? "";
-        var combined = new[] { current, user, machine }
-            .SelectMany(PathEntries)
-            .Distinct(StringComparer.OrdinalIgnoreCase);
-        Environment.SetEnvironmentVariable("PATH", string.Join(';', combined));
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(AudioRuntime.FindFfmpeg(settings.Current.LocalAiRoot) is not null && AudioRuntime.FindFfprobe(settings.Current.LocalAiRoot) is not null
+            ? new OperationResult(true, "FFmpeg 已就绪。") : MissingBundledTool("FFmpeg / ffprobe"));
     }
 
     private static bool ExecutableOnPath(string fileName)
@@ -1170,12 +1224,12 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         {
             using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             deadline.CancelAfter(timeout ?? TimeSpan.FromMinutes(2));
-            var info = new ProcessStartInfo("git", arguments) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+            var info = new ProcessStartInfo(BundledTools.Find("git") ?? "git", arguments) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
             using var process = new Process { StartInfo = info };
             BackgroundProcess.Start(process);
             var outputTask = process.StandardOutput.ReadToEndAsync(); var errorTask = process.StandardError.ReadToEndAsync();
-            using var registration = deadline.Token.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
-            await process.WaitForExitAsync(deadline.Token);
+            try { await BackgroundProcess.WaitForExitAsync(process, deadline.Token); }
+            finally { await Task.WhenAll(outputTask, errorTask).WaitAsync(TimeSpan.FromSeconds(10)); }
             var output = (await outputTask).Trim(); var error = (await errorTask).Trim();
             return process.ExitCode == 0 ? new(true, string.IsNullOrWhiteSpace(output) ? "更新完成" : output, output) : new(false, string.IsNullOrWhiteSpace(error) ? "更新失败" : error);
         }
@@ -1192,7 +1246,9 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             var existing = File.Exists(partial) ? new FileInfo(partial).Length : 0;
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             if (existing > 0) request.Headers.Range = new RangeHeaderValue(existing, null);
-            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            using var networkDeadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            networkDeadline.CancelAfter(TimeSpan.FromSeconds(60));
+            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, networkDeadline.Token);
             if (response.StatusCode == System.Net.HttpStatusCode.RequestedRangeNotSatisfiable && existing > 0)
             {
                 var serverLength = response.Content.Headers.ContentRange?.Length;
@@ -1218,7 +1274,9 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             var lastReport = TimeSpan.Zero;
             while (true)
             {
-                var read = await input.ReadAsync(buffer, cancellationToken);
+                // Reset on received bytes: a slow but active download is not a stalled one.
+                networkDeadline.CancelAfter(TimeSpan.FromSeconds(60));
+                var read = await input.ReadAsync(buffer, networkDeadline.Token);
                 if (read == 0) break;
                 await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
                 received += read;
@@ -1239,8 +1297,11 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         throw new IOException("服务器拒绝了断点位置，重新下载仍未成功。");
     }
 
-    private static async Task<(int ExitCode, string Output, string Error)> RunProcessAsync(ProcessStartInfo info, CancellationToken cancellationToken = default, IProgress<ModelInstallProgress>? progress = null)
+    private async Task<(int ExitCode, string Output, string Error)> RunProcessAsync(ProcessStartInfo info, CancellationToken cancellationToken = default, IProgress<ModelInstallProgress>? progress = null)
     {
+        BundledTools.ConfigureInstaller(info, settings.Current.LocalAiRoot);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(TimeSpan.FromHours(4));
         using var process = new Process { StartInfo = info };
         var output = new List<string>();
         var errors = new List<string>();
@@ -1248,17 +1309,36 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         void RecordLine(List<string> destination, string value)
         {
             lock (sync) destination.Add(value);
-            if (!IsProgressNoise(value)) progress?.Report(new(null, "", 0, null, 0, LogLine(value)));
+            if (!IsProgressNoise(value)) progress?.Report(new(null, "", 0, null, 0, value));
         }
         process.OutputDataReceived += (_, args) => { if (!string.IsNullOrWhiteSpace(args.Data)) RecordLine(output, args.Data); };
         process.ErrorDataReceived += (_, args) => { if (!string.IsNullOrWhiteSpace(args.Data)) RecordLine(errors, args.Data); };
         BackgroundProcess.Start(process);
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
-        using var registration = cancellationToken.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
-        await process.WaitForExitAsync(cancellationToken);
-        await Task.Delay(60, CancellationToken.None);
-        lock (sync) return (process.ExitCode, string.Join(Environment.NewLine, output), string.Join(Environment.NewLine, errors));
+        using var pulseCancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
+        var elapsed = Stopwatch.StartNew();
+        async Task Pulse()
+        {
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(10));
+            try
+            {
+                while (await timer.WaitForNextTickAsync(pulseCancellation.Token))
+                    progress?.Report(new(null, "", LogLine: new LocalizationService(settings).Format("maintenanceWaiting", elapsed.Elapsed.ToString(@"hh\:mm\:ss"))));
+            }
+            catch (OperationCanceledException) when (pulseCancellation.IsCancellationRequested) { }
+        }
+        var pulse = Pulse();
+        try
+        {
+            await BackgroundProcess.WaitForExitAsync(process, deadline.Token);
+            // WaitForExitAsync drains both redirected event streams before completing.
+            // https://learn.microsoft.com/dotnet/api/system.diagnostics.process.waitforexitasync
+            lock (sync) return (process.ExitCode, string.Join(Environment.NewLine, output), string.Join(Environment.NewLine, errors));
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        { throw new TimeoutException(new LocalizationService(settings).Get("maintenanceTimeout")); }
+        finally { await pulseCancellation.CancelAsync(); await pulse; }
     }
 
     private static bool IsProgressNoise(string value) =>

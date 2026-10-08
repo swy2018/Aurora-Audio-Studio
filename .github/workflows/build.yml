@@ -58,6 +58,10 @@ jobs:
       - name: Restore
         run: dotnet restore work/audio-studio/AuroraAudioStudio/AuroraAudioStudio.csproj --runtime win-x64 -p:PublishReadyToRun=true
 
+      - name: Prepare verified application-owned model tools
+        shell: pwsh
+        run: ./work/audio-studio/tools/Prepare-WindowsRuntime.ps1
+
       - name: Build
         run: dotnet build work/audio-studio/AuroraAudioStudio/AuroraAudioStudio.csproj --configuration Release --no-restore -p:Platform=x64 -p:ContinuousIntegrationBuild=true
 
@@ -69,6 +73,8 @@ jobs:
         run: |
           dotnet run --project work/audio-studio/AuroraAudioStudio.BehaviorTests --configuration Release
           if ($LASTEXITCODE) { throw 'Behavior checks failed.' }
+          dotnet run --project work/audio-studio/AuroraAudioStudio.BehaviorTests --configuration Release --no-build -- --bootstrap-tools work/audio-studio/AuroraAudioStudio/Runtime "$env:RUNNER_TEMP/Aurora-first-install"
+          if ($LASTEXITCODE) { throw 'Bundled first-install tools failed in an isolated PATH.' }
           dotnet run --project work/audio-studio/AuroraAudioStudio.BehaviorTests --configuration Release --no-build -- --strings .
           if ($LASTEXITCODE) { throw 'Localization checks failed.' }
           dotnet run --project work/audio-studio/AuroraAudioStudio.BehaviorTests --configuration Release --no-build -- --catalog . --check

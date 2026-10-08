@@ -8,6 +8,8 @@ Aurora Audio Studio 是一套在 Windows 本机运行的 AI 音频制作工作�
 3. 根据你的选择创建桌面快捷方式。
 4. 注册标准卸载信息，方便从 Windows“已安装的应用”中卸载。
 5. 升级时先安全移除旧版应用文件，并保留个人设置、模型、项目和成品。
+6. 按需配置随包提供的 Microsoft Visual C++ x64 系统运行组件；已有相同或更新版本时不重复安装，不会自动重启电脑。
+7. 检查工作台所需的 Microsoft WebView2，缺失时使用随包提供的官方离线安装程序补齐。
 
 安装程序不会：
 1. 自动下载任何 AI 模型。
@@ -16,6 +18,7 @@ Aurora Audio Studio 是一套在 Windows 本机运行的 AI 音频制作工作�
 4. 删除或移动现有的模型、音频和成品文件。
 
 模型只会在你于 Aurora 中明确选择安装时下载。应用运行期间产生的模型和成品位于你指定的目录，不属于程序安装目录。
+Python、Git、FFmpeg 等工具由 Aurora 准备，无需预装开发环境。首次安装模型仍需要网络、足够的磁盘空间和符合模型要求的硬件。
 
 继续安装前，请阅读并同意 GNU General Public License version 3。
 
@@ -31,6 +34,8 @@ Setup will:
 3. Create a desktop shortcut only if you select that option.
 4. Register a standard uninstaller in Windows Installed Apps.
 5. Safely remove previous application files during upgrades while preserving settings, models, projects, and outputs.
+6. Set up the bundled Microsoft Visual C++ x64 runtime when required. An equal or newer installed version is retained, and setup never restarts Windows automatically.
+7. Check for the Microsoft WebView2 workbench runtime and install it from the bundled official offline installer only when missing.
 
 Setup will not:
 1. Download AI models automatically.
@@ -39,5 +44,6 @@ Setup will not:
 4. Delete or move existing models, audio, or output files.
 
 Models are downloaded only after an explicit install action in Aurora. Models and generated outputs are stored in locations selected by the user and are not part of the application installation directory.
+Aurora prepares Python, Git, FFmpeg and other required tools; a preinstalled development environment is not required. First-time model installation still needs network access, free disk space, and compatible hardware.
 
 Before continuing, read and accept the GNU General Public License version 3.

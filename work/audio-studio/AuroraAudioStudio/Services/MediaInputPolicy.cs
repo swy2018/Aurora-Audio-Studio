@@ -68,11 +68,10 @@ public static class MediaInputPolicy
         foreach (var argument in arguments) info.ArgumentList.Add(argument);
         using var process = new Process { StartInfo = info };
         BackgroundProcess.Start(process);
-        using var cancellation = timeout.Token.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch (InvalidOperationException) { } });
         var output = process.StandardOutput.ReadToEndAsync(); var error = process.StandardError.ReadToEndAsync();
         try
         {
-            await process.WaitForExitAsync(timeout.Token);
+            await BackgroundProcess.WaitForExitAsync(process, timeout.Token);
             await Task.WhenAll(output, error);
             if (process.ExitCode != 0) throw new InvalidDataException("音频预检未通过：" + (await error).Trim());
             return await output;
@@ -80,8 +79,7 @@ public static class MediaInputPolicy
         catch (OperationCanceledException) when (!token.IsCancellationRequested) { throw new IOException("音频预检超时，请检查素材文件与存储设备。"); }
         finally
         {
-            try { if (!process.HasExited) process.Kill(true); } catch (InvalidOperationException) { }
-            await Task.WhenAll(output, error);
+            await Task.WhenAll(output, error).WaitAsync(TimeSpan.FromSeconds(10));
         }
     }
 }

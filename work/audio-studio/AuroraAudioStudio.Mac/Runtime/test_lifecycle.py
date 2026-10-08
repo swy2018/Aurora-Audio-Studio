@@ -2,6 +2,7 @@ import hashlib
 import io
 import json
 from pathlib import Path
+import subprocess
 from types import SimpleNamespace
 import tempfile
 import unittest
@@ -124,6 +125,24 @@ class LifecycleTests(unittest.TestCase):
         with patch.object(manage, "_check", side_effect=RuntimeError("broken environment")):
             with self.assertRaises(RuntimeError): manage.check(self.root, "unit-model")
         self.assertTrue(json.loads((self.base/"current/health.json").read_text())["failed"])
+
+    def test_yourmt3_health_check_loads_inference_and_records_failure(self):
+        d.CATALOG["unit-model"]["family"] = "mt3"
+        d.download(self.root, "unit-model")
+        health = self.base / "current/health.json"
+        health.write_text('{"files":true,"imports":true,"at":0}')
+
+        def import_module(args, **kwargs):
+            # The top-level package still imports when its lazily loaded T5 module is broken.
+            if args[1:] == ["-c", "import mt3_infer.models.yourmt3.inference_loader"]:
+                raise subprocess.CalledProcessError(1, args)
+
+        with patch.object(manage.subprocess, "run", side_effect=import_module) as process:
+            with self.assertRaises(subprocess.CalledProcessError):
+                manage.check(self.root, "unit-model")
+        self.assertEqual(process.call_args.args[0][1:],
+                         ["-c", "import mt3_infer.models.yourmt3.inference_loader"])
+        self.assertTrue(json.loads(health.read_text())["failed"])
 
     def test_repeated_updates_retain_older_versions_without_deletion(self):
         d.download(self.root, "unit-model")

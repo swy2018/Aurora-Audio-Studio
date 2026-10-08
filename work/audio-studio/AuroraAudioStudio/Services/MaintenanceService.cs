@@ -28,11 +28,11 @@ public sealed class MaintenanceService(SettingsService settings, ModelCatalogSer
             var info = new ProcessStartInfo("nvidia-smi", "--query-gpu=name,memory.total,driver_version --format=csv,noheader") { UseShellExecute = false, RedirectStandardOutput = true, CreateNoWindow = true };
             using var process = new Process { StartInfo = info };
             BackgroundProcess.Start(process);
-            var output = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            var output = process.StandardOutput.ReadToEndAsync();
             using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             deadline.CancelAfter(TimeSpan.FromSeconds(3));
-            using var registration = deadline.Token.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
-            await process.WaitForExitAsync(deadline.Token);
+            try { await BackgroundProcess.WaitForExitAsync(process, deadline.Token); }
+            finally { await output.WaitAsync(TimeSpan.FromSeconds(10)); }
             var text = await output;
             return string.IsNullOrWhiteSpace(text) ? "未检测到 NVIDIA GPU 信息" : text.Trim();
         }

@@ -10,12 +10,55 @@ public static class ModelInstallPlanner
     {
         var target = Path.GetFullPath(Path.Combine(modelRoot, model.RelativeRoot));
         var required = RecommendedBytes(model.Id);
+        var download = EstimatedDownload(model.Id);
+        var space = RecommendedFreeSpace(model.Id);
+        if (OperatingSystem.IsWindows() && WindowsRuntimeBudget(model.Id, modelRoot) is { } bootstrap)
+        {
+            required = bootstrap.Bytes;
+            download = bootstrap.Download;
+            space = "≈ " + FormatBytes(required);
+        }
         try
         {
             var drive = new DriveInfo(Path.GetPathRoot(target)!);
-            return new(target, EstimatedDownload(model.Id), RecommendedFreeSpace(model.Id), FormatBytes(drive.AvailableFreeSpace), drive.AvailableFreeSpace >= required, required >= 4L * 1024 * 1024 * 1024);
+            return new(target, download, space, FormatBytes(drive.AvailableFreeSpace), drive.AvailableFreeSpace >= required, required >= 4L * 1024 * 1024 * 1024);
         }
-        catch { return new(target, EstimatedDownload(model.Id), RecommendedFreeSpace(model.Id), "未知", true, required >= 4L * 1024 * 1024 * 1024); }
+        catch { return new(target, download, space, "未知", true, required >= 4L * 1024 * 1024 * 1024); }
+    }
+
+    private static (long Bytes, string Download)? WindowsRuntimeBudget(string id, string modelRoot)
+    {
+        const long gib = 1024L * 1024 * 1024;
+        // These are conservative first-install estimates, not weight-file sizes.
+        // r245.4 alone downloads 1.42 GB and extracts several GB before model weights.
+        if (id is "faster-whisper" or "whisper-small" or "whisper-large-v3-turbo" or "whisper-large-v3")
+        {
+            if (id == "faster-whisper") return (8 * gib, "≈ 1.4 GB");
+            var shared = Path.Combine(modelRoot, "Faster-Whisper-XXL", "Faster-Whisper-XXL", "faster-whisper-xxl.exe");
+            if (!HasContent(shared)) return id switch
+            {
+                "whisper-small" => (8 * gib, "≈ 2 GB"),
+                "whisper-large-v3-turbo" => (10 * gib, "≈ 3 GB"),
+                _ => (12 * gib, "≈ 4.5 GB")
+            };
+        }
+        if (id.StartsWith("qwen3-tts-", StringComparison.OrdinalIgnoreCase))
+        {
+            var scripts = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(modelRoot, "Qwen3-TTS", "Python312")), "Scripts");
+            if (!HasContent(Path.Combine(scripts, "python.exe")) || !HasContent(Path.Combine(scripts, "qwen-tts-demo.exe")))
+                return id.StartsWith("qwen3-tts-06b-", StringComparison.OrdinalIgnoreCase)
+                    ? (12 * gib, "≈ 5–7 GB") : (16 * gib, "≈ 8–10 GB");
+        }
+        // Piano provisioning creates a new native environment on every install/repair.
+        if (id == "piano") return (12 * gib, "≈ 4–7 GB");
+        return null;
+    }
+
+    private static bool HasContent(string path)
+    {
+        try { return File.Exists(path) && new FileInfo(path).Length > 0; }
+        catch (IOException) { return false; }
+        catch (UnauthorizedAccessException) { return false; }
     }
 
     public static string EstimatedDownload(string id) => id switch

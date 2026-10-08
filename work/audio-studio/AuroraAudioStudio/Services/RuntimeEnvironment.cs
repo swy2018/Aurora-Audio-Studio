@@ -13,9 +13,13 @@ public static class RuntimeEnvironment
         return Path.IsPathFullyQualified(path) ? Path.GetFullPath(path) : Path.Combine(logicalRoot, ".invalid-runtime");
     }
 
-    public static string CreateCandidate(string localAiRoot, string modelId)
+    public static string CreateCandidate(string localAiRoot)
     {
-        var root = Path.Combine(localAiRoot, "AudioTools", "aurora-runtimes", modelId, Guid.NewGuid().ToString("N"));
+        // The logical model pointer retains identity. Keep native DLL paths short: CUDA's
+        // dependent-library loader can reject paths before Python's long-path handling helps.
+        var root = Path.GetFullPath(Path.Combine(localAiRoot, ".aurora", "envs", Guid.NewGuid().ToString("N")));
+        if (OperatingSystem.IsWindows() && root.Length > 170)
+            throw new PathTooLongException("模型目录过长，Windows 无法可靠加载运行组件。请在设置中选择较短的模型目录，例如 C:\\LocalAI；现有文件未被移动。");
         Directory.CreateDirectory(Path.GetDirectoryName(root)!);
         return root;
     }

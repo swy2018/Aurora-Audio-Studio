@@ -4,6 +4,12 @@ using AuroraAudioStudio.Models;
 using AuroraAudioStudio.Services;
 
 if (args.FirstOrDefault() == "--stdin-fixture") { ProcessLaunchRegression.RunFixture(); return; }
+if (args.FirstOrDefault() == "--cancel-leaf") { await Task.Delay(TimeSpan.FromMinutes(2)); return; }
+if (args.FirstOrDefault() == "--cancel-tree") { await ProcessCancellationRegression.FixtureAsync(args[1]); return; }
+if (args.FirstOrDefault() == "--process-cancel") { await ProcessCancellationRegression.RunAsync(args.ElementAtOrDefault(1), args.ElementAtOrDefault(2)); return; }
+if (args.FirstOrDefault() == "--bootstrap-tools") { await BootstrapIntegration.RunAsync(args[1], args[2]); return; }
+if (args.FirstOrDefault() == "--first-install") { await BootstrapIntegration.InstallModelAsync(args[1], args[2]); return; }
+if (args.FirstOrDefault() == "--bootstrap-regression") { await BootstrapRegression.RunAsync(); return; }
 if (args.FirstOrDefault() == "--process-launch") { await ProcessLaunchRegression.RunAsync(); return; }
 if (args.FirstOrDefault() == "--log-fixture")
 {
@@ -85,14 +91,15 @@ ModelInstallTransaction.Commit(target);
 Check(File.ReadAllText(Path.Combine(target, "version")) == "new", "commit promotes verified candidate");
 Check(ModelInstallTransaction.RestorePrevious(target) && File.ReadAllText(Path.Combine(target, "version")) == "old", "rollback restores old candidate");
 
-var logical = Path.Combine(root, "logical-env"); var runtime = RuntimeEnvironment.CreateCandidate(root, "sample");
+var logical = Path.Combine(root, "logical-env"); var runtime = RuntimeEnvironment.CreateCandidate(root);
 Fixture(Path.Combine(logical, "Scripts", "python.exe")); Fixture(Path.Combine(runtime, "Scripts", "python.exe"));
 RuntimeEnvironment.Activate(logical, runtime);
 Check(RuntimeEnvironment.Resolve(logical) == runtime && File.Exists(Path.Combine(logical, "Scripts", "python.exe")), "environment activation leaves original files and candidate paths unchanged");
 Check(RuntimeEnvironment.Rollback(logical) && RuntimeEnvironment.Resolve(logical) == logical, "environment rollback restores original path without moving Python");
 var ace = new ModelDefinition("ace-step", "ACE", "music", "ACE-Step-1.5", @"acestep\acestep_v15_pipeline.py", "GitHub", "github-release-git");
 var staging = Path.Combine(root, "new-install.aurora-staging"); Fixture(Path.Combine(staging, ace.Marker)); Fixture(Path.Combine(staging, ".venv", "Scripts", "python.exe"));
-foreach (var folder in new[] { "acestep-v15-turbo", "acestep-v15-xl-turbo", "acestep-5Hz-lm-1.7B", "Qwen3-Embedding-0.6B", "vae" }) Fixture(Path.Combine(staging, "checkpoints", folder, "weights.bin"));
+// Match names accepted by ACE's actual loader, not an arbitrary nonempty .bin file.
+foreach (var folder in new[] { "acestep-v15-turbo", "acestep-v15-xl-turbo", "acestep-5Hz-lm-1.7B", "Qwen3-Embedding-0.6B", "vae" }) Fixture(Path.Combine(staging, "checkpoints", folder, "model.safetensors"));
 Check(ModelHealthPolicy.MissingRequirements(ace, root, staging).Count == 0 && !ModelHealthPolicy.IsReady(ace, root), "first-install validation evaluates explicit staging root");
 Check(!SettingsPathValidator.TryValidate("relative", "relative", "relative", out _), "relative settings paths rejected");
 
@@ -152,7 +159,7 @@ Fixture(Path.Combine(settings.Current.LocalAiRoot, vocals.RelativeRoot, vocals.M
 Check(!catalog.IsInstalled(vocals), "vocals weights require the shared separation launcher");
 var ffmpeg = Path.Combine(settings.Current.LocalAiRoot, "Faster-Whisper-XXL", "Faster-Whisper-XXL", "ffmpeg.exe");
 Fixture(ffmpeg);
-Check(AudioRuntime.FindFfmpeg(settings.Current.LocalAiRoot) == ffmpeg, "bundled FFmpeg has deterministic precedence over PATH");
+Check(AudioRuntime.FindFfmpeg(settings.Current.LocalAiRoot) == (BundledTools.Find("ffmpeg") ?? ffmpeg), "application-bundled or legacy FFmpeg has deterministic precedence over PATH");
 Console.WriteLine($"Behavior checks passed: {passed}. Isolated evidence: {root}");
 await MaintenanceRegression.RunAsync();
 await FunctionRegression.RunAsync();
@@ -164,3 +171,5 @@ await StorageRegression.RunAsync();
 await WorkspaceRegression.RunAsync();
 await ReviewRegression.RunAsync();
 await ProcessLaunchRegression.RunAsync();
+await BootstrapRegression.RunAsync();
+await ProcessCancellationRegression.RunAsync();

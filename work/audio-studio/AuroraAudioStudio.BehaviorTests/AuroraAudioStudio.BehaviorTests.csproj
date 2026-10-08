@@ -10,4 +10,7 @@
     <Compile Include="../AuroraAudioStudio/Services/*.cs" Link="Services/%(Filename)%(Extension)" />
     <Content Include="../AuroraAudioStudio/Tools/*.py" Link="Tools/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <ItemGroup Condition="'$(AuroraRuntimeSource)' != ''">
+    <Content Include="$(AuroraRuntimeSource)\**\*" Link="Runtime\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

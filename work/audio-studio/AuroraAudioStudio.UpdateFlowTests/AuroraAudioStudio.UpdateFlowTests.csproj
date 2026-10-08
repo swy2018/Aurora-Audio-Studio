@@ -19,6 +19,7 @@
     <Compile Include="..\AuroraAudioStudio\Services\ProjectDocumentMigrator.cs" Link="ProjectDocumentMigrator.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\MediaInputPolicy.cs" Link="MediaInputPolicy.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\BackgroundProcess.cs" Link="BackgroundProcess.cs" />
+    <Compile Include="..\AuroraAudioStudio\Services\BundledTools.cs" Link="BundledTools.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\AudioRuntime.cs" Link="AudioRuntime.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\ArtifactValidator.cs" Link="ArtifactValidator.cs" />
     <Compile Include="..\AuroraAudioStudio\Services\SettingsPathValidator.cs" Link="SettingsPathValidator.cs" />

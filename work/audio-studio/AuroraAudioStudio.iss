@@ -15,6 +15,7 @@
 #define MyAppURL "https://github.com/swy2018/Aurora-Audio-Studio"
 #define MyAppExeName "Aurora Audio Studio.exe"
 #define MyAppCopyright "Copyright (C) 2026 Aurora Contributors"
+#define VCRuntimeVersion GetVersionNumbersString("AuroraAudioStudio\Runtime\prerequisites\vc_redist.x64.exe")
 
 [Setup]
 AppId={{B8D7DD9A-AFCB-4E3B-96EA-95F67743578A}
@@ -85,6 +86,8 @@ Source: "..\..\publish\{#PublishFolder}\*"; DestDir: "{app}"; Excludes: "*.pdb";
 Source: "AuroraAudioStudio\Assets\AppIcon.ico"; DestDir: "{app}\Assets"; DestName: "AppIcon-{#MyAppVersion}.ico"; Flags: ignoreversion
 Source: "..\..\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"; Flags: ignoreversion
 Source: "README-给音乐人的使用说明.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "AuroraAudioStudio\Runtime\prerequisites\vc_redist.x64.exe"; Flags: dontcopy
+Source: "AuroraAudioStudio\Runtime\prerequisites\MicrosoftEdgeWebView2RuntimeInstallerX64.exe"; Flags: dontcopy
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Assets\AppIcon-{#MyAppVersion}.ico"
@@ -106,6 +109,18 @@ japanese.ConfirmUninstall=Aurora Audio Studio をアンインストールしま�
 japanese.UninstalledAll=Aurora Audio Studio をアンインストールしました。%n%nAI モデル、生成ファイル、個人素材は保持されています。
 
 [CustomMessages]
+english.RuntimeFailed=Microsoft Visual C++ runtime setup did not complete. Aurora has not been replaced. Check the setup log and retry. Error code:
+chinesesimplified.RuntimeFailed=Microsoft Visual C++ 运行组件未安装完成，Aurora 尚未被替换。请检查安装日志后重试。错误码：
+chinesetraditional.RuntimeFailed=Microsoft Visual C++ 執行元件未安裝完成，Aurora 尚未被取代。請檢查安裝記錄後重試。錯誤碼：
+japanese.RuntimeFailed=Microsoft Visual C++ ランタイムを準備できませんでした。Aurora は変更されていません。ログを確認して再試行してください。エラーコード:
+english.WebViewFailed=The Microsoft WebView2 workbench component could not be installed. Aurora has not been replaced. Check the setup log and retry. Error code:
+chinesesimplified.WebViewFailed=Microsoft WebView2 工作台组件未安装完成，Aurora 尚未被替换。请检查安装日志后重试。错误码：
+chinesetraditional.WebViewFailed=Microsoft WebView2 工作台元件未安裝完成，Aurora 尚未被取代。請檢查安裝記錄後重試。錯誤碼：
+japanese.WebViewFailed=Microsoft WebView2 ワークベンチコンポーネントを準備できませんでした。Aurora は変更されていません。ログを確認して再試行してください。エラーコード:
+english.RuntimeRestart=The Microsoft runtime requires a Windows restart. Restart Windows, then run the Aurora installer again. Aurora has not been replaced.
+chinesesimplified.RuntimeRestart=Microsoft 运行组件需要重启 Windows。请重启后再次运行 Aurora 安装程序；当前 Aurora 尚未被替换。
+chinesetraditional.RuntimeRestart=Microsoft 執行元件需要重新啟動 Windows。請重新啟動後再次執行 Aurora 安裝程式；目前的 Aurora 尚未被取代。
+japanese.RuntimeRestart=Microsoft ランタイムの準備には Windows の再起動が必要です。再起動後に Aurora のインストールを再実行してください。現在の Aurora は変更されていません。
 english.desktopicon=Create a desktop shortcut
 chinesesimplified.desktopicon=创建桌面快捷方式
 chinesetraditional.desktopicon=建立桌面捷徑
@@ -117,6 +132,82 @@ japanese.RemovePersonalDataPrompt=この Windows アカウントの Aurora 設�
 [Code]
 var
   DeletePersonalData: Boolean;
+
+function HasVCRuntime(): Boolean;
+var
+  Installed: Cardinal;
+  Key, VersionText: String;
+  InstalledVersion, RequiredVersion: Int64;
+begin
+  { Microsoft documents this key and recommends skipping newer installed runtimes. }
+  Key := 'SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64';
+  Result := False;
+  if not RegQueryDWordValue(HKLM64, Key, 'Installed', Installed) or (Installed <> 1) then Exit;
+  if not RegQueryStringValue(HKLM64, Key, 'Version', VersionText) then Exit;
+  if Copy(VersionText, 1, 1) = 'v' then Delete(VersionText, 1, 1);
+  if not StrToVersion(VersionText, InstalledVersion) then Exit;
+  if not StrToVersion('{#VCRuntimeVersion}', RequiredVersion) then Exit;
+  Result := ComparePackedVersion(InstalledVersion, RequiredVersion) >= 0;
+end;
+
+function PrepareVCRuntime(var NeedsRestart: Boolean): String;
+var
+  Code: Integer;
+begin
+  Result := '';
+  if HasVCRuntime() then Exit;
+  ExtractTemporaryFile('vc_redist.x64.exe');
+  Log('Preparing the bundled Microsoft Visual C++ x64 runtime.');
+  if not Exec(ExpandConstant('{tmp}\vc_redist.x64.exe'), '/install /quiet /norestart /log "' + ExpandConstant('{tmp}\Aurora-vcredist.log') + '"', '', SW_HIDE, ewWaitUntilTerminated, Code) then
+  begin
+    Result := CustomMessage('RuntimeFailed') + ' ' + IntToStr(Code);
+    Exit;
+  end;
+  Log('Visual C++ runtime exit code: ' + IntToStr(Code));
+  if Code = 3010 then
+  begin
+    NeedsRestart := True;
+    Result := CustomMessage('RuntimeRestart');
+  end
+  else if ((Code <> 0) and (Code <> 1638)) or not HasVCRuntime() then
+    Result := CustomMessage('RuntimeFailed') + ' ' + IntToStr(Code);
+end;
+
+function HasWebView2Runtime(): Boolean;
+var
+  Key, VersionText: String;
+  Version: Int64;
+begin
+  { Microsoft recommends checking both machine and user registrations, not Edge browser presence. }
+  Key := 'SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}';
+  Result := False;
+  if RegQueryStringValue(HKLM32, Key, 'pv', VersionText) then
+    if StrToVersion(VersionText, Version) and (Version > 0) then Result := True;
+  if not Result and RegQueryStringValue(HKCU, Key, 'pv', VersionText) then
+    if StrToVersion(VersionText, Version) and (Version > 0) then Result := True;
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  Code: Integer;
+begin
+  Result := PrepareVCRuntime(NeedsRestart);
+  if Result <> '' then Exit;
+  if HasWebView2Runtime() then Exit;
+  { https://learn.microsoft.com/microsoft-edge/webview2/concepts/distribution#offline-deployment }
+  ExtractTemporaryFile('MicrosoftEdgeWebView2RuntimeInstallerX64.exe');
+  Log('Preparing the bundled offline Microsoft WebView2 runtime.');
+  if not Exec(ExpandConstant('{tmp}\MicrosoftEdgeWebView2RuntimeInstallerX64.exe'), '/silent /install', '', SW_HIDE, ewWaitUntilTerminated, Code) then
+    Result := CustomMessage('WebViewFailed') + ' ' + IntToStr(Code)
+  else if Code = 3010 then
+  begin
+    NeedsRestart := True;
+    Result := CustomMessage('RuntimeRestart');
+  end
+  else if (Code <> 0) or not HasWebView2Runtime() then
+    Result := CustomMessage('WebViewFailed') + ' ' + IntToStr(Code);
+  Log('WebView2 runtime exit code: ' + IntToStr(Code));
+end;
 
 function HasCommandLineParam(const Value: String): Boolean;
 var

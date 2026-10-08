@@ -316,12 +316,7 @@ public sealed class BackendService(SettingsService settings)
             prepared = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(source) + ".wav");
             progress?.Report(new(.05, "正在准备钢琴音频"));
             await PrepareAudioAsync(source, prepared, cancellationToken);
-            info = Hidden(python, output);
-            info.ArgumentList.Add("-c");
-            info.ArgumentList.Add("from piano_transcription_inference import PianoTranscription,sample_rate; import soundfile as sf,numpy as np,math,sys; from scipy.signal import resample_poly; audio,sr=sf.read(sys.argv[1],dtype='float32'); audio=audio.mean(axis=1) if audio.ndim>1 else audio; g=math.gcd(sr,sample_rate); audio=resample_poly(audio,sample_rate//g,sr//g).astype(np.float32) if sr!=sample_rate else audio; PianoTranscription(device=sys.argv[4],checkpoint_path=sys.argv[3]).transcribe(audio,sys.argv[2])");
-            info.ArgumentList.Add(prepared); info.ArgumentList.Add(midi); info.ArgumentList.Add(checkpoint);
-            info.ArgumentList.Add(executionDevice);
-            info.Environment["NUMBA_DISABLE_JIT"] = "1";
+            info = PianoCommand(python, prepared, midi, checkpoint, executionDevice, output);
         }
         else
         {
@@ -345,6 +340,19 @@ public sealed class BackendService(SettingsService settings)
             if (prepared is not null && File.Exists(prepared)) File.Delete(prepared);
             if (tempFolder is not null && Directory.Exists(tempFolder) && !Directory.EnumerateFileSystemEntries(tempFolder).Any()) Directory.Delete(tempFolder);
         }
+    }
+
+    internal static ProcessStartInfo PianoCommand(string python, string source, string midi, string checkpoint, string device, string output)
+    {
+        var info = Hidden(python, output);
+        info.ArgumentList.Add("-c");
+        info.ArgumentList.Add("from piano_transcription_inference import PianoTranscription,sample_rate; import soundfile as sf,numpy as np,math,sys; from scipy.signal import resample_poly; audio,sr=sf.read(sys.argv[1],dtype='float32'); audio=audio.mean(axis=1) if audio.ndim>1 else audio; g=math.gcd(sr,sample_rate); audio=resample_poly(audio,sample_rate//g,sr//g).astype(np.float32) if sr!=sample_rate else audio; PianoTranscription(device=sys.argv[4],checkpoint_path=sys.argv[3]).transcribe(audio,sys.argv[2])");
+        foreach (var value in new[] { source, midi, checkpoint, device }) info.ArgumentList.Add(value);
+        // Disabling @jit breaks librosa's compiled gufunc calls during pad_center import.
+        // Keep this child on Numba's default; no external C compiler is needed by its wheels.
+        // https://numba.readthedocs.io/en/stable/reference/envvars.html#envvar-NUMBA_DISABLE_JIT
+        info.Environment["NUMBA_DISABLE_JIT"] = "0";
+        return info;
     }
 
     private async Task<OperationResult> SubtitleAsync(string source, string modelId, string language, IProgress<TaskExecutionProgress>? progress, CancellationToken cancellationToken)
@@ -451,14 +459,10 @@ public sealed class BackendService(SettingsService settings)
         try
         {
             BackgroundProcess.Start(process);
-            using var cancellation = cancellationToken.Register(() =>
-            {
-                try { if (!process.HasExited) process.Kill(true); } catch { }
-            });
             var output = process.StandardOutput.ReadToEndAsync();
             var error = process.StandardError.ReadToEndAsync();
-            await process.WaitForExitAsync(cancellationToken);
-            await error;
+            try { await BackgroundProcess.WaitForExitAsync(process, cancellationToken); }
+            finally { await Task.WhenAll(output, error).WaitAsync(TimeSpan.FromSeconds(10)); }
             return process.ExitCode == 0 && (await output).Trim().Equals("cuda", StringComparison.OrdinalIgnoreCase) ? "cuda" : "cpu";
         }
         catch (OperationCanceledException) { throw; }
@@ -476,7 +480,6 @@ public sealed class BackendService(SettingsService settings)
         {
             progress?.Report(new(.04, "正在启动本地引擎"));
             BackgroundProcess.Start(process);
-            using var cancellation = cancellationToken.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
             await using var writer = new StreamWriter(logPath, false);
             await writer.WriteLineAsync($"[Aurora] {DateTimeOffset.Now:O} {localization.Format("logTaskStarting", logPrefix)}");
             await writer.WriteLineAsync($"[Aurora] {localization.Get("logEngineOutput")}");
@@ -493,8 +496,8 @@ public sealed class BackendService(SettingsService settings)
                 }
             }
             var capture = Task.WhenAll(CaptureAsync(process.StandardOutput), CaptureAsync(process.StandardError));
-            try { await process.WaitForExitAsync(cancellationToken); }
-            finally { await capture; }
+            try { await BackgroundProcess.WaitForExitAsync(process, cancellationToken); }
+            finally { await capture.WaitAsync(TimeSpan.FromSeconds(10)); }
             var success = process.ExitCode == 0;
             IReadOnlyList<string> outputs = [];
             if (success)
@@ -763,10 +766,10 @@ public sealed class BackendService(SettingsService settings)
     {
         using var process = new Process { StartInfo = info };
         BackgroundProcess.Start(process);
-        using var cancellation = cancellationToken.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch { } });
         var output = process.StandardOutput.ReadToEndAsync();
         var error = process.StandardError.ReadToEndAsync();
-        await process.WaitForExitAsync(cancellationToken);
+        try { await BackgroundProcess.WaitForExitAsync(process, cancellationToken); }
+        finally { await Task.WhenAll(output, error).WaitAsync(TimeSpan.FromSeconds(10)); }
         return (process.ExitCode, await output, await error);
     }
 

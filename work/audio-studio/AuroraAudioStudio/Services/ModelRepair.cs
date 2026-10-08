@@ -25,6 +25,13 @@ public sealed partial class ModelUpdateService
         if (FindRunningProcess(model) is { } running) return new(ModelRepairKind.Blocked, root, running, []);
         var missing = ModelHealthPolicy.MissingRequirements(model, settings.Current.LocalAiRoot);
         var detail = string.Join("、", missing);
+        if (model.Id == "yourmt3")
+        {
+            var checkpointHash = await FileHashAsync(ModelHealthPolicy.YourMt3CheckpointPath(settings.Current.LocalAiRoot), token);
+            if (!string.Equals(checkpointHash, ModelHealthPolicy.YourMt3CheckpointSha256, StringComparison.OrdinalIgnoreCase))
+                return new(ModelRepairKind.FullRedeploy, root, repairLocalization.Translate("检测到缺失或损坏的权重，将修复当前固定版本。"), []);
+            return await InspectInstalledRuntimeAsync(model, root, token, repairLocalization.Translate("必需权重 SHA-256 校验通过。"));
+        }
         if (missing.Count > 0 && ((model.UpdateKind == "uv-package" && !missing.Any(x => x.Contains("权重") || x.Contains("配置")))
             || (model.Id.StartsWith("qwen3-tts-", StringComparison.Ordinal) && missing.All(x => x is "Qwen3-TTS 启动器" or "Qwen3-TTS SoX 音频组件"))))
             return new(ModelRepairKind.RuntimeOnly, root, detail, []);
@@ -125,7 +132,7 @@ public sealed partial class ModelUpdateService
                     "piano" => "import torch, torchaudio, piano_transcription_inference",
                     "transkun" => "import torch, torchaudio, transkun.transcribe",
                     "roformer" or "roformer-vocals" => "import torch, bs_roformer",
-                    "yourmt3" => "import torch, mt3_infer",
+                    "yourmt3" => "import torch; from mt3_infer.models.yourmt3.inference_loader import load_model_for_inference",
                     "basic-pitch" => "import basic_pitch.inference",
                     "demucs" => "import torch, demucs.pretrained",
                     "f5-tts" => "import torch, f5_tts.infer.utils_infer",

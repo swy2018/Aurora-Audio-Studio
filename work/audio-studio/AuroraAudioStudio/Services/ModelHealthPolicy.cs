@@ -4,6 +4,10 @@ namespace AuroraAudioStudio.Services;
 
 public static class ModelHealthPolicy
 {
+    internal const string YourMt3ModelFolder = "mc13_256_g4_all_v7_mt3f_sqr_rms_moe_wf4_n8k2_silu_rope_rp_b36_nops";
+    internal const string YourMt3CheckpointSha256 = "ae38e415c79efd5592dcb9b658cdb99ddb11d4c4e1eaa364cab04a052473fc25";
+    internal static string YourMt3CheckpointPath(string modelRoot) => Path.Combine(modelRoot, "AudioTools", "mt3-models", "yourmt3", YourMt3ModelFolder, "last.ckpt");
+
     public static bool IsReady(ModelDefinition model, string localAiRoot) => MissingRequirements(model, localAiRoot).Count == 0;
 
     public static IReadOnlyList<string> MissingRequirements(ModelDefinition model, string localAiRoot, string? deploymentRoot = null)
@@ -45,6 +49,9 @@ public static class ModelHealthPolicy
             case "piano":
                 required.Add(("钢琴运行环境", Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(localAiRoot, "AudioTools", "piano-env")), "Scripts", "python.exe")));
                 break;
+            case "yourmt3":
+                required.Add(("YourMT3+ 多乐器权重", YourMt3CheckpointPath(localAiRoot)));
+                break;
             case "seed-vc":
                 required.Add(("Python 运行环境", Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(root, ".venv")), "Scripts", "python.exe")));
                 required.Add(("Seed-VC 权重", Path.Combine(root, "checkpoints", "manual", "DiT_seed_v2_uvit_whisper_base_f0_44k_bigvgan_pruned_ft_ema_v2.pth")));
@@ -67,7 +74,7 @@ public static class ModelHealthPolicy
                 break;
         }
 
-        var missing = required.Where(item => !File.Exists(item.Path) || new FileInfo(item.Path).Length == 0).Select(item => item.Label).ToList();
+        var missing = required.Where(item => !HasNonemptyFile(item.Path)).Select(item => item.Label).ToList();
         var indexedRoot = model.Id == "ace-step" ? Path.Combine(root, "checkpoints") : root;
         foreach (var index in model.UpdateKind != "uv-package" && Directory.Exists(indexedRoot) ? Directory.EnumerateFiles(indexedRoot, "*.index.json", SearchOption.AllDirectories).Where(path => !path.Contains(Path.DirectorySeparatorChar + ".cache" + Path.DirectorySeparatorChar)) : [])
         {
@@ -76,7 +83,7 @@ public static class ModelHealthPolicy
                 using var document = System.Text.Json.JsonDocument.Parse(File.ReadAllText(index));
                 if (document.RootElement.TryGetProperty("weight_map", out var map))
                     foreach (var shard in map.EnumerateObject().Select(p => p.Value.GetString()).Where(p => p is not null).Distinct())
-                        if (!File.Exists(Path.Combine(Path.GetDirectoryName(index)!, shard!)) || new FileInfo(Path.Combine(Path.GetDirectoryName(index)!, shard!)).Length == 0) missing.Add("模型分片 " + shard);
+                        if (!HasNonemptyFile(Path.Combine(Path.GetDirectoryName(index)!, shard!))) missing.Add("模型分片 " + shard);
             }
             catch { missing.Add("模型索引无效"); }
         }
@@ -87,7 +94,7 @@ public static class ModelHealthPolicy
             foreach (var folder in new[] { "acestep-v15-xl-turbo", "acestep-5Hz-lm-1.7B", "Qwen3-Embedding-0.6B", "vae" })
             {
                 var checkpoint = Path.Combine(root, "checkpoints", folder);
-                if (!ContainsModelWeights(checkpoint)) missing.Add("ACE-Step 权重 " + folder);
+                if (!HasCompleteModelWeights(checkpoint)) missing.Add("ACE-Step 权重 " + folder);
             }
         }
         if (model.Id.Equals("seed-vc", StringComparison.OrdinalIgnoreCase))
@@ -106,18 +113,25 @@ public static class ModelHealthPolicy
         return missing.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
-    private static bool ContainsModelWeights(string directory)
+    internal static bool HasCompleteModelWeights(string directory)
     {
         if (!Directory.Exists(directory)) return false;
         try
         {
-            return Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Any(path =>
+            foreach (var name in new[] { "model.safetensors", "pytorch_model.bin", "diffusion_pytorch_model.safetensors", "diffusion_pytorch_model.bin" })
             {
-                var extension = Path.GetExtension(path);
-                if (!new[] { ".safetensors", ".bin", ".pth", ".pt", ".ckpt" }.Contains(extension, StringComparer.OrdinalIgnoreCase)) return false;
-                try { return new FileInfo(path).Length > 0; }
-                catch { return false; }
-            });
+                if (HasNonemptyFile(Path.Combine(directory, name))) return true;
+                var index = Path.Combine(directory, name + ".index.json");
+                if (!HasNonemptyFile(index)) continue;
+                using var document = System.Text.Json.JsonDocument.Parse(File.ReadAllText(index));
+                if (!document.RootElement.TryGetProperty("weight_map", out var map) || map.ValueKind != System.Text.Json.JsonValueKind.Object) continue;
+                var shards = map.EnumerateObject().Select(entry => entry.Value.GetString()).Distinct().ToArray();
+                var boundary = Path.TrimEndingDirectorySeparator(Path.GetFullPath(directory)) + Path.DirectorySeparatorChar;
+                if (shards.Length > 0 && shards.All(shard => !string.IsNullOrWhiteSpace(shard) && !Path.IsPathRooted(shard)
+                    && Path.GetFullPath(Path.Combine(directory, shard)).StartsWith(boundary, StringComparison.OrdinalIgnoreCase)
+                    && HasNonemptyFile(Path.Combine(directory, shard)))) return true;
+            }
+            return false;
         }
         catch { return false; }
     }
@@ -135,10 +149,25 @@ public static class ModelHealthPolicy
             return files.All(file =>
             {
                 var path = Path.Combine(snapshot, file);
-                return File.Exists(path) && new FileInfo(path).Length > 0;
+                return HasNonemptyFile(path);
             });
         }
         catch { return false; }
+    }
+
+    internal static bool HasNonemptyFile(string path)
+    {
+        try
+        {
+            FileInfo? file = new(path);
+            // On Windows FileInfo.Length can report the link itself (zero bytes).
+            // Hugging Face snapshots legitimately link to nonempty shared blobs.
+            // https://learn.microsoft.com/dotnet/api/system.io.filesysteminfo.resolvelinktarget
+            if (file.LinkTarget is not null) file = file.ResolveLinkTarget(true) as FileInfo;
+            return file is { Exists: true, Length: > 0 };
+        }
+        catch (IOException) { return false; }
+        catch (UnauthorizedAccessException) { return false; }
     }
 
     private static bool TorchAudioVersionsMatch(string root)
@@ -165,6 +194,7 @@ public static class ModelHealthPolicy
 
     private static bool ExecutableOnPath(string fileName)
     {
+        if (BundledTools.Find(Path.GetFileNameWithoutExtension(fileName)) is not null) return true;
         var paths = string.Join(';', new[]
         {
             Environment.GetEnvironmentVariable("PATH"),

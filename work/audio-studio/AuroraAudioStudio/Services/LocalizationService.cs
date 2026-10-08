@@ -88,6 +88,9 @@ public sealed class LocalizationService(SettingsService settings)
         ["taskOutputInvalid"] = ["未检测到有效成品。请查看任务日志。\n{0}", "未偵測到有效成品。請查看任務記錄。\n{0}", "No valid output was found. See the task log.\n{0}", "有効な成果が見つかりません。タスクログをご確認ください。\n{0}"],
         ["engineLogFailure"] = ["引擎启动失败。日志位置：{0}\n{1}", "引擎啟動失敗。記錄位置：{0}\n{1}", "Engine startup failed. Log location: {0}\n{1}", "エンジンの起動に失敗しました。ログの場所：{0}\n{1}"],
         ["maintenanceCode"] = ["正在准备 {0} 官方代码", "正在準備 {0} 官方程式碼", "Preparing official source for {0}", "{0} の公式コードを準備中"],
+        ["maintenanceMissingTool"] = ["Aurora 的 {0} 基础组件缺失。请重新安装完整应用安装包，无需自行安装开发环境。", "Aurora 的 {0} 基礎元件缺失。請重新安裝完整應用程式安裝包，無需自行安裝開發環境。", "Aurora's {0} component is missing. Reinstall the complete application package; no separate development tools are required.", "Aurora の {0} コンポーネントがありません。完全なアプリを再インストールしてください。開発環境の別途インストールは不要です。"],
+        ["maintenanceWaiting"] = ["此步骤仍在处理，已用时 {0}。可随时取消；请勿重复启动安装。", "此步驟仍在處理，已用時 {0}。可隨時取消；請勿重複啟動安裝。", "This step is still running ({0} elapsed). You can cancel; do not start another installation.", "この処理は実行中です（経過 {0}）。キャンセルできます。インストールを重複して開始しないでください。"],
+        ["maintenanceTimeout"] = ["安装步骤超时，已停止相关进程。请检查网络后重试；已下载的数据和原有环境会保留。", "安裝步驟逾時，已停止相關程序。請檢查網路後重試；已下載資料與原有環境會保留。", "The installation step timed out and its processes were stopped. Check your connection and retry. Downloaded data and existing environments are retained.", "インストールがタイムアウトしたため関連プロセスを停止しました。接続を確認して再試行してください。ダウンロード済みデータと既存環境は保持されます。"],
         ["maintenanceCuda"] = ["正在配置 {0} 所需的 CUDA 运行环境", "正在設定 {0} 所需的 CUDA 執行環境", "Setting up the CUDA runtime for {0}", "{0} 用の CUDA 実行環境を設定中"],
         ["正在创建隔离运行环境"] = ["正在创建隔离运行环境", "正在建立獨立執行環境", "Creating an isolated runtime", "独立した実行環境を作成中"],
         ["正在安装模型部署组件 uv"] = ["正在安装模型部署组件 uv", "正在安裝模型安裝元件 uv", "Installing uv for model setup", "モデル導入用の uv をインストール中"],
@@ -283,6 +286,7 @@ public sealed class LocalizationService(SettingsService settings)
 
     private readonly Dictionary<string, string[]> phrases = new(StringComparer.OrdinalIgnoreCase)
     {
+        ["模型目录过长，Windows 无法可靠加载运行组件。请在设置中选择较短的模型目录，例如 C:\\LocalAI；现有文件未被移动。"] = ["模型目录过长，Windows 无法可靠加载运行组件。请在设置中选择较短的模型目录，例如 C:\\LocalAI；现有文件未被移动。", "模型目錄過長，Windows 無法可靠載入執行元件。請在設定中選擇較短的模型目錄，例如 C:\\LocalAI；現有檔案未被移動。", "The model path is too long for Windows runtime libraries. Choose a shorter model directory in Settings, such as C:\\LocalAI. Existing files have not been moved.", "モデルのパスが長すぎるため、Windows でランタイムを読み込めません。設定で C:\\LocalAI などの短いモデルフォルダーを選択してください。既存ファイルは移動していません。"],
         ["AI 配音"] = ["AI 配音", "AI 配音", "AI voice", "AI 音声"],
         ["模型包"] = ["模型包", "模型套件", "model package", "モデルパッケージ"],
         ["ACE-Step 隔离运行环境"] = ["ACE-Step 隔离运行环境", "ACE-Step 獨立執行環境", "isolated ACE-Step runtime", "ACE-Step 専用ランタイム"],

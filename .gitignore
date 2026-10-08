@@ -38,6 +38,7 @@
 !work/audio-studio/tools/**
 work/audio-studio/AuroraAudioStudio/bin/
 work/audio-studio/AuroraAudioStudio/obj/
+work/audio-studio/AuroraAudioStudio/Runtime/
 !work/audio-studio/languages/
 !work/audio-studio/languages/**
 !work/audio-studio/installer/

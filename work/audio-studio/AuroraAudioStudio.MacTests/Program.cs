@@ -7,6 +7,12 @@ using AuroraAudioStudio.Mac;
 using AuroraAudioStudio.Models;
 using AuroraAudioStudio.Services;
 
+if (args.FirstOrDefault() == "--bootstrap-tools")
+{
+    await BootstrapIntegration.RunAsync(args[1], args[2], args.Length > 3 ? args[3] : "whisper-small");
+    return 0;
+}
+
 if (args.FirstOrDefault() == "instance-client")
 {
     using var second = new StudioInstance(args[1]);

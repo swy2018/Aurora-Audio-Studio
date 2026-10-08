@@ -140,20 +140,53 @@ public sealed class MacRuntime : IDisposable
         if (!Models.ContainsKey(id)) throw new InvalidOperationException("此模型尚未提供 Mac 适配器。");
         if (settings.Current.SafeMode && action != "check" && action != "updates") throw new InvalidOperationException("安全模式已启用。");
         await maintenanceGate.WaitAsync(token);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
+        deadline.CancelAfter(TimeSpan.FromHours(4));
+        using var pulseCancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
+        var elapsed = Stopwatch.StartNew();
+        async Task Pulse()
+        {
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(10));
+            try
+            {
+                while (await timer.WaitForNextTickAsync(pulseCancellation.Token))
+                    progress.Report(new LocalizationService(settings).Format("maintenanceWaiting", elapsed.Elapsed.ToString(@"hh\:mm\:ss")));
+            }
+            catch (OperationCanceledException) when (pulseCancellation.IsCancellationRequested) { }
+        }
+        var pulse = Pulse();
         try
         {
             BusyModel = id;
             var python = Path.Combine(Root, ".manager", "bin", "python");
-            if (!File.Exists(python))
+            var uv = BundledTools.Find("uv", Scripts)
+                ?? throw new IOException(new LocalizationService(settings).Format("maintenanceMissingTool", "uv"));
+            if (action is "install" or "repair" or "update")
+                foreach (var tool in new[] { "git", "ffmpeg", "ffprobe", "sox" })
+                    if (BundledTools.Find(tool, Scripts) is null)
+                        throw new IOException(new LocalizationService(settings).Format("maintenanceMissingTool", tool));
+            var managerReady = false;
+            if (File.Exists(python))
             {
-                var uv = new[] { Path.Combine(Scripts, "bin", "uv"), "/opt/homebrew/bin/uv", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/bin/uv"), "/usr/local/bin/uv" }.FirstOrDefault(File.Exists)
-                    ?? throw new InvalidOperationException("未找到 uv。请先安装 uv，或在维护页面查看诊断说明。");
-                await RunAsync(uv, ["venv", "--python", "3.11", Path.Combine(Root, ".manager")], progress, token);
-                await RunAsync(uv, ["pip", "install", "--python", python, "huggingface_hub>=0.34,<2", "filelock"], progress, token);
+                try { await RunAsync(python, ["-c", "import huggingface_hub, filelock"], progress, deadline.Token); managerReady = true; }
+                catch (IOException) { /* An interrupted first install is repaired below. */ }
             }
-            await RunAsync(python, [Path.Combine(Scripts, "manage.py"), "--root", Root, "--model", id, "--action", action], progress, token);
+            if (!managerReady)
+            {
+                if (!File.Exists(python))
+                    await RunAsync(uv, ["venv", "--python", "3.11", Path.Combine(Root, ".manager")], progress, deadline.Token);
+                await RunAsync(uv, ["pip", "install", "--python", python, "huggingface_hub>=0.34,<2", "filelock"], progress, deadline.Token);
+                await RunAsync(python, ["-c", "import huggingface_hub, filelock"], progress, deadline.Token);
+            }
+            await RunAsync(python, [Path.Combine(Scripts, "manage.py"), "--root", Root, "--model", id, "--action", action], progress, deadline.Token);
         }
-        finally { BusyModel = null; maintenanceGate.Release(); }
+        catch (OperationCanceledException) when (!token.IsCancellationRequested) { throw new IOException(new LocalizationService(settings).Get("maintenanceTimeout")); }
+        finally
+        {
+            await pulseCancellation.CancelAsync();
+            try { await pulse; }
+            finally { BusyModel = null; maintenanceGate.Release(); }
+        }
     }
 
     public Process Start(string executable, IEnumerable<string> arguments, IReadOnlyDictionary<string, string>? environment = null)
@@ -161,7 +194,7 @@ public sealed class MacRuntime : IDisposable
         var info = new ProcessStartInfo(executable) { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true, CreateNoWindow = true, WorkingDirectory = Root };
         Directory.CreateDirectory(Root);
         foreach (var arg in arguments) info.ArgumentList.Add(arg);
-        info.Environment["PATH"] = Path.Combine(Scripts, "bin") + ":/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:" + Environment.GetEnvironmentVariable("PATH");
+        BundledTools.ConfigureInstaller(info, Root, Scripts);
         info.Environment["PYTHONUNBUFFERED"] = "1";
         // Imported manager modules live in the signed app; keep that bundle immutable.
         info.Environment["PYTHONDONTWRITEBYTECODE"] = "1";
@@ -172,8 +205,11 @@ public sealed class MacRuntime : IDisposable
         info.Environment["GRADIO_ANALYTICS_ENABLED"] = "False";
         info.Environment["DO_NOT_TRACK"] = "1";
         info.Environment["TOKENIZERS_PARALLELISM"] = "false";
+        info.Environment["HF_HUB_DOWNLOAD_TIMEOUT"] = "60";
         if (environment is not null) foreach (var item in environment) info.Environment[item.Key] = item.Value;
+        info.RedirectStandardInput = true;
         var process = Process.Start(info) ?? throw new IOException("无法启动本地引擎。");
+        process.StandardInput.Close();
         lock (processes) processes.Add(process);
         return process;
     }
@@ -187,7 +223,6 @@ public sealed class MacRuntime : IDisposable
     public async Task RunAsync(string executable, IEnumerable<string> arguments, IProgress<string> progress, CancellationToken token)
     {
         using var process = Start(executable, arguments);
-        using var registration = token.Register(() => Stop(process));
         var errors = new Queue<string>();
         async Task Read(StreamReader reader)
         {
@@ -199,7 +234,7 @@ public sealed class MacRuntime : IDisposable
         }
         try
         {
-            await Task.WhenAll(Read(process.StandardOutput), Read(process.StandardError), process.WaitForExitAsync(token));
+            await Task.WhenAll(Read(process.StandardOutput), Read(process.StandardError), BackgroundProcess.WaitForExitAsync(process, token));
             token.ThrowIfCancellationRequested();
             if (process.ExitCode != 0) throw new IOException(string.Join(Environment.NewLine, errors));
         }
