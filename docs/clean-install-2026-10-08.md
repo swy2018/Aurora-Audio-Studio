@@ -119,6 +119,10 @@ F5 第一轮只做了禁止联网的依赖导入检查，第二轮已经补齐�
 
 ## Windows 复测命令（开发/CI，不是最终用户操作）
 
+2026-10-09 发布前的英文 Windows CI 额外发现 SoX 14.4.2 使用系统代码页，无法处理中文文件名；本机也用表情符号文件名复现失败。现在随未修改的上游 EXE 分发进程级 UTF-8 清单，并更新提取文件的时间戳，避免 Windows 沿用此前无清单的启动缓存。不修改系统语言、注册表或上游二进制内容。重新准备工具后，中文、日文和表情符号混合文件名的 0.2 秒输入已得到有效的 0.1 秒处理结果；CI 保留并强化这项真实音频检查，不能改用 ASCII 文件名绕过。完整 Unicode 支持需要 Windows 10 1903 或更新版本，更早的系统未在本轮验收。
+
+CI 的另一个问题是测试程序没有收到应用随附的工具，开发机上的全局 FFmpeg 掩盖了缺失。工作流现显式传入 `AuroraRuntimeSource`，再执行仅系统 PATH 的首次环境准备测试；没有放宽原有超时断言。最终拟发布提交的完整构建和安装包验收另记于版本验收记录。
+
 ```powershell
 ./work/audio-studio/tools/Prepare-WindowsRuntime.ps1
 dotnet run --project work/audio-studio/AuroraAudioStudio.BehaviorTests -c Release -- --bootstrap-tools work/audio-studio/AuroraAudioStudio/Runtime .maintenance/first-install-new

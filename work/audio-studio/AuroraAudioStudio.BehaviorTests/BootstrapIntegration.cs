@@ -98,10 +98,11 @@ internal static class BootstrapIntegration
         await Run(manager, "-c", "import huggingface_hub, filelock; print('MANAGER_READY')");
         await Run(Tool("uv"), "pip", "check", "--python", manager);
         Pass("download manager installs and imports in a fresh Python environment");
-        var wav = Path.Combine(evidence, "原始音频.wav");
+        var wav = Path.Combine(evidence, "原始音频-日本語-🎵.wav");
         await Run(Tool("ffmpeg"), "-nostdin", "-y", "-v", "error", "-f", "lavfi", "-i", "sine=frequency=440:duration=0.2", wav);
-        await Run(Tool("sox"), wav, Path.Combine(evidence, "处理音频.wav"), "trim", "0", "0.1");
-        var probe = await Run(Tool("ffprobe"), "-v", "error", "-show_entries", "format=duration", "-of", "json", Path.Combine(evidence, "处理音频.wav"));
+        var processed = Path.Combine(evidence, "处理音频-日本語-🎵.wav");
+        await Run(Tool("sox"), wav, processed, "trim", "0", "0.1");
+        var probe = await Run(Tool("ffprobe"), "-v", "error", "-show_entries", "format=duration", "-of", "json", processed);
         using var audio = JsonDocument.Parse(probe);
         if (double.Parse(audio.RootElement.GetProperty("format").GetProperty("duration").GetString()!, System.Globalization.CultureInfo.InvariantCulture) <= 0)
             throw new Exception("No valid audio output");

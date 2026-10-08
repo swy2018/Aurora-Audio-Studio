@@ -70,6 +70,15 @@ foreach ($name in $manifest.Keys) {
         if ((Get-FileHash -LiteralPath $licensePath -Algorithm SHA256).Hash -ne $license.sha256) { throw "License checksum mismatch: $name / $($license.name)" }
     }
     $executable = Join-Path $target $entry.executable
+    if ($name -eq 'sox') {
+        # Upstream 14.4.2 has no embedded manifest. Keep its binary intact while
+        # enabling Unicode file arguments independently of the Windows system locale.
+        Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'sox.exe.manifest') -Destination ($executable + '.manifest')
+        # Windows caches external activation manifests against the EXE timestamp.
+        # Invalidate a previously launched, manifest-less extraction without changing
+        # upstream executable bytes (ZIP extraction preserves its 2015 timestamp).
+        [IO.File]::SetLastWriteTimeUtc($executable, (Get-Item -LiteralPath ($executable + '.manifest')).LastWriteTimeUtc)
+    }
     $versionArgument = if ($name -eq 'ffmpeg') { '-version' } else { '--version' }
     & $executable $versionArgument
     if ($LASTEXITCODE -ne 0) { throw "Bundled $name cannot run: $executable" }

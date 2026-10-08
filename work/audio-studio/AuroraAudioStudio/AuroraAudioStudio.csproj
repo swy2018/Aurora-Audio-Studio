@@ -75,6 +75,7 @@
   </Target>
 
   <Target Name="RequireBundledModelTools" BeforeTargets="Publish">
+    <Error Condition="!Exists('Runtime/bin/sox/sox.exe.manifest')" Text="SoX Unicode manifest missing. Run tools/Prepare-WindowsRuntime.ps1 before publishing." />
     <Error Condition="!Exists('Runtime/bin/uv/uv.exe') Or !Exists('Runtime/bin/git/cmd/git.exe') Or !Exists('Runtime/bin/ffmpeg/bin/ffmpeg.exe') Or !Exists('Runtime/bin/ffmpeg/bin/ffprobe.exe') Or !Exists('Runtime/bin/sox/sox.exe')"
            Text="Model tools missing. Run tools/Prepare-WindowsRuntime.ps1 before publishing; a package that requires preinstalled tools must not ship." />
     <Error Condition="!Exists('Runtime/prerequisites/vc_redist.x64.exe')" Text="Verified Visual C++ prerequisite is missing. Run tools/Prepare-WindowsRuntime.ps1 before publishing." />
