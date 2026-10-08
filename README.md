@@ -29,6 +29,7 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 | 系统 | Windows 10 / 11 x64 | macOS 26+ · Apple Silicon |
 | 安装包 | `Aurora-Audio-Studio-2.0.1-Setup-x64.exe` | `Aurora-Audio-Studio-2.0.1-arm64.dmg` |
 | 获取 | [正式版下载](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest) | [Mac 2.0.1 正式版](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1) |
+| 测试版 | [2.0.2-beta.1 · Windows 与源码](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.2-beta.1) | 暂无本轮 Mac Beta 安装包，继续使用 2.0.1 正式版 |
 | 安装 | 运行标准安装程序 | 打开 DMG，拖入 Applications |
 | 加速 | NVIDIA RTX 推荐，依模型要求 | Apple Silicon 的 MPS / MLX 或 CPU，依模型实现 |
 | 指南 | [Windows 使用说明](work/audio-studio/README-给音乐人的使用说明.md) | [Mac 使用说明](docs/macOS-user-guide.md) |
@@ -37,7 +38,9 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 
 日常使用推荐下载正式版。如需体验预发布功能，可在更新设置中选择 Beta 通道。
 
-当前下载区保留正式版；已被 2.0.1 正式版替代的 Beta 发布包和云端标签已清理，Stable 与 Beta 通道目前均提供 2.0.1。以后每次正式版发布并验证后均清理所有更旧 Beta；本地交付产物只留最新安装包，开发源码、本地 Git、工具链与凭据保留。完整云端 Git 提交历史保留。详见[版本保留说明](docs/release-retention.md)。
+Stable 通道继续提供 Windows / Mac 2.0.1；Beta 通道提供 Windows 2.0.2-beta.1，Mac 仍为 2.0.1。历史正式版和完整 Git 历史保留。旧 Beta 与本地生成产物按准确清单批准后清理，Git 标签另行确认。详见[版本保留说明](docs/release-retention.md)。
+
+本次 Beta 重点改进未预装开发环境时的模型安装、下载重试与取消收尾。已验证的引擎和未覆盖的场景见[本轮验收记录](docs/clean-install-2026-10-08.md)。Mac 源码交接见[2.0.2-beta.1 Mac 验收说明](docs/macOS-2.0.2-beta.1-handoff.md)。
 
 Windows 与 Mac 均推荐 [2.0.1 正式版](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1)。Mac 适用于 Apple Silicon / macOS 26+，已完成实机验收、Developer ID 签名与 Apple 公证。[Windows 验收范围](docs/validation-2.0.1.md) · [Mac 验收记录](docs/validation-mac-2.0.1.md)。
 
@@ -52,16 +55,17 @@ Windows 与 Mac 均推荐 [2.0.1 正式版](https://github.com/swy2018/Aurora-Au
 ## 当前版本更新
 
 <!-- current-packages:start -->
-当前源码版本 / Source version: `2.0.1`。实际可下载的平台安装包请以[官网](https://swy2018.github.io/Aurora-Audio-Studio/#download)和 [GitHub Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases) 为准。 / See the website or Releases for available platform packages.
+当前源码版本 / Source version: `2.0.2-beta.1`。实际可下载的平台安装包请以[官网](https://swy2018.github.io/Aurora-Audio-Studio/#download)和 [GitHub Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases) 为准。 / See the website or Releases for available platform packages.
 <!-- current-packages:end -->
 
 <!-- release-notes-zh:start -->
-- Windows 与 Mac 2.0.1 正式版均已发布；Mac Apple Silicon 安装包已完成实机验收、Developer ID 签名与 Apple 公证。
-- 修复部分桌面启动环境下 Qwen 工作台报“句柄无效”的问题，统一后台引擎与维护工具的非交互输入处理。
-- 修正引擎日志中中文路径的编码；维护检查明确区分文件齐全与实际运行验证。
-- 包含 2.0.1 测试版的任务取消后重试、批量成果保存、更新缓存恢复、字幕导出及卸载数据保护修复。
-- 保留四语言界面、窄窗口和日语排版改进；旧版配置、处理记录与用户成品受到原有保护。
-- Windows 安装包未签名。Mac 已验证八个已安装模型的短样本、四语言界面及升级回退；未安装模型、长素材与 Intel Mac 不在本次实机验收范围内。
+- 本次提供 Windows 2.0.2-beta.1 安装包与完整源码；Mac 下载继续提供已验收的 2.0.1 正式版。
+- 改进未预装开发环境时的模型安装：应用随附 Git、音频工具和环境管理组件，安装程序包含 Visual C++ 与 WebView2 前置组件；Python 与模型依赖按需部署到隔离目录。
+- 修复 Whisper 共享组件缺失、部分模型依赖冲突、CUDA 依赖被替换、ACE 权重不完整及下载文件漏选等首次安装问题。
+- Basic Pitch 的大型依赖支持保留断点、备用下载服务和官方 SHA-256 校验，并修复运行依赖缺失导致无法启动的问题。
+- 改进长任务进度反馈与取消收尾，避免取消后下载进程继续运行；保留已有模型、设置和作品。
+- Windows 隔离环境已验证 11 个引擎的短样本输出；Basic Pitch 的 12 音符样本音高全部匹配，但不代表复杂乐曲或演出总谱精度。
+- Windows 包未签名。全新 Windows 系统及本轮 Mac 原生安装仍待进一步验收；模型首次下载需要网络，具体加速能力取决于引擎和硬件。
 <!-- release-notes-zh:end -->
 
 模型中心分别显示文件状态和运行记录。成功完成任务后，会记录模型版本、时间及计算设备。“仅模型管理”表示支持下载与维护，但不能在 Aurora 内生成内容。可选模型的兼容性与运行表现取决于具体设备，请先使用短素材确认。
@@ -147,7 +151,7 @@ Windows 与 Mac 均推荐 [2.0.1 正式版](https://github.com/swy2018/Aurora-Au
 
 ## 数据与隐私
 
-Aurora 不提供云端生成服务，素材与结果保存在你指定的本地目录。下载应用更新或安装模型时，会连接 GitHub、Hugging Face 或模型列明的官方来源。
+Aurora 不提供云端生成服务，素材与结果保存在你指定的本地目录。下载应用更新或安装模型时，会连接 GitHub、Hugging Face、PyPI 或模型列明的来源；指定依赖下载失败时可使用清华大学 PyPI 镜像，仍按官方摘要验证文件。
 
 - [隐私说明](PRIVACY.md)
 - [代码签名政策](CODE_SIGNING_POLICY.md)
@@ -159,6 +163,7 @@ Aurora 不提供云端生成服务，素材与结果保存在你指定的本地�
 两端均使用 .NET 10。Windows 使用 WinUI 3 / Windows App SDK，Mac 使用 Avalonia，并共享设置、任务和成果等服务。官网使用原生 HTML、CSS 与 ES Modules，部署到 GitHub Pages。Mac 的本地编译、签名和公证见 [Mac 发布说明](docs/macOS-release.md)。
 
 ```powershell
+.\work\audio-studio\tools\Prepare-WindowsRuntime.ps1
 dotnet restore .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj --runtime win-x64
 dotnet build .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -p:Platform=x64
 dotnet publish .\work\audio-studio\AuroraAudioStudio\AuroraAudioStudio.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o .\publish\Aurora-Audio-Studio
@@ -196,6 +201,8 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows and Mac Stable are both 2.0.1. The Mac package is Developer ID signed and notarized. Screenshots show the Mac 2.0.1 interface. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Mac build and distribution guide](docs/macOS-release.md).
 
+[2.0.2-beta.1](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.2-beta.1) provides a Windows installer and source with first-install, download and cancellation fixes. No new Mac Beta package is offered yet; Mac remains on 2.0.1. See the [acceptance scope](docs/clean-install-2026-10-08.md) and [Mac handoff](docs/macOS-2.0.2-beta.1-handoff.md).
+
 Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Beta releases are intended for users who want early access; back up important settings before upgrading.
 
 Use “Revert to previous stable release” to review and install the latest stable version older than your current app, for your platform. This is available from both Stable and Beta and does not change your update channel. Models and results are preserved, but older versions may not read newer settings or records. Back up important data first.
@@ -205,19 +212,20 @@ Successful app installation no longer retains an old app copy. Replacement failu
 ### Current release notes
 
 <!-- release-notes-en:start -->
-- Windows and Mac 2.0.1 Stable are available. The Apple Silicon package has passed native Mac acceptance, Developer ID signing and Apple notarization.
-- Fix Qwen workbench startup failing with an invalid handle in some desktop launch environments. Background engines and maintenance tools now receive valid non-interactive input.
-- Preserve Unicode paths in engine logs and distinguish file completeness from verified operation in maintenance results.
-- Includes the 2.0.1 Beta fixes for retry after cancellation, batch result preservation, update-cache recovery, subtitle export and uninstall data protection.
-- Retains four-language, compact-window and Japanese typography improvements, with existing safeguards for settings, processing records and user outputs.
-- The Windows installer is unsigned. Mac acceptance covers short samples on eight installed models, four UI languages, update and rollback. Missing models, long inputs and Intel Macs were not tested.
+- This release provides the Windows 2.0.2-beta.1 installer and full source. Mac downloads remain on the verified 2.0.1 Stable release.
+- Improve model setup without preinstalled developer tools. Aurora includes Git, audio tools and environment management; setup includes Visual C++ and WebView2 prerequisites. Python and model dependencies are provisioned on demand in isolated directories.
+- Fix missing Whisper shared components, model dependency conflicts, CUDA dependency replacement, incomplete ACE weights and omitted download files during first installation.
+- Basic Pitch retains partial downloads of its large dependency, supports an alternate download server and verifies the official SHA-256. Fix a missing runtime dependency that prevented startup.
+- Improve progress feedback and cancellation cleanup so downloads do not keep running after cancellation. Existing models, settings and outputs are preserved.
+- Short-output acceptance covers 11 engines in isolated Windows environments. All 12 pitches in the Basic Pitch test fixture matched; this does not establish complex-music or performance-score accuracy.
+- The Windows installer is unsigned. Pristine Windows systems and this round's native Mac installation still need further acceptance. First model downloads require a network connection; acceleration depends on the engine and hardware.
 <!-- release-notes-en:end -->
 
 Read the [capability matrix](docs/capabilities.json) and [Mac release requirements](docs/macOS-release.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. MIDI editing/playback requires your own music application; audio playback and subtitle-copy editing are available in Results.
 
 ### Local by design
 
-Aurora does not operate a cloud generation service. Media and generated output remain in the directories chosen by the user. App updates and model deployment connect only to GitHub, Hugging Face, or the official source identified for each model.
+Aurora does not operate a cloud generation service. Media and generated output remain in the directories chosen by the user. App updates and model deployment connect to GitHub, Hugging Face, PyPI or the source identified for each model. A specified dependency may resume from Tsinghua University's PyPI mirror if the primary download fails; its official checksum is still required.
 
 ### Install
 

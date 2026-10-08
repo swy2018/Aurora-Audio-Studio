@@ -1,21 +1,22 @@
 # Aurora Audio Studio 隐私政策 / Privacy Policy
 
-生效日期 / Effective date: 2026-08-08
+生效日期 / Effective date: 2026-10-09
 
 ## 中文
 
-Aurora Audio Studio 是本地优先的开源 Windows 应用，不提供 Aurora 账户或云端创作服务，也不包含遥测、广告或使用情况分析。
+Aurora Audio Studio 是本地优先的开源 Windows 与 macOS 应用，不提供 Aurora 账户或云端创作服务，也不包含遥测、广告或使用情况分析。
 
 ### 本地保存的数据
 
-- 应用设置、日志、任务记录、模型元数据和更新缓存保存在当前 Windows 账户的本地应用数据目录中。
+- 应用设置、日志、任务记录、模型元数据和更新缓存保存在当前系统账户的本地应用数据目录中。
 - 处理记录、源素材、模型和生成成品保存在用户选择的目录中。
 - “导出诊断”会先显示将包含的本地日志数量，并隐藏 Windows 用户目录、用户名、模型目录、成品目录和处理记录目录；诊断包只在本机生成，除非用户主动分享，否则 Aurora 不会上传该文件。
 
 ### 网络连接
 
-- Aurora 每天首次启动时会访问 GitHub Releases 检查一次应用更新，也可以由用户手动检查。只有用户确认后才下载并安装新版。
+- 启用自动检查时，Aurora 每天首次启动会访问 GitHub Releases 检查一次应用更新，也可以由用户手动检查。只有用户确认后才下载并安装新版。
 - 只有用户主动选择安装、更新或启动模型与第三方工具时，Aurora 才会连接相应的公开项目或模型来源。
+- 安装下载可能连接 GitHub、Hugging Face、PyPI、Microsoft 或组件列明的来源。Windows Basic Pitch 指定依赖在主源失败或超时后可从清华大学 PyPI 镜像续传；文件必须符合官方 SHA-256。此类下载请求不上传创作素材，不修改系统的全局包源。
 - Aurora 不会把用户的声音、音乐、视频、提示词、处理记录或生成内容发送到 Aurora 运营的服务器。
 - 用户选择使用的第三方模型、工具和下载服务受其各自的隐私政策与使用条款约束。
 
@@ -27,18 +28,19 @@ Aurora Audio Studio 是本地优先的开源 Windows 应用，不提供 Aurora �
 
 ## English
 
-Aurora Audio Studio is a local-first, open-source Windows application. It does not provide Aurora accounts or a cloud creation service and contains no telemetry, advertising, or usage analytics.
+Aurora Audio Studio is a local-first, open-source Windows and macOS application. It does not provide Aurora accounts or a cloud creation service and contains no telemetry, advertising, or usage analytics.
 
 ### Data stored locally
 
-- Application settings, logs, task history, model metadata, and update cache are stored in the current Windows account's local application-data directory.
+- Application settings, logs, task history, model metadata, and update cache are stored in the current operating-system account's local application-data directory.
 - Processing records, source media, models, and generated outputs are stored in directories selected by the user.
 - Export Diagnostics previews the local log count and redacts the Windows profile, user name, model folder, output folder, and processing-record folder. The archive is created locally and is never uploaded unless the user chooses to share it.
 
 ### Network access
 
-- On the first launch of each day, Aurora contacts GitHub Releases once to check for application updates. Users may also check manually. A new version is downloaded and installed only after user confirmation.
+- When automatic checks are enabled, Aurora contacts GitHub Releases on the first launch of each day to check for application updates. Users may also check manually. A new version is downloaded and installed only after user confirmation.
 - Aurora connects to the relevant public project or model source only when the user chooses to install, update, or launch a model or third-party tool.
+- Setup downloads may connect to GitHub, Hugging Face, PyPI, Microsoft or a component's documented source. A specified Windows Basic Pitch dependency may resume from Tsinghua University's PyPI mirror after a primary-source failure or timeout, with the official SHA-256 required. These download requests do not upload creative media or change the system-wide package index.
 - Aurora does not transmit voices, music, videos, prompts, processing records, or generated content to servers operated by Aurora.
 - Third-party models, tools, and download services selected by the user remain subject to their own privacy policies and terms.
 

@@ -86,6 +86,50 @@ internal static class BootstrapRegression
             return new(HttpStatusCode.OK) { Content = new StringContent(JsonSerializer.Serialize(new { assets = new[] { asset } })) };
         }));
         var updater = new ModelUpdateService(catalog, settings, client, client);
+        var basic = updater.PackageInstallCommand("uv.exe", catalog.Find("basic-pitch")!, "python.exe", "0.4.0");
+        var tensorflowWheel = Path.Combine(settings.Current.LocalAiRoot, ".aurora", "packages", "tensorflow_intel-2.15.0-cp311-cp311-win_amd64.whl");
+        if (!basic.ArgumentList.Contains("basic-pitch==0.4.0") || basic.ArgumentList.Count(value => value == tensorflowWheel) != 1
+            || !basic.ArgumentList.Contains("setuptools<81") || basic.ArgumentList.Contains("--no-deps"))
+            throw new Exception("Basic Pitch must resolve its verified resumable TensorFlow wheel with all other dependencies");
+        Console.WriteLine("PASS Basic Pitch resolves the verified local TensorFlow wheel without skipping dependency checks");
+        Directory.CreateDirectory(Path.GetDirectoryName(tensorflowWheel)!);
+        await File.WriteAllTextAsync(tensorflowWheel, "unverified cache, never activate");
+        var tensorflowRequests = new List<HttpRequestMessage>();
+        using var incompleteTensorflow = new HttpClient(new Handler(request =>
+        {
+            tensorflowRequests.Add(request);
+            var response = new HttpResponseMessage(tensorflowRequests.Count == 1 ? HttpStatusCode.OK : HttpStatusCode.PartialContent)
+                { Content = new ByteArrayContent([1, 2, 3]) };
+            if (tensorflowRequests.Count == 2) response.Content.Headers.ContentRange = new(3, 5, 300919984);
+            return response;
+        }));
+        var tensorflowUpdater = new ModelUpdateService(catalog, settings, incompleteTensorflow, incompleteTensorflow);
+        var rejectedTensorflow = false;
+        try { await tensorflowUpdater.EnsureBasicPitchTensorflowAsync(null, CancellationToken.None); }
+        catch (IOException) { rejectedTensorflow = true; }
+        if (!rejectedTensorflow || tensorflowRequests.Count != 2
+            || tensorflowRequests[0].RequestUri!.Host != "files.pythonhosted.org"
+            || tensorflowRequests[1].RequestUri!.Host != "pypi.tuna.tsinghua.edu.cn"
+            || tensorflowRequests[1].Headers.Range?.Ranges.Single().From != 3
+            || new FileInfo(tensorflowWheel + ".download.part").Length != 6
+            || await File.ReadAllTextAsync(tensorflowWheel) != "unverified cache, never activate")
+            throw new Exception("Basic Pitch must resume partial bytes and reject incomplete dependencies without replacing its cache");
+        Console.WriteLine("PASS Basic Pitch retries the same pinned file with Range and preserves cache on failed verification");
+        using var tensorflowCancel = new CancellationTokenSource();
+        var canceledRequests = 0;
+        using var canceledTensorflowClient = new HttpClient(new Handler(request =>
+        {
+            canceledRequests++;
+            tensorflowCancel.Cancel();
+            throw new OperationCanceledException(tensorflowCancel.Token);
+        }));
+        var canceledTensorflowUpdater = new ModelUpdateService(catalog, settings, canceledTensorflowClient, canceledTensorflowClient);
+        var tensorflowCanceled = false;
+        try { await canceledTensorflowUpdater.EnsureBasicPitchTensorflowAsync(null, tensorflowCancel.Token); }
+        catch (OperationCanceledException) { tensorflowCanceled = true; }
+        if (!tensorflowCanceled || canceledRequests != 1)
+            throw new Exception("User cancellation must stop Basic Pitch download without requesting the alternate server");
+        Console.WriteLine("PASS Basic Pitch user cancellation never starts a fallback download");
         foreach (var id in new[] { "transkun", "roformer", "yourmt3", "demucs", "f5-tts" })
         {
             var definition = catalog.Find(id)!;

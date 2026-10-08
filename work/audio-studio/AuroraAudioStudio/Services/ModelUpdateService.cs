@@ -632,8 +632,10 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         if (!environment.Success) return environment;
         using var packageDocument = JsonDocument.Parse(await metadataClient.GetStringAsync($"https://pypi.org/pypi/{Uri.EscapeDataString(PyPiPackageName(model.Repository!))}/json", cancellationToken));
         var packageVersion = packageDocument.RootElement.GetProperty("info").GetProperty("version").GetString()!;
-        var install = PackageInstallCommand(uv, model, python, packageVersion);
         progress?.Report(new(null, $"正在部署 {model.Name}"));
+        if (model.Id == "basic-pitch" && packageVersion == "0.4.0")
+            await EnsureBasicPitchTensorflowAsync(progress, cancellationToken);
+        var install = PackageInstallCommand(uv, model, python, packageVersion);
         var installResult = await RunProcessAsync(install, cancellationToken, progress);
         if (installResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(installResult.Error) ? $"{model.Name} 部署失败。" : installResult.Error);
         if (includeWeights && model.Id.Equals("roformer", StringComparison.OrdinalIgnoreCase))
@@ -694,6 +696,12 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
     {
         var info = CreateInstaller(uv);
         foreach (var value in new[] { "pip", "install", "--python", python, model.Repository! + "==" + version }) info.ArgumentList.Add(value);
+        if (model.Id == "basic-pitch" && version == "0.4.0")
+        {
+            info.ArgumentList.Add(BasicPitchTensorflowWheelPath);
+            // Its resampy 0.4.2 still imports pkg_resources; match the Mac runtime constraint.
+            info.ArgumentList.Add("setuptools<81");
+        }
         if (model.Id == "transkun")
         {
             // NCLS 0.0.70 has no Windows wheel. The official 0.0.68 cp311 wheel
@@ -730,6 +738,41 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             info.ArgumentList.Add("datasets>=3");
         }
         return info;
+    }
+
+    private string BasicPitchTensorflowWheelPath => Path.Combine(settings.Current.LocalAiRoot, ".aurora", "packages", "tensorflow_intel-2.15.0-cp311-cp311-win_amd64.whl");
+
+    internal async Task EnsureBasicPitchTensorflowAsync(IProgress<ModelInstallProgress>? progress, CancellationToken token)
+    {
+        // Basic Pitch 0.4.0 on this installer's CPython 3.11 / Windows x64 uses
+        // TensorFlow 2.15. uv restarts a failed streaming extraction from zero.
+        // Keep the archive resumable and verify PyPI's fixed length + SHA-256 instead.
+        // https://pypi.org/pypi/tensorflow-intel/2.15.0/json
+        const string sha256 = "4710b0ea84defaafc0d6cc51162ebef8b07da015fc68375661451861c5bf4421";
+        const long size = 300919984;
+        const string asset = "/packages/4c/48/1a5a15517f18eaa4ff8d598b1c000300b20c1bb0e624539d702117a0c369/tensorflow_intel-2.15.0-cp311-cp311-win_amd64.whl";
+        var destination = BasicPitchTensorflowWheelPath;
+        if (string.Equals(await FileHashAsync(destination, token), sha256, StringComparison.OrdinalIgnoreCase)) return;
+        Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+        var pending = destination + ".download";
+        try
+        {
+            using var primary = CancellationTokenSource.CreateLinkedTokenSource(token);
+            primary.CancelAfter(TimeSpan.FromMinutes(2));
+            await DownloadFileAsync("https://files.pythonhosted.org" + asset, pending, progress, primary.Token, size);
+        }
+        catch (Exception ex) when (!token.IsCancellationRequested && ex is HttpRequestException or IOException or OperationCanceledException)
+        {
+            // Only this pinned public file uses a secondary source; no global index
+            // changes. Both transfers share the partial file and the same final hash.
+            const string mirror = "pypi.tuna.tsinghua.edu.cn";
+            progress?.Report(new(null, "", LogLine: new LocalizationService(settings).Format("dependencyMirrorRetry", mirror)));
+            await DownloadFileAsync("https://" + mirror + asset, pending, progress, token, size);
+        }
+        if (!string.Equals(await FileHashAsync(pending, token), sha256, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException(new LocalizationService(settings).Get("dependencyHashMismatch"));
+        token.ThrowIfCancellationRequested();
+        File.Move(pending, destination, true);
     }
 
     internal async Task EnsureYourMt3WeightsAsync(IProgress<ModelInstallProgress>? progress, CancellationToken token)

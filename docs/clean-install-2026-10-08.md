@@ -1,6 +1,6 @@
 # 首次安装修复与验收记录（未发布）
 
-日期：2026-10-08。目标是最终用户不需要预装开发环境，不等于离线首次安装或任意硬件都能运行全部模型。版本号和线上 2.0.1 未更改，本轮没有打包、发布或替换用户已安装的应用。
+日期：2026-10-08（实测）。目标是最终用户不需要预装开发环境，不等于离线首次安装或任意硬件都能运行全部模型。以下保留当日修复与失败证据；2026-10-09 用户另行授权发布 Windows 2.0.2-beta.1 与源码，Mac 新包不在本次交付中。实际发布状态以该版本 Release 为准；本机已安装应用未替换。
 
 ## 已实施
 
@@ -23,7 +23,7 @@ Basic Pitch 慢下载的一小时限时测试另外发现真实取消缺陷：�
 ## 当前验证结果
 
 - Windows 应用编译：0 警告、0 错误；没有启动 GUI。
-- Windows 完整行为回归：当前源码 330 条 PASS 记录；更新流程复测通过。新增取消检查包括 10 个进程树夹具场景，另有 10 个真实 uv 离线场景，均检查取消返回后的父子进程状态；旧代码在两组检查中均失败。四语言条目此前审计通过：141 个自有键无缺失英文翻译、576 个工作台条目四语言齐全，本轮未修改文案。两个旧 ACE 夹具曾把任意 `.bin` 或四分片中的单片当作完整模型，现改为真实加载器接受的文件结构，并新增缺分片必须失败的断言；没有跳过测试或放宽完整性检查。
+- Windows 完整行为回归：Basic Pitch 补验后的源码 333 条 PASS 记录；更新流程复测通过。新增取消检查包括 10 个进程树夹具场景，另有 10 个真实 uv 离线场景，均检查取消返回后的父子进程状态；旧代码在两组检查中均失败。四语言条目此前审计通过：141 个自有键无缺失英文翻译、576 个工作台条目四语言齐全；本次新增两个依赖下载提示键，四语言均补齐。两个旧 ACE 夹具曾把任意 `.bin` 或四分片中的单片当作完整模型，现改为真实加载器接受的文件结构，并新增缺分片必须失败的断言；没有跳过测试或放宽完整性检查。
 - Windows 真实隔离工具启动：仅保留系统 PATH，应用自带五个工具启动、Git HTTPS、独立下载 Python 3.10/3.11/3.12、安装并导入 Hugging Face 管理依赖、中文路径音频生成/SoX 处理/ffprobe 校验，共 11 项通过。这一组只证明基础工具；下述模型测试单独记录。
 - BS-RoFormer：在新的模型目录内经生产安装器下载 Python、CUDA 依赖、约 699 MB 权重并通过依赖检查。随后用生产后端和任务队列处理 2 秒合成音频，实际使用 CUDA，产生六个分轨及伴奏，共 7 个有效 WAV 并入库。测试后已停止该引擎。此结果不代表原生 UI 自动化、分离质量评测或纯净 Windows 系统验收。
 - Qwen3-TTS CustomVoice：独立下载 Python 3.12、CUDA 依赖及权重并通过安装校验；随后从新环境启动真实工作台，通过 `/run_instruct` 提交配音，生成 6.08 秒、24 kHz、单声道 WAV，并成功进入 Aurora 成品库，设备记录为 CUDA。测试后引擎已关闭。当前上游 Gradio 6 有 theme/css 参数弃用警告，未影响这次生成；未把后台 API 验收写成原生 UI 视觉验收。
@@ -35,7 +35,7 @@ Basic Pitch 慢下载的一小时限时测试另外发现真实取消缺陷：�
 - Demucs：新环境实测 `pip check` 通过，但 `demucs --help` 因缺失 NumPy 失败。官方 4.1.0 元数据只在 Intel Mac 条件下声明 NumPy；Windows 明确补齐，Mac 也显式约束并探测 `demucs.api`。修复后重新安装并处理 9.6 秒自制音符，生成四个 44.1 kHz 双声道 WAV 并入库，记录 CUDA。生成测试仅系统 PATH，HF/Torch 缓存指向隔离模型根目录；默认 Demucs 权重仍由上游在第一次处理时联网获取，不声称安装后已离线可用。
 - 经典钢琴：完整安装 Python/CUDA 环境并下载、核验官方固定权重；首次转写在 Librosa/Numba 处失败。实际失败调用的对照实验只改变 `NUMBA_DISABLE_JIT`，`1` 失败、`0` 通过。修复后相同输入生成有效 MIDI 并入库，记录 CUDA。输出 2 轨、30 音符，输入为 12 音符，存在额外识别，因此仅证明执行链路，不作为准确扒谱的验收。
 - 取消修复后的正常路径复测：经典钢琴再次完成 CUDA 转写；Demucs 使用已经下载的测试缓存，在 `HF_HUB_OFFLINE=1` 条件下再次完成 CUDA 四轨分离。均入库成功，未将“杀进程成功”代替正常任务验收。
-- Basic Pitch：隔离冷安装未在测试设置的一小时内完成，主要剩余为 TensorFlow 大依赖；没有生成 MIDI 验收，也没有激活候选环境。保留已完成的依赖缓存和失败日志。本轮检测到的后台残留问题已独立修复、短测试通过，但不据此宣称 Basic Pitch 安装或推理已经通过。
+- Basic Pitch：上轮一小时限时内未完成，后续补验发现大包传输重头下载及 `pkg_resources` 缺失，均已修复并复测。Windows 隔离环境的自动下载、安装、实际转写及成品入库已通过；9.6 秒自制样本输出合法 MIDI，12 个音符的音高顺序全部匹配。使用 TensorFlow CPU 后端，不是 CUDA 验收。详见下方补验记录；原失败证据保留。
 - Whisper Small：从无共享引擎状态下载安装 1,424,256,246 字节的官方 r245.4 组件包，再安装 Small 权重，实际以 CUDA 识别 Qwen 测试语音，生成两条非空 SRT，文字与测试句一致并入库。官方该资产未返回 SHA-256，不能把本次长度与解包检查写成官方摘要核验。
 - 视频输入：用捆绑 FFmpeg 将上述自有语音制成 6.08 秒 MP4，再经生产字幕入口处理，生成两条非空 SRT 并入库，设备为 CUDA。输入使用中文文件名，未使用私人或外部授权不明的视频。
 - Inno 安装脚本：`/O-` 语法检查通过；没有生成安装包，也没有在主机安装或修复 VC++ / WebView2。整套工具准备脚本复跑通过，两项微软前置文件的签名、SHA-256 和安装器版本均已校验。MSBuild 内容项检查确认这两个安装程序不会复制进应用目录。
@@ -95,6 +95,28 @@ F5 第一轮只做了禁止联网的依赖导入检查，第二轮已经补齐�
 
 依据：[Demucs 4.1.0 官方包元数据](https://pypi.org/pypi/demucs/4.1.0/json)、[Numba JIT 环境变量](https://numba.readthedocs.io/en/stable/reference/envvars.html#envvar-NUMBA_DISABLE_JIT)、[.NET 取消等待不等于退出进程](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.waitforexitasync?view=net-10.0)、[Kill 的异步退出语义及后代进程限制](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.kill?view=net-10.0)。
 
+## Basic Pitch 补验（2026-10-08）
+
+本次补验基于测试分支 `d7fd214` 继续修复；2026-10-08 完成时尚未提交、推送或发版，后续纳入 2.0.2-beta.1 发布准备。没有替换已安装 Aurora，没有修改 `C:\LocalAI`、用户配置或全局 Python/包源。
+
+发现与修复：
+
+- 原安装器将 TensorFlow 大包交给 uv 边下载边解压；本轮实测在约 25 分钟后重新下载。独立 curl 诊断也遇到官方 CDN 后半段约 46 KB/s 的传输，确认不是单纯 UI 不刷新。先保留官方部分文件，再通过清华大学 PyPI 镜像续传，所得完整包与 PyPI 官方长度 `300919984`、SHA-256 `4710b0ea84defaafc0d6cc51162ebef8b07da015fc68375661451861c5bf4421` 一致。
+- Windows Basic Pitch 0.4.0 的指定 TensorFlow wheel 改由 Aurora 现有断点下载器保存到 `.aurora/packages`。官方源单次尝试最多两分钟，网络失败或到时后从已保留字节切换清华镜像；最终必须通过长度及官方 SHA-256 验证，再交 uv 与其他依赖一同解析安装。只作用于这个固定版本文件，不改变全局源、不关闭 TLS、不跳过依赖校验；用户主动取消不触发备用下载。未来不同 Basic Pitch 版本不强套这个固定 wheel。
+- resampy 0.4.2 仍导入 `pkg_resources`，但新环境解析到 setuptools 84.0.0 后缺少此模块。补上与 Mac 既有配置一致的 `setuptools<81`；实际安装得到 80.10.2。Mac 原有约束未改，不能把本次 Windows 结果写成 Mac 实机通过。
+
+真实验收：
+
+1. 使用本轮源码重新编译验证程序，并清除开发者 PATH；Python、模型及缓存均留在专用 `basic-install/Models`。最初误用旧编译产物的重试已主动停止，其日志不计入验收。
+2. 确认应用的 wheel 缓存尚不存在后重走生产安装入口，未预置手工诊断下载文件。官方源限时结束后，应用自动切换镜像、续传并完成校验，66 个包检查兼容。首次 `--help` 实际检出了缺少 `pkg_resources`，候选未启用；补齐约束后再次创建候选，复用应用刚校验的缓存，安装和启动检查通过。期间还保留了一次 PyPI 元数据 TLS EOF 失败；同请求重试后恢复，未放宽证书校验。
+3. 从 Aurora 的生产后端、任务队列与项目记录处理 `model-install/piano-notes.wav`：9.6 秒、44.1 kHz、单声道。任务在约 20.65 秒内生成并登记 `piano-notes_basic_pitch.mid`；文件 2261 字节，SMF 类型 1，两条轨道（含元数据轨），12 个音符，时长约 9.470 秒。Mido 和 PrettyMIDI 独立解析通过，音高序列 `60,64,67,72,67,64,62,65,69,74,69,65` 全部匹配，最大起音绝对偏差约 22.7 毫秒。这只是短样本功能/基础音符检查，不代表复杂乐曲或演出总谱精度。
+4. 独立设备探针确认 TensorFlow 2.15.0 的 `cuda_build=false`、GPU 列表为空，使用 CPU。任务回执的 `Device` 字段目前为空，因此设备结论来自运行时探针，不能从回执推断 CUDA。
+5. 最终 Windows 行为回归 333 条 PASS，更新流程通过；Windows/Mac 项目编译均零警告、零错误，Mac 共享逻辑 113 项通过（原生 Unix 项明确跳过）。真实 uv 取消 10 个场景通过，测试所属进程检查无残留。更新流程首次被沙箱临时目录的移动权限阻止，普通用户环境复测通过，未修改断言。
+
+证据均位于 `.maintenance/clean-install-20261008/`：`basic-first-install-fixed-retry.log`（自动下载及实际导入失败）、`basic-pkg-resources-failure.json`、`basic-first-install-complete.log`、`basic-install/basic-pitch-install.json`、`basic-inference/basic-pitch/acceptance.json`、`basic-note-check.json`、`basic-device-check.log`、`basic-all-regressions-final.log`、`basic-update-flow-final-retry.log`、`basic-mac-shared-final.log`。回归修复前失败分别在 `basic-download-regression-before.log` 和 `basic-dependency-regression-before.log`。模型、包和样本不会提交到源码仓库，当前未清理测试证据。
+
+依据：[PyPI 官方 wheel 元数据](https://pypi.org/pypi/tensorflow-intel/2.15.0/json)、[清华镜像官方说明](https://mirrors.tuna.tsinghua.edu.cn/help/pypi/)、[Setuptools 82 移除 pkg_resources](https://setuptools.pypa.io/en/latest/history.html#v82-0-0)、[TensorFlow 原生 Windows GPU 限制](https://www.tensorflow.org/install/pip#windows-native)。
+
 ## Windows 复测命令（开发/CI，不是最终用户操作）
 
 ```powershell
@@ -111,7 +133,7 @@ dotnet run --project work/audio-studio/AuroraAudioStudio.BehaviorTests -c Releas
 
 ## Mac 原生交接
 
-测试分支：`test/zero-env-bootstrap-20261008`。本次授权仅上传修复源码供 Mac 验收，不合入 `main`，不创建 Release、不更改下载入口、不执行正式 DMG/公证/发布。分支基于主分支 `93bda80`，保留其最新文档规则；应用版本号仍是 2.0.1，不代表该修复已随线上 2.0.1 发布。此前记录的“未提交/未推送”是当时的检查快照。
+以下是首次独立测试分支 `test/zero-env-bootstrap-20261008` 的交接快照，当时仅授权上传测试源码。后续 Windows 2.0.2-beta.1 的 Mac 构建应改用 [2.0.2-beta.1 交接说明](macOS-2.0.2-beta.1-handoff.md)和对应发布标签；不要将本轮修复误认为线上 2.0.1 已包含。此前“未提交/未推送”描述均是对应时点的状态。
 
 建议在 Mac 使用独立新目录，不切换或覆盖有未提交改动的现有工作区。下面命令从当前目录创建一个新的源码目录；同名目录已存在时，选另一个名字，不删除旧目录。
 
@@ -150,7 +172,7 @@ dotnet run --project work/audio-studio/AuroraAudioStudio.MacTests -c Release -- 
 
 回传时记录源码完整 SHA、Mac 型号/系统版本、工具打包及签名检查结果、模型 ID、首次安装日志、实际输出路径/时长或条目数、失败堆栈与取消后进程状态。日志中的用户名或私有路径在对外发布前脱敏，不上传音频素材、模型、令牌、证书或私钥。`bootstrap-result.txt` 只证明指定模型安装完成，不能用作“全功能通过”的回执。
 
-## 发布前仍必须完成
+## 正式版与跨平台完整验收的剩余门槛
 
 1. 干净 Windows 用户/虚拟机，不预装 Git、Python、uv、FFmpeg、SoX、开发编译器、VC++ 或 WebView2，确认原生安装程序补齐前置组件，应用完成首次安装；核验失败/需要重启分支与已有环境保留。
 2. Mac 原生验证新收集的 Mach-O、HTTPS CA、签名/公证、从 Finder 启动后的管理环境创建；确认模型依赖不要求用户安装 Xcode/Homebrew。
