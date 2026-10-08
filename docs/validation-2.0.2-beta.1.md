@@ -1,6 +1,6 @@
 # Aurora 2.0.2-beta.1 验收记录
 
-日期：2026-10-09。交付范围为 Windows x64 安装包与源码；Mac 下载维持 2.0.1，本轮未构建或宣称验收新的 Mac 安装包。
+日期：2026-10-09。Windows x64 安装包与源码先发布，随后补充 Mac Apple Silicon 安装包。下文为 Windows 验收，Mac 独立实测见[Mac 验收记录](validation-mac-2.0.2-beta.1.md)。Stable 仍为 2.0.1。
 
 ## 来源与构建
 

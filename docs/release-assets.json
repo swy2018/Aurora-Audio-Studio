@@ -1,12 +1,24 @@
 {
   "schemaVersion": 1,
-  "verifiedAt": "2026-10-08T17:19:50.7520588+00:00",
+  "verifiedAt": "2026-10-08T19:02:31.6089060+00:00",
   "releases": [
     {
       "tag_name": "v2.0.2-beta.1",
       "draft": false,
       "prerelease": true,
       "assets": [
+        {
+          "name": "Aurora-Audio-Studio-2.0.2-beta.1-arm64.dmg",
+          "browser_download_url": "https://github.com/swy2018/Aurora-Audio-Studio/releases/download/v2.0.2-beta.1/Aurora-Audio-Studio-2.0.2-beta.1-arm64.dmg",
+          "size": 106000128,
+          "digest": "sha256:9bf87ae4aadac1127f3a53d2fe538269ef90d4bb7b3090777b066192398e63fb"
+        },
+        {
+          "name": "Aurora-Audio-Studio-2.0.2-beta.1-arm64.dmg.sha256",
+          "browser_download_url": "https://github.com/swy2018/Aurora-Audio-Studio/releases/download/v2.0.2-beta.1/Aurora-Audio-Studio-2.0.2-beta.1-arm64.dmg.sha256",
+          "size": 109,
+          "digest": "sha256:a8704c1e87b98bc60c95f13ef1296b1590db4153056f52c5d1e83b5f97508c89"
+        },
         {
           "name": "Aurora-Audio-Studio-2.0.2-beta.1-Setup-x64.exe",
           "browser_download_url": "https://github.com/swy2018/Aurora-Audio-Studio/releases/download/v2.0.2-beta.1/Aurora-Audio-Studio-2.0.2-beta.1-Setup-x64.exe",
