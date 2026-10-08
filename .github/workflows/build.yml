@@ -71,7 +71,8 @@ jobs:
       - name: Verify behavior, localization, and published catalog
         shell: pwsh
         run: |
-          dotnet run --project work/audio-studio/AuroraAudioStudio.BehaviorTests --configuration Release
+          $auroraRuntime = (Resolve-Path 'work/audio-studio/AuroraAudioStudio/Runtime').Path
+          dotnet run --project work/audio-studio/AuroraAudioStudio.BehaviorTests --configuration Release -p:AuroraRuntimeSource="$auroraRuntime"
           if ($LASTEXITCODE) { throw 'Behavior checks failed.' }
           dotnet run --project work/audio-studio/AuroraAudioStudio.BehaviorTests --configuration Release --no-build -- --bootstrap-tools work/audio-studio/AuroraAudioStudio/Runtime "$env:RUNNER_TEMP/Aurora-first-install"
           if ($LASTEXITCODE) { throw 'Bundled first-install tools failed in an isolated PATH.' }
