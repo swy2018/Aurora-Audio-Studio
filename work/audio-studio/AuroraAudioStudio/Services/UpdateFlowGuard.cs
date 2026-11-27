@@ -18,8 +18,11 @@ public sealed class UpdateFlowGuard
 
     public static string DateKey(DateOnly date) => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-    public static string BuildInstallerArguments(int currentProcessId, string logPath) =>
-        $"/SILENT /CLOSEAPPLICATIONS /NORESTART /KEEPUSERDATA /UPDATE /UPDATEPID={currentProcessId} /LOG=\"{logPath}\"";
+    public static bool SupportsSafeRestart(string targetVersion) =>
+        AppReleaseVersion.Parse(targetVersion) is { } target && target >= AppReleaseVersion.Parse("2.1.0-beta.1")!;
+
+    public static string BuildInstallerArguments(int currentProcessId, string logPath, bool automaticRestart = true) =>
+        $"/SILENT /CLOSEAPPLICATIONS /NORESTART /KEEPUSERDATA{(automaticRestart ? $" /UPDATE /UPDATEPID={currentProcessId}" : "")} /LOG=\"{logPath}\"";
 }
 
 public static class DownloadResumeGuard

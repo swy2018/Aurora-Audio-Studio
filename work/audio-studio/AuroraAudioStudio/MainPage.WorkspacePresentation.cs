@@ -44,6 +44,7 @@ public sealed partial class MainPage
     {
         if (StorageInfo is null || taskQueue is null) return;
         StorageInfo.IsOpen = !StorageAvailable;
+        RecoverSettingsButton.Visibility = settings.NeedsRecovery ? Visibility.Visible : Visibility.Collapsed;
         StorageInfo.Title = localization.Get("storageUnavailable");
         StorageInfo.Message = StorageAvailable ? "" : localization.Get("storageUnavailableBody") + "\n" +
             localization.Translate(taskQueue.StorageWarning ?? settings.StorageWarning ?? watcherWarning ?? "");
@@ -54,6 +55,8 @@ public sealed partial class MainPage
 
     private async void RestoreStorageButton_Click(object sender, RoutedEventArgs e)
     {
+        try
+        {
         settings.Load();
         taskQueue.TryRestoreStorage();
         activityWatcher?.Dispose(); activityWatcher = null;
@@ -61,6 +64,24 @@ public sealed partial class MainPage
         InitializeResultWatchers();
         RefreshStorageWarning();
         if (StorageAvailable) { await ImportWorkbenchResultsAsync(); RefreshWorkspace(); }
+        }
+        catch (Exception ex) { SetStatus(localization.Translate(ex.Message)); RefreshStorageWarning(); }
+    }
+
+    private async void RecoverSettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = localization.Get("recoverSettings"),
+                Content = new TextBlock { Text = localization.Get("recoverSettingsBody"), TextWrapping = TextWrapping.Wrap },
+                PrimaryButtonText = localization.Get("recoverSettings"), CloseButtonText = localization.Get("cancel"), DefaultButton = ContentDialogButton.Close };
+            if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
+            if (!settings.TryRecoverSettings(out var backup, out var error)) throw new IOException(error);
+            SetStatus(localization.Format("recoverySaved", backup));
+            RefreshStorageWarning();
+            RefreshWorkspace();
+        }
+        catch (Exception ex) { SetStatus(localization.Translate(ex.Message)); }
     }
 
     private void RefreshPresetHint()

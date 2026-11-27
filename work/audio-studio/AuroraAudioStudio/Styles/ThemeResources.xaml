@@ -8,6 +8,7 @@
             <SolidColorBrush x:Key="AuroraPaneBrush" Color="#F0F6F3" />
             <SolidColorBrush x:Key="AuroraSurfaceBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="AuroraAccentBrush" Color="#267D63" />
+            <SolidColorBrush x:Key="AuroraOnAccentBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="AuroraTextBrush" Color="#15231F" />
             <SolidColorBrush x:Key="AuroraMutedBrush" Color="#5C6D67" />
             <SolidColorBrush x:Key="AuroraStrokeBrush" Color="#D9E6DF" />
@@ -17,6 +18,7 @@
             <SolidColorBrush x:Key="AuroraPaneBrush" Color="#16221F" />
             <SolidColorBrush x:Key="AuroraSurfaceBrush" Color="#1B2824" />
             <SolidColorBrush x:Key="AuroraAccentBrush" Color="#57C7A4" />
+            <SolidColorBrush x:Key="AuroraOnAccentBrush" Color="#13241F" />
             <SolidColorBrush x:Key="AuroraTextBrush" Color="#EFF8F4" />
             <SolidColorBrush x:Key="AuroraMutedBrush" Color="#B0C1BA" />
             <SolidColorBrush x:Key="AuroraStrokeBrush" Color="#32443E" />
@@ -26,6 +28,7 @@
             <SolidColorBrush x:Key="AuroraPaneBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="AuroraSurfaceBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="AuroraAccentBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="AuroraOnAccentBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
             <SolidColorBrush x:Key="AuroraTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
             <SolidColorBrush x:Key="AuroraMutedBrush" Color="{ThemeResource SystemColorGrayTextColor}" />
             <SolidColorBrush x:Key="AuroraStrokeBrush" Color="{ThemeResource SystemColorWindowTextColor}" />

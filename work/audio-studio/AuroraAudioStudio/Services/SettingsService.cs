@@ -22,6 +22,7 @@ public sealed class SettingsService
         : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aurora Audio Studio");
 
     public string? StorageWarning { get; private set; }
+    public bool NeedsRecovery => unreadSettings;
     public SettingsService(string? appDataRoot = null)
     {
         appDataRoot ??= Environment.GetEnvironmentVariable("AURORA_DATA_ROOT");
@@ -85,6 +86,30 @@ public sealed class SettingsService
     public void Save(AppSettings settings)
     {
         if (!TrySave(settings, out var error)) throw new IOException(error);
+    }
+
+    // Called only after the user explicitly chooses recovery. A failed backup
+    // must never turn the original read-only protection into an overwrite.
+    public bool TryRecoverSettings(out string backupPath, out string error)
+    {
+        backupPath = "";
+        error = "";
+        if (!unreadSettings) return true;
+        try
+        {
+            if (File.Exists(SettingsPath))
+            {
+                backupPath = SettingsPath + ".recovery-" + Guid.NewGuid().ToString("N");
+                File.Copy(SettingsPath, backupPath, false);
+            }
+            unreadSettings = false;
+            if (Persist(Current, out error)) return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        { error = ex.Message; }
+        unreadSettings = true;
+        StorageWarning = error;
+        return false;
     }
 
     public bool TrySetLanguage(string language, out string error)

@@ -32,6 +32,8 @@ internal static class RuntimeCopyRegression
             {
                 string[] stages = ["正在校验官方模型文件", "正在校验 GitHub Release 摘要", "正在检查模型部署组件", "正在创建隔离运行环境", "正在安装模型部署组件 uv", "正在校验模型包完整性", "正在安装模型文件", "正在读取模型版本", "正在配置独立模型下载组件", "正在下载模型包", "正在配置 ACE-Step 隔离运行环境", "正在下载 ACE-Step 基础权重", "正在下载 ACE-Step 1.5 XL Turbo 官方权重", "正在配置 Seed-VC Python 3.10 隔离环境", "正在下载 Seed-VC 官方权重与配置", "正在下载 BS-RoFormer-SW 多轨权重", "正在下载 YourMT3+ 多乐器权重", "正在下载并配置 MiniMax-Music3 CUDA 运行环境（PyTorch 组件较大，请耐心等待）", "正在下载 MiniMax-Music3 官方模型（约 27 GB）", "正在创建 Qwen3-TTS Python 3.12 隔离环境", "正在安装 Qwen3-TTS 所需的 SoX 音频组件", "正在安装 FFmpeg 音频组件"];
                 Check(stages.All(stage => !System.Text.RegularExpressions.Regex.IsMatch(text.Translate(stage), @"[\u4e00-\u9fff]")), "all authored maintenance stages translated");
+                var sourceReport = text.Translate("本地源码较新，未建议降级。运行代码：v0.1.5。未发布源码：abcdef12。权重更新数：0。");
+                Check(sourceReport.Contains("no downgrade") && !System.Text.RegularExpressions.Regex.IsMatch(sourceReport, @"[\u4e00-\u9fff]"), "source update report translates the entire status without leaking a Chinese suffix");
             }
             var backend = new BackendService(settings);
             settings.Current.LocalAiRoot = Path.Combine(root, language, "models");
@@ -63,7 +65,7 @@ internal static class RuntimeCopyRegression
                 return info;
             }
             async Task<OperationResult> Run(string mode, string prefix, CancellationToken token = default)
-                => await (Task<OperationResult>)method.Invoke(backend, ["utility", Fixture(mode), prefix, output, null, token])!;
+                => await (Task<OperationResult>)method.Invoke(backend, ["utility", Fixture(mode), prefix, output, null, token, null])!;
 
             var failed = await Run("fail", "copy-fail");
             Check(!failed.Success && failed.Message == text.Format("logTaskExit", 23), language + " failed exit is localized");

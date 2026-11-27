@@ -20,9 +20,9 @@
     <Nullable>enable</Nullable>
     <AssemblyName>Aurora Audio Studio</AssemblyName>
     <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
-    <Version>2.0.2-beta.1</Version>
-    <FileVersion>2.0.2.0</FileVersion>
-    <AssemblyVersion>2.0.2.0</AssemblyVersion>
+    <Version>2.1.0-beta.1</Version>
+    <FileVersion>2.1.0.0</FileVersion>
+    <AssemblyVersion>2.1.0.0</AssemblyVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <Product>Aurora Audio Studio</Product>
     <Company>Aurora Contributors</Company>
@@ -75,6 +75,7 @@
   </Target>
 
   <Target Name="RequireBundledModelTools" BeforeTargets="Publish">
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/../tools/Test-WindowsRuntime.ps1&quot;" />
     <Error Condition="!Exists('Runtime/bin/sox/sox.exe.manifest')" Text="SoX Unicode manifest missing. Run tools/Prepare-WindowsRuntime.ps1 before publishing." />
     <Error Condition="!Exists('Runtime/bin/uv/uv.exe') Or !Exists('Runtime/bin/git/cmd/git.exe') Or !Exists('Runtime/bin/ffmpeg/bin/ffmpeg.exe') Or !Exists('Runtime/bin/ffmpeg/bin/ffprobe.exe') Or !Exists('Runtime/bin/sox/sox.exe')"
            Text="Model tools missing. Run tools/Prepare-WindowsRuntime.ps1 before publishing; a package that requires preinstalled tools must not ship." />

@@ -128,7 +128,7 @@ Require(installerScript.Contains("if HasWebView2Runtime() then Exit;", StringCom
     && installerScript.Contains("else if (Code <> 0) or not HasWebView2Runtime() then", StringComparison.Ordinal),
     "WebView2 must use machine/user runtime registration, skip existing installs and verify the post-install state.");
 Require(!installerScript.Contains("UninstallString", StringComparison.Ordinal), "The installer must not parse and execute a registry uninstall command during an upgrade.");
-Require(installerScript.Contains("Flags: nowait runascurrentuser; Check: IsAutomaticUpdate", StringComparison.Ordinal), "A successful automatic update must relaunch Aurora as the signed-in user.");
+Require(installerScript.Contains("Parameters: \"--after-update\"; Flags: nowait runasoriginaluser; Check: IsAutomaticUpdate", StringComparison.Ordinal), "Setup must request original-user relaunch with the legacy elevated-client startup guard.");
 Require(installerScript.Contains("Result := HasCommandLineParam('/UPDATE')", StringComparison.Ordinal), "The installer must recognize automatic update mode.");
 
 var audioStudioRoot = Path.GetDirectoryName(args[0])!;
@@ -379,7 +379,7 @@ Require(transkunSetupStart >= 0, "Model package installation method must exist."
 var transkunSetupEnd = modelUpdateSource.IndexOf("\n    private ", transkunSetupStart + 1, StringComparison.Ordinal);
 var transkunSetup = transkunSetupEnd > transkunSetupStart ? modelUpdateSource[transkunSetupStart..transkunSetupEnd] : modelUpdateSource[transkunSetupStart..];
 var transkunPackageInstall = transkunSetup.IndexOf("var installResult = await RunProcessAsync(install, cancellationToken, progress)", StringComparison.Ordinal);
-Require(transkunPackageInstall >= 0 && transkunSetup.Contains("PackageInstallCommand(uv, model, python, packageVersion)", StringComparison.Ordinal)
+Require(transkunPackageInstall >= 0 && transkunSetup.Contains("PackageInstallCommand(uv, model, python, packageVersion, packageSource)", StringComparison.Ordinal)
     && !transkunSetup.Contains("var torchResult = await RunProcessAsync", StringComparison.Ordinal),
     "Model and CUDA dependencies must resolve together; the later CPU-to-CUDA replacement phase must not return. Command arguments are checked by BootstrapRegression.");
 Require(modelUpdateSource.Contains("正在下载 ACE-Step 基础权重", StringComparison.Ordinal) && modelUpdateSource.Contains("acestep-v15-xl-turbo", StringComparison.Ordinal), "ACE-Step installation must download both the official base components and XL checkpoint.");

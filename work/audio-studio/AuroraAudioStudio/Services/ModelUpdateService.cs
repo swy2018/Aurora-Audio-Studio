@@ -47,6 +47,8 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         cancellationToken.ThrowIfCancellationRequested();
         var root = ResolveExistingModelRoot(model, Path.Combine(settings.Current.LocalAiRoot, model.RelativeRoot));
         if (!catalog.IsInstalled(model)) return new(false, "尚未安装或运行环境不完整", "not-installed");
+        if (PackageSourceRepository(model.Id) is not null)
+            return await CheckPackageSourceAsync(model, root, cancellationToken);
         if (model.UpdateKind.Equals("fixed-file", StringComparison.OrdinalIgnoreCase))
             return await CheckFixedFileAsync(model, root, cancellationToken);
         if (model.UpdateKind.Equals("roformer-registry", StringComparison.OrdinalIgnoreCase))
@@ -458,6 +460,8 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             }
             response.EnsureSuccessStatusCode();
             using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            if (document.RootElement.TryGetProperty("draft", out var draft) && draft.GetBoolean()
+                || document.RootElement.TryGetProperty("prerelease", out var prerelease) && prerelease.GetBoolean()) return null;
             var tag = document.RootElement.GetProperty("tag_name").GetString();
             return string.IsNullOrWhiteSpace(tag) ? null : new(owner, repository, tag, "", "", "");
         }
@@ -630,12 +634,22 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         var python = Path.Combine(root, "Scripts", "python.exe");
         var environment = await EnsureUvEnvironmentAsync(uv, root, python, progress, cancellationToken);
         if (!environment.Success) return environment;
-        using var packageDocument = JsonDocument.Parse(await metadataClient.GetStringAsync($"https://pypi.org/pypi/{Uri.EscapeDataString(PyPiPackageName(model.Repository!))}/json", cancellationToken));
-        var packageVersion = packageDocument.RootElement.GetProperty("info").GetProperty("version").GetString()!;
+        PackageSource? packageSource = null;
+        string packageVersion;
+        if (PackageSourceRepository(model.Id) is { } sourceRepository)
+        {
+            packageSource = await ResolvePackageSourceAsync(sourceRepository, cancellationToken);
+            packageVersion = packageSource.Version;
+        }
+        else
+        {
+            using var packageDocument = JsonDocument.Parse(await metadataClient.GetStringAsync($"https://pypi.org/pypi/{Uri.EscapeDataString(PyPiPackageName(model.Repository!))}/json", cancellationToken));
+            packageVersion = packageDocument.RootElement.GetProperty("info").GetProperty("version").GetString()!;
+        }
         progress?.Report(new(null, $"正在部署 {model.Name}"));
         if (model.Id == "basic-pitch" && packageVersion == "0.4.0")
-            await EnsureBasicPitchTensorflowAsync(progress, cancellationToken);
-        var install = PackageInstallCommand(uv, model, python, packageVersion);
+            await EnsureBasicPitchOnnxWheelAsync(progress, cancellationToken);
+        var install = PackageInstallCommand(uv, model, python, packageVersion, packageSource);
         var installResult = await RunProcessAsync(install, cancellationToken, progress);
         if (installResult.ExitCode != 0) return new(false, string.IsNullOrWhiteSpace(installResult.Error) ? $"{model.Name} 部署失败。" : installResult.Error);
         if (includeWeights && model.Id.Equals("roformer", StringComparison.OrdinalIgnoreCase))
@@ -673,6 +687,13 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
                 "import numpy as np; from ncls import FNCLS; tree=FNCLS(np.array([0., 2.]), np.array([1., 3.]), np.array([42, 43], dtype=np.int64)); queries, hits=tree.all_overlaps_both(np.array([0.5]), np.array([0.75]), np.array([7], dtype=np.int64)); assert queries.tolist() == [7] and hits.tolist() == [42]", cancellationToken);
             if (!nativeProbe.Success) return nativeProbe;
         }
+        if (model.Id == "basic-pitch" && packageVersion == "0.4.0")
+        {
+            var onnxProbe = await ProbePythonRuntimeAsync(python,
+                "from importlib.resources import files; from basic_pitch.inference import Model; import importlib.util; assert importlib.util.find_spec('tensorflow') is None; Model(str(files('basic_pitch')/'saved_models/icassp_2022/nmp.onnx'))", cancellationToken);
+            if (!onnxProbe.Success) return onnxProbe;
+            File.WriteAllText(Path.Combine(root, ".aurora-basic-pitch-onnx"), BasicPitchOnnxVersion);
+        }
         var dependencyCheck = CreateInstaller(uv);
         foreach (var value in new[] { "pip", "check", "--python", python }) dependencyCheck.ArgumentList.Add(value);
         var dependencyResult = await RunProcessAsync(dependencyCheck, cancellationToken, progress);
@@ -687,18 +708,20 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
         if (frozen.ExitCode != 0) return new(false, "无法记录候选环境的依赖组合。");
         File.WriteAllText(Path.Combine(root, "requirements.aurora.txt"), frozen.Output);
         File.WriteAllText(Path.Combine(root, ".aurora-version"), packageVersion);
+        if (packageSource is not null) File.WriteAllText(Path.Combine(root, ".aurora-source.json"), JsonSerializer.Serialize(packageSource));
         RuntimeEnvironment.Activate(logicalRoot, root);
         WriteInstalledVersion(model.Id, packageVersion);
         return new(true, $"{model.Name} 已下载并部署完成", "current");
     }
 
-    internal ProcessStartInfo PackageInstallCommand(string uv, ModelDefinition model, string python, string version)
+    internal ProcessStartInfo PackageInstallCommand(string uv, ModelDefinition model, string python, string version, PackageSource? source = null)
     {
         var info = CreateInstaller(uv);
-        foreach (var value in new[] { "pip", "install", "--python", python, model.Repository! + "==" + version }) info.ArgumentList.Add(value);
+        var requirement = model.Id == "basic-pitch" && version == "0.4.0" ? BasicPitchOnnxWheelPath
+            : source is null ? model.Repository! + "==" + version : $"{PyPiPackageName(model.Repository!)} @ git+{source.Repository}@{source.Commit}";
+        foreach (var value in new[] { "pip", "install", "--python", python, requirement }) info.ArgumentList.Add(value);
         if (model.Id == "basic-pitch" && version == "0.4.0")
         {
-            info.ArgumentList.Add(BasicPitchTensorflowWheelPath);
             // Its resampy 0.4.2 still imports pkg_resources; match the Mac runtime constraint.
             info.ArgumentList.Add("setuptools<81");
         }
@@ -738,41 +761,6 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             info.ArgumentList.Add("datasets>=3");
         }
         return info;
-    }
-
-    private string BasicPitchTensorflowWheelPath => Path.Combine(settings.Current.LocalAiRoot, ".aurora", "packages", "tensorflow_intel-2.15.0-cp311-cp311-win_amd64.whl");
-
-    internal async Task EnsureBasicPitchTensorflowAsync(IProgress<ModelInstallProgress>? progress, CancellationToken token)
-    {
-        // Basic Pitch 0.4.0 on this installer's CPython 3.11 / Windows x64 uses
-        // TensorFlow 2.15. uv restarts a failed streaming extraction from zero.
-        // Keep the archive resumable and verify PyPI's fixed length + SHA-256 instead.
-        // https://pypi.org/pypi/tensorflow-intel/2.15.0/json
-        const string sha256 = "4710b0ea84defaafc0d6cc51162ebef8b07da015fc68375661451861c5bf4421";
-        const long size = 300919984;
-        const string asset = "/packages/4c/48/1a5a15517f18eaa4ff8d598b1c000300b20c1bb0e624539d702117a0c369/tensorflow_intel-2.15.0-cp311-cp311-win_amd64.whl";
-        var destination = BasicPitchTensorflowWheelPath;
-        if (string.Equals(await FileHashAsync(destination, token), sha256, StringComparison.OrdinalIgnoreCase)) return;
-        Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-        var pending = destination + ".download";
-        try
-        {
-            using var primary = CancellationTokenSource.CreateLinkedTokenSource(token);
-            primary.CancelAfter(TimeSpan.FromMinutes(2));
-            await DownloadFileAsync("https://files.pythonhosted.org" + asset, pending, progress, primary.Token, size);
-        }
-        catch (Exception ex) when (!token.IsCancellationRequested && ex is HttpRequestException or IOException or OperationCanceledException)
-        {
-            // Only this pinned public file uses a secondary source; no global index
-            // changes. Both transfers share the partial file and the same final hash.
-            const string mirror = "pypi.tuna.tsinghua.edu.cn";
-            progress?.Report(new(null, "", LogLine: new LocalizationService(settings).Format("dependencyMirrorRetry", mirror)));
-            await DownloadFileAsync("https://" + mirror + asset, pending, progress, token, size);
-        }
-        if (!string.Equals(await FileHashAsync(pending, token), sha256, StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException(new LocalizationService(settings).Get("dependencyHashMismatch"));
-        token.ThrowIfCancellationRequested();
-        File.Move(pending, destination, true);
     }
 
     internal async Task EnsureYourMt3WeightsAsync(IProgress<ModelInstallProgress>? progress, CancellationToken token)
@@ -819,6 +807,12 @@ public sealed partial class ModelUpdateService(ModelCatalogService catalog, Sett
             using var document = JsonDocument.Parse(await metadataClient.GetStringAsync($"https://pypi.org/pypi/{Uri.EscapeDataString(package)}/json", cancellationToken));
             var latest = document.RootElement.GetProperty("info").GetProperty("version").GetString() ?? "";
             var current = local.Output.Trim().Split('\n', StringSplitOptions.RemoveEmptyEntries).LastOrDefault()?.Trim() ?? "";
+            if (model.Id == "basic-pitch" && latest == "0.4.0")
+            {
+                if (!File.Exists(Path.Combine(root, ".aurora-basic-pitch-onnx")))
+                    return new(true, new LocalizationService(settings).Get("basicPitchOnnxAvailable"), "available");
+                if (current == BasicPitchOnnxVersion) current = "0.4.0";
+            }
             var same = current.Equals(latest, StringComparison.OrdinalIgnoreCase);
             return new(true, same ? $"已是最新版本 {current}" : $"发现新版本 {latest}", same ? "current" : "available");
         }

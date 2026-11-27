@@ -54,6 +54,7 @@ public sealed class MacWorkspace
     private string DraftsPath => Path.Combine(Settings.AppDataRoot, "mac-drafts.json");
     private string? lastSavedDrafts;
     private bool unreadDrafts;
+    public bool DraftsNeedRecovery => unreadDrafts;
     public string? StorageWarning => Settings.StorageWarning ?? Queue.StorageWarning ?? (unreadDrafts ? Localization.Get("storageUnavailableBody") : null);
 
     public MacWorkspace(string? root = null)
@@ -73,26 +74,38 @@ public sealed class MacWorkspace
             if (definition.Feature is "music" or "voice" or "singing") Workbenches.Register(new MacWorkbenchAdapter(Runtime, id));
             else Engines.Register(new MacUtilityAdapter(Runtime, Settings, id));
         }
-        if (File.Exists(DraftsPath))
+        TryReloadDrafts();
+        NormalizeDrafts();
+    }
+
+    public bool TryReloadDrafts()
+    {
+        try
         {
-            try { Drafts = JsonSerializer.Deserialize<Dictionary<string, StudioDraft>>(File.ReadAllText(DraftsPath)) ?? []; }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
-            {
-                try { File.Copy(DraftsPath, DraftsPath + ".recovery-" + DateTimeOffset.UtcNow.Ticks); }
-                catch (Exception backupError) when (backupError is IOException or UnauthorizedAccessException) { unreadDrafts = true; }
-                RecoveryWarning = ex.Message;
-            }
+            var loaded = File.Exists(DraftsPath)
+                ? JsonSerializer.Deserialize<Dictionary<string, StudioDraft>>(File.ReadAllText(DraftsPath)) ?? throw new InvalidDataException("保存的处理选项无效，原文件已保留。")
+                : new Dictionary<string, StudioDraft>();
+            if (loaded.Values.Any(draft => draft is null || draft.Sources is null || draft.Sources.Any(string.IsNullOrWhiteSpace)
+                || draft.Name is null || draft.Prompt is null || draft.Source is null || draft.Reference is null || draft.ModelId is null
+                || draft.Option is null || draft.ProjectId is null || draft.TrackMode is null || draft.SourceLanguage is null))
+                throw new InvalidDataException("保存的处理选项无效，原文件已保留。");
+            Drafts = loaded;
+            unreadDrafts = false;
+            RecoveryWarning = null;
+            lastSavedDrafts = null;
+            NormalizeDrafts();
+            return true;
         }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or InvalidDataException)
+        { unreadDrafts = true; RecoveryWarning = ex.Message; return false; }
+    }
+
+    private void NormalizeDrafts()
+    {
         foreach (var feature in Features)
         {
             if (!Drafts.ContainsKey(feature)) Drafts[feature] = new() { Feature = feature };
             var draft = Drafts[feature];
-            if (draft is null || draft.Sources is null || draft.Sources.Any(string.IsNullOrWhiteSpace))
-            {
-                unreadDrafts = true;
-                RecoveryWarning = "保存的处理选项无效，原文件已保留。";
-                Drafts[feature] = draft = new() { Feature = feature };
-            }
             draft.Feature = feature;
             if (draft.Sources.Count == 0 && !string.IsNullOrWhiteSpace(draft.Source)) draft.Sources.Add(draft.Source);
             if (!SupportsWorkflow(draft.ModelId, feature))
@@ -132,6 +145,26 @@ public sealed class MacWorkspace
         File.WriteAllText(temporary, json);
         File.Move(temporary, DraftsPath, true);
         lastSavedDrafts = json;
+    }
+
+    public bool TryRecoverDrafts(out string backupPath, out string error)
+    {
+        backupPath = ""; error = "";
+        if (!unreadDrafts) return true;
+        try
+        {
+            if (File.Exists(DraftsPath))
+            {
+                backupPath = DraftsPath + ".recovery-" + Guid.NewGuid().ToString("N");
+                File.Copy(DraftsPath, backupPath, false);
+            }
+            unreadDrafts = false;
+            SaveDrafts();
+            RecoveryWarning = null;
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        { unreadDrafts = true; error = ex.Message; RecoveryWarning = error; return false; }
     }
 
     public async Task<AuroraProject> SaveProjectAsync(StudioDraft draft)

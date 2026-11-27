@@ -10,6 +10,7 @@ import time
 from filelock import FileLock
 from download_models import CATALOG, digest, download, emit, validate_required
 from install_environment import install, environment_path, IMPORTS
+import source_updates
 
 SOURCES = {"ace": ("ace-step", "https://github.com/ace-step/ACE-Step-1.5.git"), "seed": ("seed-vc", "https://github.com/Plachtaa/seed-vc.git")}
 
@@ -20,7 +21,7 @@ def trash_model(base):
     subprocess.run([str(helper), str(base)], check=True)
 
 
-def environment(root, family, repair=False):
+def environment(root, family, repair=False, update_source=False):
     if family in SOURCES:
         name, url = SOURCES[family]
         source = root / "sources" / name
@@ -30,7 +31,7 @@ def environment(root, family, repair=False):
     marker = environment_path(root, family) / "aurora-runtime.json"
     if repair or not marker.exists():
         emit("progress", stage="安装 Mac 运行环境", model=family)
-        install(root, family, repair=repair)
+        install(root, family, repair=repair, update_source=update_source)
 
 
 def _check(root, model, deep=True):
@@ -94,7 +95,8 @@ def action(root, model, command):
     if command in ("install", "repair", "update"):
         try:
             if not CATALOG[model].get("download_only"):
-                environment(root, family, repair=command=="repair")
+                source_update = command == "update" and family in source_updates.PACKAGES
+                environment(root, family, repair=command=="repair" or source_update, update_source=source_update)
             if family == "subtitle-edit":
                 from subtitle_edit import install as install_editor
                 with FileLock(str(base / ".lock"), timeout=0):
@@ -121,7 +123,13 @@ def action(root, model, command):
         changes = [a["repo"] for a in receipt["assets"] if "repo" in a and
             (HfApi().space_info if a.get("repo_type") == "space" else HfApi().model_info)(a["repo"]).sha != a["revision"]]
         message = "发现更新：" + ", ".join(changes) if changes else "已检查可追踪的模型权重，未发现更新。源码与运行依赖不在本次检查范围内。"
-        result = dict(at=time.time(), available=bool(changes), message=message, updates=changes)
+        code = None
+        if family in source_updates.PACKAGES:
+            code = source_updates.check(environment_path(root, family), family)
+            message = "运行代码：" + code["target"]["version"] + "。未发布源码：" + (code["unreleased"] or "—") + "。权重更新数：" + str(len(changes)) + "。"
+            if code.get("newer_local"):
+                message = "本地源码较新，未建议降级。" + message
+        result = dict(at=time.time(), available=bool(changes) or bool(code and code["available"]), message=message, updates=changes, source=code)
         (base / "current/update-status.json").write_text(json.dumps(result, ensure_ascii=False))
         emit("completed", model=model, message=message, updates=changes)
     elif command == "rollback":

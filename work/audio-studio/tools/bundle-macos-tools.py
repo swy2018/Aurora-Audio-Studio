@@ -6,6 +6,7 @@ import re
 import shutil
 import subprocess
 import sys
+from macos_bundle_policy import lock, sha256, verify_architecture, verify_version, prepare_certificates
 
 app = Path(sys.argv[1])
 bin_dir = app / 'Contents/MacOS/Runtime/bin'
@@ -13,6 +14,13 @@ lib_dir = bin_dir / 'lib'
 licenses = app / 'Contents/MacOS/Licenses/Tools'
 for p in (bin_dir, lib_dir, licenses): p.mkdir(parents=True, exist_ok=True)
 queue = [(Path(shutil.which(n) or '/opt/homebrew/bin/'+n).resolve(), bin_dir/n) for n in ('uv','ffmpeg','ffprobe','sox','git')]
+policy = lock()
+tool_versions = {}
+for source, target in queue:
+    tool_versions[target.name] = verify_version(target.name, source, policy['tools'][target.name])
+    verify_architecture(source, policy['architecture'])
+    if 'Cellar' not in source.parts:
+        raise RuntimeError('Use the accepted Homebrew toolchain with redistributable license notices: ' + str(source))
 # /usr/bin/git is an Xcode command-line-tools launcher, not a redistributable Git.
 git = queue[-1][0]
 if git == Path('/usr/bin/git'):
@@ -25,7 +33,7 @@ templates = git.parent.parent/'share/git-core/templates'
 shutil.copytree(templates, app/'Contents/MacOS/Runtime/share/git-core/templates', dirs_exist_ok=True)
 certificates = app/'Contents/MacOS/Runtime/share/certs'
 certificates.mkdir(parents=True, exist_ok=True)
-shutil.copy2('/etc/ssl/cert.pem', certificates/'ca-bundle.crt')
+certificate_receipt = prepare_certificates(certificates/'ca-bundle.crt', licenses/'certifi', app.parent/'tool-cache', policy['certificates'])
 # Homebrew's .NET runtime can itself depend on Homebrew libraries (e.g. Brotli).
 # Include those app dylibs too, excluding their own LC_ID_DYLIB from dependencies.
 def dependency_names(path):
@@ -45,6 +53,7 @@ while queue:
             target.symlink_to(os.path.relpath(copies[source], target.parent))
         continue
     if not source.is_file(): raise FileNotFoundError(source)
+    verify_architecture(source, policy['architecture'])
     copies[source] = target
     if source.resolve() != target.resolve(): shutil.copy2(source, target)
     target.chmod(target.stat().st_mode | 0o200)
@@ -80,12 +89,17 @@ for source,target in copies.items():
 for formula in sorted(formulas):
     name = formula.parent.name
     folder = licenses/name; folder.mkdir(exist_ok=True)
+    found_license = False
     for item in formula.iterdir():
-        if item.is_file() and item.name.upper().startswith(('LICENSE','LICENCE','COPYING','NOTICE','COPYRIGHT')): shutil.copy2(item, folder/item.name)
+        if item.is_file() and item.name.upper().startswith(('LICENSE','LICENCE','COPYING','NOTICE','COPYRIGHT')):
+            shutil.copy2(item, folder/item.name); found_license = True
+    if not found_license: raise RuntimeError('Missing redistribution notice: ' + str(formula))
     if (formula/'.brew').exists():
         for item in (formula/'.brew').glob('*.rb'): shutil.copy2(item,folder/item.name)
 manifest = {str(s):str(t.relative_to(app)) for s,t in copies.items()}
 (licenses/'manifest.json').write_text(json.dumps(manifest,indent=2))
+(licenses/'verified-inputs.json').write_text(json.dumps(dict(hashStage='relocated-ad-hoc-signed-before-developer-id-signing', tools=tool_versions, architecture=policy['architecture'], certificates=certificate_receipt,
+    files={str(target.relative_to(app)):sha256(target) for target in copies.values()}), indent=2))
 (licenses/'README.txt').write_text('Bundled native tools: uv, Git (including HTTPS transport), FFmpeg/ffprobe, SoX and their runtime libraries.\nExact Homebrew build recipes, source URLs and installed license notices are included by formula directory.\nUpstream sources: https://github.com/astral-sh/uv ; https://git-scm.com ; https://ffmpeg.org ; https://sourceforge.net/projects/sox/\nThis bundle was built for Apple Silicon on macOS 26+.\n')
 isolated = os.environ.copy()
 isolated['PATH'] = str(bin_dir) + ':/usr/bin:/bin'

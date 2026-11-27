@@ -1,0 +1,10 @@
+{
+  "architecture": "arm64",
+  "tools": { "uv": "0.12.23", "git": "2.56.0", "ffmpeg": "9.0.2", "ffprobe": "9.0.2", "sox": "14.4.2" },
+  "certificates": {
+    "version": "2026.11.20",
+    "url": "https://files.pythonhosted.org/packages/6d/39/5eec3296860b94ac20bb8ed807725b88f6adfab3f343df592afd975f5f86/certifi-2026.11.20-py3-none-any.whl",
+    "sha256": "7422df25243767b9877031a2248cb14d09ddac9beee846f4cef3d5c9191d488f",
+    "size": 127913
+  }
+}

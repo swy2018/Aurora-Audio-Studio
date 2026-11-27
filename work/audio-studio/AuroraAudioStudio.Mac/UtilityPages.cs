@@ -165,6 +165,7 @@ public sealed partial class MainWindow
             form.Children.Add(Field(L("素材语言"), language));
         }
         form.Children.Add(Txt(L(outputHint), 12));
+        if (feature == "transcription") form.Children.Add(ActionButton(L("scorePrepare"), () => PrepareScoreAsync(), "score-prepare"));
         DescribeModel(); form.Children.Add(suitability);
         var run = ActionButton(L("开始处理"), () => RunUtilityAsync(feature)); run.Classes.Add("primary");
         var installModel = ActionButton(L("installModel"), async () => { await InstallFromFeatureAsync(draft.ModelId); if (current == feature) RenderPage(); }, "install-utility-model");

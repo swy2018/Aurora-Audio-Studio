@@ -168,6 +168,7 @@ public sealed partial class MainPage : Page
         UtilityDescription.Text = localization.Translate(copy.Item3);
         UtilityInputHint.Text = localization.Translate(copy.Item4);
         UtilityOutputHint.Text = localization.Translate(copy.Item5);
+        PrepareScoreButton.Visibility = tag == "transcription" ? Visibility.Visible : Visibility.Collapsed;
         UtilityFeatureIcon.Glyph = copy.Item6;
         InputPathBox.Text = string.Empty;
         utilitySources.Clear();
@@ -201,13 +202,14 @@ public sealed partial class MainPage : Page
     {
         if (!StorageAvailable) { RefreshStorageWarning(); return; }
         if (ModelPicker.SelectedItem is not ComboBoxItem item || item.Tag is not string modelId || catalog.Find(modelId) is not { } model) return;
+        var launchFeature = feature;
         if (!catalog.IsInstalled(model) && !await InstallSelectedModelAsync(model)) return;
+        if (feature != launchFeature || !ReferenceEquals(ModelPicker.SelectedItem, item)) return;
         if (settings.Current.SafeMode) { SetStatus("安全模式已启用。关闭安全模式后才能启动创作引擎。"); return; }
-        if (!backend.CanStartWorkbench(feature, modelId)) { SetStatus("请返回正在运行的工作台，手动结束引擎后再切换模型。"); return; }
+        if (!backend.CanStartWorkbench(launchFeature, modelId)) { SetStatus("请返回正在运行的工作台，手动结束引擎后再切换模型。"); return; }
         workbenchStartupCancellation?.Cancel();
         var startup = new CancellationTokenSource();
         workbenchStartupCancellation = startup;
-        var launchFeature = feature;
         var previousPid = backend.WorkbenchProcessId(launchFeature);
         connectedWorkbench = null;
         int? launchedPid = null;
@@ -217,7 +219,7 @@ public sealed partial class MainPage : Page
         }
         workbenchStartingFeature = launchFeature;
         WorkbenchInfo.IsOpen = false;
-        WorkbenchStartingPanel.Visibility = Visibility.Visible; WorkbenchProgress.IsActive = true; StudioEmpty.Visibility = Visibility.Collapsed;
+        WorkbenchStartingPanel.Visibility = Visibility.Visible; WorkbenchProgress.Visibility = Visibility.Visible; WorkbenchProgress.IsActive = true; StudioEmpty.Visibility = Visibility.Collapsed;
         OpenWorkbenchButton.IsEnabled = false; ModelPicker.IsEnabled = false;
         SetStatus("正在启动 " + item.Content + "…");
         try
@@ -432,7 +434,7 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private async void BrowseButton_Click(object sender, RoutedEventArgs e)
+    private async void BrowseButton_Click(object sender, RoutedEventArgs e) => await RunUiActionAsync(async () =>
     {
         var picker = new FileOpenPicker(App.MainWindow.AppWindow.Id);
         foreach (var extension in MediaInputPolicy.Extensions(feature)) picker.FileTypeFilter.Add(extension);
@@ -445,7 +447,7 @@ public sealed partial class MainPage : Page
             catch { }
         }
         await AddSourcesAsync(storageFiles);
-    }
+    });
 
     private async Task AddSourcesAsync(IEnumerable<StorageFile> files)
     {
@@ -526,12 +528,12 @@ public sealed partial class MainPage : Page
         e.DragUIOverride.Caption = "添加到 Aurora 批处理";
     }
 
-    private async void UtilityView_Drop(object sender, DragEventArgs e)
+    private async void UtilityView_Drop(object sender, DragEventArgs e) => await RunUiActionAsync(async () =>
     {
         if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
         var items = await e.DataView.GetStorageItemsAsync();
         await AddSourcesAsync(items.OfType<StorageFile>());
-    }
+    });
 
     private void UtilityModelPicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -1136,14 +1138,15 @@ public sealed partial class MainPage : Page
 
     private void FeedbackButton_Click(object sender, RoutedEventArgs e)
     {
-        Process.Start(new ProcessStartInfo("https://github.com/swy2018/Aurora-Audio-Studio/issues/new/choose") { UseShellExecute = true });
+        try { Process.Start(new ProcessStartInfo("https://github.com/swy2018/Aurora-Audio-Studio/issues/new/choose") { UseShellExecute = true }); }
+        catch (Exception ex) { SetStatus(localization.Translate(ex.Message)); }
     }
 
-    private async void ReleaseNotesButton_Click(object sender, RoutedEventArgs e)
+    private async void ReleaseNotesButton_Click(object sender, RoutedEventArgs e) => await RunUiActionAsync(async () =>
     {
         var current = CurrentDisplayVersion();
         var notes = ReleaseNotesCatalog.CurrentAndRecent(current, settings.EffectiveLanguage());
-        var content = new StackPanel { Spacing = 18, Width = 620 };
+        var content = new StackPanel { Spacing = 18, MaxWidth = 460 };
         foreach (var note in notes)
         {
             var heading = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
@@ -1174,7 +1177,7 @@ public sealed partial class MainPage : Page
             Content = new ScrollViewer { MaxHeight = 560, Content = content, VerticalScrollBarVisibility = ScrollBarVisibility.Auto }
         };
         await ShowDialogAsync(dialog);
-    }
+    });
 
     private async Task RunAppUpdateFlowAsync(bool showCurrent, bool rollback = false)
     {
@@ -1211,7 +1214,8 @@ public sealed partial class MainPage : Page
             {
                 XamlRoot = XamlRoot,
                 Title = localization.Get(rollback ? "rollbackApp" : "updateDialogTitle"),
-                Content = localization.Format(rollback ? "rollbackDialogBody" : "updateDialogBody", update.CurrentVersion, update.LatestVersion),
+                Content = localization.Format(rollback ? "rollbackDialogBody" : "updateDialogBody", update.CurrentVersion, update.LatestVersion)
+                    + (UpdateFlowGuard.SupportsSafeRestart(update.LatestVersion) ? "" : "\n\n" + localization.Get("legacyRestartHint")),
                 PrimaryButtonText = localization.Get(rollback ? "rollbackInstall" : "updateInstall"),
                 CloseButtonText = localization.Get("later")
             };
@@ -1413,7 +1417,7 @@ public sealed partial class MainPage : Page
         SetStatus(localization.Get("languageChanged"));
     }
 
-    private async void BrowseSettingsFolderButton_Click(object sender, RoutedEventArgs e)
+    private async void BrowseSettingsFolderButton_Click(object sender, RoutedEventArgs e) => await RunUiActionAsync(async () =>
     {
         var picker = new FolderPicker(App.MainWindow.AppWindow.Id) { SuggestedStartLocation = PickerLocationId.ComputerFolder };
         var folder = await picker.PickSingleFolderAsync();
@@ -1421,7 +1425,7 @@ public sealed partial class MainPage : Page
         if (target == "models") ModelRootBox.Text = folder.Path;
         else if (target == "output") OutputRootBox.Text = folder.Path;
         else ProjectsRootBox.Text = folder.Path;
-    }
+    });
 
     private void ApplySettingsToControls()
     {
@@ -1586,7 +1590,7 @@ public sealed partial class MainPage : Page
         backend.StopWorkbench(feature);
         ResetWorkbenchStartupUi("当前创作引擎已安全结束。");
     }
-    private async void DiagnosticsButton_Click(object sender, RoutedEventArgs e)
+    private async void DiagnosticsButton_Click(object sender, RoutedEventArgs e) => await RunUiActionAsync(async () =>
     {
         var dialog = new ContentDialog
         {
@@ -1600,9 +1604,9 @@ public sealed partial class MainPage : Page
         if (await ShowDialogAsync(dialog) != ContentDialogResult.Primary) return;
         var result = await Task.Run(backend.CreateDiagnostics);
         SetStatus(localization.Get(result.Message) + (result.Path is null ? "" : " " + result.Path));
-    }
+    });
     private void OpenLogsButton_Click(object sender, RoutedEventArgs e) => backend.OpenFolder(settings.LogsRoot);
-    private async void RunHealthScanButton_Click(object sender, RoutedEventArgs e) => await RunHealthScanAsync();
+    private async void RunHealthScanButton_Click(object sender, RoutedEventArgs e) => await RunUiActionAsync(RunHealthScanAsync);
     private async Task RunHealthScanAsync()
     {
         HealthList.ItemsSource = maintenance.Scan();
@@ -1677,7 +1681,7 @@ public sealed partial class MainPage : Page
         finally { RefreshWorkspace(); RefreshModels(); }
     }
 
-    private async void CancelTaskButton_Click(object sender, RoutedEventArgs e)
+    private async void CancelTaskButton_Click(object sender, RoutedEventArgs e) => await RunUiActionAsync(async () =>
     {
         if ((sender as Button)?.Tag is not string id) return;
         if (taskQueue.Items.FirstOrDefault(x => x.Id == id) is { WorkbenchInstance.Length: > 0 } workbenchTask)
@@ -1693,7 +1697,7 @@ public sealed partial class MainPage : Page
         }
         taskQueue.Cancel(id);
         SetStatus("已请求安全取消任务。 ");
-    }
+    });
 
     private async void TaskLogButton_Click(object sender, RoutedEventArgs e)
     {
@@ -1737,15 +1741,16 @@ public sealed partial class MainPage : Page
         catch (Exception ex) { FooterStatus.Text = ex.Message; }
     }
 
-    private async Task ExportArtifactAsync(string path, string? subtitleText = null)
+    private async Task<bool> ExportArtifactAsync(string path, string? subtitleText = null)
     {
         ArtifactValidator.Validate(path);
-        if (subtitleText is not null) ArtifactValidator.ValidateSubtitleText(subtitleText);
+        if (subtitleText is not null) AuroraAudioStudio.Core.ArtifactExport.ValidateSubtitleEdit(path, subtitleText);
         var picker = new FolderPicker(App.MainWindow.AppWindow.Id) { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
         var folder = await picker.PickSingleFolderAsync();
-        if (folder is null) return;
+        if (folder is null) return false;
         var destination = await AuroraAudioStudio.Core.ArtifactExport.CopyAsync(path, folder.Path, subtitleText);
         FooterStatus.Text = localization.Format("artifactExported", destination);
+        return true;
     }
 
     private async void PreviewArtifactButton_Click(object sender, RoutedEventArgs e)
@@ -1777,23 +1782,39 @@ public sealed partial class MainPage : Page
             {
                 dialog.Content = new TextBlock { Text = localization.Format("midiPreviewHint", ArtifactValidator.MidiNoteCount(path)), TextWrapping = TextWrapping.Wrap, MaxWidth = 420 };
                 dialog.PrimaryButtonText = localization.Translate("用默认程序打开");
+                dialog.SecondaryButtonText = localization.Get("scorePrepare");
             }
             var previewBody = new StackPanel { Spacing = 12 };
             previewBody.Children.Add(new TextBlock { Text = FormatArtifactInfo(metadata), TextWrapping = TextWrapping.Wrap });
             foreach (var warning in metadata.Warnings ?? []) previewBody.Children.Add(new TextBlock { Text = localization.Translate(warning), TextWrapping = TextWrapping.Wrap });
             if (dialog.Content is UIElement previewContent) previewBody.Children.Add(previewContent);
+            if (editor is not null)
+            {
+                var error = new InfoBar { IsOpen = false, IsClosable = false, Severity = InfoBarSeverity.Error };
+                previewBody.Children.Add(error);
+                dialog.PrimaryButtonClick += async (_, args) =>
+                {
+                    var deferral = args.GetDeferral();
+                    args.Cancel = true;
+                    error.IsOpen = false;
+                    try { args.Cancel = !await ExportArtifactAsync(path, editor.Text); }
+                    catch (Exception ex) { error.Message = localization.Translate(ex.Message); error.IsOpen = true; }
+                    finally { deferral.Complete(); }
+                };
+            }
             dialog.Content = previewBody;
             var choice = await ShowDialogAsync(dialog);
+            if (choice == ContentDialogResult.Secondary && extension is ".mid" or ".midi")
+                await PrepareScoreAsync(new[] { path });
             if (choice == ContentDialogResult.Secondary && extension == ".srt")
             {
                 var info = new ProcessStartInfo(Path.Combine(settings.Current.LocalAiRoot, "SubtitleEdit", "SubtitleEdit.exe")) { UseShellExecute = true };
                 info.ArgumentList.Add(path);
                 Process.Start(info);
             }
-            if (choice == ContentDialogResult.Primary)
+            if (choice == ContentDialogResult.Primary && editor is null)
             {
-                if (editor is not null) await ExportArtifactAsync(path, editor.Text);
-                else if (!await Windows.System.Launcher.LaunchFileAsync(await StorageFile.GetFileFromPathAsync(path)))
+                if (!await Windows.System.Launcher.LaunchFileAsync(await StorageFile.GetFileFromPathAsync(path)))
                     FooterStatus.Text = localization.Translate("请先安装可打开 MIDI 的音乐软件。");
             }
         }
@@ -1852,6 +1873,13 @@ public sealed partial class MainPage : Page
     }
     private void ShowUtility(bool success, string message) { UtilityInfo.Severity = success ? InfoBarSeverity.Success : InfoBarSeverity.Error; UtilityInfo.Message = localization.Translate(message); UtilityInfo.IsOpen = true; SetStatus(message); }
     private void SetStatus(string value) { var translated = localization.Translate(value); FooterStatus.Text = translated; TaskStatusText.Text = translated; }
+
+    private async Task RunUiActionAsync(Func<Task> action)
+    {
+        try { await action(); }
+        catch (OperationCanceledException) { }
+        catch (Exception ex) { if (IsLoaded) SetStatus(localization.Translate(ex.Message)); }
+    }
     private static string FormatBackendStatus(string value)
     {
         if (value.Equals("released", StringComparison.OrdinalIgnoreCase)) return "创作引擎已结束，显存已释放。";

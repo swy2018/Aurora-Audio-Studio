@@ -359,6 +359,7 @@ public sealed class MacUtilityAdapter(MacRuntime runtime, SettingsService settin
         await runtime.RunAsync(runtime.Python(runtime.Models[id].Family), [Path.Combine(runtime.Scripts, "utility.py"), "--root", runtime.Root, "--model", id, "--source", draft.Source, "--output", output, "--language", draft.SourceLanguage], reporter, token);
         if (outputs is null || outputs.Length == 0) throw new InvalidDataException("引擎没有返回有效结果。");
         foreach (var file in outputs) ArtifactValidator.Validate(file);
+        if (draft.Feature == "separation") StemOutputValidation.Validate(id, outputs, input.DurationSeconds);
         runtime.RecordSuccessfulRun(id, device);
         return new OperationResult(true, message, output, Outputs: outputs, Device: device, InputInfo: input);
     }

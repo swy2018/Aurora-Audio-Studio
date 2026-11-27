@@ -23,7 +23,7 @@ namespace AuroraAudioStudio;
 public partial class App : Application
 {
     public static MainWindow MainWindow { get; private set; } = null!;
-    private readonly SingleInstanceGuard singleInstance = new();
+    private readonly SingleInstanceGuard singleInstance;
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -31,6 +31,8 @@ public partial class App : Application
     /// </summary>
     public App()
     {
+        UpdateRelaunch.HandleBeforeStartup();
+        singleInstance = new();
         Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = new SettingsService().EffectiveLanguage();
         InitializeComponent();
         UnhandledException += (_, args) =>

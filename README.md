@@ -29,7 +29,7 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 | 系统 | Windows 10 / 11 x64 | macOS 26+ · Apple Silicon |
 | 安装包 | `Aurora-Audio-Studio-2.0.1-Setup-x64.exe` | `Aurora-Audio-Studio-2.0.1-arm64.dmg` |
 | 获取 | [正式版下载](https://github.com/swy2018/Aurora-Audio-Studio/releases/latest) | [Mac 2.0.1 正式版](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1) |
-| 测试版 | [2.0.2-beta.1 · Windows 与源码](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.2-beta.1) | [2.0.2-beta.1 · Mac](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.2-beta.1) |
+| 测试版 | [2.1.0-beta.1 · Windows 与源码](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.1.0-beta.1) | [2.0.2-beta.1 · Mac](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.2-beta.1) |
 | 安装 | 运行标准安装程序 | 打开 DMG，拖入 Applications |
 | 加速 | NVIDIA RTX 推荐，依模型要求 | Apple Silicon 的 MPS / MLX 或 CPU，依模型实现 |
 | 指南 | [Windows 使用说明](work/audio-studio/README-给音乐人的使用说明.md) | [Mac 使用说明](docs/macOS-user-guide.md) |
@@ -38,9 +38,9 @@ Aurora 将音乐生成、配音与声音克隆、歌声转换、音轨分离、M
 
 日常使用推荐下载正式版。如需体验预发布功能，可在更新设置中选择 Beta 通道。
 
-Stable 通道继续提供 Windows / Mac 2.0.1；Beta 通道提供 Windows / Mac 2.0.2-beta.1。历史正式版和完整 Git 历史保留。旧 Beta 与本地生成产物按准确清单批准后清理，Git 标签另行确认。详见[版本保留说明](docs/release-retention.md)。
+Stable 通道继续提供 Windows / Mac 2.0.1；Beta 通道提供 Windows 2.1.0-beta.1、Mac 2.0.2-beta.1。Mac 新版待原生构建与验收后补包。历史正式版和完整 Git 历史保留。旧 Beta 与本地生成产物按准确清单批准后清理，Git 标签另行确认。详见[版本保留说明](docs/release-retention.md)。
 
-本次 Beta 重点改进未预装开发环境时的模型安装、下载重试与取消收尾。已验证的引擎、安装包来源和未覆盖的场景见[本轮验收记录](docs/validation-2.0.2-beta.1.md)。Mac 的首次安装、短样本、签名公证和未验证项见[本轮 Mac 验收](docs/validation-mac-2.0.2-beta.1.md)。
+本次 Beta 重点改进数据恢复、导出和更新边界，并新增较轻的 Windows Basic Pitch 环境及 [MIDI 乐谱整理](docs/score-preparation.md)。已验证结果与未覆盖范围见[本轮验收记录](docs/validation-2.1.0-beta.1.md)。Mac 当前下载包仍以 [2.0.2-beta.1 原生验收](docs/validation-mac-2.0.2-beta.1.md)为准；新版源码见 [Mac 交接](docs/macOS-2.1.0-beta.1-handoff.md)。
 
 Windows 与 Mac 均推荐 [2.0.1 正式版](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.1)。Mac 适用于 Apple Silicon / macOS 26+，已完成实机验收、Developer ID 签名与 Apple 公证。[Windows 验收范围](docs/validation-2.0.1.md) · [Mac 验收记录](docs/validation-mac-2.0.1.md)。
 
@@ -55,25 +55,25 @@ Windows 与 Mac 均推荐 [2.0.1 正式版](https://github.com/swy2018/Aurora-Au
 ## 当前版本更新
 
 <!-- current-packages:start -->
-当前源码版本 / Source version: `2.0.2-beta.1`。实际可下载的平台安装包请以[官网](https://swy2018.github.io/Aurora-Audio-Studio/#download)和 [GitHub Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases) 为准。 / See the website or Releases for available platform packages.
+当前源码版本 / Source version: `2.1.0-beta.1`。实际可下载的平台安装包请以[官网](https://swy2018.github.io/Aurora-Audio-Studio/#download)和 [GitHub Releases](https://github.com/swy2018/Aurora-Audio-Studio/releases) 为准。 / See the website or Releases for available platform packages.
 <!-- current-packages:end -->
 
 <!-- release-notes-zh:start -->
-- Windows 与 Mac 2.0.2-beta.1 安装包及完整源码现已提供；Mac Apple Silicon 包已签名、公证并完成原生验收，Stable 继续提供 2.0.1。
-- 改进未预装开发环境时的模型安装：应用随附 Git、音频工具和环境管理组件，安装程序包含 Visual C++ 与 WebView2 前置组件；Python 与模型依赖按需部署到隔离目录。
-- 修复 Whisper 共享组件缺失、部分模型依赖冲突、CUDA 依赖被替换、ACE 权重不完整及下载文件漏选等首次安装问题。
-- Basic Pitch 的大型依赖支持保留断点、备用下载服务和官方 SHA-256 校验，并修复运行依赖缺失导致无法启动的问题。
-- 改进长任务进度反馈与取消收尾，避免取消后下载进程继续运行；保留已有模型、设置和作品。
-- 修复 SoX 在不同 Windows 系统语言下无法读取中文等文件名的问题；进程级 UTF-8 清单随包提供，不改系统设置。完整 Unicode 支持需要 Windows 10 1903 或更新版本。
-- Windows 隔离环境已验证 11 个引擎的短样本输出；Basic Pitch 的 12 音符样本音高全部匹配，但不代表复杂乐曲或演出总谱精度。
-- Windows 包未签名。Mac 已验证隔离首次安装、九个模型短样本及升级回退；全新操作系统、Intel Mac、全部可选模型与长素材未覆盖。首次模型下载需要网络。
+- 本轮提供 Windows 2.1.0-beta.1 与完整源码；Mac Beta 暂保留已验收的 2.0.2-beta.1，待 Mac 原生构建、签名及验收后补包。Stable 仍为 2.0.1。
+- 字幕校对在格式错误、取消保存或写入失败时保留编辑内容；导出采用临时目录校验后完成，避免不完整文件被误认为成品。
+- 增加设置与草稿恢复入口，恢复前保留原始文件；改进 Mac 草稿保存失败时的退出选择、工作台启动状态和深色主题对比度。
+- Windows 更新后优先以普通桌面用户身份启动；回退至不支持安全重启的旧正式版时提示手动重新打开，保留用户设置和作品。
+- BS-RoFormer 与 YourMT3 区分正式源码、未发布修订和权重更新。正式版优先，无正式发布时检测日期版本；较新或分叉的本地源码不会被自动降级。
+- Windows Basic Pitch 新安装与主动维护使用较轻的 ONNX 环境，保留可工作的旧环境。短样本与 TensorFlow 输出音符、时间一致；不代表识别精度提升。
+- 新增 MIDI 乐谱整理：多文件声部合并、节拍量化、乐器与音域提示、可选音符简化、MusicXML 和整理版 MIDI 导出、合成音色回放校对。原始 MIDI 保留，正式演奏前仍需人工复核。
+- 补充分轨完整性和时长检查、关键回归及随包工具完整性核验。Windows 包未签名；全新操作系统、所有可选模型和长素材不在本轮验收范围。
 <!-- release-notes-zh:end -->
 
 模型中心分别显示文件状态和运行记录。成功完成任务后，会记录模型版本、时间及计算设备。“仅模型管理”表示支持下载与维护，但不能在 Aurora 内生成内容。可选模型的兼容性与运行表现取决于具体设备，请先使用短素材确认。
 
 恢复任务时会使用保留的素材与参数重新处理，不会从中断步骤继续计算。模型下载在版本未变且来源支持续传时可继续；模型更新保留原文件与运行环境，以便回退，不自动删除旧模型。
 
-音频可在成品库试听和导出；MIDI 显示音符信息并交给默认音乐软件编辑，Aurora 不内置 MIDI 合成器；SRT 可编辑后保存副本，已安装 Subtitle Edit 时也可直接交给它校对。
+音频可在成品库试听和导出；MIDI 可交给默认音乐软件编辑。Windows 2.1 Beta 新增乐谱整理、MusicXML 导出与合成音色校对回放，不替代专业制谱软件。SRT 可编辑后保存副本，已安装 Subtitle Edit 时也可交给它校对。
 
 ## 工作流
 
@@ -203,7 +203,7 @@ Aurora Audio Studio 以 [GNU General Public License v3.0](LICENSE) 开源。模�
 
 Aurora Audio Studio brings music, voice, singing, stem separation, MIDI transcription, and subtitles into one local workspace for Windows and macOS. Windows and Mac Stable are both 2.0.1. The Mac package is Developer ID signed and notarized. Screenshots show the Mac 2.0.1 interface. See the platform table above, the [Mac guide](docs/macOS-user-guide.md), and the [Mac build and distribution guide](docs/macOS-release.md).
 
-[2.0.2-beta.1](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.0.2-beta.1) provides Windows and Mac installers and source with first-install, download and cancellation fixes. The Apple Silicon package is signed and notarized; Stable remains 2.0.1. See the [acceptance scope and package provenance](docs/validation-2.0.2-beta.1.md) and [native Mac acceptance](docs/validation-mac-2.0.2-beta.1.md).
+[2.1.0-beta.1](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.1.0-beta.1) provides Windows and full source with recovery, export and update safeguards, lighter Basic Pitch setup and MIDI score preparation. Mac Beta remains the signed, notarized 2.0.2-beta.1 until native acceptance of the new source. Stable remains 2.0.1. See the [acceptance scope](docs/validation-2.1.0-beta.1.md), [score guide](docs/score-preparation.md) and [Mac handoff](docs/macOS-2.1.0-beta.1-handoff.md).
 
 Choose Stable or Beta in Settings and save. Stable is the default; Beta includes prereleases and subsequent stable versions. Updates download and verify the package for your platform before installer handoff. Switching from Beta to Stable never silently downgrades. Beta releases are intended for users who want early access; back up important settings before upgrading.
 
@@ -214,17 +214,17 @@ Successful app installation no longer retains an old app copy. Replacement failu
 ### Current release notes
 
 <!-- release-notes-en:start -->
-- Windows and Mac 2.0.2-beta.1 installers and full source are available. The Apple Silicon package is signed, notarized and natively tested; Stable remains 2.0.1.
-- Improve model setup without preinstalled developer tools. Aurora includes Git, audio tools and environment management; setup includes Visual C++ and WebView2 prerequisites. Python and model dependencies are provisioned on demand in isolated directories.
-- Fix missing Whisper shared components, model dependency conflicts, CUDA dependency replacement, incomplete ACE weights and omitted download files during first installation.
-- Basic Pitch retains partial downloads of its large dependency, supports an alternate download server and verifies the official SHA-256. Fix a missing runtime dependency that prevented startup.
-- Improve progress feedback and cancellation cleanup so downloads do not keep running after cancellation. Existing models, settings and outputs are preserved.
-- Fix SoX file access across Windows system languages using a bundled per-process UTF-8 manifest, without changing system settings. Full Unicode support requires Windows 10 1903 or newer.
-- Short-output acceptance covers 11 engines in isolated Windows environments. All 12 pitches in the Basic Pitch test fixture matched; this does not establish complex-music or performance-score accuracy.
-- The Windows installer is unsigned. Mac acceptance covers isolated first setup, short outputs from nine models, update and rollback. Pristine operating systems, Intel Macs, every optional model and long inputs were not tested. First model downloads require network access.
+- This release provides Windows 2.1.0-beta.1 and full source. Mac Beta remains the accepted 2.0.2-beta.1 until native building, signing and acceptance are completed. Stable remains 2.0.1.
+- Subtitle edits survive validation errors, canceled saving and write failures. Exports are staged and validated before final promotion so incomplete files are not presented as finished results.
+- Add explicit settings and draft recovery with original-file preservation. Improve Mac exit choices after draft-save failures, workbench startup state and dark-theme contrast.
+- Windows updates request an ordinary desktop-user restart. Rollback to older stable versions without safe restart support asks users to reopen manually, preserving settings and creations.
+- Track BS-RoFormer and YourMT3 formal source releases, unreleased revisions and weights separately. Prefer formal releases; use dated revisions only when no formal release exists. Newer or diverged local source is not automatically downgraded.
+- New Windows Basic Pitch installations and user-requested maintenance use a lighter ONNX environment while preserving working legacy environments. Notes and timing matched TensorFlow on the short fixture; this is not a transcription-accuracy improvement.
+- Add MIDI score preparation: synchronized part merging, rhythm quantization, instrument/range warnings, optional note simplification, MusicXML and arranged-MIDI export, and synthesized reference playback. Original MIDI is preserved; human review is required before performance.
+- Extend stem completeness/duration checks, critical regression coverage and bundled-tool verification. The Windows installer is unsigned. Pristine operating systems, every optional model and long inputs were not covered in this acceptance.
 <!-- release-notes-en:end -->
 
-Read the [capability matrix](docs/capabilities.json) and [Mac release requirements](docs/macOS-release.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. MIDI editing/playback requires your own music application; audio playback and subtitle-copy editing are available in Results.
+Read the [capability matrix](docs/capabilities.json) and [Mac release requirements](docs/macOS-release.md) for exact scope. Download-only models are not runnable workbenches. Retrying an interrupted task restarts inference from its saved inputs and parameters. Windows 2.1 Beta adds MusicXML export and synthesized reference playback; professional notation editing still requires a notation application. Audio playback and subtitle-copy editing are available in Results.
 
 ### Local by design
 

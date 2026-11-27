@@ -219,6 +219,11 @@ public sealed class BackendService(SettingsService settings)
             "subtitles" => await SubtitleAsync(inputPath, modelId, language, progress, cancellationToken),
             _ => new OperationResult(false, localization.Get("taskNotSupported"))
         };
+        if (result.Success && feature == "separation")
+        {
+            try { StemOutputValidation.Validate(modelId, result.Outputs ?? [], input.DurationSeconds); }
+            catch (InvalidDataException ex) { return new(false, localization.Translate(ex.Message), result.Path, InputInfo: input); }
+        }
         return result with { InputInfo = input };
     }
 
@@ -234,7 +239,7 @@ public sealed class BackendService(SettingsService settings)
             demucsInfo.ArgumentList.Add("--device"); demucsInfo.ArgumentList.Add(demucsDevice);
             demucsInfo.ArgumentList.Add("-o"); demucsInfo.ArgumentList.Add(demucsOutput); demucsInfo.ArgumentList.Add(source);
             demucsInfo.Environment["PYTHONUTF8"] = "1";
-            return (await RunCapturedAsync("utility", demucsInfo, "demucs", demucsOutput, progress, cancellationToken)) with { Device = demucsDevice };
+            return (await RunCapturedAsync("utility", demucsInfo, "demucs", demucsOutput, progress, cancellationToken, modelId)) with { Device = demucsDevice };
         }
         var exe = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "roformer-env")), "Scripts", "bs-roformer-infer.exe");
         var models = Path.Combine(Root, "AudioTools", "roformer-models");
@@ -259,7 +264,7 @@ public sealed class BackendService(SettingsService settings)
                 info.ArgumentList.Add("roformer-model-bs-roformer-vocals-revive-v3e-by-unwa");
             }
             info.Environment["PATH"] = Path.GetDirectoryName(AudioRuntime.FindFfmpeg(Root)) + ";" + Environment.GetEnvironmentVariable("PATH");
-            return (await RunCapturedAsync("utility", info, "separator", output, progress, cancellationToken)) with { Device = device };
+            return (await RunCapturedAsync("utility", info, "separator", output, progress, cancellationToken, modelId)) with { Device = device };
         }
         finally
         {
@@ -272,13 +277,16 @@ public sealed class BackendService(SettingsService settings)
     {
         if (modelId.Equals("basic-pitch", StringComparison.OrdinalIgnoreCase))
         {
-            var basicPitch = Path.Combine(RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "basic-pitch-env")), "Scripts", "basic-pitch.exe");
+            var basicPitchRoot = RuntimeEnvironment.Resolve(Path.Combine(Root, "AudioTools", "basic-pitch-env"));
+            var basicPitch = Path.Combine(basicPitchRoot, "Scripts", "basic-pitch.exe");
             if (!File.Exists(basicPitch)) return Missing("Spotify Basic Pitch");
             var basicPitchOutput = ArtifactValidator.CreateRunDirectory(settings.Current.OutputRoot, "AI扒谱", source);
             var basicPitchInfo = Hidden(basicPitch, basicPitchOutput);
             basicPitchInfo.ArgumentList.Add(basicPitchOutput); basicPitchInfo.ArgumentList.Add(source);
+            var usesOnnx = File.Exists(Path.Combine(basicPitchRoot, ".aurora-basic-pitch-onnx"));
+            if (usesOnnx) { basicPitchInfo.ArgumentList.Add("--model-serialization"); basicPitchInfo.ArgumentList.Add("onnx"); }
             basicPitchInfo.Environment["PYTHONUTF8"] = "1";
-            return await RunCapturedAsync("utility", basicPitchInfo, "basic-pitch", basicPitchOutput, progress, cancellationToken);
+            return (await RunCapturedAsync("utility", basicPitchInfo, "basic-pitch", basicPitchOutput, progress, cancellationToken)) with { Device = usesOnnx ? "cpu (ONNX)" : "cpu (TensorFlow)" };
         }
         if (modelId.Equals("transkun", StringComparison.OrdinalIgnoreCase))
         {
@@ -469,7 +477,7 @@ public sealed class BackendService(SettingsService settings)
         catch { return "cpu"; }
     }
 
-    private async Task<OperationResult> RunCapturedAsync(string key, ProcessStartInfo info, string logPrefix, string output, IProgress<TaskExecutionProgress>? progress = null, CancellationToken cancellationToken = default)
+    private async Task<OperationResult> RunCapturedAsync(string key, ProcessStartInfo info, string logPrefix, string output, IProgress<TaskExecutionProgress>? progress = null, CancellationToken cancellationToken = default, string? separationModelId = null)
     {
         StatusChanged?.Invoke(this, "running:" + logPrefix);
         var logPath = Path.Combine(Logs, $"{logPrefix}-{DateTime.Now:yyyyMMdd-HHmmss}.log");
@@ -503,7 +511,11 @@ public sealed class BackendService(SettingsService settings)
             if (success)
             {
                 var feature = logPrefix.StartsWith("subtitles") ? "subtitles" : logPrefix is "transkun" or "yourmt3" or "piano" or "basic-pitch" ? "transcription" : "separation";
-                try { outputs = ArtifactValidator.Collect(feature, output); }
+                try
+                {
+                    outputs = ArtifactValidator.Collect(feature, output);
+                    if (separationModelId is not null) StemOutputValidation.Validate(separationModelId, outputs);
+                }
                 catch (Exception ex)
                 {
                     await writer.WriteLineAsync($"[Aurora] {localization.Get("logOperationFailed")}");

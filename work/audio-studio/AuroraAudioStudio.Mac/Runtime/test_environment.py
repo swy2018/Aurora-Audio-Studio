@@ -9,6 +9,9 @@ import install_environment as e
 
 class EnvironmentTests(unittest.TestCase):
     def setUp(self):
+        self.source = patch.object(e.source_updates, "release", side_effect=lambda family: dict(repository="https://github.com/" + e.source_updates.PACKAGES[family][1] + ".git", commit="a" * 40, tag="v1.0", date="2026.11.27", version="v1.0"))
+        self.source.start()
+        self.addCleanup(self.source.stop)
         self.uv = patch.object(e.shutil, "which", return_value="/Aurora.app/Runtime/bin/uv")
         self.uv.start()
         self.addCleanup(self.uv.stop)

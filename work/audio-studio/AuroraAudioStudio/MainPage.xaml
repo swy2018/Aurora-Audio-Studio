@@ -50,7 +50,10 @@
                         <TextBlock x:Name="PageTitle" Text="音乐创作" TextWrapping="Wrap" FontSize="28" FontWeight="SemiBold" Foreground="{ThemeResource AuroraTextBrush}" AutomationProperties.LiveSetting="Polite" />
                         <TextBlock x:Name="PageSubtitle" Text="从灵感到成品，一站完成生成、编辑与导出。" TextWrapping="Wrap" Foreground="{ThemeResource AuroraMutedBrush}" />
                         <InfoBar x:Name="StorageInfo" IsOpen="False" IsClosable="False" Severity="Warning" Margin="0,8,0,0">
-                            <InfoBar.ActionButton><Button x:Name="RestoreStorageButton" ui:LocalizedText.Key="retryStorage" Click="RestoreStorageButton_Click"/></InfoBar.ActionButton>
+                            <StackPanel Spacing="8">
+                                <Button x:Name="RestoreStorageButton" ui:LocalizedText.Key="retryStorage" Click="RestoreStorageButton_Click"/>
+                                <Button x:Name="RecoverSettingsButton" ui:LocalizedText.Key="recoverSettings" Click="RecoverSettingsButton_Click" Visibility="Collapsed"/>
+                            </StackPanel>
                         </InfoBar>
                     </StackPanel>
                     <Border x:Name="LocalModeBadge" Grid.Column="1" Padding="10,6" CornerRadius="8" Background="#E4F3ED" VerticalAlignment="Center">
@@ -68,10 +71,10 @@
                             <Border Padding="30" CornerRadius="14" Background="{ThemeResource AuroraAccentBrush}">
                                 <Grid ColumnSpacing="28"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <StackPanel Spacing="10" MaxWidth="700" HorizontalAlignment="Left">
-                                        <TextBlock x:Name="HomeWelcomeTitle" ui:LocalizedText.Key="今天想创作什么？" FontSize="30" FontWeight="SemiBold" Foreground="White"/>
-                                        <TextBlock x:Name="HomeWelcomeBody" ui:LocalizedText.Key="六个功能互相独立，不需要先新建项目。选择功能后，再按提示添加素材、模型和输出位置。" TextWrapping="Wrap" Foreground="#E7FFF6" FontSize="15"/>
+                                        <TextBlock x:Name="HomeWelcomeTitle" ui:LocalizedText.Key="今天想创作什么？" FontSize="30" FontWeight="SemiBold" Foreground="{ThemeResource AuroraOnAccentBrush}"/>
+                                        <TextBlock x:Name="HomeWelcomeBody" ui:LocalizedText.Key="六个功能互相独立，不需要先新建项目。选择功能后，再按提示添加素材、模型和输出位置。" TextWrapping="Wrap" Foreground="{ThemeResource AuroraOnAccentBrush}" FontSize="15"/>
                                     </StackPanel>
-                                    <FontIcon Grid.Column="1" Glyph="&#xE8D6;" FontSize="48" Foreground="#D6F8EA" VerticalAlignment="Center"/>
+                                    <FontIcon Grid.Column="1" Glyph="&#xE8D6;" FontSize="48" Foreground="{ThemeResource AuroraOnAccentBrush}" VerticalAlignment="Center"/>
                                 </Grid>
                             </Border>
                             <Grid Grid.Row="1" ColumnSpacing="12" RowSpacing="12">
@@ -217,6 +220,7 @@
                                     <TextBlock x:Name="UtilityPresetHint" TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
                                     <TextBlock x:Name="InputMetadataText" TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}" AutomationProperties.LiveSetting="Polite"/>
                                     <TextBlock x:Name="UtilityOutputHint" Text="处理结果会自动保存到 Aurora 成品目录。" TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource AuroraMutedBrush}"/>
+                                    <Button x:Name="PrepareScoreButton" ui:LocalizedText.Key="scorePrepare" Click="PrepareScoreButton_Click" Visibility="Collapsed" AutomationProperties.AutomationId="score-prepare"/>
                                     <ComboBox x:Name="SourceLanguagePicker" ui:LocalizedText.HeaderKey="素材语言" SelectedIndex="0" Visibility="Collapsed" HorizontalAlignment="Stretch" ui:LocalizedText.NameKey="素材语言">
                                         <ComboBoxItem ui:LocalizedText.Key="自动识别" Tag="auto"/><ComboBoxItem ui:LocalizedText.Key="中文" Tag="zh"/><ComboBoxItem Content="English" Tag="en"/><ComboBoxItem ui:LocalizedText.Key="日本語" Tag="ja"/><ComboBoxItem Content="한국어" Tag="ko"/><ComboBoxItem Content="Français" Tag="fr"/><ComboBoxItem Content="Deutsch" Tag="de"/><ComboBoxItem Content="Español" Tag="es"/>
                                     </ComboBox>

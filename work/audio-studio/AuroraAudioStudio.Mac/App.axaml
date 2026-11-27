@@ -1,9 +1,23 @@
 <Application xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="AuroraAudioStudio.Mac.App" RequestedThemeVariant="Light">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="AuroraWindowBackground">#F6FBF8</SolidColorBrush>
+          <SolidColorBrush x:Key="AuroraWindowForeground">#17241F</SolidColorBrush>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="AuroraWindowBackground">#1B2824</SolidColorBrush>
+          <SolidColorBrush x:Key="AuroraWindowForeground">#EFF8F4</SolidColorBrush>
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
   <Application.Styles>
     <FluentTheme />
     <Style Selector="Window">
-      <Setter Property="Background" Value="#F6FBF8" />
-      <Setter Property="Foreground" Value="#17241F" />
+      <Setter Property="Background" Value="{DynamicResource AuroraWindowBackground}" />
+      <Setter Property="Foreground" Value="{DynamicResource AuroraWindowForeground}" />
       <Setter Property="FontSize" Value="14" />
     </Style>
     <Style Selector="TextBlock"><Setter Property="TextWrapping" Value="Wrap" /></Style>

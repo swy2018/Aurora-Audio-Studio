@@ -10,6 +10,7 @@ import time
 import uuid
 import re
 from filelock import FileLock
+import source_updates
 
 PACKAGES = {
     "mt3": ["mt3-infer==0.2.0", "torch==2.8.0", "torchaudio==2.8.0", "torchvision==0.23.0", "transformers==4.45.2", "numpy<2", "setuptools<81"],
@@ -38,7 +39,7 @@ def environment_path(root, family):
     return env
 
 
-def install(root, family, repair=False):
+def install(root, family, repair=False, update_source=False):
     uv = shutil.which("uv")
     if not uv:
         raise RuntimeError("Aurora 缺少内置 uv 组件，请重新安装完整应用。")
@@ -47,7 +48,14 @@ def install(root, family, repair=False):
     env = root / "envs" / (family + "-" + uuid.uuid4().hex)
     env.parent.mkdir(parents=True, exist_ok=True)
     with FileLock(str(env.parent / (family + ".lock")), timeout=0):
-        environment_path(root, family)  # Reject unsafe existing selectors before changing anything.
+        active = environment_path(root, family)  # Reject unsafe existing selectors before changing anything.
+        source = None
+        if family in source_updates.PACKAGES:
+            source = None if update_source else source_updates.installed_source(active)
+            source = source or source_updates.release(family)
+            expected_repo = "https://github.com/" + source_updates.PACKAGES[family][1] + ".git"
+            if source.get("repository") != expected_repo or not re.fullmatch(r"[0-9a-f]{40}", source.get("commit", "")):
+                raise ValueError("Invalid recorded source revision")
         subprocess.run([uv, "venv", "--python", "3.11", str(env)], check=True)
         python = str(env / "bin/python")
         args = [uv, "pip", "install", "--python", python]
@@ -60,7 +68,10 @@ def install(root, family, repair=False):
             args += [r for r in requirements if r and not r.startswith(("--", "torch", "resemblyzer"))]
             args += ["torch==2.5.1", "torchaudio==2.5.1", "torchvision==0.20.1", "setuptools<81", "gradio_client"]
         else:
-            args += PACKAGES[family]
+            dependencies = list(PACKAGES[family])
+            if source:
+                dependencies[0] = source_updates.PACKAGES[family][0] + " @ git+" + source["repository"] + "@" + source["commit"]
+            args += dependencies
         if family == "seed":
             subprocess.run([uv, "pip", "uninstall", "--python", python, "resemblyzer", "typing"], check=True)
         subprocess.run(args, check=True)
@@ -68,7 +79,7 @@ def install(root, family, repair=False):
         subprocess.run([python, "-c", "import " + IMPORTS[family]], check=True, timeout=180)
         frozen = subprocess.check_output([uv, "pip", "freeze", "--python", python], text=True)
         (env / "aurora-packages.txt").write_text(frozen)
-        (env / "aurora-runtime.json").write_text(json.dumps(dict(family=family, at=time.time(), python=python)))
+        (env / "aurora-runtime.json").write_text(json.dumps(dict(family=family, at=time.time(), python=python, source=source)))
         pointer = env.parent / (family + ".active")
         pending = env.parent / (family + ".active-" + uuid.uuid4().hex)
         pending.write_text(env.name, encoding="utf-8")

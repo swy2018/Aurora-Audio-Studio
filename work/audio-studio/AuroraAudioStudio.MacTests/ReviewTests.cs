@@ -32,5 +32,8 @@ internal static class ReviewTests
         await File.WriteAllTextAsync(Path.Combine(workspace.Settings.AppDataRoot, "mac-drafts.json"), "{\"music\":null}");
         var recovered = new MacWorkspace(workspace.Settings.AppDataRoot);
         check(recovered.Drafts["music"] is not null && recovered.StorageWarning is not null, "null saved draft cannot crash startup or overwrite its original");
+        check(recovered.TryRecoverDrafts(out var draftBackup, out _) && File.ReadAllText(draftBackup) == "{\"music\":null}", "explicit draft recovery keeps the invalid original");
+        recovered.SaveDrafts();
+        check(new MacWorkspace(recovered.Settings.AppDataRoot).StorageWarning is null, "recovered drafts save and load without blocking shutdown");
     }
 }

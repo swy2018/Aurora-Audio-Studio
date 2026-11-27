@@ -34,11 +34,14 @@ public sealed partial class MainWindow : Window
     private LocalWorkbenchServer? webServer;
     private string modelSearch = "";
     private readonly DispatcherTimer saveTimer;
+    private bool closeWithoutSaving;
+    private bool closeDecisionPending;
     private FileSystemWatcher? receiptWatcher;
     private string? receiptStorageWarning;
     private readonly StackPanel storageBanner = new() { Spacing = 8, IsVisible = false };
     private static readonly SolidColorBrush Muted = new(Color.Parse("#5C6D67"));
     private static readonly SolidColorBrush Accent = new(Color.Parse("#267D63"));
+    private static readonly SolidColorBrush OnAccent = new(Colors.White);
     private static readonly SolidColorBrush Line = new(Color.Parse("#D9E6DF"));
     private static readonly SolidColorBrush Surface = new(Color.Parse("#FFFFFF"));
     private static readonly SolidColorBrush Pane = new(Color.Parse("#F0F6F3"));
@@ -88,8 +91,13 @@ public sealed partial class MainWindow : Window
         saveTimer.Start();
         Closing += (_, e) =>
         {
+            if (closeWithoutSaving) return;
             try { workspace.SaveDrafts(); }
-            catch (Exception ex) { e.Cancel = true; _ = MessageAsync(text["error"], ex.Message); }
+            catch (Exception ex)
+            {
+                e.Cancel = true;
+                if (!closeDecisionPending) _ = ConfirmCloseWithoutSavingAsync(ex.Message);
+            }
         };
         KeyDown += (_, e) =>
         {
@@ -117,6 +125,7 @@ public sealed partial class MainWindow : Window
         Pane.Color = Color.Parse(dark ? "#16221F" : "#F0F6F3");
         Surface.Color = Color.Parse(dark ? "#1B2824" : "#FFFFFF");
         Accent.Color = Color.Parse(dark ? "#57C7A4" : "#267D63");
+        OnAccent.Color = Color.Parse(dark ? "#13241F" : "#FFFFFF");
         Ink.Color = Color.Parse(dark ? "#EFF8F4" : "#15231F");
         Muted.Color = Color.Parse(dark ? "#B0C1BA" : "#5C6D67");
         Line.Color = Color.Parse(dark ? "#32443E" : "#D9E6DF");
@@ -197,16 +206,30 @@ public sealed partial class MainWindow : Window
         storageBanner.Children.Add(Txt(L("storageUnavailableBody") + "\n" + L(warning), 12));
         storageBanner.Children.Add(ActionButton(L("retryStorage"), async () =>
         {
-            workspace.Settings.Load(); workspace.Queue.TryRestoreStorage(); InitializeReceiptWatcher();
+            workspace.Settings.Load(); workspace.Queue.TryRestoreStorage();
+            if (workspace.DraftsNeedRecovery) workspace.TryReloadDrafts();
+            InitializeReceiptWatcher();
             await ImportWorkbenchResultsAsync(); RenderPage();
         }));
+        if (workspace.Settings.NeedsRecovery || workspace.DraftsNeedRecovery)
+            storageBanner.Children.Add(ActionButton(L("recoverStorage"), async () =>
+            {
+                if (!await ConfirmAsync(L("recoverStorage"), L("recoverSettingsBody"), L("recoverStorage"))) return;
+                var backups = new List<string>();
+                if (!workspace.Settings.TryRecoverSettings(out var settingsBackup, out var error)) throw new IOException(error);
+                if (settingsBackup.Length > 0) backups.Add(settingsBackup);
+                if (!workspace.TryRecoverDrafts(out var draftBackup, out error)) throw new IOException(error);
+                if (draftBackup.Length > 0) backups.Add(draftBackup);
+                status.Text = workspace.Localization.Format("recoverySaved", string.Join("\n", backups));
+                RenderPage();
+            }));
     }
 
     private Control HomePage()
     {
         var content = VStack();
-        var welcomeTitle = Txt(text["welcome"], 30, true); welcomeTitle.Foreground = Brushes.White;
-        var welcomeBody = Txt(L("六个功能互相独立，不需要先新建项目。选择功能后，再按提示添加素材、模型和输出位置。"), 15); welcomeBody.Foreground = Brush.Parse("#E7FFF6");
+        var welcomeTitle = Txt(text["welcome"], 30, true); welcomeTitle.Foreground = OnAccent;
+        var welcomeBody = Txt(L("六个功能互相独立，不需要先新建项目。选择功能后，再按提示添加素材、模型和输出位置。"), 15); welcomeBody.Foreground = OnAccent;
         content.Children.Add(new Border { Background = Brush.Parse("#165F4D"), CornerRadius = new CornerRadius(14), Padding = new Thickness(26), Child = VStack(welcomeTitle, welcomeBody) });
         var features = new Grid { ColumnDefinitions = new ColumnDefinitions("*,*,*"), RowDefinitions = new RowDefinitions("Auto,Auto"), ColumnSpacing = 12, RowSpacing = 12 };
         string[] titles = ["创作音乐", "制作配音", "克隆歌声", "拆分混音", "音频转 MIDI", "生成字幕"];
@@ -414,11 +437,38 @@ public sealed partial class MainWindow : Window
 
     private async Task MessageAsync(string heading, string message)
     {
-        var dialog = new Window { Title = heading, Width = 520, Height = 280, MinWidth = 380, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+        var dialog = new Window { Title = heading, Width = 520, Height = 280, MinWidth = 380, Background = Surface, Foreground = Ink, WindowStartupLocation = WindowStartupLocation.CenterOwner };
         var close = new Button { Content = text["ok"], HorizontalAlignment = HorizontalAlignment.Right };
         close.Click += (_, _) => dialog.Close();
         dialog.Content = new ScrollViewer { Content = new StackPanel { Margin = new Thickness(24), Spacing = 20, Children = { Txt(heading, 20, true), Txt(message), close } } };
         await dialog.ShowDialog(this);
+    }
+
+    private async Task<bool> ConfirmAsync(string heading, string message, string primary)
+    {
+        var dialog = new Window { Title = heading, Width = 540, Height = 340, MinWidth = 380, Background = Surface, Foreground = Ink, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+        var cancel = new Button { Content = L("cancel") };
+        var confirm = new Button { Content = primary };
+        cancel.Click += (_, _) => dialog.Close(false);
+        confirm.Click += (_, _) => dialog.Close(true);
+        dialog.Content = new ScrollViewer { Content = new StackPanel { Margin = new Thickness(24), Spacing = 20,
+            Children = { Txt(heading, 20, true), Txt(message), Row(cancel, confirm) } } };
+        return await dialog.ShowDialog<bool>(this);
+    }
+
+    private async Task ConfirmCloseWithoutSavingAsync(string error)
+    {
+        closeDecisionPending = true;
+        try
+        {
+            if (await ConfirmAsync(L("draftSaveFailed"), L("closeWithoutSavingBody") + "\n\n" + L(error), L("closeWithoutSaving")))
+            {
+                closeWithoutSaving = true;
+                Close(); // The normal Closed handler still cancels owned work and disposes engines.
+            }
+        }
+        catch (Exception ex) { status.Text = L(ex.Message); }
+        finally { closeDecisionPending = false; }
     }
 
     private static string CssColor(SolidColorBrush brush) => $"#{brush.Color.R:X2}{brush.Color.G:X2}{brush.Color.B:X2}";

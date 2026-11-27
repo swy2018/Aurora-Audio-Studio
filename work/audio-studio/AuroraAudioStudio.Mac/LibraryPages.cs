@@ -69,8 +69,9 @@ public sealed partial class MainWindow
             var actions = Row(ActionButton(text["previewFile"], () => PreviewAsync(artifact.Path)), ActionButton(text["export"], () => ExportAsync(artifact.Path)),
                 ActionButton(L("复制路径"), () => CopyArtifactPathAsync(artifact.Path)),
                 ActionButton(L("打开位置"), () => OpenPathAsync(Path.GetDirectoryName(artifact.Path)!)));
-            if (Path.GetExtension(artifact.Path).Equals(".srt", StringComparison.OrdinalIgnoreCase)) actions.Children.Add(ActionButton("编辑字幕", () => EditSubtitlesAsync(artifact.Path)));
+            if (Path.GetExtension(artifact.Path).Equals(".srt", StringComparison.OrdinalIgnoreCase)) actions.Children.Add(ActionButton(L("编辑字幕"), () => EditSubtitlesAsync(artifact.Path)));
             if (artifact.CanTranscribe) actions.Children.Add(ActionButton(L("sendToMidi"), () => StageMidiAsync([artifact.Path])));
+            if (Path.GetExtension(artifact.Path).ToLowerInvariant() is ".mid" or ".midi") actions.Children.Add(ActionButton(L("scorePrepare"), () => PrepareScoreAsync([artifact.Path])));
             if (artifact.IsStem) actions.Children.Add(ActionButton(L("sendStemsToMidi"), () => StageMidiAsync(
                 workspace.Projects.TranscriptionSources(artifact.ProjectId))));
             content.Children.Add(Panel(VStack(Txt(artifact.Name, 16, true), Txt(text[artifact.Kind] + "  ·  " + artifact.ProjectName + "  ·  " + artifact.CreatedDisplay, 12),
@@ -102,19 +103,19 @@ public sealed partial class MainWindow
         ArtifactValidator.Validate(source);
         if (new FileInfo(source).Length > 2 * 1024 * 1024) throw new InvalidDataException(L("字幕超过 2 MB，请使用外部编辑器打开。"));
         var editor = new TextBox { Text = await File.ReadAllTextAsync(source), AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 320 };
-        var dialog = new Window { Title = "编辑字幕", Width = 820, Height = 650, WindowStartupLocation = WindowStartupLocation.CenterOwner };
-        var message = Txt("可修改字幕文字和时间码，保存前会检查 SRT 格式。", 12);
-        var save = ActionButton("保存副本…", async () =>
+        var dialog = new Window { Title = L("编辑字幕"), Width = 820, Height = 650, Background = Surface, Foreground = Ink, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+        var message = Txt(L("subtitleEditHelp"), 12);
+        var save = ActionButton(L("保存副本"), async () =>
         {
             try
             {
-                ArtifactValidator.ValidateSubtitleText(editor.Text ?? "");
+                ArtifactExport.ValidateSubtitleEdit(source, editor.Text ?? "");
                 var folders = await dialog.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions { Title = L("保存副本"), AllowMultiple = false });
                 if (folders.FirstOrDefault()?.TryGetLocalPath() is not { } folder) return;
                 var destination = await ArtifactExport.CopyAsync(source, folder, editor.Text);
                 message.Text = workspace.Localization.Format("artifactExported", destination);
             }
-            catch (Exception ex) { message.Text = ex.Message; }
+            catch (Exception ex) { message.Text = L(ex.Message); }
         });
         var layout = new Grid { Margin = new Thickness(20), RowDefinitions = new RowDefinitions("Auto,*,Auto,Auto"), RowSpacing = 12 };
         layout.Children.Add(Txt(Path.GetFileName(source), 20, true)); Grid.SetRow(editor, 1); layout.Children.Add(editor);

@@ -4,6 +4,78 @@ public sealed class LocalizationService(SettingsService settings)
 {
     private readonly Dictionary<string, string[]> values = new(StringComparer.OrdinalIgnoreCase)
     {
+        ["modelSourceAheadReport"] = ["本地源码较新，未建议降级。运行代码：{0}。未发布源码：{1}。权重更新数：{2}。", "本機原始碼較新，未建議降級。發佈目標：{0}。未發佈原始碼：{1}。模型更新數：{2}。", "Installed source is newer; no downgrade is offered. Release target: {0}. Unreleased revision: {1}. Weight updates: {2}.", "導入済みソースの方が新しいため、ダウングレードは案内しません。リリース対象：{0}。未リリースの修訂：{1}。重みの更新数：{2}。"],
+        ["本地源码较新，未建议降级。"] = ["本地源码较新，未建议降级。", "本機原始碼較新，未建議降級。", "The installed source is newer; no downgrade is offered.", "導入済みのソースの方が新しいため、ダウングレードは案内しません。"],
+        ["modelSourceAhead"] = ["本地代码比更新目标更新，未建议降级。当前正式更新目标：{0}。", "本機程式碼比更新目標新，未建議降級。目前正式更新目標：{0}。", "Local code is newer than the update target; no downgrade is offered. Current release target: {0}.", "ローカルのコードは更新先より新しいため、ダウングレードは案内しません。現在のリリース対象：{0}。"],
+        ["scoreTripletMeter"] = ["当前拍号不能容纳完整的所选三连音组。请换用更细的三连音网格或调整拍号。", "目前拍號無法容納完整的所選三連音組。請改用更細的三連音網格或調整拍號。", "This meter cannot contain complete groups on the selected triplet grid. Choose a finer triplet grid or adjust the meter.", "この拍子では選択した 3 連符グループが小節に収まりません。より細かい 3 連符グリッドか別の拍子を選んでください。"],
+        ["分轨时长不一致，请查看任务日志后重试。"] = ["分轨时长不一致，请查看任务日志后重试。", "分軌時長不一致，請查看任務記錄後重試。", "Stem durations do not match. Review the task log and retry.", "分離音声の長さが一致しません。タスクログを確認して再試行してください。"],
+        ["分轨时长与素材不一致，未将不完整结果标记为成功。"] = ["分轨时长与素材不一致，未将不完整结果标记为成功。", "分軌時長與素材不一致，未將不完整結果標記為成功。", "Stem duration differs from the source. The incomplete output was not marked successful.", "分離音声の長さが素材と一致しません。不完全な結果を成功として扱いませんでした。"],
+        ["scorePrepare"] = ["整理 MIDI 为乐谱", "整理 MIDI 為樂譜", "Prepare MIDI score", "MIDI を楽譜に整理"],
+        ["scoreIntro"] = ["可同时选择多个同步 MIDI 声部，按节拍整理为实音总谱。原始文件始终保留；识别错误仍需人工校对。", "可同時選取多個同步 MIDI 聲部，依節拍整理為實音總譜。原始檔案一律保留；辨識錯誤仍需人工校對。", "Combine synchronized MIDI parts into a concert-pitch score. Original files are preserved. Transcription errors still require musical review.", "同期した複数の MIDI パートを実音の総譜に整理できます。元のファイルは保持します。採譜の誤りは別途確認が必要です。"],
+        ["scoreGrid"] = ["节奏量化", "節奏量化", "Rhythm grid", "リズムの量子化"],
+        ["scoreTriplet8"] = ["八分三连音", "八分三連音", "Eighth-note triplets", "8 分音符の 3 連符"],
+        ["scoreTriplet16"] = ["十六分三连音", "十六分三連音", "Sixteenth-note triplets", "16 分音符の 3 連符"],
+        ["scoreBeats"] = ["每小节拍数", "每小節拍數", "Beats per measure", "小節内の拍数"],
+        ["scoreBeatUnit"] = ["拍号分母", "拍號分母", "Beat unit", "拍子の分母"],
+        ["scoreKeepTempo"] = ["保留首个 MIDI 的速度变化", "保留首個 MIDI 的速度變化", "Keep the first MIDI's tempo map", "最初の MIDI のテンポ変化を保持"],
+        ["scoreTempo"] = ["速度（四分音符 BPM）", "速度（四分音符 BPM）", "Tempo (quarter-note BPM)", "テンポ（4 分音符 BPM）"],
+        ["scoreKey"] = ["调号（显示对应大调）", "調號（顯示對應大調）", "Key signature (major labels)", "調号（長調名で表示）"],
+        ["scoreOffset"] = ["首拍偏移（秒）", "首拍偏移（秒）", "First-beat offset (seconds)", "最初の拍の位置（秒）"],
+        ["scoreParts"] = ["声部与乐器", "聲部與樂器", "Parts and instruments", "パートと楽器"],
+        ["scorePartName"] = ["声部名称", "聲部名稱", "Part name", "パート名"],
+        ["scoreInstrument"] = ["乐器与音域", "樂器與音域", "Instrument and range", "楽器と音域"],
+        ["scoreSimplify"] = ["整理方式", "整理方式", "Note treatment", "音符の整理方法"],
+        ["scorePreserve"] = ["保留全部音符", "保留全部音符", "Keep all notes", "すべての音符を保持"],
+        ["scoreMelody"] = ["单声部：保留最高音", "單聲部：保留最高音", "Melody: keep the highest note", "単旋律：最高音を保持"],
+        ["scoreChord"] = ["同起音和弦：最多四音", "同起音和弦：最多四音", "Same-onset chords: up to four notes", "同時に始まる和音：最大 4 音"],
+        ["scoreCheck"] = ["检查整理结果", "檢查整理結果", "Check arrangement", "整理結果を確認"],
+        ["scoreSummary"] = ["{0} 个声部 · 合并或省略 {1} 个音符 · {2} 个音域提示。原始 MIDI 未修改。", "{0} 個聲部 · 合併或省略 {1} 個音符 · {2} 個音域提示。原始 MIDI 未修改。", "{0} parts · {1} notes merged or omitted · {2} range warnings. Original MIDI unchanged.", "{0} パート・統合または省略 {1} 音・音域の注意 {2} 件。元の MIDI は変更していません。"],
+        ["scoreExport"] = ["导出乐谱与校对文件…", "匯出樂譜與校對檔案…", "Export score and review files…", "楽譜と確認用ファイルを書き出す…"],
+        ["scoreExporting"] = ["正在整理谱面并生成校对音频…", "正在整理譜面並產生校對音訊…", "Preparing notation and review audio…", "楽譜と確認用音声を作成しています…"],
+        ["scoreOpenXml"] = ["打开 MusicXML 乐谱", "開啟 MusicXML 樂譜", "Open MusicXML score", "MusicXML 楽譜を開く"],
+        ["scoreOpenHint"] = ["乐谱已保存。请使用支持 MusicXML 的制谱软件打开，例如 MuseScore Studio。", "樂譜已儲存。請使用支援 MusicXML 的製譜軟體開啟，例如 MuseScore Studio。", "The score is saved. Open it in a MusicXML-compatible notation application, such as MuseScore Studio.", "楽譜を保存しました。MuseScore Studio など、MusicXML 対応の楽譜ソフトで開いてください。"],
+        ["scoreListen"] = ["回放校对", "回放校對", "Listen and review", "再生して確認"],
+        ["scoreAudioHelp"] = ["校对音频使用合成音色，仅供检查节奏、音高和声部；不是原乐器音色。", "校對音訊使用合成音色，僅供檢查節奏、音高與聲部；並非原樂器音色。", "Review audio uses synthesized reference tones for rhythm, pitch and part checking, not realistic instrument sounds.", "確認用音声はリズム・音高・パートを確認する合成音です。元の楽器音色は再現しません。"],
+        ["scoreLimits"] = ["简化会减少音符；音域提示不会自动移调。弯音、踏板及演奏控制保留在原始 MIDI 中。支持最长 30 分钟的校对音频，最终演奏前请在制谱软件中复核。", "簡化會減少音符；音域提示不會自動移調。滑音、踏板與演奏控制保留於原始 MIDI。支援最長 30 分鐘的校對音訊，正式演奏前請在製譜軟體中複核。", "Simplification removes notes; range warnings do not transpose them. Pitch bends, pedals and performance controls remain in the original MIDI. Review audio supports up to 30 minutes. Review the score in notation software before performance.", "簡略化では音符が減ります。音域の注意による自動移調は行いません。ピッチベンド・ペダル・演奏制御は元の MIDI に保持します。確認用音声は最長 30 分です。演奏前に楽譜ソフトで確認してください。"],
+        ["scoreMeterWarning"] = ["源 MIDI 包含拍号变化；本次会按上方所选的固定拍号重新分小节。", "來源 MIDI 含拍號變化；此次會依上方所選的固定拍號重新劃分小節。", "The source has meter changes. This arrangement uses the single meter selected above.", "元の MIDI には拍子の変化があります。今回は上で選択した一定の拍子で小節を区切ります。"],
+        ["scoreCanceled"] = ["整理已取消。原始文件未修改，未完成文件保留在 .partial 目录。", "整理已取消。原始檔案未修改，未完成檔案保留於 .partial 目錄。", "Arrangement canceled. Originals are unchanged; unfinished files remain in the .partial folder.", "整理をキャンセルしました。元のファイルは変更せず、未完了のファイルは .partial フォルダーに保持します。"],
+        ["scoreNoNotes"] = ["没有可整理的音符，请检查 MIDI 或首拍偏移。", "沒有可整理的音符，請檢查 MIDI 或首拍偏移。", "No notes are available. Check the MIDI or first-beat offset.", "整理できる音符がありません。MIDI または最初の拍の位置を確認してください。"],
+        ["scoreTooLarge"] = ["乐谱超出文件、声部、音符或小节数量限制，请先分段。上限为单文件 32 MB、128 声部、10 万源音符、4,000 小节及 30 万跨小节音符片段。", "樂譜超出檔案、聲部、音符或小節數量限制，請先分段。上限為單檔 32 MB、128 聲部、10 萬來源音符、4,000 小節及 30 萬跨小節音符片段。", "Split the score before continuing. Limits: 32 MB per file, 128 parts, 100,000 source notes, 4,000 measures and 300,000 bar-split note segments.", "楽譜を分割してください。上限は 1 ファイル 32 MB、128 パート、元の音符 10 万、4,000 小節、小節分割後の音符 30 万です。"],
+        ["scoreInvalidMidi"] = ["MIDI 结构不完整或无效。原始文件未修改。", "MIDI 結構不完整或無效。原始檔案未修改。", "MIDI structure is incomplete or invalid. The original is unchanged.", "MIDI の構造が不完全または無効です。元のファイルは変更していません。"],
+        ["scoreUnsupportedMidi"] = ["当前支持按拍计时的 MIDI 格式 0 和 1；请先转换格式 2 或 SMPTE 文件。", "目前支援依拍計時的 MIDI 格式 0 與 1；請先轉換格式 2 或 SMPTE 檔案。", "Score preparation supports beat-timed MIDI formats 0 and 1. Convert format 2 or SMPTE files first.", "拍単位の MIDI フォーマット 0 と 1 に対応します。フォーマット 2 または SMPTE のファイルは先に変換してください。"],
+        ["scoreOpenNotes"] = ["MIDI 中有未结束的音符，请先在 MIDI 编辑器中修复。", "MIDI 中有未結束的音符，請先在 MIDI 編輯器中修復。", "The MIDI contains notes without note-off events. Repair it in a MIDI editor first.", "終了イベントのない音符があります。先に MIDI エディターで修正してください。"],
+        ["scoreInvalidOptions"] = ["请检查拍号、速度、量化和首拍偏移。", "請檢查拍號、速度、量化與首拍偏移。", "Check the meter, tempo, rhythm grid and first-beat offset.", "拍子、テンポ、量子化、最初の拍の位置を確認してください。"],
+        ["scoreInvalidRhythm"] = ["当前节奏无法按所选网格记谱，请调整量化设置。", "目前節奏無法依所選網格記譜，請調整量化設定。", "The rhythm cannot be notated on this grid. Adjust quantization.", "選択したグリッドで記譜できません。量子化の設定を変更してください。"],
+        ["scorePreviewTooLong"] = ["校对音频最长支持 30 分钟，请先分段整理。", "校對音訊最長支援 30 分鐘，請先分段整理。", "Review audio is limited to 30 minutes. Arrange shorter sections.", "確認用音声は最長 30 分です。短い区間に分けて整理してください。"],
+        ["scorePiano"] = ["钢琴（双谱表）", "鋼琴（雙譜表）", "Piano (grand staff)", "ピアノ（大譜表）"],
+        ["scoreGuitar"] = ["吉他", "吉他", "Guitar", "ギター"],
+        ["scoreBass"] = ["贝斯", "貝斯", "Bass", "ベース"],
+        ["scoreViolin"] = ["小提琴", "小提琴", "Violin", "ヴァイオリン"],
+        ["scoreViola"] = ["中提琴", "中提琴", "Viola", "ヴィオラ"],
+        ["scoreCello"] = ["大提琴", "大提琴", "Cello", "チェロ"],
+        ["scoreVoice"] = ["人声", "人聲", "Voice", "声楽"],
+        ["scoreTrumpet"] = ["小号", "小號", "Trumpet", "トランペット"],
+        ["scoreClarinet"] = ["单簧管", "單簧管", "Clarinet", "クラリネット"],
+        ["scoreFlute"] = ["长笛", "長笛", "Flute", "フルート"],
+        ["scorePercussion"] = ["打击乐", "打擊樂", "Percussion", "打楽器"],
+        ["modelSourceReport"] = ["运行代码：{0}。未发布源码：{1}。权重更新数：{2}。", "執行程式碼：{0}。未發佈原始碼：{1}。模型更新數：{2}。", "Runtime source: {0}. Unreleased revision: {1}. Weight updates: {2}.", "実行コード：{0}。未リリースの修訂：{1}。重みの更新数：{2}。"],
+        ["legacyRestartHint"] = ["此旧版本安装完成后，请从开始菜单重新打开 Aurora。为避免应用以管理员身份运行，本次不自动重启。", "此舊版本安裝完成後，請從開始功能表重新開啟 Aurora。為避免應用程式以系統管理員身分執行，此次不自動重新啟動。", "After this older version finishes installing, reopen Aurora from the Start menu. Automatic restart is disabled to avoid running the application as administrator.", "この旧バージョンのインストール完了後、スタートメニューから Aurora を開いてください。管理者権限での動作を避けるため、自動では再起動しません。"],
+        ["basicPitchOnnxAvailable"] = ["可迁移到轻量 ONNX 运行环境；模型仍为 0.4.0。现有环境保持可用，完成检查后才切换。", "可移轉至輕量 ONNX 執行環境；模型仍為 0.4.0。既有環境維持可用，完成檢查後才切換。", "A lighter ONNX runtime is available for model 0.4.0. The existing environment remains usable until the replacement passes validation.", "モデル 0.4.0 用の軽量 ONNX 実行環境に移行できます。検証が完了するまで既存の環境は保持されます。"],
+        ["updateManualRestart"] = ["安装程序已启动。完成后请从开始菜单重新打开 Aurora；为避免旧版本以管理员身份运行，本次不自动重启。", "安裝程式已啟動。完成後請從開始功能表重新開啟 Aurora；為避免舊版本以系統管理員身分執行，此次不自動重新啟動。", "Setup has started. Reopen Aurora from the Start menu when it finishes. Automatic restart is disabled for this older version to avoid running it as administrator.", "インストーラーを起動しました。完了後、スタートメニューから Aurora を開いてください。旧バージョンが管理者権限で動作しないよう、今回は自動で再起動しません。"],
+        ["modelFormalSource"] = ["正式版 {0} · 源码 {1}", "正式版 {0} · 原始碼 {1}", "Stable {0} · source {1}", "正式版 {0}・ソース {1}"],
+        ["modelDatedSource"] = ["源码日期版 {0} · {1}", "原始碼日期版 {0} · {1}", "Dated source {0} · {1}", "ソース日付版 {0}・{1}"],
+        ["modelSourceCurrent"] = ["运行代码已是当前版本：{0}。", "執行程式碼已是目前版本：{0}。", "Runtime source is current: {0}.", "実行コードは最新です：{0}。"],
+        ["modelSourceAvailable"] = ["可更新运行代码：{0}。", "可更新執行程式碼：{0}。", "Runtime source update available: {0}.", "実行コードを更新できます：{0}。"],
+        ["modelWeightsSeparate"] = ["模型权重独立管理，本次不代表权重已更新。", "模型權重獨立管理，此次不代表權重已更新。", "Model weights are managed separately; this does not confirm a weight update.", "モデルの重みは別途管理されます。今回の確認は重みの更新を示すものではありません。"],
+        ["modelUnreleasedSource"] = ["另有未发布源码修订 {0}；正式版优先，不自动安装。", "另有未發佈的原始碼修訂 {0}；正式版優先，不自動安裝。", "Unreleased source revision {0} is also available. Stable-first policy does not install it automatically.", "未リリースのソース修訂 {0} もあります。正式版を優先し、自動では導入しません。"],
+        ["recoverSettings"] = ["恢复设置", "復原設定", "Recover settings", "設定を復旧"],
+        ["recoverStorage"] = ["恢复设置与草稿", "復原設定與草稿", "Recover settings and drafts", "設定と下書きを復旧"],
+        ["recoverSettingsBody"] = ["将先保留无法读取的原文件，再保存当前可用的设置或草稿。不会删除模型、作品或处理记录。备份失败时不会覆盖原文件。", "會先保留無法讀取的原檔案，再儲存目前可用的設定或草稿。不會刪除模型、作品或處理記錄。備份失敗時不會覆寫原檔案。", "The unreadable original will be backed up before the current usable settings or drafts are saved. Models, outputs and processing history will not be deleted. If backup fails, the original will not be overwritten.", "読み取れない元のファイルをバックアップしてから、現在使用できる設定または下書きを保存します。モデル、成果物、処理履歴は削除しません。バックアップに失敗した場合、元のファイルは上書きしません。"],
+        ["recoverySaved"] = ["恢复完成，原文件保留在：{0}", "復原完成，原檔案保留於：{0}", "Recovery complete. Original preserved at: {0}", "復旧しました。元のファイルの保存先：{0}"],
+        ["draftSaveFailed"] = ["草稿未能保存", "草稿未能儲存", "Drafts could not be saved", "下書きを保存できませんでした"],
+        ["closeWithoutSaving"] = ["不保存并退出", "不儲存並結束", "Exit without saving", "保存せずに終了"],
+        ["closeWithoutSavingBody"] = ["可以取消退出，检查保存位置后重试；也可以不保存本次草稿并退出。已有文件保持不变，正在运行的任务将停止。", "可以取消結束，檢查儲存位置後重試；也可以不儲存此次草稿並結束。既有檔案保持不變，執行中的任務將停止。", "Cancel to check the storage location and try again, or exit without saving these drafts. Existing files will be preserved and running tasks will stop.", "キャンセルして保存先を確認し再試行するか、今回の下書きを保存せずに終了できます。既存のファイルは保持され、実行中のタスクは停止します。"],
+        ["subtitleEditHelp"] = ["修改文字或时间码后保存副本。格式错误或取消保存时，编辑内容会保留。", "修改文字或時間碼後儲存副本。格式錯誤或取消儲存時，編輯內容會保留。", "Edit text or timecodes and save a copy. Your edits remain available if validation fails or saving is canceled.", "字幕やタイムコードを編集し、コピーとして保存します。形式エラーや保存のキャンセル時も編集内容を保持します。"],
         ["处理记录字段无效，原文件已保留，请检查后重新导入。"] = ["处理记录字段无效，原文件已保留，请检查后重新导入。", "處理記錄欄位無效，原檔案已保留，請檢查後重新匯入。", "This processing record contains invalid fields. The original file was preserved; review it before importing again.", "処理記録の項目が無効です。元のファイルは保持されています。確認してから再度読み込んでください。"],
         ["处理记录中的素材列表无效，原文件已保留。"] = ["处理记录中的素材列表无效，原文件已保留。", "處理記錄中的素材清單無效，原檔案已保留。", "The processing record has an invalid source list. The original file was preserved.", "処理記録の素材一覧が無効です。元のファイルは保持されています。"],
         ["保存的处理选项无效，原文件已保留。"] = ["保存的处理选项无效，原文件已保留。", "已儲存的處理選項無效，原檔案已保留。", "Saved processing options are invalid. The original file was preserved.", "保存済みの処理設定が無効です。元のファイルは保持されています。"],
@@ -561,9 +633,9 @@ public sealed class LocalizationService(SettingsService settings)
         var pair = phrases.Concat(values).FirstOrDefault(x => x.Value.Contains(source, StringComparer.OrdinalIgnoreCase));
         if (pair.Value is null)
         {
-            foreach (var template in templates)
+            foreach (var template in templates.Append(values["modelSourceAheadReport"]).Append(values["modelSourceReport"]))
             {
-                var pattern = "^" + System.Text.RegularExpressions.Regex.Escape(template[0]).Replace("\\{0}", "(.+?)").Replace("\\{1}", "(.+?)") + "$";
+                var pattern = "^" + System.Text.RegularExpressions.Regex.Escape(template[0]).Replace("\\{0}", "(.+?)").Replace("\\{1}", "(.+?)").Replace("\\{2}", "(.+?)") + "$";
                 var match = System.Text.RegularExpressions.Regex.Match(source, pattern, System.Text.RegularExpressions.RegexOptions.Singleline);
                 if (!match.Success) continue;
                 var index = settings.EffectiveLanguage() switch { "zh-TW" => 1, "en-US" => 2, "ja-JP" => 3, _ => 0 };
@@ -577,6 +649,8 @@ public sealed class LocalizationService(SettingsService settings)
 
     private static readonly string[][] templates =
     [
+        ["分轨结果不完整或重复：{0}", "分軌結果不完整或重複：{0}", "Missing or duplicate stem: {0}", "音源分離の不足または重複：{0}"],
+        ["分轨音频无效：{0}", "分軌音訊無效：{0}", "Invalid stem audio: {0}", "無効な分離音声：{0}"],
         ["尚未安装 {0}，请前往模型中心安装。", "尚未安裝 {0}，請前往模型中心安裝。", "{0} is not installed. Install it in Model Center.", "{0} は未インストールです。モデルセンターでインストールしてください。"],
         ["检查未完成：{0}", "檢查未完成：{0}", "Check incomplete: {0}", "確認未完了：{0}"],
         ["正在准备 {0}", "正在準備 {0}", "Preparing {0}", "{0} を準備中"],

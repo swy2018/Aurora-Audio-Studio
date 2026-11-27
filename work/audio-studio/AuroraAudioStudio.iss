@@ -1,6 +1,6 @@
 #define MyAppName "Aurora Audio Studio"
 #ifndef MyAppVersion
-  #define MyAppVersion "2.0.2-beta.1"
+  #define MyAppVersion "2.1.0-beta.1"
 #endif
 #ifndef PublishFolder
   #define PublishFolder "Aurora-Audio-Studio-" + MyAppVersion
@@ -65,7 +65,7 @@ RestartApplications=no
 SetupLogging=yes
 SetupMutex=AuroraAudioStudioInstaller
 MinVersion=10.0.17763
-VersionInfoVersion=2.0.2.0
+VersionInfoVersion=2.1.0.0
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoCopyright={#MyAppCopyright}
 VersionInfoDescription=Aurora Audio Studio installer
@@ -95,8 +95,8 @@ Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Assets\AppIcon-{#MyAppVersion}.ico"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent; Check: not IsAutomaticUpdate
-Filename: "{app}\{#MyAppExeName}"; Flags: nowait runascurrentuser; Check: IsAutomaticUpdate
+Filename: "{app}\{#MyAppExeName}"; Parameters: "--after-update"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent runasoriginaluser; Check: not IsAutomaticUpdate
+Filename: "{app}\{#MyAppExeName}"; Parameters: "--after-update"; Flags: nowait runasoriginaluser; Check: IsAutomaticUpdate
 
 [Messages]
 english.ConfirmUninstall=Do you want to uninstall Aurora Audio Studio?%n%nApplication files and shortcuts will be removed. Your AI models, generated outputs, and personal media will be kept.

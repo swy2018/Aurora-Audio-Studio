@@ -23,6 +23,25 @@ if (args.FirstOrDefault() == "--log-fixture")
 if (args.FirstOrDefault() == "--runtime-copy") { await RuntimeCopyRegression.RunAsync(); return; }
 if (args.FirstOrDefault() == "--output-integrity") { OutputIntegrityRegression.Run(); return; }
 if (args.FirstOrDefault() == "--storage") { await StorageRegression.RunAsync(); return; }
+if (args.FirstOrDefault() == "--release-210") { await Release210Regression.RunAsync(); return; }
+if (args.FirstOrDefault() == "--source-targets")
+{
+    var sourceSettings = new SettingsService(Path.GetFullPath(args[1]));
+    var sourceUpdater = new ModelUpdateService(new ModelCatalogService(sourceSettings), sourceSettings);
+    foreach (var id in new[] { "roformer", "yourmt3" })
+        Console.WriteLine(JsonSerializer.Serialize(await sourceUpdater.ResolvePackageSourceAsync(ModelUpdateService.PackageSourceRepository(id)!, default)));
+    return;
+}
+if (args.FirstOrDefault() == "--score") { ScoreRegression.Run(args.ElementAtOrDefault(1)); return; }
+if (args.FirstOrDefault() == "--basic-onnx-package")
+{
+    var packageSettings = new SettingsService(Path.GetFullPath(args[1]));
+    using var directClient = new HttpClient(new HttpClientHandler { UseProxy = false }) { Timeout = TimeSpan.FromMinutes(5) };
+    var packageUpdater = new ModelUpdateService(new ModelCatalogService(packageSettings), packageSettings, directClient, directClient);
+    await packageUpdater.EnsureBasicPitchOnnxWheelAsync(null, CancellationToken.None);
+    Console.WriteLine(packageUpdater.BasicPitchOnnxWheelPath);
+    return;
+}
 if (args.FirstOrDefault() == "--review") { await ReviewRegression.RunAsync(); return; }
 if (args.FirstOrDefault() == "--workspace") { await WorkspaceRegression.RunAsync(); return; }
 if (args.FirstOrDefault() == "--library-benchmark") { await WorkspaceRegression.BenchmarkAsync(args[1]); return; }
@@ -173,3 +192,6 @@ await ReviewRegression.RunAsync();
 await ProcessLaunchRegression.RunAsync();
 await BootstrapRegression.RunAsync();
 await ProcessCancellationRegression.RunAsync();
+await Release210Regression.RunAsync();
+ScoreRegression.Run();
+await PackageSourceRegression.RunAsync();

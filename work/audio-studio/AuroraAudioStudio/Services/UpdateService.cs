@@ -82,19 +82,20 @@ public sealed class UpdateService(SettingsService settings, LocalizationService 
             if (canInstall is not null && !canInstall()) return new(false, localization.Get("appInstallBusy"));
             var logPath = Path.Combine(settings.LogsRoot, $"update-{DateTime.Now:yyyyMMdd-HHmmss}.log");
             progress?.Report(new(95, localization.Get("updatePreparingInstall"), true));
-            var arguments = UpdateFlowGuard.BuildInstallerArguments(Environment.ProcessId, logPath);
+            var automaticRestart = UpdateFlowGuard.SupportsSafeRestart(update.LatestVersion);
+            var arguments = UpdateFlowGuard.BuildInstallerArguments(Environment.ProcessId, logPath, automaticRestart);
             WriteLog(clientLogPath, $"Launching installer: {arguments}");
             var installer = Process.Start(new ProcessStartInfo(installerPath, arguments)
             {
-                UseShellExecute = true,
-                Verb = "runas"
+                // Let Setup request its own elevation so Inno retains the original user.
+                UseShellExecute = true
             }) ?? throw new InvalidOperationException("The verified installer process could not be started.");
             await Task.Delay(500, cancellationToken);
             if (installer.HasExited && installer.ExitCode != 0)
                 throw new InvalidOperationException($"The installer exited before handoff with code {installer.ExitCode}.");
             progress?.Report(new(100, localization.Get("updateInstallerHandoff")));
             WriteLog(clientLogPath, $"Installer handoff succeeded: pid={installer.Id}");
-            return new(true, localization.Get("updateStarted"), installerPath);
+            return new(true, localization.Get(automaticRestart ? "updateStarted" : "updateManualRestart"), installerPath);
         }
         catch (Exception ex)
         {
