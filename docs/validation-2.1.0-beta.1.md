@@ -1,6 +1,6 @@
 # Aurora 2.1.0-beta.1 — implementation and acceptance
 
-Status: candidate implementation complete; ordinary-user and same-desktop elevated update handoff verified. New hosted installer and release asset verification tracked separately.
+Status: Windows x64 and full source published as [2.1.0-beta.1](https://github.com/swy2018/Aurora-Audio-Studio/releases/tag/v2.1.0-beta.1). Stable remains 2.0.1. Mac Beta remains 2.0.2-beta.1 pending a native build.
 
 Baseline: `71de68dc70de41482e0e9a466f4a8b0e82e6ec75` (includes the previously accepted Mac Beta package documentation).
 
@@ -31,14 +31,14 @@ Baseline: `71de68dc70de41482e0e9a466f4a8b0e82e6ec75` (includes the previously ac
 
 Local evidence is retained under `.maintenance/release-2.1.0-beta.1/` and `output/playwright/aurora210-*`. Detailed tests also retain isolated temporary fixtures. Private machine paths and test audio are not release assets.
 
-## Remaining release gates
+## Final release verification and limits
 
 - Background-only acceptance was requested. Interactive score controls, file-picker cancellation/export retry, audio review, subtitle edit retention and narrow-window/theme/language switching are not claimed as natively tested in this Beta. Hosted installer launch is a separate check.
 - [x] **Interactive UAC, 2026-11-27:** Fresh isolated baseline, elevated diagnostic probe, then a separate full `RunAs --after-update` run using the actual installer argument. Parent exit 0; the child was the expected executable, non-elevated, with matching SID, session, profile and LocalAppData. This is a real interactive handoff with the production guard, not an in-place install on the maintainer's machine. Alternate-account and no-shell scenarios were not exercised.
-- [ ] Build the delivery from a fixed, rechecked commit and validate the actual installer/payload/version/hash; installer acceptance must not overwrite the maintainer's installed app.
-- [ ] Publish Windows and source, verify remote sizes/digests and preserve Stable Latest. Mac 2.1.0 packaging remains a separate Mac task.
-- [ ] Export the download snapshot from real uploaded assets, verify Pages and online platform/channel selection, and update GitHub About if required. Local README, website text, About/release metadata and changelog are prepared but not yet pushed.
+- [x] Final [hosted installer acceptance](https://github.com/swy2018/Aurora-Audio-Studio/actions/runs/45994395001) passed, including installed-window startup and uninstall retention. Commit `5b22e55393f7322cb8c6f6983d11e7330f283e3d`, artifact `15194674704`. Unsigned installer: 428,737,971 bytes, product 2.1.0-beta.1, file 2.1.0.0, SHA-256 `e9705cb2c2c64dfb9617697f51b55a315ab3fd91165b07b3f1f4a025971c34f7`.
+- [x] Public prerelease `460559102`; tag verified against that commit. Source ZIP: 295 files, 13,684,515 bytes, SHA-256 `503b00a23240aa5b6b2a3db97d37d4af209cae0e43d010291fb4b9f88e8581a2`. The sizes and SHA-256 digests of both assets and both checksum files matched the uploaded assets.
+- [x] Download snapshot exported from published releases; platform selection returns Windows Beta 2.1.0-beta.1, Mac Beta 2.0.2-beta.1, stable 2.0.1 for both. GitHub About updated.
 
-Initial [hosted candidate build](https://github.com/swy2018/Aurora-Audio-Studio/actions/runs/45991714384) passed for 81461dc, but that is not the delivery build: the release must use the CI artifact containing the corrected desktop relaunch.
+Earlier CI artifact 81461dc was not distributed as this Beta. No on-device installer was run on the maintainer's machine.
 
 Mac native UI, inference, signing, notarization and DMG acceptance require a Mac. Windows/shared-code tests do not satisfy these gates. Do not advertise an unbuilt Mac 2.1.0 package. No cleanup is authorized by this checklist.
